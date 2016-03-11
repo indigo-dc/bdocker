@@ -1,0 +1,6 @@
+pbr
+WebOb
+tabulate
+click
+Flask
+six
