@@ -14,35 +14,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
 import webob
 
 from bdocker.client.controller import utils
 from bdocker.client import exceptions
 
 
-def get_from_response(response, default):
-    if response.status_int in [200, 201, 202]:
-        exceptions.logger.debug('HTTP response: %s', response.status_int)
-        return response.json_body #.get(element, default)
-    elif response.status_int in [204]:
-        return "Non Content"
-    else:
-        raise exceptions.exception_from_response(response)
-
-
 class RequestController(object):
     resource = None
 
-    def __init__(self, defaul_path="/", endopoint="http://localhost:5000"):
+    def __init__(self, defaul_path="",
+                 endopoint="http://localhost:5000"):
         self.default_path = defaul_path
         self.endpoint = endopoint
 
     @staticmethod
     def _get_from_response(response, default):
         if response.status_int in [200, 201, 202]:
-            exceptions.logger.debug('HTTP response: %s', response.status_int)
-            return response.json_body #.get(element, default)
+            exceptions.logger.debug('HTTP response: %s',
+                                    response.status_int)
+            return response.json_body
         elif response.status_int in [204]:
             return "Non Content"
         else:
@@ -70,7 +61,9 @@ class RequestController(object):
         """
         server = self.endpoint
         environ = {}
-        new_req = webob.Request.blank(path=path, environ=environ,  base_url=server)
+        new_req = webob.Request.blank(path=path,
+                                      environ=environ,
+                                      base_url=server)
         new_req.query_string = query_string
         new_req.method = method
         if path is not None:
@@ -82,39 +75,45 @@ class RequestController(object):
         return new_req
 
     def execute_get(self, path, parameters):
-        """Get a list of networks.
-        This method retrieve a list of network to which the tenant has access.
-        :param req: the incoming request
-        :param parameters: parameters to filter results
+        """Execute GET request.
+        This method execute a POST request on the endpoint.
+
+        :param path: path of the request
+        :param parameters: parameters to include in the request
         """
         try:
             query_string = utils.get_query_string(parameters)
-            req = self._get_req(path, query_string=query_string, method="GET")
+            req = self._get_req(path, query_string=query_string,
+                                method="GET")
             response = req.get_response(None)
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response, {})
         return json_response
 
-
     def execute_post(self, path, parameters):
-        """Create a server.
-        :param path: the incoming request
-        :param parameters: parameters with values for the new resource
+        """Execute POST request.
+        This method execute a POST request on the endpoint.
+
+        :param path: path of the request
+        :param parameters: parameters to include in the request
         """
         try:
             body = utils.make_body(parameters)
-            req = self._get_req(path, content_type="application/json", body=json.dumps(body), method="POST")
+            req = self._get_req(path, content_type="application/json",
+                                body=body, method="POST")
             response = req.get_response(None)
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response, {})
         return json_response
 
+    def execute_delete(self, path, parameters):
+        """Execute DELETE request.
+        This method execute a DELETE request on the endpoint.
 
-    def execute_delete(self, path):
-        """Delete network. It returns empty array
-        :param path:
+        :param path: path of the request
+        :param parameters: parameters to include in the request
         """
         try:
             req = self._get_req(path, method="DELETE")
@@ -126,11 +125,15 @@ class RequestController(object):
 
 
     def execute_put(self, path, parameters):
-        """Create a server.
-        :param path: the incoming request
+        """Execute PUT request.
+        This method execute a PUT request on the endpoint.
+
+        :param path: path of the request
+        :param parameters: parameters to include in the request
         """
         try:
-            req = self._get_req(path, method="PUT")
+            body = utils.make_body(parameters)
+            req = self._get_req(path, body=body, method="PUT")
             response = req.get_response(None)
         except Exception as e:
              response = webob.Response(status=500, body=str(e))

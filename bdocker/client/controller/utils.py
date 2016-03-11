@@ -15,6 +15,7 @@
 # under the License.
 
 import six
+import json
 
 
 def utf8(value):
@@ -46,7 +47,7 @@ def make_body(parameters):
         for key in parameters.keys():
             body[key] = parameters[key]
 
-        return body
+        return json.dumps(body)
 
 
 def get_user_credentials():

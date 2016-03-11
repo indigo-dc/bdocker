@@ -17,6 +17,7 @@ import click
 
 from bdocker.client.controller import request
 from bdocker.client.controller import utils
+from bdocker.client import exceptions
 
 
 class CommandController(object):
@@ -29,72 +30,126 @@ class CommandController(object):
 
     def create_token(self):
         path = "/token"
-        user_credentials = utils.get_user_credentials()
         parameters = dict
-        parameters["user_credentials"] = user_credentials
-
-        click.echo("create_token")
+        try:
+            parameters["user_credentials"] = utils.get_user_credentials()
+            results = self.control.execute_put(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("create_token")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def container_pull(self, token, source):
         path = "/pull"
         parameters = dict
         parameters["user_token"] = token
         parameters["container_source"] = source
-
-        click.echo("container_pull")
+        try:
+            results = self.control.execute_post(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_pull")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def container_delete(self, token, container_id):
         path = "/delete"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_delete(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_delete")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
-        click.echo("container_delete")
 
     def container_list(self, token, container_id):
         path = "/list"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("container_list")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_get(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_list")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def container_logs(self, token, container_id):
         path = "/logs"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("container_logs")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_get(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_logs")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def container_start(self, token, container_id):
         path = "/start"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("container_start")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_post(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_start")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def container_stop(self, token, container_id):
         path = "/stop"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("container_stop")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_post(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_stop")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def task_run(self, token, container_id):
         path = "/run"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("container_run")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_post(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("container_run")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
         parameters = dict
         parameters["user_token"] = token
-        parameters["contanier_id"] = container_id
-
-        click.echo("accounting_retrieve")
+        parameters["container_id"] = container_id
+        try:
+            results = self.control.execute_get(path=path, parameters=parameters)
+            # todo(jorgesece): implement print results
+            click.echo("accounting_retrieve")
+        except exceptions.UserCredentialsException as e:
+            click.echo(e.message)
+        except Exception as e:
+            raise click.ClickException(e.message)

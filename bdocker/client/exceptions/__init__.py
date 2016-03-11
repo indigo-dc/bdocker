@@ -71,10 +71,11 @@ class ParseException(Exception):
         return repr(self.message)
 
 
-class ControllerException(Exception):
+class UserCredentialsException(Exception):
 
     def __init__(self, code, message):
-        self.message = message
+        self.message = ("User Credentials Exception: "
+                       + message)
         self.code = code
 
     def __str__(self):

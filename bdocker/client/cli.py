@@ -89,8 +89,8 @@ def container_stop(ctx, token, container_id):
 @container_id_argument
 @command_argument
 @click.pass_context
-def container_run(ctx, token, container_id, task):
-    ctx.obj.task_run(token, container_id, task)
+def container_run(ctx, token, container_id, command):
+    ctx.obj.task_run(token, container_id, command)
 
 
 @bdocker.command('accounting', help="Retrieve the job accounting.")
