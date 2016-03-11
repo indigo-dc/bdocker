@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2015 LIP - Lisbon
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,17 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import webob
 
-class UserController(object):
 
-    def __init__(self):
-        pass
-
-    def validate_user(self):
-        return "retrieving user credentials"
-
-    def create_token(self):
-        return "creating token"
-
-    def validate_admin(self):
-        return "validate admin credentials"
+def validate(dict, mandatory_keys):
+    for key in mandatory_keys:
+        if (key not in dict):
+            raise webob.exc.HTTPBadRequest("The {0} field is mandatory.".format(key))
+    return True

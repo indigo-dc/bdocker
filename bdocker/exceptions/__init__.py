@@ -70,7 +70,6 @@ class ParseException(Exception):
     def __str__(self):
         return repr(self.message)
 
-
 class UserCredentialsException(Exception):
 
     def __init__(self, code, message):

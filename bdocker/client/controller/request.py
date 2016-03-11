@@ -16,8 +16,8 @@
 
 import webob
 
+from bdocker import exceptions
 from bdocker.client.controller import utils
-from bdocker.client import exceptions
 
 
 class RequestController(object):

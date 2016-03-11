@@ -15,9 +15,9 @@
 # under the License.
 import click
 
+from bdocker import exceptions
 from bdocker.client.controller import request
 from bdocker.client.controller import utils
-from bdocker.client import exceptions
 
 
 class CommandController(object):
