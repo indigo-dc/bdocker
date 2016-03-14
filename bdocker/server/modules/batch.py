@@ -15,16 +15,21 @@
 # under the License.
 
 
-class UserController(object):
+class BatchController(object):
 
     def __init__(self):
         pass
 
-    def validate_user(self):
-        return "retrieving user credentials"
+    def get_job_info(self):
+        return "retrieving job info"
 
-    def create_token(self):
-        return "creating token"
+    def get_cuotas(self):
+        return "retrieving cuotas"
 
-    def validate_admin(self):
-        return "validate admin credentials"
+
+class SGEController(BatchController):
+
+    def __init__(self,*args,**kwargs):
+        super(SGEController, self).__init__(*args, **kwargs)
+
+

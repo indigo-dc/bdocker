@@ -17,20 +17,23 @@
 from flask import Flask
 from flask import json, jsonify, request, abort
 
-from bdocker.server import credentials
-from bdocker.server import docker
 from bdocker.server import utils
 
 app = Flask(__name__)
-credentials_module = credentials.UserController()
-docker_module = docker.DockerController()
+conf = utils.load_configuration()
+
+credentials_module = utils.load_credentials_module(conf)
+batch_module = utils.load_batch_module(conf)
+docker_module = utils.load_docker_module(conf)
+
 
 @app.route('/token')
 def token():
     data = request.get_json()
-    utils.validate(data, None)
-    results = credentials_module.create_token()
+    utils.validate(data, None) # todo(jorgesece): define userdata
+    results = credentials_module.authenticate(data)
     return jsonify(results)
+
 
 @app.route('/pull')
 def pull():
@@ -39,36 +42,71 @@ def pull():
     results = docker_module.pull_container()
     return jsonify(results)
 
+
 @app.route('/delete')
 def delete():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.delete_container()
+    return jsonify(results)
 
-@app.route('/list')
+
+@app.route('/ps')
 def list():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.list_container()
+    return jsonify(results)
+
 
 @app.route('/logs')
 def logs():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.logs_container()
+    return jsonify(results)
+
 
 @app.route('/start')
 def start():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.start_container()
+    return jsonify(results)
+
 
 @app.route('/stop')
 def stop():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.stop_container()
+    return jsonify(results)
+
 
 @app.route('/run')
 def run():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.run_container()
+    return jsonify(results)
+
 
 @app.route('/accounting')
 def accounting():
-    return "Hello, World!"
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.accounting_user()
+    return jsonify(results)
+
+@app.route('/output')
+def output():
+    data = request.get_json()
+    utils.validate(data, None)
+    results = docker_module.output_task()
+    return jsonify(results)
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.33',
-            port=5000, debug=True)
-    #todo(jorgesece): configure from file
+    app.run(host=conf['host'],
+            port=conf['port'],
+            debug=conf['debug'])

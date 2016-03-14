@@ -71,7 +71,7 @@ class CommandController(object):
 
 
     def container_list(self, token, container_id):
-        path = "/list"
+        path = "/ps"
         parameters = dict
         parameters["user_token"] = token
         parameters["container_id"] = container_id

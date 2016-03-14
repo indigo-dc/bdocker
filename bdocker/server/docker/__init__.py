@@ -16,7 +16,7 @@
 
 
 def create_dict(code, message):
-    return {'code': code, 'message': message }
+    return {'code': code, 'message': message}
 
 
 class DockerController(object):
@@ -25,32 +25,29 @@ class DockerController(object):
         pass
 
     def pull_container(self):
-        return create_dict(200, "pull container")
+        return create_dict(201, "pull container")
 
+    def delete_container(self):
+        return create_dict(204, "delete container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def list_container(self):
+        return create_dict(200, "list container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def logs_container(self):
+        return create_dict(200, "log container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def start_container(self):
+        return create_dict(200, "start container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def stop_container(self):
+        return create_dict(200, "stop container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def run_container(self):
+        return create_dict(200, "run container")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def accounting_user(self):
+        return create_dict(200, "accounting of the user")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
+    def output_task(self):
+        return create_dict(200, "output of the task")
 
-    def pull_container(self):
-        return create_dict(200, "pull container")
-
-    def pull_container(self):
-        return create_dict(200, "pull container")

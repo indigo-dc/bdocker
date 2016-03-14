@@ -70,12 +70,21 @@ class ParseException(Exception):
     def __str__(self):
         return repr(self.message)
 
+
 class UserCredentialsException(Exception):
 
-    def __init__(self, code, message):
+    def __init__(self, message):
         self.message = ("User Credentials Exception: "
                        + message)
-        self.code = code
+
+    def __str__(self):
+        return repr(self.message)
+
+
+class ConfigurationException(Exception):
+    def __init__(self, message):
+        self.message = ("Configuration Credentials Exception: "
+                       + message)
 
     def __str__(self):
         return repr(self.message)
