@@ -22,7 +22,7 @@ from bdocker.client.controller import utils
 
 class CommandController(object):
 
-    def __init__(self, path_prefix):
+    def __init__(self):
         try:
             self.control = request.RequestController()
         except Exception as e:
@@ -30,7 +30,7 @@ class CommandController(object):
 
     def create_token(self):
         path = "/token"
-        parameters = dict
+        parameters = {}
         try:
             parameters["user_credentials"] = utils.get_user_credentials()
             results = self.control.execute_put(path=path, parameters=parameters)
@@ -43,11 +43,11 @@ class CommandController(object):
 
     def container_pull(self, token, source):
         path = "/pull"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_source"] = source
         try:
-            results = self.control.execute_post(path=path, parameters=parameters)
+            results = self.control.execute_put(path=path, parameters=parameters)
             # todo(jorgesece): implement print results
             click.echo("container_pull")
         except exceptions.UserCredentialsException as e:
@@ -57,7 +57,7 @@ class CommandController(object):
 
     def container_delete(self, token, container_id):
         path = "/delete"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:
@@ -72,7 +72,7 @@ class CommandController(object):
 
     def container_list(self, token, container_id):
         path = "/ps"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:
@@ -86,7 +86,7 @@ class CommandController(object):
 
     def container_logs(self, token, container_id):
         path = "/logs"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:
@@ -100,7 +100,7 @@ class CommandController(object):
 
     def container_start(self, token, container_id):
         path = "/start"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:
@@ -114,7 +114,7 @@ class CommandController(object):
 
     def container_stop(self, token, container_id):
         path = "/stop"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:
@@ -126,11 +126,12 @@ class CommandController(object):
         except Exception as e:
             raise click.ClickException(e.message)
 
-    def task_run(self, token, container_id):
+    def task_run(self, token, container_id, script):
         path = "/run"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
+        parameters["script"] = script
         try:
             results = self.control.execute_post(path=path, parameters=parameters)
             # todo(jorgesece): implement print results
@@ -142,7 +143,7 @@ class CommandController(object):
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
-        parameters = dict
+        parameters = {}
         parameters["user_token"] = token
         parameters["container_id"] = container_id
         try:

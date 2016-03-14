@@ -14,11 +14,28 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import logging
-import webob
+import webob.exc
 
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('tcpserver')
+
+default_exceptions = {
+    400: webob.exc.HTTPBadRequest,
+    401: webob.exc.HTTPUnauthorized,
+    403: webob.exc.HTTPForbidden,
+    404: webob.exc.HTTPNotFound,
+    405: webob.exc.HTTPMethodNotAllowed,
+    406: webob.exc.HTTPNotAcceptable,
+    409: webob.exc.HTTPConflict,
+    413: webob.exc.HTTPRequestEntityTooLarge,
+    415: webob.exc.HTTPUnsupportedMediaType,
+    429: webob.exc.HTTPTooManyRequests,
+    500: webob.exc.HTTPInternalServerError,
+    501: webob.exc.HTTPNotImplemented,
+    503: webob.exc.HTTPServiceUnavailable,
+}
+
 
 def exception_from_response(response):
     """
@@ -34,38 +51,26 @@ def exception_from_response(response):
     :param response: a webob.Response containing an exception
     :returns: a webob.exc.exception object
     """
-    exceptions = {
-        400: webob.exc.HTTPBadRequest,
-        401: webob.exc.HTTPUnauthorized,
-        403: webob.exc.HTTPForbidden,
-        404: webob.exc.HTTPNotFound,
-        405: webob.exc.HTTPMethodNotAllowed,
-        406: webob.exc.HTTPNotAcceptable,
-        409: webob.exc.HTTPConflict,
-        413: webob.exc.HTTPRequestEntityTooLarge,
-        415: webob.exc.HTTPUnsupportedMediaType,
-        429: webob.exc.HTTPTooManyRequests,
-        500: webob.exc.HTTPInternalServerError,
-        501: webob.exc.HTTPNotImplemented,
-        503: webob.exc.HTTPServiceUnavailable,
-    }
     try:
         code = response.status_int
-        message = response.json_body.popitem()[1].get("message")
         title = response.json_body.popitem()[1].get("title")
     except Exception:
         code = 500
         message = "Unknown error happenened processing response %s" % response
         title = message
-    #logger.warning('Response exception. %s:%s', code, message)
-    exc = exceptions.get(code, webob.exc.HTTPInternalServerError)
-    return exc(message=title)
+    ex = manage_http_exception(code, title)
+    return ex
+
+
+def manage_http_exception(code, message):
+    exc = default_exceptions.get(code, webob.exc.HTTPInternalServerError)
+    return exc(message=("%s. %s") %(exc.title, message))
 
 
 class ParseException(Exception):
-    def __init__(self, code, message):
+    def __init__(self, message):
         self.message = message
-        self.code = code
+        self.code = 400
 
     def __str__(self):
         return repr(self.message)
@@ -76,6 +81,7 @@ class UserCredentialsException(Exception):
     def __init__(self, message):
         self.message = ("User Credentials Exception: "
                        + message)
+        self.code = 401
 
     def __str__(self):
         return repr(self.message)

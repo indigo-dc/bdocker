@@ -15,6 +15,7 @@
 # under the License.
 
 import webob
+from flask import jsonify
 
 from bdocker import exceptions
 from bdocker.server.modules import batch
@@ -22,37 +23,24 @@ from bdocker.server.modules import credentials
 from bdocker.server import docker
 
 
-mandatory_keys = { "mandatory1",
-                  "mandatory2"
-                 }
-
-
 def validate(dict, mandatory_keys):
-    for key in mandatory_keys:
-        if (key not in dict):
-            raise webob.exc.HTTPBadRequest(
-                "The {0} field is mandatory."
-                "".format(key))
+    try:
+        for key in mandatory_keys:
+            if (key not in dict):
+                raise webob.exc.HTTPBadRequest(
+                    "The {0} field is mandatory."
+                    "".format(key))
+    except Exception as e:
+        raise exceptions.ParseException("Validation of required values")
     return True
-
-
-def load_from_yaml_file(path):
-    yaml_content = {}
-    token = {'uid': 'uuuuuuuuuuiiiidddddd',
-              'guid': 'gggggggggguuuiiidd',
-              'other': {'o1':'inf1',
-                        'o2':'inf2'}
-              }
-    yaml_content['99999999999'] = token
-    return yaml_content
 
 
 def load_configuration():
 
     conf = {}
     server = {'host': '127.0.0.33',
-              'port': '5000',
-              'debug': True
+              'port': 5000,
+              'debug': False
               }
     conf['server'] = server
     conf['batch'] = 'SGE'
@@ -64,7 +52,8 @@ def load_configuration():
 
 
 def load_credentials_module(conf):
-    return credentials.UserController()
+    path = '/home/jorge/toke_store.yml'
+    return credentials.UserController(path)
 
 
 def load_batch_module(conf):
@@ -77,3 +66,23 @@ def load_batch_module(conf):
 
 def load_docker_module(conf):
     return docker.DockerController()
+
+
+
+def make_json_response(status_code, description):
+    return jsonify({
+        'status_code': status_code,
+        'description': description
+    })
+
+
+def error_json_handler(exception):
+    ex = exceptions.manage_http_exception(exception.code, exception.message)
+    response = make_json_response(ex.code, ex.message)
+    return response
+
+
+def set_error_handler(app):
+    for code in exceptions.default_exceptions.iterkeys():
+        app.error_handler_spec[None][code] = error_json_handler
+

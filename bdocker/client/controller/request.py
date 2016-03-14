@@ -24,7 +24,7 @@ class RequestController(object):
     resource = None
 
     def __init__(self, defaul_path="",
-                 endopoint="http://localhost:5000"):
+                 endopoint="http://127.0.0.33:5000"):
         self.default_path = defaul_path
         self.endpoint = endopoint
 
@@ -39,7 +39,7 @@ class RequestController(object):
         else:
             raise exceptions.exception_from_response(response)
 
-    def _get_req(self, token, path, method,
+    def _get_req(self, path, method,
                  content_type="application/json",
                  body=None,
                  query_string=""):

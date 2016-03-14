@@ -17,13 +17,13 @@
 import uuid
 
 from bdocker import exceptions
-from bdocker.server import utils
+from bdocker.server.modules import utils
 
 
 class UserController(object):
 
     def __init__(self, path):
-        self.token_store = utils.load_from_ymal_file(path)
+        self.token_store = utils.load_from_yaml_file(path)
 
     def _get_token_from_cache(self, token):
         if token not in self.token_store:
@@ -41,17 +41,18 @@ class UserController(object):
         self.token_store.update(new_token)
         return token
 
-    def _update_token_in_cache(self, token, other):
+    def _update_token_in_cache(self, token, others):
         current_token = self._get_token_from_cache(token)
-        current_token['other'] = other
+        for key,value in others.items():
+            current_token[key] = value
         self.token_store.update({token: current_token})
 
     def authenticate(self, user_data):
         # todo(jorgesece): valid user?
-        if not user_data:
-            return False
-        self._set_token_in_cache(user_data)
-        return True
+        #if not user_data:
+        #    return False
+        token = self._set_token_in_cache(user_data)
+        return token
 
     def authorizate(self, token, policies):
         token_info = self._get_token_from_cache(token)

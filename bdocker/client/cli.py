@@ -15,7 +15,7 @@
 # under the License.
 
 
-from bdocker.client.controller import ControllerClient
+from bdocker.client.controller import commands
 from bdocker.client.decorators import *
 
 #sys.tracebacklimit=0
@@ -23,9 +23,10 @@ from bdocker.client.decorators import *
 
 @click.group()
 @click.version_option()
+@click.pass_context
 def bdocker(ctx):
     """Manages docker execution on batch systems."""
-    ctx.obj = ControllerClient()
+    ctx.obj = commands.CommandController()
 
 
 @bdocker.command('token', help="Request for user token.")
@@ -39,7 +40,7 @@ def token_create(ctx):
 @source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
-    ctx.obj.container_push(token, source)
+    ctx.obj.container_pull(token, source)
 
 
 @bdocker.command('delete', help="Delete a container.")
@@ -47,7 +48,7 @@ def container_pull(ctx, token, source):
 @container_id_argument
 @click.pass_context
 def container_delete(ctx, token, container_id):
-    ctx.obj.container_push(token, container_id)
+    ctx.obj.container_delete(token, container_id)
 
 
 @bdocker.command('ps', help="Show all containers running.")
@@ -89,8 +90,8 @@ def container_stop(ctx, token, container_id):
 @container_id_argument
 @command_argument
 @click.pass_context
-def container_run(ctx, token, container_id, command):
-    ctx.obj.task_run(token, container_id, command)
+def container_run(ctx, token, container_id, script):
+    ctx.obj.task_run(token, container_id, script)
 
 
 @bdocker.command('accounting', help="Retrieve the job accounting.")

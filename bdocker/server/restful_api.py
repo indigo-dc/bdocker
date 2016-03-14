@@ -15,9 +15,12 @@
 # under the License.
 
 from flask import Flask
-from flask import json, jsonify, request, abort
+from flask import jsonify, request, abort
+import sys
 
 from bdocker.server import utils
+
+sys.tracebacklimit=0
 
 app = Flask(__name__)
 conf = utils.load_configuration()
@@ -26,87 +29,101 @@ credentials_module = utils.load_credentials_module(conf)
 batch_module = utils.load_batch_module(conf)
 docker_module = utils.load_docker_module(conf)
 
+utils.set_error_handler(app)
 
-@app.route('/token')
+
+@app.route('/token', methods=['PUT'])
 def token():
     data = request.get_json()
-    utils.validate(data, None) # todo(jorgesece): define userdata
+    required = {}
+    utils.validate(data, required) # todo(jorgesece): define userdata
+    data = {'uid': 'uuuuuuuuuuiiiidddddd', 'guid': 'gggggggggguuuiiidd'}
     results = credentials_module.authenticate(data)
-    return jsonify(results)
+    return utils.make_json_response(200, results)
 
 
-@app.route('/pull')
+@app.route('/pull', methods=['PUT'])
 def pull():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.pull_container()
-    return jsonify(results)
+    return utils.make_json_response(201,results)
 
 
-@app.route('/delete')
+@app.route('/delete', methods=['DELETE'])
 def delete():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.delete_container()
-    return jsonify(results)
+    return utils.make_json_response(204,results)
 
 
-@app.route('/ps')
+@app.route('/ps', methods=['GET'])
 def list():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.list_container()
-    return jsonify(results)
+    return utils.make_json_response(200,results)
 
 
-@app.route('/logs')
+@app.route('/logs', methods=['GET'])
 def logs():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.logs_container()
-    return jsonify(results)
+    return utils.make_json_response(200,results)
 
 
-@app.route('/start')
+@app.route('/start', methods=['POST'])
 def start():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.start_container()
-    return jsonify(results)
+    return utils.make_json_response(201,results)
 
 
-@app.route('/stop')
+@app.route('/stop', methods=['POST'])
 def stop():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.stop_container()
-    return jsonify(results)
+    return utils.make_json_response(200,results)
 
 
-@app.route('/run')
+@app.route('/run', methods=['POST'])
 def run():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.run_container()
-    return jsonify(results)
+    return utils.make_json_response(201,results)
 
 
-@app.route('/accounting')
+@app.route('/accounting', methods=['GET'])
 def accounting():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.accounting_user()
-    return jsonify(results)
+    return utils.make_json_response(200,results)
 
-@app.route('/output')
+
+@app.route('/output', methods=['GET'])
 def output():
     data = request.get_json()
-    utils.validate(data, None)
+    required = {}
+    utils.validate(data, required)
     results = docker_module.output_task()
-    return jsonify(results)
+    return utils.make_json_response(200,results)
 
 
 if __name__ == '__main__':
-    app.run(host=conf['host'],
-            port=conf['port'],
-            debug=conf['debug'])
+    app.run(host=conf['server']['host'],
+            port=conf['server']['port'],
+            debug=conf['server']['debug'])
