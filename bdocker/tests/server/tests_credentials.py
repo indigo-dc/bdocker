@@ -17,11 +17,11 @@
 import testtools
 
 from bdocker.server.modules import credentials
-from bdocker import exceptions
+from bdocker.common import exceptions
 
 
 def create_fake_user():
-    return {'uid':'u333', 'gid':'g333'}
+    return {'uid': 'u333', 'gid': 'g333'}
 
 
 class TestUserCredentials(testtools.TestCase):
@@ -29,7 +29,8 @@ class TestUserCredentials(testtools.TestCase):
 
     def setUp(self):
         super(TestUserCredentials, self).setUp()
-        self.path = "fake_token_store.yml"
+        self.path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
+                    "bdocker/bdocker/tests/server/fake_token_store.yml"
         self.control = credentials.UserController(self.path)
 
     def test_token_store(self):
@@ -42,15 +43,18 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual("token_prolog", user_info['token'])
 
     def test_authenticate(self):
-        t = self.control._get_token_from_cache("prolog")['token']
+        t = self.control._get_token_from_cache(
+            "prolog")['token']
         u = create_fake_user()
-        token = self.control.authenticate(admin_token=t, user_data=u)
+        token = self.control.authenticate(admin_token=t,
+                                          user_data=u)
         self.assertIsNotNone(token)
 
-    def test_authenticate_save(self):
+    def test_authenticate_save_file(self):
         t = self.control._get_token_from_cache("prolog")['token']
         u = create_fake_user()
-        token = self.control.authenticate(admin_token=t, user_data=u)
+        token = self.control.authenticate(admin_token=t,
+                                          user_data=u)
         self.assertIsNotNone(token)
         self.control._save_token_file()
         new_controller = credentials.UserController(self.path)
@@ -58,7 +62,9 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(2, user_info1.__len__())
         new_controller.remove_token_from_cache(token)
         new_controller._save_token_file()
-        self.assertRaises(exceptions.UserCredentialsException, new_controller._get_token_from_cache, token)
+        self.assertRaises(exceptions.UserCredentialsException,
+                          new_controller._get_token_from_cache,
+                          token)
 
     def test_authorize(self):
         t = 'token1'
@@ -73,20 +79,25 @@ class TestUserCredentials(testtools.TestCase):
         token_info = self.control.authorize(token=t)
         self.assertIsNotNone(token_info)
         self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(2, token_info['containers'].__len__())
+        self.assertEqual(2,
+                         token_info['containers'].__len__())
 
     def test_add_container(self):
         token = "token2"
         c_id = "container3"
         token_info = self.control._get_token_from_cache(token)
         self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(2, token_info['containers'].__len__())
+        self.assertEqual(2,
+                         token_info['containers'].__len__())
         self.control.add_container(token, c_id)
-        self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(3, token_info['containers'].__len__())
+        self.assertIsNotNone(
+            token_info['containers'])
+        self.assertEqual(3,
+                         token_info['containers'].__len__())
         self.control.remove_container(token, c_id)
         self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(2, token_info['containers'].__len__())
+        self.assertEqual(2,
+                         token_info['containers'].__len__())
 
     def test_create_remove_container(self):
         token = "token1"
@@ -95,6 +106,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertNotIn('containers', token_info)
         self.control.add_container(token, c_id)
         self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(1, token_info['containers'].__len__())
+        self.assertEqual(1,
+                         token_info['containers'].__len__())
         self.control.remove_container(token, c_id)
         self.assertNotIn('containers', token_info)

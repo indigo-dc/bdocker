@@ -41,6 +41,13 @@ def command_argument(f):
                           , type=click.STRING
                           )(f)
 
+
+def user_credentials(f):
+    out = click.argument("uid"
+                          , type=click.INT
+                          )(f)
+    return out
+
 # ########################
 #
 # def out_format_option(f):

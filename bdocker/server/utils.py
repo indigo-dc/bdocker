@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2016 LIP - Lisbon
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -17,7 +17,7 @@
 from flask import jsonify
 import webob
 
-from bdocker import exceptions
+from bdocker.common import exceptions
 from bdocker.server.modules import batch
 from bdocker.server.modules import credentials
 from bdocker.server import docker
@@ -35,23 +35,6 @@ def validate(dict, mandatory_keys):
     return True
 
 
-def load_configuration():
-
-    conf = {}
-    server = {'host': '127.0.0.33',
-              'port': 5000,
-              'debug': False
-              }
-    conf['server'] = server
-    conf['batch'] = 'SGE'
-    conf['token_store'] = '../etc/token_store.yml'
-
-    # todo(jorgesece): read from file and validate fields
-    # conf = ConfigParser.ConfigParser()
-    # config.read('example.cfg')
-    return conf
-
-
 def load_credentials_module(conf):
     path = conf['token_store']
     return credentials.UserController(path)
@@ -67,7 +50,6 @@ def load_batch_module(conf):
 
 def load_docker_module(conf):
     return docker.DockerController()
-
 
 
 def make_json_response(status_code, description):

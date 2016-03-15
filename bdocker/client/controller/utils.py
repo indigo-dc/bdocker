@@ -14,9 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import six
 import json
+import pwd
+import six
+import yaml
 
+from bdocker.common import utils
 
 def utf8(value):
     """Try to turn a string into utf-8 if possible.
@@ -50,5 +53,19 @@ def make_body(parameters):
         return json.dumps(body)
 
 
-def get_user_credentials():
-    return "user" # todo(jorgesece): create method
+def get_user_credentials(uid):
+    info = pwd.getpwuid(uid)
+    user = {'uid': uid, 'gid': info.pw_gid, 'home': info.pw_dir}
+    return user
+
+
+def get_admin_token(path):
+    token_store = utils.read_yaml_file(path)
+    return token_store['prolog']
+
+
+def write_user_credentials(token, file_path):
+    with open(file_path,'w') as out:
+        out.write(token) # todo: control several jobs
+        # out.write("{}\n".format(token))
+        out.close()

@@ -4,3 +4,4 @@ tabulate
 click
 Flask
 six
+pyyaml

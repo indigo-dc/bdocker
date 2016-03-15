@@ -16,7 +16,7 @@
 
 import uuid
 
-from bdocker import exceptions
+from bdocker.common import exceptions
 from bdocker.server.modules import utils
 
 

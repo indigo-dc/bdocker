@@ -15,15 +15,16 @@
 # under the License.
 
 from flask import Flask
-from flask import jsonify, request, abort
+from flask import json, jsonify, request, abort
 import sys
 
 from bdocker.server import utils
+from bdocker.common import utils as utils_common
 
 sys.tracebacklimit = 0
 
 app = Flask(__name__)
-conf = utils.load_configuration()
+conf = utils_common.load_configuration()
 
 credentials_module = utils.load_credentials_module(conf)
 batch_module = utils.load_batch_module(conf)
@@ -32,14 +33,15 @@ docker_module = utils.load_docker_module(conf)
 utils.set_error_handler(app)
 
 
-@app.route('/token', methods=['PUT'])
-def token():
-    data = request.get_json()
+@app.route('/credentials', methods=['PUT'])
+def credentials():
+    data = json.loads(request.data)
     required = {}
-    utils.validate(data, required) # todo(jorgesece): define userdata
-    data = {'uid': 'uuuuuuuuuuiiiidddddd', 'guid': 'gggggggggguuuiiidd'}
-    results = credentials_module.authenticate(data)
-    return utils.make_json_response(200, results)
+    utils.validate(data, required)  # todo: validate
+    token = data['token']
+    user = data['user_credentials']
+    results = credentials_module.authenticate(token, user)
+    return utils.make_json_response(201, results)
 
 
 @app.route('/pull', methods=['PUT'])

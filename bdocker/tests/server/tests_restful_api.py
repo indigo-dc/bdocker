@@ -13,22 +13,47 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
 import mock
 import testtools
 import webob
 
+
 from bdocker.server import docker
+from bdocker.server.modules import credentials
 from bdocker.server import restful_api
 
 # todo(jorgesece): test results retrieve
 
 
+def make_body(parameters):
+        body = {}
+        for key in parameters.keys():
+            body[key] = parameters[key]
+
+        return json.dumps(body)
+
+
 class TestREST(testtools.TestCase):
-    """Test OCCI compute controller."""
+    """Test REST request mapping."""
 
     def setUp(self):
         super(TestREST, self).setUp()
         self.app = restful_api.app
+
+    @mock.patch.object(credentials.UserController, "authenticate")
+    def test_credentials(self, m):
+        parameters = {"token":"tokennnnnn"
+                        ,"user_credentials":
+                        {'uid': 'uuuuuuuuuuiiiidddddd',
+                         'guid': 'gggggggggguuuiiidd'}
+                    }
+        body = make_body(parameters)
+        result = webob.Request.blank("/credentials",
+                                     method="PUT",
+                                     body=body).get_response(self.app)
+        self.assertEqual(201, result.status_code)
+
 
     @mock.patch.object(docker.DockerController, "pull_container")
     def test_pull(self, m):
@@ -138,3 +163,15 @@ class TestREST(testtools.TestCase):
         result = webob.Request.blank("/output",
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
+
+
+class TestRestFulCredentials(TestREST):
+    """Test REST request mapping."""
+
+    def setUp(self):
+        super(TestRestFulCredentials, self).setUp()
+
+    def test_credentials(self):
+        result = webob.Request.blank("/pull",
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)

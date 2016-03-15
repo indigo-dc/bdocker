@@ -29,11 +29,12 @@ def bdocker(ctx):
     ctx.obj = commands.CommandController()
 
 
-@bdocker.command('token', help="Request for user token.")
+@bdocker.command('credentials', help="Request for user token.")
+@user_credentials
 @click.pass_context
-def token_create(ctx):
-    ctx.obj.create_token()
-
+def credentials_create(ctx, uid):
+    out = ctx.obj.create_credentials(uid)
+    click.echo("Command output:%s" % out)
 
 @bdocker.command('pull', help="Pull a container and its intermediate layers.")
 @token_argument
