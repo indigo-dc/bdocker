@@ -17,7 +17,7 @@
 import uuid
 
 from bdocker.common import exceptions
-from bdocker.server.modules import utils
+from bdocker.common import utils
 
 
 class UserController(object):
