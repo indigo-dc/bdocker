@@ -13,14 +13,18 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import yaml
 
 
-def load_from_yaml_file(path):
-    yaml_content = {}
-    token = {'uid': 'uuuuuuuuuuiiiidddddd',
-              'guid': 'gggggggggguuuiiidd',
-              'other': {'o1':'inf1',
-                        'o2':'inf2'}
-              }
-    yaml_content['99999999999'] = token
+def read_yaml_file(path):
+    f = open(path, 'r')
+    data = f.read()
+    f.close()
+    yaml_content = yaml.load(data)
     return yaml_content
+
+
+def write_file(path, data):
+    f = open(path, 'w')
+    f.write(data)
+    f.close()

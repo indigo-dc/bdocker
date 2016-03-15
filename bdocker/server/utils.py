@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import webob
 from flask import jsonify
+import webob
 
 from bdocker import exceptions
 from bdocker.server.modules import batch
@@ -44,15 +44,16 @@ def load_configuration():
               }
     conf['server'] = server
     conf['batch'] = 'SGE'
+    conf['token_store'] = '../etc/token_store.yml'
 
-    # todo(jorgesece): read from file
+    # todo(jorgesece): read from file and validate fields
     # conf = ConfigParser.ConfigParser()
     # config.read('example.cfg')
     return conf
 
 
 def load_credentials_module(conf):
-    path = '/home/jorge/toke_store.yml'
+    path = conf['token_store']
     return credentials.UserController(path)
 
 
@@ -72,8 +73,8 @@ def load_docker_module(conf):
 def make_json_response(status_code, description):
     return jsonify({
         'status_code': status_code,
-        'description': description
-    })
+        'results': description
+    }), status_code
 
 
 def error_json_handler(exception):
@@ -85,4 +86,6 @@ def error_json_handler(exception):
 def set_error_handler(app):
     for code in exceptions.default_exceptions.iterkeys():
         app.error_handler_spec[None][code] = error_json_handler
+
+
 

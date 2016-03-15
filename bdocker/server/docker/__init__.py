@@ -41,7 +41,7 @@ class DockerController(object):
     def run_container(self):
         return "run container"
 
-    def accounting_user(self):
+    def accounting_container(self):
         return "accounting of the user"
 
     def output_task(self):
