@@ -1,7 +1,11 @@
 ---
 prolog:
- - token: "903489023490fjkldfnvzx.23493489"
-100:
- - gid: "XXXXXXXXXXXXXXX"
- - token: "903489023490fjkldfnvzx.23493489"
- - jobid: "YYYYYYYYYYYYYYY"
+ token: "token_prolog"
+token1:
+ gid: "gid1"
+ uid: "uid1"
+ jobid: "job1"
+token2:
+ gid: "gid2"
+ uid: "uid2"
+ jobid: "job2"

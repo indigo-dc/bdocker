@@ -1,0 +1,16 @@
+24896a5b548249a9beb703ac401f8701:
+  gid: g333
+  uid: u333
+prolog:
+  token: token_prolog
+token1:
+  gid: gid1
+  jobid: job1
+  uid: uid1
+token2:
+  containers:
+  - cotainer1
+  - container2
+  gid: gid2
+  jobid: job2
+  uid: uid2

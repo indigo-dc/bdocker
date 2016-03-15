@@ -17,14 +17,14 @@ import yaml
 
 
 def read_yaml_file(path):
-    f = open(path, 'r')
-    data = f.read()
-    f.close()
-    yaml_content = yaml.load(data)
-    return yaml_content
+    with open(path, 'r') as f:
+        data = f.read()
+        f.close()
+        return yaml.load(data)
+    return None
 
 
-def write_file(path, data):
-    f = open(path, 'w')
-    f.write(data)
-    f.close()
+def write_yaml_file(path, data):
+    with open(path, 'w') as f:
+        f.write(yaml.dump(data, default_flow_style=False))
+        f.close()
