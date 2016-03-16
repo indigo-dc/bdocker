@@ -55,7 +55,7 @@ def container_pull(ctx, token, source):
         utils.print_error(e.message)
 
 
-@bdocker.command('delete', help="Delete a container.")
+@bdocker.command('rm', help="Delete a container.")
 @token_argument
 @container_id_argument
 @click.pass_context

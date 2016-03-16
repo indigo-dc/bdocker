@@ -113,7 +113,7 @@ class TestREST(server.TestConfiguration):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
         query = get_query_string(parameters)
-        result = webob.Request.blank("/delete?%s" % query,
+        result = webob.Request.blank("/rm?%s" % query,
                                      method="DELETE").get_response(self.app)
         self.assertEqual(204, result.status_code)
 
@@ -122,7 +122,7 @@ class TestREST(server.TestConfiguration):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
         query = get_query_string(parameters)
-        result = webob.Request.blank("/delete?%s" % query,
+        result = webob.Request.blank("/rm?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
@@ -132,7 +132,7 @@ class TestREST(server.TestConfiguration):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
         query = get_query_string(parameters)
-        result = webob.Request.blank("/delete?%s" % query,
+        result = webob.Request.blank("/rm?%s" % query,
                                      method="DELETE").get_response(self.app)
         self.assertEqual(401, result.status_code)
 

@@ -23,12 +23,15 @@ class DockerController(object):
         self.control = Client()
 
     def pull_container(self, repo):
+        self.control.pull(repository=repo)
         return "pull container"
 
     def delete_container(self, container_id):
+        self.control.remove_container(container=container_id)
         return "delete container"
 
     def list_containers(self, token):
+        self.control.containers(all=True)
         return "list container"
 
     def logs_container(self, container_id):
@@ -36,12 +39,16 @@ class DockerController(object):
         return "log container"
 
     def start_container(self, container_id):
+        self.control.start(container=container_id)
         return "start container"
 
     def stop_container(self, container_id):
+        self.control.stop(container=container_id)
         return "stop container"
 
     def run_container(self, container_id, script):
+        # todo: check this command. It seems to more than needed
+        # self.control.create_container
         return "run container"
 
     def accounting_container(self, container_id):

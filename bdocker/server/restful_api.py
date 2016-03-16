@@ -51,13 +51,13 @@ def pull():
     utils.validate(data, required)
     token = data['token']
     repo = data['repo']
-    token_info = credentials_module.authorize(token)
+    credentials_module.authorize(token)
     results = docker_module.pull_container(repo)
-    # todo: update add container to token storage
+    credentials_module.add_container(token, results)
     return utils.make_json_response(201, results)
 
 
-@app.route('/delete', methods=['DELETE'])
+@app.route('/rm', methods=['DELETE'])
 def delete():
     data = request.args
     required = {'token', 'container_id'}
@@ -67,6 +67,7 @@ def delete():
     credentials_module.authorize_container(token,
                                            container_id)
     results = docker_module.delete_container(container_id)
+    credentials_module.remove_container(token, container_id)
     return utils.make_json_response(204, results)
 
 
@@ -132,8 +133,8 @@ def run():
     credentials_module.authorize_container(token,
                                            container_id)
     results = docker_module.run_container(
-                                          container_id,
-                                          script)
+        container_id,
+        script)
     return utils.make_json_response(201, results)
 
 
