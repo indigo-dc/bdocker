@@ -25,11 +25,12 @@ class CommandController(object):
 
     def __init__(self):
         try:
-            self.conf = utils_common.load_configuration()
-            endpoint = "http://%s:%s" % (self.conf['server']['host'],
-                                         self.conf['server']['port'])
+            conf = utils_common.load_configuration()
+            endpoint = "http://%s:%s" % (conf['server']['host'],
+                                         conf['server']['port'])
             self.control = request.RequestController(endopoint=endpoint)
-            self.token_file = self.conf['token_client_file']
+            self.token_file = conf["credentials"]['token_client_file']
+            self.token_storage = conf["credentials"]['token_store']
         except Exception as e:
             raise click.ClickException(e.message)
 
@@ -37,7 +38,7 @@ class CommandController(object):
         path = "/credentials"
         parameters = {}
         try:
-            parameters["token"] = utils.get_admin_token(self.conf['token_store'])
+            parameters["token"] = utils.get_admin_token(self.token_storage)
             user_info = utils.get_user_credentials(uid)
             home_dir = user_info.pop('home')
             parameters["user_credentials"] = user_info
@@ -50,7 +51,7 @@ class CommandController(object):
             click.echo(e.message)
         except Exception as e:
             raise click.ClickException(e.message)
-        return results
+        return token_path, results
 
     def container_pull(self, token, source):
         path = "/pull"

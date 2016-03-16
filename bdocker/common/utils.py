@@ -14,22 +14,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import yaml
+import ConfigParser
 
 
 def load_configuration():
+    config = ConfigParser.SafeConfigParser()
+    config.read('/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg')
 
     conf = {}
     server = {'host': '127.0.0.33',
               'port': 5000,
               'debug': False
               }
-    conf['server'] = server
-    conf['batch'] = 'SGE'
-    conf['token_store'] = '/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/token_store.yml'
-    conf["token_client_file"] = ".bdocker_token"
+    conf['server'] = dict(config.items("server"))
+    conf['batch'] = dict(config.items("batch"))
+    dict(config.items("batch"))
+    conf['credentials'] = dict(config.items("credentials"))
     # todo(jorgesece): read from file and validate fields
-    # conf = ConfigParser.ConfigParser()
-    # config.read('example.cfg')
+
+
     return conf
 
 

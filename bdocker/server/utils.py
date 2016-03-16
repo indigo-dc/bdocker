@@ -23,10 +23,10 @@ from bdocker.server.modules import credentials
 from bdocker.server import docker
 
 
-def validate(dict, mandatory_keys):
+def validate(fields, mandatory_keys):
     try:
         for key in mandatory_keys:
-            if (key not in dict):
+            if (key not in fields):
                 raise webob.exc.HTTPBadRequest(
                     "The %s field is mandatory."
                     "" % key)
@@ -36,14 +36,14 @@ def validate(dict, mandatory_keys):
 
 
 def load_credentials_module(conf):
-    path = conf['token_store']
+    path = conf["credentials"]['token_store']
     return credentials.UserController(path)
 
 
 def load_batch_module(conf):
     if 'batch' not in conf:
         raise exceptions.ConfigurationException("Batch system is not defined")
-    if conf['batch'] == 'SGE':
+    if conf['batch']["system"] == 'SGE':
         return batch.SGEController()
     exceptions.ConfigurationException("Batch is not supported")
 

@@ -147,5 +147,5 @@ def output():
 
 if __name__ == '__main__':
     app.run(host=conf['server']['host'],
-            port=conf['server']['port'],
+            port=int(conf['server']['port']),
             debug=conf['server']['debug'])
