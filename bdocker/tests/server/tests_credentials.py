@@ -72,20 +72,28 @@ class TestUserCredentials(testtools.TestCase):
                           token)
 
     def test_authorize(self):
-        t = 'token1'
-        token_info = self.control.authorize(token=t)
-        self.assertIsNotNone(token_info)
-        self.assertIsNotNone(token_info['uid'])
-        self.assertIsNotNone(token_info['gid'])
-        self.assertEqual('uid1',token_info['uid'])
+        t = 'token2'
+        ath = self.control.authorize(t)
+        self.assertIsNotNone(ath)
+
+    def test_authorize_err(self):
+        t = 'token'
+        self.assertRaises(exceptions.UserCredentialsException,
+            self.control.authorize, t)
 
     def test_authorize_containers(self):
         t = 'token2'
-        token_info = self.control.authorize(token=t)
-        self.assertIsNotNone(token_info)
-        self.assertIsNotNone(token_info['containers'])
-        self.assertEqual(2,
-                         token_info['containers'].__len__())
+        c = 'cotainer1'
+        ath = self.control.authorize_container(
+            token=t,
+            container_id=c)
+        self.assertIs(True, ath)
+
+    def test_authorize_container_err(self):
+        t = 'token'
+        c = '84848'
+        self.assertRaises(exceptions.UserCredentialsException,
+            self.control.authorize_container, t, c)
 
     def test_add_container(self):
         token = "token2"

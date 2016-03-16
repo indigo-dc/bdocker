@@ -122,10 +122,26 @@ class UserController(object):
         self.token_store.update({token: current_token})
 
 
-    def authorize(self, token):
-        """Authorize user token for the requested services.
+    def authorize_container(self, token, container_id):
+        """Check user authorization to the container.
 
-        :param token: token
+        :param token: user token
+        :param container_id: container id
+        """
+        token_info = self._get_token_from_cache(token)
+        if 'containers' not in token_info:
+            raise exceptions.UserCredentialsException(
+                "No container related to %s"
+                % token)
+        if container_id not in token_info['containers']:
+            raise exceptions.UserCredentialsException(
+                "Unauthorization error")
+        return True
+
+    def authorize(self, token):
+        """Check token authorization.
+
+        :param token: user token
         """
         token_info = self._get_token_from_cache(token)
         return token_info

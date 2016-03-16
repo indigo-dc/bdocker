@@ -14,36 +14,39 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from docker import Client
+
 
 class DockerController(object):
 
     def __init__(self):
-        pass
+        self.control = Client()
 
-    def pull_container(self):
+    def pull_container(self, repo):
         return "pull container"
 
-    def delete_container(self):
+    def delete_container(self, container_id):
         return "delete container"
 
-    def list_container(self):
+    def list_containers(self, token):
         return "list container"
 
-    def logs_container(self):
+    def logs_container(self, container_id):
+        self.control.logs(container=container_id)
         return "log container"
 
-    def start_container(self):
+    def start_container(self, container_id):
         return "start container"
 
-    def stop_container(self):
+    def stop_container(self, container_id):
         return "stop container"
 
-    def run_container(self):
+    def run_container(self, container_id, script):
         return "run container"
 
-    def accounting_container(self):
+    def accounting_container(self, container_id):
         return "accounting of the user"
 
-    def output_task(self):
+    def output_task(self, container_id):
         return "output of the task"
 

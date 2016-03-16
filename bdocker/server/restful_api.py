@@ -51,7 +51,9 @@ def pull():
     utils.validate(data, required)
     token = data['token']
     repo = data['repo']
-    results = docker_module.pull_container(token, repo)
+    token_info = credentials_module.authorize(token)
+    results = docker_module.pull_container(repo)
+    # todo: update add container to token storage
     return utils.make_json_response(201, results)
 
 
@@ -62,8 +64,9 @@ def delete():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    results = docker_module.delete_container(token,
-                                             container_id)
+    credentials_module.authorize_container(token,
+                                           container_id)
+    results = docker_module.delete_container(container_id)
     return utils.make_json_response(204, results)
 
 
@@ -73,7 +76,8 @@ def list():
     required = {'token'}
     utils.validate(data, required)
     token = data['token']
-    results = docker_module.list_container(token)
+    token_info = credentials_module.authorize(token)
+    results = docker_module.list_containers(token_info)
     return utils.make_json_response(200, results)
 
 
@@ -83,7 +87,10 @@ def logs():
     required = {'token'}
     utils.validate(data, required)
     token = data['token']
-    results = docker_module.logs_container(token)
+    container_id = data['container_id']
+    credentials_module.authorize_container(token,
+                                           container_id)
+    results = docker_module.logs_container(container_id)
     return utils.make_json_response(200, results)
 
 
@@ -94,8 +101,9 @@ def start():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    results = docker_module.start_container(token,
-                                            container_id)
+    credentials_module.authorize_container(token,
+                                           container_id)
+    results = docker_module.start_container(container_id)
     return utils.make_json_response(201, results)
 
 
@@ -106,8 +114,10 @@ def stop():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    results = docker_module.stop_container(token,
+    credentials_module.authorize_container(token,
                                            container_id)
+    results = docker_module.stop_container(
+        container_id)
     return utils.make_json_response(200, results)
 
 
@@ -119,7 +129,9 @@ def run():
     token = data['token']
     container_id = data['container_id']
     script = data['script']
-    results = docker_module.run_container(token,
+    credentials_module.authorize_container(token,
+                                           container_id)
+    results = docker_module.run_container(
                                           container_id,
                                           script)
     return utils.make_json_response(201, results)
@@ -131,17 +143,22 @@ def accounting():
     required = {'token'}
     utils.validate(data, required)
     token = data['token']
-    results = docker_module.accounting_container(token)
+    # todo: study the implementation
+    token_info = credentials_module.authorize(token)
+    results = docker_module.accounting_container(token_info)
     return utils.make_json_response(200, results)
 
 
 @app.route('/output', methods=['GET'])
 def output():
     data = request.args
-    required = {'token'}
+    required = {'token','container_id'}
     utils.validate(data, required)
     token = data['token']
-    results = docker_module.output_task(token)
+    container_id = data['container_id']
+    credentials_module.authorize_container(token,
+                                           container_id)
+    results = docker_module.output_task(container_id)
     return utils.make_json_response(200, results)
 
 
