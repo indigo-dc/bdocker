@@ -20,7 +20,6 @@ import webob
 
 
 from bdocker.client.controller import request
-from bdocker.server import utils
 
 
 class TestCommands(testtools.TestCase):
@@ -37,11 +36,11 @@ class TestCommands(testtools.TestCase):
         fake_response.status_int = 201
         fake_response.body = '{"results": "%s", "status_code": 201}' % t
         m.return_value = fake_response
-        parameters = {"token":"tokennnnnn"
-                        ,"user_credentials":
-                        {'uid': 'uuuuuuuuuuiiiidddddd',
-                         'gid': 'gggggggggguuuiiidd'}
-                    }
+        parameters = {"token":"tokennnnnn",
+                      "user_credentials": {
+                          'uid': 'uuuuuuuuuuiiiidddddd',
+                          'gid': 'gggggggggguuuiiidd'}
+                      }
         path = "/credentials"
         result = self.control.execute_put(path=path, parameters=parameters)
         self.assertEqual(t, result)
@@ -54,6 +53,6 @@ class TestCommands(testtools.TestCase):
         fake_response.body = '{"results": "%s", "status_code": 201}' % r
         m.return_value = fake_response
         parameters = {"token":"tokennnnnn"}
-        path = "/ps"
+        path = "/ps?token"
         result = self.control.execute_get(path=path, parameters=parameters)
         self.assertEqual(r, result)

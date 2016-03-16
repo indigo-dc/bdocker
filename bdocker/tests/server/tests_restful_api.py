@@ -161,66 +161,104 @@ class TestREST(testtools.TestCase):
 
     @mock.patch.object(docker.DockerController, "start_container")
     def test_start_405(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        body = make_body(parameters)
         result = webob.Request.blank("/start",
+                                     content_type="application/json",
+                                     body=body,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "stop_container")
     def test_stop(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        body = make_body(parameters)
         result = webob.Request.blank("/stop",
+                                     content_type="application/json",
+                                     body=body,
                                      method="POST").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker.DockerController, "stop_container")
     def test_stop_405(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        body = make_body(parameters)
         result = webob.Request.blank("/stop",
+                                     content_type="application/json",
+                                     body=body,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "run_container")
     def test_run(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr',
+                      "script": "scriptttt"}
+        body = make_body(parameters)
         result = webob.Request.blank("/run",
+                                     content_type="application/json",
+                                     body=body,
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(docker.DockerController, "run_container")
     def test_run_405(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr',
+                      "script": "scriptttt"}
+        body = make_body(parameters)
         result = webob.Request.blank("/run",
+                                     content_type="application/json",
+                                     body=body,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
+    @mock.patch.object(docker.DockerController, "run_container")
+    def test_run_400(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "script": "scriptttt"}
+        body = make_body(parameters)
+        result = webob.Request.blank("/run",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="POST").get_response(self.app)
+        self.assertEqual(400, result.status_code)
+
     @mock.patch.object(docker.DockerController, "accounting_container")
     def test_acc(self, m):
-        result = webob.Request.blank("/accounting",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/accounting?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker.DockerController, "accounting_container")
     def test_acc_405(self, m):
-        result = webob.Request.blank("/accounting",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/accounting?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "output_task")
     def test_output(self, m):
-        result = webob.Request.blank("/output",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/output?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker.DockerController, "output_task")
     def test_output_405(self, m):
-        result = webob.Request.blank("/output",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/output?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
-
-
-class TestRestFulCredentials(TestREST):
-    """Test REST request mapping."""
-
-    def setUp(self):
-        super(TestRestFulCredentials, self).setUp()
-
-    def test_credentials(self):
-        result = webob.Request.blank("/pull",
-                                     method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)

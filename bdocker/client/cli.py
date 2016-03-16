@@ -44,7 +44,8 @@ def credentials_create(ctx, uid):
 @source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
-    ctx.obj.container_pull(token, source)
+    out = ctx.obj.container_pull(token, source)
+    click.echo("Container id: %s" % out)
 
 
 @bdocker.command('delete', help="Delete a container.")
@@ -52,14 +53,17 @@ def container_pull(ctx, token, source):
 @container_id_argument
 @click.pass_context
 def container_delete(ctx, token, container_id):
-    ctx.obj.container_delete(token, container_id)
+    out = ctx.obj.container_delete(token, container_id)
+    click.echo("Deleted container: %s" % out)
 
 
 @bdocker.command('ps', help="Show all containers running.")
 @token_argument
 @click.pass_context
 def container_list(ctx, token):
-    ctx.obj.container_list(token)
+    out = ctx.obj.container_list(token)
+    click.echo("List in table: %s" % out)
+    # todo: list in table
 
 
 @bdocker.command('logs', help="Retrieves logs present at"
@@ -68,7 +72,9 @@ def container_list(ctx, token):
 @container_id_argument
 @click.pass_context
 def container_logs(ctx, token, container_id):
-    ctx.obj.container_logs(token, container_id)
+    out = ctx.obj.container_logs(token, container_id)
+    click.echo("List in table: %s" % out)
+    # todo: list in table
 
 
 @bdocker.command('start',
@@ -78,7 +84,8 @@ def container_logs(ctx, token, container_id):
 @container_id_argument
 @click.pass_context
 def container_start(ctx, token, container_id):
-    ctx.obj.container_start(token, container_id)
+    out = ctx.obj.container_start(token, container_id)
+    click.echo("Started container: %s" % out)
 
 
 @bdocker.command('stop', help="Start a container.")
@@ -86,7 +93,8 @@ def container_start(ctx, token, container_id):
 @container_id_argument
 @click.pass_context
 def container_stop(ctx, token, container_id):
-    ctx.obj.container_stop(token, container_id)
+    out = ctx.obj.container_stop(token, container_id)
+    click.echo("Stoped container: %s" % out)
 
 
 @bdocker.command('run', help="Creates a writeable container "
@@ -97,7 +105,8 @@ def container_stop(ctx, token, container_id):
 @command_argument
 @click.pass_context
 def container_run(ctx, token, container_id, script):
-    ctx.obj.task_run(token, container_id, script)
+    out = ctx.obj.task_run(token, container_id, script)
+    click.echo("Script executed in job: %s" % out)
 
 
 @bdocker.command('accounting',
@@ -106,4 +115,6 @@ def container_run(ctx, token, container_id, script):
 @container_id_argument
 @click.pass_context
 def accounting(ctx, token, container_id):
-    ctx.obj.accounting_retrieve(token, container_id)
+    out = ctx.obj.accounting_retrieve(token, container_id)
+    click.echo("List in table: %s" % out)
+    # todo: list in table
