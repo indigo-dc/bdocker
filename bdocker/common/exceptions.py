@@ -89,7 +89,7 @@ class UserCredentialsException(Exception):
 
 class ConfigurationException(Exception):
     def __init__(self, message):
-        self.message = ("Configuration Credentials Exception: "
+        self.message = ("Configuration Exception: "
                        + message)
 
     def __str__(self):

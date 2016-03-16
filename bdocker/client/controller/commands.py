@@ -45,10 +45,8 @@ class CommandController(object):
             results = self.control.execute_put(path=path, parameters=parameters)
             token_path = "%s/%s" % (home_dir, self.token_file)
             utils.write_user_credentials(results, token_path)
-        except exceptions.UserCredentialsException as e:
-            click.echo(e.message)
         except IOError as e:
-            click.echo(e.message)
+            raise click.ClickException(e.strerror)
         except Exception as e:
             raise click.ClickException(e.message)
         return token_path, results

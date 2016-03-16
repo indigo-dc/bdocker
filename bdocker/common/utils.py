@@ -16,35 +16,57 @@
 import yaml
 import ConfigParser
 
+from bdocker.common import exceptions
+
 
 def load_configuration():
-    config = ConfigParser.SafeConfigParser()
-    config.read('/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg')
-
-    conf = {}
-    server = {'host': '127.0.0.33',
-              'port': 5000,
-              'debug': False
-              }
-    conf['server'] = dict(config.items("server"))
-    conf['batch'] = dict(config.items("batch"))
-    dict(config.items("batch"))
-    conf['credentials'] = dict(config.items("credentials"))
-    # todo(jorgesece): read from file and validate fields
-
-
+    try:
+        config = ConfigParser.SafeConfigParser()
+        config.read('/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg')
+        conf = {
+            'server': dict(config.items("server")),
+            'batch': dict(config.items("batch")),
+            'credentials': dict(config.items("credentials")),
+            'dockerAPI': dict(config.items("dockerAPI"))
+        }
+        validate_config(conf)
+    except exceptions.ParseException as e:
+        raise exceptions.ConfigurationException(
+            "Parameter %s missed in configuration file."
+            % e.message)
+    except BaseException as e:
+        raise exceptions.ConfigurationException(
+            "Error reading configuration file.")
     return conf
 
 
+def validate_config(conf):
+    section_keys = {'server', 'batch', 'credentials', 'dockerAPI'}
+    server_keys = {'host','port','debug'}
+    batch_keys = {'system'}
+    credentials_keys = {'token_store', 'token_client_file'}
+    for key in section_keys:
+        if key not in conf:
+            raise exceptions.ParseException(key)
+    for key in server_keys:
+        if key not in conf['server']:
+            raise exceptions.ParseException(key)
+    for key in batch_keys:
+        if key not in conf['batch']:
+            raise exceptions.ParseException(key)
+    for key in credentials_keys:
+        if key not in conf['credentials']:
+            raise exceptions.ParseException(key)
+
+
 def read_yaml_file(path):
-    with open(path, 'r') as f:
-        data = f.read()
-        f.close()
-        return yaml.load(data)
-    return None
+    f = open(path, 'r')
+    data = f.read()
+    f.close()
+    return yaml.load(data)
 
 
 def write_yaml_file(path, data):
-    with open(path, 'w') as f:
-        f.write(yaml.dump(data, default_flow_style=False))
-        f.close()
+    f = open(path, 'w')
+    f.write(yaml.dump(data, default_flow_style=False))
+    f.close()

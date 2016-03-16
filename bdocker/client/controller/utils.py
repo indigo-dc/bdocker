@@ -17,9 +17,24 @@
 import json
 import pwd
 import six
-import yaml
 
 from bdocker.common import utils
+
+
+colors = {"WARNING": "\033[93m",
+          'FAIL': '\033[91m'}
+
+
+colors = { 'FAIL' : '\033[91m',
+           'OK': '\033[92m',
+           'WARNING': '\033[93m',
+           'ENDC': '\033[0m'
+         }
+
+messages = { "empty": colors['FAIL'] + ' "Parsing error" ' + colors['ENDC'],
+            "error": "There was an error"
+          }
+
 
 def utf8(value):
     """Try to turn a string into utf-8 if possible.
@@ -65,7 +80,32 @@ def get_admin_token(path):
 
 
 def write_user_credentials(token, file_path):
-    with open(file_path,'w') as out:
-        out.write(token) # todo: control several jobs
-        # out.write("{}\n".format(token))
-        out.close()
+    out = open(file_path,'w')
+    out.write(token) # todo: control several jobs
+    out.close()
+
+
+def print_message(message, type='OK'):
+    message = colors[type] + message + colors['ENDC']
+    print
+    print '{:<}'.format(message)
+    print
+
+
+def print_error(message):
+    print_message(message, 'FAIL')
+
+
+def print_table(title, headers, rows, err=False):
+    try:
+        if err:
+            message = colors['FAIL'] + ' ERROR ' + colors['ENDC']
+        else:
+            message = colors['OK'] + title.upper() + colors['ENDC']
+        if headers:
+            print
+            print '   =====> {:<} <====='.format(message)
+            #print tabulate(rows, headers=headers, tablefmt="orgtbl")
+            print
+    except:
+        print messages["empty"]
