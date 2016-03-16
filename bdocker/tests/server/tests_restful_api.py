@@ -34,6 +34,17 @@ def make_body(parameters):
         return json.dumps(body)
 
 
+def get_query_string(parameters):
+        query_string = ""
+        if parameters is None:
+            return None
+
+        for key in parameters.keys():
+            query_string = ("%s%s=%s&" % (query_string, key, parameters[key]))
+
+        return query_string[:-1] # delete last character
+
+
 class TestREST(testtools.TestCase):
     """Test REST request mapping."""
 
@@ -43,70 +54,108 @@ class TestREST(testtools.TestCase):
 
     @mock.patch.object(credentials.UserController, "authenticate")
     def test_credentials(self, m):
-        parameters = {"token":"tokennnnnn"
-                        ,"user_credentials":
-                        {'uid': 'uuuuuuuuuuiiiidddddd',
-                         'guid': 'gggggggggguuuiiidd'}
-                    }
+        m.return_value = 'tokenresult'
+        parameters = {"token": "tokennnnnn",
+                      "user_credentials":
+                          {'uid': 'uuuuuuuuuuiiiidddddd',
+                           'gid': 'gggggggggguuuiiidd'}
+                      }
         body = make_body(parameters)
         result = webob.Request.blank("/credentials",
                                      method="PUT",
+                                     content_type="application/json",
                                      body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
 
 
     @mock.patch.object(docker.DockerController, "pull_container")
     def test_pull(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "repo": 'repoooo'}
+        body = make_body(parameters)
         result = webob.Request.blank("/pull",
+                                     content_type="application/json",
+                                     body=body,
                                      method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(docker.DockerController, "pull_container")
-    def test_pul_405l(self, m):
-        #m.return_value = {}
+    def test_pull_405(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "repo": 'repoooo'}
+        body = make_body(parameters)
         result = webob.Request.blank("/pull",
+                                     content_type="application/json",
+                                     body=body,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
+    @mock.patch.object(docker.DockerController, "pull_container")
+    def test_pull_400(self, m):
+        parameters = {"token":"tokennnnnn"}
+        body = make_body(parameters)
+        result = webob.Request.blank("/pull",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="put").get_response(self.app)
+        self.assertEqual(400, result.status_code)
+
     @mock.patch.object(docker.DockerController, "delete_container")
     def test_delete(self, m):
-        result = webob.Request.blank("/delete",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'repoooo'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/delete?%s" % query,
                                      method="DELETE").get_response(self.app)
         self.assertEqual(204, result.status_code)
 
     @mock.patch.object(docker.DockerController, "delete_container")
     def test_delete_405(self, m):
-        result = webob.Request.blank("/delete",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'repoooo'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/delete?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "list_container")
     def test_ps(self, m):
-        result = webob.Request.blank("/ps",
+        result = webob.Request.blank("/ps?token=333333",
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker.DockerController, "list_container")
     def test_ps_405(self, m):
-        result = webob.Request.blank("/ps",
+        result = webob.Request.blank("/ps?token=333333",
                                      method="PUT").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "logs_container")
     def test_logs(self, m):
-        result = webob.Request.blank("/logs",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/logs?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker.DockerController, "logs_container")
     def test_logs_405(self, m):
-        result = webob.Request.blank("/logs",
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/logs?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker.DockerController, "start_container")
     def test_start(self, m):
+        parameters = {"token":"tokennnnnn",
+                      "container_id": 'containerrrrr'}
+        body = make_body(parameters)
         result = webob.Request.blank("/start",
+                                     content_type="application/json",
+                                     body=body,
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
 

@@ -29,11 +29,11 @@ class RequestController(object):
         self.endpoint = endopoint
 
     @staticmethod
-    def _get_from_response(response):
+    def _get_from_response(response, data_field='results'):
         if response.status_int in [200, 201, 202]:
             exceptions.logger.debug('HTTP response: %s',
                                     response.status_int)
-            return response.json_body
+            return response.json_body[data_field]
         elif response.status_int in [204]:
             return "Non Content"
         else:
@@ -116,7 +116,9 @@ class RequestController(object):
         :param parameters: parameters to include in the request
         """
         try:
-            req = self._get_req(path, method="DELETE")
+            query_string = utils.get_query_string(parameters)
+            req = self._get_req(path, method="DELETE",
+                                query_string=query_string)
             response = req.get_response(None)
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
@@ -133,7 +135,7 @@ class RequestController(object):
         try:
             body = utils.make_body(parameters)
             req = self._get_req(path, body=body, method="PUT")
-            response = req.get_response(None)
+            response = req.get_response()
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)

@@ -35,9 +35,9 @@ utils.set_error_handler(app)
 
 @app.route('/credentials', methods=['PUT'])
 def credentials():
-    data = json.loads(request.data)
-    required = {}
-    utils.validate(data, required)  # todo: validate
+    data = request.get_json()
+    required = {'token','user_credentials'}
+    utils.validate(data, required)
     token = data['token']
     user = data['user_credentials']
     results = credentials_module.authenticate(token, user)
@@ -47,82 +47,102 @@ def credentials():
 @app.route('/pull', methods=['PUT'])
 def pull():
     data = request.get_json()
-    required = {}
+    required = {'token','repo'}
     utils.validate(data, required)
-    results = docker_module.pull_container()
-    return utils.make_json_response(201,results)
+    token = data['token']
+    repo = data['repo']
+    results = docker_module.pull_container(token, repo)
+    return utils.make_json_response(201, results)
 
 
 @app.route('/delete', methods=['DELETE'])
 def delete():
-    data = request.get_json()
-    required = {}
+    data = request.args
+    required = {'token', 'container_id'}
     utils.validate(data, required)
-    results = docker_module.delete_container()
-    return utils.make_json_response(204,results)
+    token = data['token']
+    container_id = data['container_id']
+    results = docker_module.delete_container(token,
+                                             container_id)
+    return utils.make_json_response(204, results)
 
 
 @app.route('/ps', methods=['GET'])
 def list():
-    data = request.get_json()
-    required = {}
+    data = request.args
+    required = {'token'}
     utils.validate(data, required)
-    results = docker_module.list_container()
-    return utils.make_json_response(200,results)
+    token = data['token']
+    results = docker_module.list_container(token)
+    return utils.make_json_response(200, results)
 
 
 @app.route('/logs', methods=['GET'])
 def logs():
-    data = request.get_json()
-    required = {}
+    data = request.args
+    required = {'token'}
     utils.validate(data, required)
-    results = docker_module.logs_container()
-    return utils.make_json_response(200,results)
+    token = data['token']
+    results = docker_module.logs_container(token)
+    return utils.make_json_response(200, results)
 
 
 @app.route('/start', methods=['POST'])
 def start():
-    data = request.get_json()
-    required = {}
+    data = json.loads(request.data)
+    required = {'token','container_id'}
     utils.validate(data, required)
-    results = docker_module.start_container()
-    return utils.make_json_response(201,results)
+    token = data['token']
+    container_id = data['container_id']
+    results = docker_module.start_container(token,
+                                            container_id)
+    return utils.make_json_response(201, results)
 
 
 @app.route('/stop', methods=['POST'])
 def stop():
-    data = request.get_json()
-    required = {}
+    data = json.loads(request.data)
+    required = {'token','container_id'}
     utils.validate(data, required)
-    results = docker_module.stop_container()
-    return utils.make_json_response(200,results)
+    token = data['token']
+    container_id = data['container_id']
+    results = docker_module.stop_container(token,
+                                           container_id)
+    return utils.make_json_response(200, results)
 
 
 @app.route('/run', methods=['POST'])
 def run():
-    data = request.get_json()
-    required = {}
+    data = json.loads(request.data)
+    required = {'token','container_id', 'script'}
     utils.validate(data, required)
-    results = docker_module.run_container()
-    return utils.make_json_response(201,results)
+    token = data['token']
+    container_id = data['container_id']
+    script = data['script']
+    results = docker_module.run_container(token,
+                                          container_id,
+                                          script)
+    return utils.make_json_response(201, results)
 
 
 @app.route('/accounting', methods=['GET'])
 def accounting():
-    data = request.get_json()
-    required = {}
+    data = request.args
+    required = {'token'}
     utils.validate(data, required)
-    results = docker_module.accounting_container()
-    return utils.make_json_response(200,results)
+    token = data['token']
+    results = docker_module.accounting_container(token)
+    return utils.make_json_response(200, results)
 
 
 @app.route('/output', methods=['GET'])
 def output():
-    data = request.get_json()
-    required = {}
+    data = request.args
+    required = {'token'}
     utils.validate(data, required)
-    results = docker_module.output_task()
-    return utils.make_json_response(200,results)
+    token = data['token']
+    results = docker_module.output_task(token)
+    return utils.make_json_response(200, results)
 
 
 if __name__ == '__main__':

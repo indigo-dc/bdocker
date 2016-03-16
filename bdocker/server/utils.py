@@ -28,8 +28,8 @@ def validate(dict, mandatory_keys):
         for key in mandatory_keys:
             if (key not in dict):
                 raise webob.exc.HTTPBadRequest(
-                    "The {0} field is mandatory."
-                    "".format(key))
+                    "The %s field is mandatory."
+                    "" % key)
     except Exception as e:
         raise exceptions.ParseException("Validation of required values")
     return True

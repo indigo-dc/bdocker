@@ -35,7 +35,7 @@ def bdocker(ctx):
 @click.pass_context
 def credentials_create(ctx, uid):
     out = ctx.obj.create_credentials(uid)
-    click.echo("Command output:%s" % out)
+    click.echo("User token: %s" % out)
 
 @bdocker.command('pull',
                  help="Pull a container and"

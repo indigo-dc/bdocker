@@ -20,8 +20,13 @@ from bdocker.server.modules import credentials
 from bdocker.common import exceptions
 
 
-def create_fake_user():
-    return {'uid': 'u333', 'gid': 'g333'}
+def create_parameters():
+        parameters = {"token":"tokennnnnn"
+                        ,"user_credentials":
+                        {'uid': 'uuuuuuuuuuiiiidddddd',
+                         'gid': 'gggggggggguuuiiidd'}
+                    }
+        return parameters
 
 
 class TestUserCredentials(testtools.TestCase):
@@ -45,14 +50,14 @@ class TestUserCredentials(testtools.TestCase):
     def test_authenticate(self):
         t = self.control._get_token_from_cache(
             "prolog")['token']
-        u = create_fake_user()
+        u = create_parameters()['user_credentials']
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
         self.assertIsNotNone(token)
 
     def test_authenticate_save_file(self):
         t = self.control._get_token_from_cache("prolog")['token']
-        u = create_fake_user()
+        u = create_parameters()['user_credentials']
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
         self.assertIsNotNone(token)

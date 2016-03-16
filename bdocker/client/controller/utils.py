@@ -61,7 +61,7 @@ def get_user_credentials(uid):
 
 def get_admin_token(path):
     token_store = utils.read_yaml_file(path)
-    return token_store['prolog']
+    return token_store['prolog']['token']
 
 
 def write_user_credentials(token, file_path):
