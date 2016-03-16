@@ -71,7 +71,9 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker.DockerController, "pull_container")
     @mock.patch.object(credentials.UserController,
                    "authorize")
-    def test_pull(self, mu, md):
+    @mock.patch.object(credentials.UserController,
+                   "add_container")
+    def test_pull(self, mc, mu, md):
         mu.return_value=True
         parameters = {"token":"tokennnnnn",
                       "repo": 'repoooo'}
