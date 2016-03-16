@@ -18,11 +18,17 @@ import ConfigParser
 
 from bdocker.common import exceptions
 
+default_conf_file = ("/home/jorge/Dropbox" +
+                     "/INDIGO_DOCKER/bdocker/" +
+                     "bdocker/common/"
+                     "configure_bdocker.cfg"
+                     )
 
-def load_configuration():
+
+def load_configuration(path=default_conf_file):
     try:
         config = ConfigParser.SafeConfigParser()
-        config.read('/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg')
+        config.read(path)
         conf = {
             'server': dict(config.items("server")),
             'batch': dict(config.items("batch")),

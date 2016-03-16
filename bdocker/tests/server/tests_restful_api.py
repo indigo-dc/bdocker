@@ -15,13 +15,13 @@
 # under the License.
 import json
 import mock
-import testtools
 import webob
 
 
 from bdocker.server import docker
 from bdocker.server.modules import credentials
 from bdocker.server import restful_api
+from bdocker.tests import server
 
 # todo(jorgesece): test results retrieve
 
@@ -45,7 +45,7 @@ def get_query_string(parameters):
         return query_string[:-1] # delete last character
 
 
-class TestREST(testtools.TestCase):
+class TestREST(server.TestConfiguration):
     """Test REST request mapping."""
 
     def setUp(self):
