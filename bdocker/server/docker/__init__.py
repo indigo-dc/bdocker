@@ -14,25 +14,38 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from docker import Client
+import docker
+import json
+
+from bdocker.common import exceptions
+from bdocker.server.docker import parsers
 
 
 class DockerController(object):
 
-    def __init__(self):
-        self.control = Client()
+    def __init__(self, url):
+        # tls_config = docker.tls.TLSConfig(
+        #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
+        # )
+        self.control = docker.Client(base_url=url, version='1.19')
 
-    def pull_container(self, repo):
-        self.control.pull(repository=repo)
-        return "pull container"
+    def pull_container(self, repo, tag='latest'):
+        try:
+            docker_out = self.control.pull(repository=repo, tag=tag, stream=True)
+            result = parsers.parse_pull(docker_out)
+        except exceptions.ParseException as e:
+            raise exceptions.DockerException(e.message)
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation)
+        return result
 
     def delete_container(self, container_id):
         self.control.remove_container(container=container_id)
         return "delete container"
 
-    def list_containers(self, token):
-        self.control.containers(all=True)
-        return "list container"
+    def list_containers(self, containers):
+        result = self.control.containers(all=True)
+        return result
 
     def logs_container(self, container_id):
         self.control.logs(container=container_id)
@@ -56,4 +69,3 @@ class DockerController(object):
 
     def output_task(self, container_id):
         return "output of the task"
-

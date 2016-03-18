@@ -1,0 +1,115 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2015 LIP - Lisbon
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+import docker
+import mock
+import testtools
+
+from bdocker.server import docker as control_docker
+from bdocker.server.docker import parsers
+from bdocker.common import exceptions
+from bdocker.tests.server import fake_docker_outputs
+
+container1 = {'Command': '/bin/sleep 30',
+              'Created': 1412574844,
+              'Id': '6e276c9e6e5759e12a6a9214efec6439f80b4f37618e1a6547f28a3da34db07a',
+              'Image': 'busybox:buildroot-2014.02',
+              'Names': ['/grave_mayer'],
+              'Ports': [],
+              'Status': 'Up 1 seconds'}
+
+container2 = {'Command': 'whoami',
+              'Created': 1412574844,
+              'Id': '89034890sdfdjlksdf93k2390kldfjlsdf09w80349ijfalfjf0393iu4pofjl33',
+              'Image': 'busybox:buildroot-2014.02',
+              'Names': ['/grave_mayer'],
+              'Ports': [],
+              'Status': 'Up 1 seconds'}
+
+container_real = [{'Status': 'Exited (0) 6 minutes ago',
+               'Created': 1458231723,
+               'Image': 'ubuntu', 'Labels': {},
+               'Ports': [], 'Command': 'sleep 30',
+               'Names': ['/nostalgic_noyce'],
+               'Id': 'f20b77988e436da8645cde68208'
+                     '00dc9ee3aabe1bd9d2dd5b061a3c853ad688b'},
+              {'Status': 'Exited (0) 7 minutes ago',
+               'Created': 1458231670, 'Image': 'ubuntu',
+               'Labels': {}, 'Ports': [], 'Command': 'whoami',
+               'Names': ['/tender_nobel'],
+               'Id': '144a7e26743ed487217ae1494cac01197'
+                     '245ef8e64669c666addd6a770639264'}]
+
+
+def create_generator(json_data):
+    for line in json_data:
+        yield line
+
+
+class FakeDocker(control_docker.DockerController):
+    def __init__(self):
+        super(FakeDocker,self).__init__()
+
+    def pull_container(self, repo):
+        return {
+            "status": "Pulling image (latest) from busybox, endpoint: ...",
+            "progressDetail": {},
+            "id": "e72ac664f4f0"
+        }
+
+    def delete_container(self, container_id):
+        return ""
+
+    def list_containers(self, containers):
+        return [container1, container2]
+
+    def logs_container(self, container_id):
+        return "generator or str (test command)"
+
+    def logs_container(self, container_id):
+        return "generator or str (test command)"
+
+
+class TestDocker(testtools.TestCase):
+    """Test User Credential controller."""
+
+    def setUp(self):
+        super(TestDocker, self).setUp()
+        url = 'localhost:2376'
+        self.control = control_docker.DockerController(url)
+
+    @mock.patch.object(docker.Client, 'pull')
+    def test_pull(self, m):
+        image = 'imageOK'
+        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
+        out = self.control.pull_container(image)
+        self.assertIsNotNone(out)
+
+    @mock.patch.object(docker.Client, 'pull')
+    def test_pull_exist(self, m):
+        image = 'imageExist'
+        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
+        out = self.control.pull_container(image)
+        self.assertIsNotNone(out)
+
+    @mock.patch.object(docker.Client, 'pull')
+    def test_pull_error(self, m):
+        image = 'imageError'
+        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
+        self.assertRaises(exceptions.DockerException, self.control.pull_container, image)
+
+    def test_list(self):
+        out = self.control.list_containers(None)
+        self.assertIsNotNone(out)

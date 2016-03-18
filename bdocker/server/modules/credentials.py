@@ -121,6 +121,18 @@ class UserController(object):
             del current_token["containers"]
         self.token_store.update({token: current_token})
 
+    def list_containers(self, token):
+        """Return containers from a token record.
+
+        :param token: token
+        """
+        token_info = self._get_token_from_cache(token)
+        if 'containers' not in token_info:
+            raise exceptions.UserCredentialsException(
+                "No container related to %s"
+                % token)
+        return token_info['containers']
+
 
     def authorize_container(self, token, container_id):
         """Check user authorization to the container.
