@@ -68,7 +68,7 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(201, result.status_code)
 
 
-    @mock.patch.object(docker.DockerController, "pull_container")
+    @mock.patch.object(docker.DockerController, "pull_image")
     @mock.patch.object(credentials.UserController,
                    "authorize")
     @mock.patch.object(credentials.UserController,
@@ -84,7 +84,7 @@ class TestREST(server.TestConfiguration):
                                      method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "pull_container")
+    @mock.patch.object(docker.DockerController, "pull_image")
     def test_pull_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "repo": 'repoooo'}
@@ -95,7 +95,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "pull_container")
+    @mock.patch.object(docker.DockerController, "pull_image")
     def test_pull_400(self, m):
         parameters = {"token":"tokennnnnn"}
         body = make_body(parameters)
@@ -137,9 +137,10 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(docker.DockerController, "list_containers")
+    @mock.patch.object(credentials.UserController, "list_containers")
     @mock.patch.object(credentials.UserController,
                        "authorize")
-    def test_ps(self, mu, md):
+    def test_ps(self, mu, md,ml):
         mu.return_value = True
         result = webob.Request.blank("/ps?token=333333",
                                      method="GET").get_response(self.app)
@@ -187,41 +188,41 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "start_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    def test_start(self, mu, md):
-        mu.return_value = True
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        body = make_body(parameters)
-        result = webob.Request.blank("/start",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
-        self.assertEqual(201, result.status_code)
-
-    @mock.patch.object(docker.DockerController, "start_container")
-    def test_start_405(self, md):
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        body = make_body(parameters)
-        result = webob.Request.blank("/start",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="GET").get_response(self.app)
-        self.assertEqual(405, result.status_code)
-
-    @mock.patch.object(docker.DockerController, "start_container")
-    def test_start_401(self, m):
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        body = make_body(parameters)
-        result = webob.Request.blank("/start",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
-        self.assertEqual(401, result.status_code)
+    # @mock.patch.object(docker.DockerController, "start_container")
+    # @mock.patch.object(credentials.UserController,
+    #                    "authorize_container")
+    # def test_start(self, mu, md):
+    #     mu.return_value = True
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="POST").get_response(self.app)
+    #     self.assertEqual(201, result.status_code)
+    #
+    # @mock.patch.object(docker.DockerController, "start_container")
+    # def test_start_405(self, md):
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="GET").get_response(self.app)
+    #     self.assertEqual(405, result.status_code)
+    #
+    # @mock.patch.object(docker.DockerController, "start_container")
+    # def test_start_401(self, m):
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="POST").get_response(self.app)
+    #     self.assertEqual(401, result.status_code)
 
     @mock.patch.object(docker.DockerController, "stop_container")
     @mock.patch.object(credentials.UserController,
@@ -261,11 +262,12 @@ class TestREST(server.TestConfiguration):
 
     @mock.patch.object(docker.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
-                       "authorize_container")
+                       "add_container")
     def test_run(self, mu, md):
         mu.return_value = True
+        md.return_value = {'Id':'33333'}
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr',
+                      "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = make_body(parameters)
         result = webob.Request.blank("/run",
@@ -277,7 +279,7 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker.DockerController, "run_container")
     def test_run_405(self, m):
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr',
+                      "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = make_body(parameters)
         result = webob.Request.blank("/run",
@@ -289,7 +291,7 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker.DockerController, "run_container")
     def test_run_401(self, m):
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr',
+                      "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = make_body(parameters)
         result = webob.Request.blank("/run",

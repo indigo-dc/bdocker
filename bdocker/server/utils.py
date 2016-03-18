@@ -49,7 +49,7 @@ def load_batch_module(conf):
 
 
 def load_docker_module(conf):
-    return docker.DockerController()
+    return docker.DockerController(conf['dockerAPI']['base_url'])
 
 
 def make_json_response(status_code, description):

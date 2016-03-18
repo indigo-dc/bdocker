@@ -53,7 +53,7 @@ def pull():
     repo = data['repo']
     credentials_module.authorize(token)
     results = docker_module.pull_image(repo)
-    credentials_module.add_container(token, results)
+    # credentials_module.add_container(token, results)
     return utils.make_json_response(201, results)
 
 
@@ -95,17 +95,17 @@ def logs():
     return utils.make_json_response(200, results)
 
 
-@app.route('/start', methods=['POST'])
-def start():
-    data = json.loads(request.data)
-    required = {'token','container_id'}
-    utils.validate(data, required)
-    token = data['token']
-    container_id = data['container_id']
-    credentials_module.authorize_container(token,
-                                           container_id)
-    results = docker_module.start_container(container_id)
-    return utils.make_json_response(201, results)
+# @app.route('/start', methods=['POST'])
+# def start():
+#     data = json.loads(request.data)
+#     required = {'token','container_id'}
+#     utils.validate(data, required)
+#     token = data['token']
+#     container_id = data['container_id']
+#     credentials_module.authorize_container(token,
+#                                            container_id)
+#     results = docker_module.start_container(container_id)
+#     return utils.make_json_response(201, results)
 
 
 @app.route('/stop', methods=['POST'])
@@ -125,16 +125,17 @@ def stop():
 @app.route('/run', methods=['POST'])
 def run():
     data = json.loads(request.data)
-    required = {'token','container_id', 'script'}
+    required = {'token','image_id', 'script'}
     utils.validate(data, required)
     token = data['token']
-    container_id = data['container_id']
+    container_id = data['image_id']
     script = data['script']
-    credentials_module.authorize_container(token,
-                                           container_id)
+    # credentials_module.authorize_container(token,
+    #                                        container_id)
     results = docker_module.run_container(
         container_id,
         script)
+    credentials_module.add_container(token, results['Id'])
     return utils.make_json_response(201, results)
 
 

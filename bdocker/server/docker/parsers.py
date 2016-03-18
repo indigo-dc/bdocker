@@ -19,19 +19,50 @@ import json
 from bdocker.common import exceptions
 
 
+def parse_docker_log(gen_data):
+    dict_data = []
+    for line in gen_data:
+        dict_data.append(line.strip())
+    return dict_data
+
+
 def parse_docker_generator(gen_data, key='Status'):
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
-    out = json.loads(dict_data[dict_data.__len__()-1])
     try:
+        out = json.loads(dict_data[dict_data.__len__()-1])
+        if 'status' in out:
+            info = out['status']
+        elif 'errorDetail' in out:
+            info = out['errorDetail']['message']
+        else:
+            raise exceptions.ParseException('Pull output error',
+                                            406)
         results = json.loads("{\"%s\"}"
-                             % out['status'].replace(":", "\":\"",1))
+                                 % info.replace(":", "\":\"", 1))
     except BaseException as e:
         raise exceptions.ParseException('Pull output error',
                                         code=406)
     if key in results:
-        return results[key]
+        out['image_id'] = json.loads(dict_data[2])['id']
+        out['status'] = results[key]
+        return out
     else:
         raise exceptions.ParseException(results['Error'],
                                         code=404)
+
+
+def parse_list_container(data):
+    try:
+        dict_data = { 'exit': data['State']['ExitCode'],
+                      'image': data['Config']['Image'],
+                      'container': data['Config']['Hostname'],
+                      'command': data['Config']['Cmd'],
+                      'created': data['Created'],
+                      'name': data['Name']
+                      }
+    except BaseException as e:
+        raise exceptions.ParseException('Container information error',
+                                        code=406)
+    return dict_data

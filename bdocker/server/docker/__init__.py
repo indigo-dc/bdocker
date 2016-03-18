@@ -67,7 +67,11 @@ class DockerController(object):
         result = []
         try:
             for container_id in containers:
-                result.append(self.control.inspect_container(container_id))
+                docker_out = self.control.inspect_container(container_id)
+                dict_info = parsers.parse_list_container(docker_out)
+                result.append(dict_info)
+        except exceptions.ParseException as e:
+            raise exceptions.DockerException(e.message, e.code)
         except BaseException as e:
             raise exceptions.DockerException(e.explanation,
                                              e.response.status_code)
@@ -75,12 +79,15 @@ class DockerController(object):
 
     def logs_container(self, container_id):
         try:
-            # todo: it is empty, control logs with data
-            docker_out = self.control.logs(container=container_id)
+            docker_out = self.control.logs(container=container_id,
+                                           stdout=True,
+                                           stderr=True,
+                                           stream=True)
+            out = parsers.parse_docker_log(docker_out)
         except BaseException as e:
             raise exceptions.DockerException(e.explanation,
                                              e.response.status_code)
-        return docker_out
+        return out
 
     # def start_container(self, container_id):
     #     try:
@@ -94,19 +101,26 @@ class DockerController(object):
         self.control.stop(container=container_id)
         return "stop container"
 
-    def run_container(self, container_id, script):
+    def run_container(self, image_id, command, working_dir=None):
+        # todo:verify directory of working node to move things (HOME)
+        # allow users to bind directories from the wd in the container
         try:
-            docker_out = self.control.create_container(
-                container=container_id, command=script)
-
+            container_info = self.control.create_container(
+                image=image_id, command=command)
+            self.control.start(container=container_info['Id'])
         except BaseException as e:
             raise exceptions.DockerException(e.explanation,
                                              e.response.status_code)
-        return docker_out
-
+        return container_info
 
     def accounting_container(self, container_id):
         return "accounting of the user"
 
-    def output_task(self, container_id):
-        return "output of the task"
+    def output_task(self, container_id, path):
+        try:
+            docker_out, stat = self.control.get_archive(
+                container=container_id, path=path)
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+        return docker_out

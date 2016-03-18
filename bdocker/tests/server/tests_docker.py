@@ -96,6 +96,8 @@ class TestDocker(testtools.TestCase):
         m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
         out = self.control.pull_image(image)
         self.assertIsNotNone(out)
+        self.assertIn('image_id',out)
+        self.assertIn('status',out)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_exist(self, m):
@@ -117,22 +119,49 @@ class TestDocker(testtools.TestCase):
         out = self.control.delete_image(image)
         self.assertIsNotNone(out)
 
-    # def test_list_containers_real(self):
-    #     containers =['b5f659fba626','f20b77988e43']
-    #     out = self.control.list_containers(containers)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
-
     @mock.patch.object(docker.Client, 'inspect_container')
     def test_list_containers(self, m):
-        m.return_value = {'State':'Fake contanier info'}
+        m.return_value = fake_docker_outputs.fake_container_info
         containers = ['xxx','xxxx']
         out = self.control.list_containers(containers)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
 
-    def test_log_container(self):
-        container_id = 'b5f659fba626'
-        out = self.control.logs_container(container_id)
+    @mock.patch.object(docker.Client, 'create_container')
+    @mock.patch.object(docker.Client, 'start')
+    def test_run_containers(self, ms,mc):
+        mc.return_value = fake_docker_outputs.fake_create
+        ms.return_value = None
+        containers = ['xxx','xxxx']
+        out = self.control.run_container(image_id='',command='')
         self.assertIsNotNone(out)
-        self.assertEqual(2, out.__len__())
+        self.assertEqual(fake_docker_outputs.fake_create['Id'], out['Id'])
+        self.assertEqual(fake_docker_outputs.fake_create['Id'], out['Id'])
+
+#########
+# REAL
+#######
+
+    # def test_pull_real(self):
+    #     image = 'busyboxy'
+    #     out = self.control.pull_image(image)
+    #     self.assertIsNotNone(out)
+    #
+    # def test_log_container_real(self):
+    #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91'
+    #     out = self.control.logs_container(container_id)
+    #     self.assertIsNotNone(out)
+    #     self.assertEqual(2, out.__len__())
+    #
+    # def test_list_containers_real(self):
+    #     containers =['b5f659fba626','f20b77988e43']
+    #     out = self.control.list_containers(containers)
+    #     self.assertIsNotNone(out)
+    #     self.assertEqual(2, out.__len__())
+    #
+    # def test_run_container_real(self):
+    #     image_id = 'f1e4b055fb65'
+    #     script = 'whoami'
+    #     out = self.control.run_container(image_id, script)
+    #     self.assertIsNotNone(out)
+    #     self.assertEqual(2, out.__len__())
