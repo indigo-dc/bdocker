@@ -19,7 +19,7 @@ import json
 from bdocker.common import exceptions
 
 
-def parse_pull(gen_data):
+def parse_docker_generator(gen_data, key='Status'):
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
@@ -28,8 +28,10 @@ def parse_pull(gen_data):
         results = json.loads("{\"%s\"}"
                              % out['status'].replace(":", "\":\"",1))
     except BaseException as e:
-        raise exceptions.ParseException('Pull output error')
-    if 'Status' in results:
-        return results['Status']
+        raise exceptions.ParseException('Pull output error',
+                                        code=406)
+    if key in results:
+        return results[key]
     else:
-        raise exceptions.ParseException(results['Error'])
+        raise exceptions.ParseException(results['Error'],
+                                        code=404)

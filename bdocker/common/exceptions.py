@@ -67,10 +67,10 @@ def manage_http_exception(code, message):
     return exc(message=("%s. %s") %(exc.title, message))
 
 
-class ParseException(Exception):
-    def __init__(self, message):
+class ParseException(Exception, ):
+    def __init__(self, message, code='400'):
         self.message = message
-        self.code = 400
+        self.code = code
 
     def __str__(self):
         return repr(self.message)
@@ -96,9 +96,10 @@ class ConfigurationException(Exception):
         return repr(self.message)
 
 class DockerException(Exception):
-    def __init__(self, message):
+    def __init__(self, message, code='500'):
         self.message = ("Docker Exception: "
                        + message)
+        self.code = code
 
     def __str__(self):
         return repr(self.message)

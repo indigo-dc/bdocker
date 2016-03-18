@@ -52,7 +52,7 @@ def pull():
     token = data['token']
     repo = data['repo']
     credentials_module.authorize(token)
-    results = docker_module.pull_container(repo)
+    results = docker_module.pull_image(repo)
     credentials_module.add_container(token, results)
     return utils.make_json_response(201, results)
 

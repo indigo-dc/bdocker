@@ -29,40 +29,81 @@ class DockerController(object):
         # )
         self.control = docker.Client(base_url=url, version='1.19')
 
-    def pull_container(self, repo, tag='latest'):
+    def pull_image(self, repo, tag='latest'):
         try:
-            docker_out = self.control.pull(repository=repo, tag=tag, stream=True)
-            result = parsers.parse_pull(docker_out)
+            docker_out = self.control.pull(repository=repo,
+                                           tag=tag, stream=True)
+            result = parsers.parse_docker_generator(docker_out)
         except exceptions.ParseException as e:
-            raise exceptions.DockerException(e.message)
+            raise exceptions.DockerException(e.message, e.code)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation)
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
         return result
 
+    def delete_image(self, image_id):
+        try:
+            docker_out = self.control.remove_image(container=image_id)
+            if docker_out is None:
+                return True
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+
     def delete_container(self, container_id):
-        self.control.remove_container(container=container_id)
-        return "delete container"
+        try:
+            docker_out = self.control.remove_container(
+                container=container_id)
+            result = parsers.parse_docker_generator(docker_out,
+                                                    key='Deleted')
+        except exceptions.ParseException as e:
+            raise exceptions.DockerException(e.message, e.code)
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+        return result
 
     def list_containers(self, containers):
-        result = self.control.containers(all=True)
+        result = []
+        try:
+            for container_id in containers:
+                result.append(self.control.inspect_container(container_id))
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
         return result
 
     def logs_container(self, container_id):
-        self.control.logs(container=container_id)
-        return "log container"
+        try:
+            # todo: it is empty, control logs with data
+            docker_out = self.control.logs(container=container_id)
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+        return docker_out
 
-    def start_container(self, container_id):
-        self.control.start(container=container_id)
-        return "start container"
+    # def start_container(self, container_id):
+    #     try:
+    #         docker_out = self.control.start(container=container_id)
+    #     except BaseException as e:
+    #         raise exceptions.DockerException(e.explanation,
+    #                                          e.response.status_code)
+    #     return docker_out
 
     def stop_container(self, container_id):
         self.control.stop(container=container_id)
         return "stop container"
 
     def run_container(self, container_id, script):
-        # todo: check this command. It seems to more than needed
-        # self.control.create_container
-        return "run container"
+        try:
+            docker_out = self.control.create_container(
+                container=container_id, command=script)
+
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+        return docker_out
+
 
     def accounting_container(self, container_id):
         return "accounting of the user"

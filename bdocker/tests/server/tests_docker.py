@@ -62,7 +62,7 @@ class FakeDocker(control_docker.DockerController):
     def __init__(self):
         super(FakeDocker,self).__init__()
 
-    def pull_container(self, repo):
+    def pull_image(self, repo):
         return {
             "status": "Pulling image (latest) from busybox, endpoint: ...",
             "progressDetail": {},
@@ -83,7 +83,7 @@ class FakeDocker(control_docker.DockerController):
 
 
 class TestDocker(testtools.TestCase):
-    """Test User Credential controller."""
+    """Test Docker controller."""
 
     def setUp(self):
         super(TestDocker, self).setUp()
@@ -94,22 +94,45 @@ class TestDocker(testtools.TestCase):
     def test_pull(self, m):
         image = 'imageOK'
         m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
-        out = self.control.pull_container(image)
+        out = self.control.pull_image(image)
         self.assertIsNotNone(out)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_exist(self, m):
         image = 'imageExist'
         m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
-        out = self.control.pull_container(image)
+        out = self.control.pull_image(image)
         self.assertIsNotNone(out)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_error(self, m):
         image = 'imageError'
         m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
-        self.assertRaises(exceptions.DockerException, self.control.pull_container, image)
+        self.assertRaises(exceptions.DockerException, self.control.pull_image, image)
 
-    def test_list(self):
-        out = self.control.list_containers(None)
+    @mock.patch.object(docker.Client, 'remove_image')
+    def test_delete_image(self, m):
+        image = 'f1e4b055fb65'
+        m.return_value = None
+        out = self.control.delete_image(image)
         self.assertIsNotNone(out)
+
+    # def test_list_containers_real(self):
+    #     containers =['b5f659fba626','f20b77988e43']
+    #     out = self.control.list_containers(containers)
+    #     self.assertIsNotNone(out)
+    #     self.assertEqual(2, out.__len__())
+
+    @mock.patch.object(docker.Client, 'inspect_container')
+    def test_list_containers(self, m):
+        m.return_value = {'State':'Fake contanier info'}
+        containers = ['xxx','xxxx']
+        out = self.control.list_containers(containers)
+        self.assertIsNotNone(out)
+        self.assertEqual(2, out.__len__())
+
+    def test_log_container(self):
+        container_id = 'b5f659fba626'
+        out = self.control.logs_container(container_id)
+        self.assertIsNotNone(out)
+        self.assertEqual(2, out.__len__())
