@@ -108,13 +108,14 @@ class DockerController(object):
             container_info = self.control.create_container(
                 image=image_id, command=command)
             self.control.start(container=container_info['Id'])
+            # todo: control Id exists
         except BaseException as e:
             raise exceptions.DockerException(e.explanation,
                                              e.response.status_code)
         return container_info
 
     def accounting_container(self, container_id):
-        return "accounting of the user"
+        raise exceptions.DockerException(500,"Not implemented")
 
     def output_task(self, container_id, path):
         try:
