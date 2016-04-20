@@ -18,6 +18,7 @@ import json
 import pwd
 import six
 
+from bdocker.common import exceptions
 from bdocker.common import utils
 
 
@@ -69,14 +70,29 @@ def make_body(parameters):
 
 
 def get_user_credentials(uid):
-    info = pwd.getpwuid(uid)
-    user = {'uid': uid, 'gid': info.pw_gid, 'home': info.pw_dir}
+    try:
+        info = pwd.getpwuid(uid)
+        user = {'uid': uid, 'gid': info.pw_gid, 'home': info.pw_dir}
+    except BaseException:
+        raise exceptions.UserCredentialsException(
+            "Parsing user information"
+        )
     return user
 
 
 def get_admin_token(path):
-    token_store = utils.read_yaml_file(path)
-    return token_store['prolog']['token']
+    try:
+        token_store = utils.read_yaml_file(path)
+        token = token_store['prolog']['token']
+    except IOError:
+        raise exceptions.UserCredentialsException(
+            "No admin credentials"
+        )
+    except BaseException:
+        raise exceptions.ParseException(
+            "Token not found"
+        )
+    return token
 
 
 def write_user_credentials(token, file_path):

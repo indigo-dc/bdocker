@@ -22,6 +22,7 @@ import uuid
 from bdocker.client.controller import commands
 from bdocker.client.controller import request
 from bdocker.common import exceptions
+from bdocker.common import utils
 
 
 class TestCommands(testtools.TestCase):
@@ -36,7 +37,7 @@ class TestCommands(testtools.TestCase):
                           commands.CommandController,
                           '/root/.config')
 
-    def test_create_credentials_error(self):
+    def test_create_configuration_error(self):
         err_file = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
                     "bdocker/bdocker/tests/client/"
                     "configure_bdocker_error.cfg")
@@ -44,11 +45,24 @@ class TestCommands(testtools.TestCase):
                           commands.CommandController,
                           err_file)
 
-    @mock.patch.object(request.RequestController, "execute_put")
-    def test_create_credentials_no_root(self, m):
-        m.return_value = uuid.uuid4().hex
-        u = self.control.create_credentials(1000)
-        self.assertIsNotNone(u)
+    def test_create_credentials_root(self):
+        err_file = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
+                    "bdocker/bdocker/tests/client/"
+                    "configure_bdocker_root.cfg")
+        root_control = commands.CommandController(err_file)
+        self.assertRaises(exceptions.UserCredentialsException,
+                          root_control.create_credentials,
+                          1)
+
+    # @mock.patch.object(request.RequestController, "execute_put")
+    # @mock._patch_dict(utils, "get_user_credentials")
+    # def test_create_credentials_no_root(self, m_u, m_put):
+    #     token = uuid.uuid4().hex
+    #     home_dir = "/foo"
+    #     m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
+    #     m_put.return_value = {"results": token}
+    #     u = self.control.create_credentials(1000)
+    #     self.assertIsNotNone(u)
 
     @mock.patch.object(request.RequestController, "execute_put")
     def test_container_pull(self, m):

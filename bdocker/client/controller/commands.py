@@ -36,14 +36,15 @@ class CommandController(object):
 
     def create_credentials(self, uid):
         path = "/credentials"
-        token = utils.get_admin_token(self.token_storage)
         user_info = utils.get_user_credentials(uid)
         home_dir = user_info.pop('home')
-        parameters = {"token": token, "user_credentials": user_info}
+        admin_token = utils.get_admin_token(self.token_storage)
+        parameters = {"token": admin_token, "user_credentials": user_info}
         result = self.control.execute_put(path=path, parameters=parameters)
+        token = result["results"]
         token_path = "%s/%s" % (home_dir, self.token_file)
         utils.write_user_credentials(result, token_path)
-        return {"token": token , "result": token_path}
+        return {"token": token, "result": token_path}
 
     def container_pull(self, token, source):
         path = "/pull"
