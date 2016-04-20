@@ -14,19 +14,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import testtools
+import json
 import mock
+import testtools
 import webob
 
 
 from bdocker.client.controller import request
 
 
-class TestCommands(testtools.TestCase):
+def create_fake_json_resp(data, status=200):
+    r = webob.Response()
+    r.headers["Content-Type"] = "application/json"
+    r.charset = "utf8"
+    r.body = json.dumps(data).encode("utf8")
+    r.status_code = status
+    return r
+
+
+class TestRequest(testtools.TestCase):
     """Test User Credential controller."""
 
     def setUp(self):
-        super(TestCommands, self).setUp()
+        super(TestRequest, self).setUp()
         self.control = request.RequestController()
 
     @mock.patch.object(webob.Request, "get_response")
@@ -47,12 +57,21 @@ class TestCommands(testtools.TestCase):
 
     @mock.patch.object(webob.Request, "get_response")
     def test_GET(self, m):
-        r = "[cont1, cont2, cont3]"
-        fake_response = webob.Response()
-        fake_response.status_int = 200
-        fake_response.body = '{"results": "%s", "status_code": 201}' % r
+        r = ['cont1', 'cont2', 'cont3']
+        fake_response = create_fake_json_resp({'results': r
+                                               }, 200)
         m.return_value = fake_response
         parameters = {"token":"tokennnnnn"}
         path = "/ps?token"
         result = self.control.execute_get(path=path, parameters=parameters)
         self.assertEqual(r, result)
+
+    @mock.patch.object(webob.Request, "get_response")
+    def test_GET_500(self, m):
+        fake_response = create_fake_json_resp({}, 500)
+        m.return_value = fake_response
+        parameters = {"token":"tokennnnnn"}
+        path = "/ps?token"
+        self.assertRaises(webob.exc.HTTPInternalServerError,
+                          self.control.execute_get,
+                          path=path, parameters=parameters)

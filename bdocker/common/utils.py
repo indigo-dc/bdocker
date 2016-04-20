@@ -25,10 +25,19 @@ default_conf_file = ("/home/jorge/Dropbox" +
                      )
 
 
-def load_configuration(path=default_conf_file):
+def load_configuration(path=None):
+
+    config = ConfigParser.SafeConfigParser()
+    if not path:
+        path = default_conf_file
     try:
-        config = ConfigParser.SafeConfigParser()
-        config.read(path)
+        with open(path) as f:
+            config.readfp(f)
+    except IOError:
+        raise exceptions.UserCredentialsException(
+            "No administration permission"
+        )
+    try:
         conf = {
             'server': dict(config.items("server")),
             'batch': dict(config.items("batch")),
@@ -63,10 +72,10 @@ def validate_config(conf):
             raise exceptions.ParseException('batch:' +key)
     for key in credentials_keys:
         if key not in conf['credentials']:
-            raise exceptions.ParseException('credentials:' +key)
+            raise exceptions.ParseException('credentials:' + key)
     for key in dockers_keys:
         if key not in conf['dockerAPI']:
-            raise exceptions.ParseException('dockerAPI:' +key)
+            raise exceptions.ParseException('dockerAPI:' + key)
 
 
 def read_yaml_file(path):

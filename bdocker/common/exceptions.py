@@ -58,8 +58,7 @@ def exception_from_response(response):
         code = 500
         message = "Unknown error happenened processing response %s" % response
         title = message
-    ex = manage_http_exception(code, title)
-    return ex
+    return manage_http_exception(code, title)
 
 
 def manage_http_exception(code, message):

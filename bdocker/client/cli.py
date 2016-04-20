@@ -35,11 +35,16 @@ def bdocker(ctx):
 @user_credentials
 @click.pass_context
 def credentials_create(ctx, uid):
+    # Command executed by the root in prolog
     try:
-        path, token = ctx.obj.create_credentials(uid)
-        utils.print_message("User token: %s Path: %s" % (token, path))
-    except click.ClickException as e:
-        utils.print_error(e.message)
+        out = ctx.obj.create_credentials(uid)
+        utils.print_message(
+            "User token: %s Path: %s"
+            % (out["token"], out["path"])
+        )
+    except BaseException as e:
+        utils.print_error(e)
+
 
 @bdocker.command('pull',
                  help="Pull a container and"
@@ -51,8 +56,8 @@ def container_pull(ctx, token, source):
     try:
         out = ctx.obj.container_pull(token, source)
         utils.print_message("Container id: %s" % out)
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+        utils.print_error(e)
 
 
 @bdocker.command('rm', help="Delete a container.")
@@ -63,8 +68,8 @@ def container_delete(ctx, token, container_id):
     try:
         out = ctx.obj.container_delete(token, container_id)
         utils.print_message("Deleted container: %s" % out)
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('ps', help="Show all containers running.")
@@ -75,8 +80,8 @@ def container_list(ctx, token):
         out = ctx.obj.container_list(token)
         utils.print_message("List in table: %s" % out)
     # todo: list in table
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('logs', help="Retrieves logs present at"
@@ -89,8 +94,8 @@ def container_logs(ctx, token, container_id):
         out = ctx.obj.container_logs(token, container_id)
         utils.print_message("List in table: %s" % out)
     # todo: list in table
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('start',
@@ -103,8 +108,8 @@ def container_start(ctx, token, container_id):
     try:
         out = ctx.obj.container_start(token, container_id)
         utils.print_message("Started container: %s" % out)
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('stop', help="Start a container.")
@@ -115,8 +120,8 @@ def container_stop(ctx, token, container_id):
     try:
         out = ctx.obj.container_stop(token, container_id)
         utils.print_message("Stoped container: %s" % out)
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('run', help="Creates a writeable container "
@@ -130,8 +135,8 @@ def container_run(ctx, token, container_id, script):
     try:
         out = ctx.obj.task_run(token, container_id, script)
         utils.print_message("Script executed in job: %s" % out)
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('accounting',
@@ -144,5 +149,5 @@ def accounting(ctx, token, container_id):
         out = ctx.obj.accounting_retrieve(token, container_id)
         utils.print_message("List in table: %s" % out)
     # todo: list in table
-    except click.ClickException as e:
-        utils.print_error(e.message)
+    except BaseException as e:
+            utils.print_error(e)

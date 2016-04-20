@@ -39,7 +39,7 @@ class UserController(object):
         """
         if token not in self.token_store:
             raise exceptions.UserCredentialsException(
-                "Token not found")
+                "User token not found")
         return self.token_store[token]
 
     def _set_token_in_cache(self, user_info):
@@ -78,7 +78,7 @@ class UserController(object):
         prolog_token = self._get_token_from_cache("prolog")
         if admin_token != prolog_token['token']:
             raise exceptions.UserCredentialsException(
-                "Authentication error using token: %s" % admin_token)
+                "Unauthorized user with token: %s" % admin_token)
         try:
             token = self._set_token_in_cache(user_data)
         except Exception as e:
@@ -132,7 +132,6 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         return token_info['containers']
-
 
     def authorize_container(self, token, container_id):
         """Check user authorization to the container.
