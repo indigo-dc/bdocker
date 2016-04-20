@@ -34,11 +34,8 @@ class DockerController(object):
             docker_out = self.control.pull(repository=repo,
                                            tag=tag, stream=True)
             result = parsers.parse_docker_generator(docker_out)
-        except exceptions.ParseException as e:
-            raise exceptions.DockerException(e.message, e.code)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return result
 
     def delete_image(self, image_id):
@@ -47,8 +44,7 @@ class DockerController(object):
             if docker_out is None:
                 return True
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
 
     def delete_container(self, container_id):
         try:
@@ -56,11 +52,8 @@ class DockerController(object):
                 container=container_id)
             result = parsers.parse_docker_generator(docker_out,
                                                     key='Deleted')
-        except exceptions.ParseException as e:
-            raise exceptions.DockerException(e.message, e.code)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return result
 
     def list_containers(self, containers):
@@ -70,11 +63,8 @@ class DockerController(object):
                 docker_out = self.control.inspect_container(container_id)
                 dict_info = parsers.parse_list_container(docker_out)
                 result.append(dict_info)
-        except exceptions.ParseException as e:
-            raise exceptions.DockerException(e.message, e.code)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return result
 
     def logs_container(self, container_id):
@@ -85,8 +75,7 @@ class DockerController(object):
                                            stream=True)
             out = parsers.parse_docker_log(docker_out)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return out
 
     # def start_container(self, container_id):
@@ -110,18 +99,16 @@ class DockerController(object):
             self.control.start(container=container_info['Id'])
             # todo: control Id exists
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return container_info
 
     def accounting_container(self, container_id):
-        raise exceptions.DockerException(500,"Not implemented")
+        raise exceptions.DockerException()
 
     def output_task(self, container_id, path):
         try:
             docker_out, stat = self.control.get_archive(
                 container=container_id, path=path)
         except BaseException as e:
-            raise exceptions.DockerException(e.explanation,
-                                             e.response.status_code)
+            raise exceptions.DockerException(e)
         return docker_out

@@ -87,7 +87,7 @@ class TestDocker(testtools.TestCase):
 
     def setUp(self):
         super(TestDocker, self).setUp()
-        url = 'localhost:2376'
+        url = 'localhost:2375'
         self.control = control_docker.DockerController(url)
 
     @mock.patch.object(docker.Client, 'pull')
@@ -138,6 +138,9 @@ class TestDocker(testtools.TestCase):
         self.assertEqual(fake_docker_outputs.fake_create['Id'], out['Id'])
         self.assertEqual(fake_docker_outputs.fake_create['Id'], out['Id'])
 
+    def test_accouning_error(self):
+        self.assertRaises(exceptions.DockerException, self.control.accounting_container, None)
+
 #########
 # REAL
 #######
@@ -153,11 +156,11 @@ class TestDocker(testtools.TestCase):
     #     self.assertIsNotNone(out)
     #     self.assertEqual(2, out.__len__())
     #
-    # def test_list_containers_real(self):
-    #     containers =['b5f659fba626','f20b77988e43']
-    #     out = self.control.list_containers(containers)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
+    def test_list_containers_real(self):
+        containers =['b5f659fba626','f20b77988e43']
+        out = self.control.list_containers(containers)
+        self.assertIsNotNone(out)
+        self.assertEqual(2, out.__len__())
     #
     # def test_run_container_real(self):
     #     image_id = 'f1e4b055fb65'

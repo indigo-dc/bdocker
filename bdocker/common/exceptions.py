@@ -67,7 +67,7 @@ def manage_http_exception(code, message):
     return exc(message=("%s. %s") %(exc.title, message))
 
 
-class ParseException(Exception, ):
+class ParseException(Exception):
     def __init__(self, message, code=400):
         self.message = message
         self.code = code
@@ -95,11 +95,28 @@ class ConfigurationException(Exception):
     def __str__(self):
         return repr(self.message)
 
+
 class DockerException(Exception):
-    def __init__(self, message, code='500'):
+    def __init__(self, exc=None, message='Internal Error', code='500'):
+        details = get_exception_details(exc, message, code)
         self.message = ("Docker Exception: "
-                       + message)
-        self.code = code
+                        + details['message'])
+        self.code = details['code']
 
     def __str__(self):
         return repr(self.message)
+
+
+def get_exception_details(ex=None, message=None, code=None):
+    if ex:
+        if hasattr(ex,'explanation'):
+            message = ex.explanation,
+        elif hasattr(ex,'message'):
+            message = str(ex.message)
+
+        if hasattr(ex,'status_code'):
+            code = ex.response.status_code
+        elif hasattr(ex,'code'):
+            code = ex.code
+    details = {"message": message, "code": code}
+    return details
