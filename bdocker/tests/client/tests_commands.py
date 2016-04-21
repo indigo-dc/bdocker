@@ -32,7 +32,7 @@ class TestCommands(testtools.TestCase):
         super(TestCommands, self).setUp()
         self.control = commands.CommandController()
 
-    def test_create_credentials_root(self):
+    def test_create_command_with_root_file(self):
         self.assertRaises(exceptions.UserCredentialsException,
                           commands.CommandController,
                           '/root/.config')
@@ -45,7 +45,7 @@ class TestCommands(testtools.TestCase):
                           commands.CommandController,
                           err_file)
 
-    def test_create_credentials_root(self):
+    def test_create_credentials_token_in_root(self):
         err_file = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
                     "bdocker/bdocker/tests/client/"
                     "configure_bdocker_root.cfg")
