@@ -75,30 +75,16 @@ class CommandController(object):
         # todo(jorgesece): implement message output
         return results
 
-    def container_start(self, token, container_id):
-        path = "/start"
-        parameters = {"user_token": token, "container_id": container_id}
-        results = self.control.execute_post(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
-        return results
-
-
-    def container_stop(self, token, container_id):
-        path = "/stop"
-        parameters = {"user_token": token, "container_id": container_id}
-        results = self.control.execute_post(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
-        return results
-
-    def task_run(self, token, container_id, script):
+    def container_run(self, token, image_id, script):
         path = "/run"
         parameters = {"user_token": token,
-                      "container_id": container_id,
+                      "image_id": image_id,
                       "script": script
                       }
         results = self.control.execute_post(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
-        return results
+        container_id = results["results"]["Id"]
+        err = results["results"]["Warnings"]
+        return {"container_id": container_id, "error": err}
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
@@ -106,3 +92,18 @@ class CommandController(object):
         results = self.control.execute_get(path=path, parameters=parameters)
         # todo(jorgesece): implement message output
         return results
+
+    # def container_start(self, token, container_id):
+    #     path = "/start"
+    #     parameters = {"user_token": token, "container_id": container_id}
+    #     results = self.control.execute_post(path=path, parameters=parameters)
+    #     # todo(jorgesece): implement message output
+    #     return results
+    #
+    #
+    # def container_stop(self, token, container_id):
+    #     path = "/stop"
+    #     parameters = {"user_token": token, "container_id": container_id}
+    #     results = self.control.execute_post(path=path, parameters=parameters)
+    #     # todo(jorgesece): implement message output
+    #     return results

@@ -55,7 +55,7 @@ def credentials_create(ctx, uid):
 def container_pull(ctx, token, source):
     try:
         out = ctx.obj.container_pull(token, source)
-        utils.print_message("Container id: %s" % out)
+        utils.print_message("Image id: %s" % out)
     except BaseException as e:
         utils.print_error(e)
 
@@ -98,32 +98,6 @@ def container_logs(ctx, token, container_id):
             utils.print_error(e)
 
 
-@bdocker.command('start',
-                 help="Stop a container"
-                      " by sending SIGTERM.")
-@token_argument
-@container_id_argument
-@click.pass_context
-def container_start(ctx, token, container_id):
-    try:
-        out = ctx.obj.container_start(token, container_id)
-        utils.print_message("Started container: %s" % out)
-    except BaseException as e:
-            utils.print_error(e)
-
-
-@bdocker.command('stop', help="Start a container.")
-@token_argument
-@container_id_argument
-@click.pass_context
-def container_stop(ctx, token, container_id):
-    try:
-        out = ctx.obj.container_stop(token, container_id)
-        utils.print_message("Stoped container: %s" % out)
-    except BaseException as e:
-            utils.print_error(e)
-
-
 @bdocker.command('run', help="Creates a writeable container "
                              "layer over the specified image,"
                              " and executes the command.")
@@ -131,10 +105,10 @@ def container_stop(ctx, token, container_id):
 @container_id_argument
 @command_argument
 @click.pass_context
-def container_run(ctx, token, container_id, script):
+def container_run(ctx, token, image_id, script):
     try:
-        out = ctx.obj.task_run(token, container_id, script)
-        utils.print_message("Script executed in job: %s" % out)
+        out = ctx.obj.task_run(token, image_id, script)
+        utils.print_message("Container Id: %s" % out)
     except BaseException as e:
             utils.print_error(e)
 

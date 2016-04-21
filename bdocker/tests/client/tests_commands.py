@@ -73,5 +73,19 @@ class TestCommands(testtools.TestCase):
         image_id = uuid.uuid4().hex
         source = "foo"
         m.return_value = image_id
-        u = self.control.container_pull(token, source)
-        self.assertIsNotNone(u)
+        results = self.control.container_pull(token, source)
+        self.assertEqual(image_id, results)
+
+    @mock.patch.object(request.RequestController, "execute_post")
+    def test_container_run(self, m):
+        token = uuid.uuid4().hex
+        image_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        err = None
+        m.return_value = {"results": {"Id": container_id, "Warnings": err}}
+        results = self.control.container_run(token, image_id, '')
+        self.assertEqual(container_id, results['container_id'])
+        self.assertEqual(err, results['error'])
+
+
+        # CREATE CONTAINER {'Id': '8a61192da2b3bb2d922875585e29b74ec0dc4e0117fcbf84c962204e97564cd7', 'Warnings': None}
