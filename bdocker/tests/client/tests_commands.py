@@ -54,15 +54,18 @@ class TestCommands(testtools.TestCase):
                           root_control.create_credentials,
                           1)
 
-    # @mock.patch.object(request.RequestController, "execute_put")
-    # @mock._patch_dict(utils, "get_user_credentials")
-    # def test_create_credentials_no_root(self, m_u, m_put):
-    #     token = uuid.uuid4().hex
-    #     home_dir = "/foo"
-    #     m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
-    #     m_put.return_value = {"results": token}
-    #     u = self.control.create_credentials(1000)
-    #     self.assertIsNotNone(u)
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
+    def test_create_credentials_no_root(self, m_write, m_u, m_put):
+        token = uuid.uuid4().hex
+        home_dir = "/foo"
+        m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
+        m_put.return_value = {"results": token}
+        u = self.control.create_credentials(1000)
+        self.assertIsNotNone(u)
+        self.assertEqual(token, u['token'])
+        self.assertIn(home_dir, u['path'])
 
     @mock.patch.object(request.RequestController, "execute_put")
     def test_container_pull(self, m):

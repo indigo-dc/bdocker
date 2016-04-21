@@ -44,7 +44,7 @@ class CommandController(object):
         token = result["results"]
         token_path = "%s/%s" % (home_dir, self.token_file)
         utils.write_user_credentials(result, token_path)
-        return {"token": token, "result": token_path}
+        return {"token": token, "path": token_path}
 
     def container_pull(self, token, source):
         path = "/pull"
