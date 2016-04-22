@@ -46,7 +46,7 @@ class CommandController(object):
         utils.write_user_credentials(result, token_path)
         return {"token": token, "path": token_path}
 
-    def container_pull(self, token, detach, source):
+    def container_pull(self, token, source):
         path = "/pull"
         parameters = {"user_token": token, "container_source": source}
 

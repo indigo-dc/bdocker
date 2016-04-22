@@ -23,7 +23,7 @@ from bdocker.server.docker import parsers
 
 class DockerController(object):
 
-    def __init__(self, url):
+    def __init__(self, url, credentials=None):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
@@ -94,6 +94,7 @@ class DockerController(object):
                       working_dir=None, host_dir=None, docker_dir=None):
         # todo:verify directory of working node to move things (HOME)
         # allow users to bind directories from the wd in the container
+        out_put = None
         try:
             # volumes = None
             host_config = None
@@ -110,11 +111,16 @@ class DockerController(object):
                 working_dir=working_dir
                 # volumes=volumes
             )
+
             self.control.start(container=container_info['Id'])
+            if detach:
+                out_put = self.logs_container(container_info)
+            else:
+                out_put = container_info['Id']
             # todo: control Id exists
         except BaseException as e:
             raise exceptions.DockerException(e)
-        return container_info['Id']
+        return out_put
 
     def accounting_container(self, container_id):
         raise exceptions.DockerException()

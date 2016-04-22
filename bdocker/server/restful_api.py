@@ -15,20 +15,15 @@
 # under the License.
 
 from flask import Flask
-from flask import json, jsonify, request, abort
+from flask import json, request
 import sys
 
+from bdocker import server
 from bdocker.server import utils
-from bdocker.common import utils as utils_common
 
 sys.tracebacklimit = 0
 
 app = Flask(__name__)
-conf = utils_common.load_configuration()
-
-credentials_module = utils.load_credentials_module(conf)
-batch_module = utils.load_batch_module(conf)
-docker_module = utils.load_docker_module(conf)
 
 utils.set_error_handler(app)
 
@@ -40,7 +35,7 @@ def credentials():
     utils.validate(data, required)
     token = data['token']
     user = data['user_credentials']
-    results = credentials_module.authenticate(token, user)
+    results = server.credentials_module.authenticate(token, user)
     return utils.make_json_response(201, results)
 
 
@@ -51,8 +46,8 @@ def pull():
     utils.validate(data, required)
     token = data['token']
     repo = data['repo']
-    credentials_module.authorize(token)
-    results = docker_module.pull_image(repo)
+    server.credentials_module.authorize(token)
+    results = server.docker_module.pull_image(repo)
     # credentials_module.add_container(token, results)
     return utils.make_json_response(201, results)
 
@@ -67,10 +62,10 @@ def run():
     script = data['script']
     # credentials_module.authorize_container(token,
     #                                        container_id)
-    results = docker_module.run_container(
+    results = server.docker_module.run_container(
         container_id,
         script)
-    credentials_module.add_container(token, results['Id'])
+    server.credentials_module.add_container(token, results['Id'])
     return utils.make_json_response(201, results)
 
 
@@ -81,10 +76,10 @@ def delete():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    credentials_module.authorize_container(token,
+    server.credentials_module.authorize_container(token,
                                            container_id)
-    results = docker_module.delete_container(container_id)
-    credentials_module.remove_container(token, container_id)
+    results = server.docker_module.delete_container(container_id)
+    server.credentials_module.remove_container(token, container_id)
     return utils.make_json_response(204, results)
 
 
@@ -94,8 +89,8 @@ def list():
     required = {'token'}
     utils.validate(data, required)
     token = data['token']
-    containers = credentials_module.list_containers(token)
-    results = docker_module.list_containers(containers)
+    containers = server.credentials_module.list_containers(token)
+    results = server.docker_module.list_containers(containers)
     return utils.make_json_response(200, results)
 
 
@@ -106,9 +101,9 @@ def logs():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    credentials_module.authorize_container(token,
+    server.credentials_module.authorize_container(token,
                                            container_id)
-    results = docker_module.logs_container(container_id)
+    results = server.docker_module.logs_container(container_id)
     return utils.make_json_response(200, results)
 
 
@@ -132,9 +127,9 @@ def stop():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    credentials_module.authorize_container(token,
+    server.credentials_module.authorize_container(token,
                                            container_id)
-    results = docker_module.stop_container(
+    results = server.docker_module.stop_container(
         container_id)
     return utils.make_json_response(200, results)
 
@@ -146,8 +141,8 @@ def accounting():
     utils.validate(data, required)
     token = data['token']
     # todo: study the implementation
-    token_info = credentials_module.authorize(token)
-    results = docker_module.accounting_container(token_info)
+    token_info = server.credentials_module.authorize(token)
+    results = server.docker_module.accounting_container(token_info)
     return utils.make_json_response(200, results)
 
 
@@ -158,13 +153,13 @@ def output():
     utils.validate(data, required)
     token = data['token']
     container_id = data['container_id']
-    credentials_module.authorize_container(token,
+    server.credentials_module.authorize_container(token,
                                            container_id)
-    results = docker_module.output_task(container_id)
+    results = server.docker_module.output_task(container_id)
     return utils.make_json_response(200, results)
 
 
 if __name__ == '__main__':
-    app.run(host=conf['server']['host'],
-            port=int(conf['server']['port']),
-            debug=conf['server']['debug'])
+    app.run(host=server.conf['server']['host'],
+            port=int(server.conf['server']['port']),
+            debug=server.conf['server']['debug'])
