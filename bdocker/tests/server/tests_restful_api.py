@@ -72,7 +72,7 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(credentials.UserController,
                    "authorize")
     @mock.patch.object(credentials.UserController,
-                   "add_container")
+                   "add_image")
     def test_pull(self, mc, mu, md):
         mu.return_value=True
         parameters = {"token":"tokennnnnn",

@@ -96,6 +96,28 @@ class UserController(object):
                 "Token not found")
         del self.token_store[token]
 
+    def add_image(self, token, image_id):
+        """Add image to the token record.
+
+        :param token: token
+        :param image_id: image id from dockers
+        """
+        # todo: test this method
+        current_token = self._get_token_from_cache(token)
+        if "images" in current_token:
+            current_token["images"].append(image_id)
+        else:
+            current_token["images"] = [image_id]
+        self.token_store.update({token: current_token})
+
+    def remove_image(self, token, image_id):
+        """Remove image to the token record.
+
+        :param token: token
+        :param image_id: container id from dockers
+        """
+        raise exceptions.NoImplementedException
+
     def add_container(self, token, container_id):
         """Add container to the token record.
 
@@ -108,6 +130,8 @@ class UserController(object):
         else:
             current_token["containers"] = [container_id]
         self.token_store.update({token: current_token})
+        # todo: register in the file, it is needed in case
+        # the service goes down
 
     def remove_container(self, token, container_id):
         """Remove container to the token record.

@@ -66,6 +66,16 @@ def manage_http_exception(code, message):
     return exc(message=("%s. %s") %(exc.title, message))
 
 
+class NoImplementedException(Exception):
+    def __init__(self, message='', code=501):
+        self.message = ("Method not implemeted: "
+                       + message)
+        self.code = code
+
+    def __str__(self):
+        return repr(self.message)
+
+
 class ParseException(Exception):
     def __init__(self, message, code=400):
         self.message = message

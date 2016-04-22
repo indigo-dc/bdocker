@@ -47,9 +47,9 @@ def pull():
     token = data['token']
     repo = data['repo']
     server.credentials_module.authorize(token)
-    results = server.docker_module.pull_image(repo)
-    # credentials_module.add_container(token, results)
-    return utils.make_json_response(201, results)
+    image_id = server.docker_module.pull_image(repo)
+    server.credentials_module.add_image(token, image_id)
+    return utils.make_json_response(201, image_id)
 
 
 @app.route('/run', methods=['POST'])
