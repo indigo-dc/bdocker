@@ -58,14 +58,22 @@ def run():
     required = {'token','image_id', 'script'}
     utils.validate(data, required)
     token = data['token']
-    container_id = data['image_id']
+    image_id = data['image_id']
     script = data['script']
-    # credentials_module.authorize_container(token,
-    #                                        container_id)
-    results = server.docker_module.run_container(
-        container_id,
+    detach = data.get('detach', False)
+    server.credentials_module.authorize_image(token,
+                                            image_id)
+
+    container_id = server.docker_module.create_container(
+        image_id,
+        detach,
         script)
-    server.credentials_module.add_container(token, results['Id'])
+    server.credentials_module.add_container(token, container_id)
+    server.docker_module.start_container(container_id)
+    if detach:
+        results = server.docker_module.logs_container(container_id)
+    else:
+        results = container_id
     return utils.make_json_response(201, results)
 
 

@@ -82,7 +82,8 @@ class UserController(object):
         try:
             token = self._set_token_in_cache(user_data)
         except Exception as e:
-            raise exceptions.UserCredentialsException("Invalid user information")
+            raise exceptions.UserCredentialsException(
+                "Invalid user information")
         return token
 
     def remove_token_from_cache(self, token):
@@ -145,6 +146,22 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         if container_id not in token_info['containers']:
+            raise exceptions.UserCredentialsException(
+                "Unauthorization error")
+        return True
+
+    def authorize_image(self, token, image_id):
+        """Check user authorization to the container.
+
+        :param token: user token
+        :param container_id: container id
+        """
+        token_info = self._get_token_from_cache(token)
+        if 'images' not in token_info:
+            raise exceptions.UserCredentialsException(
+                "No container related to %s"
+                % token)
+        if image_id not in token_info['images']:
             raise exceptions.UserCredentialsException(
                 "Unauthorization error")
         return True

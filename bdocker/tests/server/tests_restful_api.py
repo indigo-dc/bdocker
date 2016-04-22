@@ -260,11 +260,18 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "run_container")
+    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_image")
     @mock.patch.object(credentials.UserController,
                        "add_container")
-    def test_run(self, mu, md):
-        mu.return_value = True
+    @mock.patch.object(docker.DockerController,
+                       "start_container")
+    @mock.patch.object(docker.DockerController,
+                       "logs_container")
+    def test_run(self, m_log, m_start, madd, math, md):
+        madd.return_value = True
+        math.return_value = True
         md.return_value = {'Id':'33333'}
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
@@ -276,8 +283,18 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "run_container")
-    def test_run_405(self, m):
+    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_image")
+    @mock.patch.object(credentials.UserController,
+                       "add_container")
+    @mock.patch.object(docker.DockerController,
+                       "start_container")
+    @mock.patch.object(docker.DockerController,
+                       "logs_container")
+    def test_run_405(self, m_log, m_start, madd, math, md):
+        madd.return_value = True
+        math.return_value = True
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
@@ -288,7 +305,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "run_container")
+    @mock.patch.object(docker.DockerController, "create_container")
     def test_run_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
@@ -300,8 +317,18 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "run_container")
-    def test_run_400(self, m):
+    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_image")
+    @mock.patch.object(credentials.UserController,
+                       "add_container")
+    @mock.patch.object(docker.DockerController,
+                       "start_container")
+    @mock.patch.object(docker.DockerController,
+                       "logs_container")
+    def test_run_400(self, m_log, m_start, madd, math, md):
+        madd.return_value = True
+        math.return_value = True
         parameters = {"token":"tokennnnnn",
                       "script": "scriptttt"}
         body = make_body(parameters)

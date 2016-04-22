@@ -128,15 +128,22 @@ class TestDocker(testtools.TestCase):
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
 
+    @mock.patch.object(docker.Client, 'logs')
     @mock.patch.object(docker.Client, 'create_container')
     @mock.patch.object(docker.Client, 'start')
-    def test_run_containers(self, ms,mc):
+    def test_run_containers(self, ms, mc, ml):
         mc.return_value = fake_docker_outputs.fake_create
         ms.return_value = None
+        ml.return_value = fake_docker_outputs.fake_log
         image_id = uuid.uuid4()
-        out = self.control.run_container(image_id=image_id, detach=False, command='')
-        self.assertIsNotNone(out)
-        self.assertEqual(fake_docker_outputs.fake_create['Id'], out)
+        detach = False
+        container_id = self.control.create_container(image_id=image_id, detach=detach, command='')
+        self.control.start_container(container_id)
+        out_put = self.control.logs_container(container_id)
+        self.assertEqual(fake_docker_outputs.fake_create['Id'], container_id)
+        self.assertIsNotNone(out_put)
+        self.assertEqual(out_put, fake_docker_outputs.fake_log)
+
 
 
     def test_accouning_error(self):

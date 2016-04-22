@@ -20,3 +20,4 @@ fake_container_info = {'State': {'ExitCode': 0},
 fake_create = {'Id': uuid.uuid4(),
                'Warnings': None
                }
+fake_log = ['root', 'home']
