@@ -161,10 +161,20 @@ class TestDocker(testtools.TestCase):
         out = self.control.list_containers(containers)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
-    #
-    # def test_run_container_real(self):
-    #     image_id = 'f1e4b055fb65'
-    #     script = 'whoami'
-    #     out = self.control.run_container(image_id, script)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
+
+    def test_run_container_real(self):
+        image_id = 'c917d6497f55'
+        script = './bdocker_script.sh'
+        detach = True
+        host_dir = "/root/docker_test/"
+        docker_dir = "/tmp"
+        run_out = self.control.run_container(image_id,
+                                             detach=detach,
+                                             command=script,
+                                             working_dir=docker_dir,
+                                             host_dir=host_dir,
+                                             docker_dir=docker_dir)
+        out = self.control.logs_container(run_out)
+        self.assertIsNotNone(out)
+        self.assertEqual(1, out.__len__())
+

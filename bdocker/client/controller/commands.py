@@ -46,12 +46,34 @@ class CommandController(object):
         utils.write_user_credentials(result, token_path)
         return {"token": token, "path": token_path}
 
-    def container_pull(self, token, source):
+    def container_pull(self, token, detach, source):
         path = "/pull"
         parameters = {"user_token": token, "container_source": source}
+
         results = self.control.execute_put(path=path, parameters=parameters)
         # fixme: parse out to id
         return results
+
+    def container_run(self, token, image_id, script):
+        path = "/run"
+        parameters = {"user_token": token,
+                      "image_id": image_id,
+                      "script": script
+                      }
+        results = self.control.execute_post(path=path, parameters=parameters)
+        container_id = results["results"]["Id"]
+        err = results["results"]["Warnings"]
+        return {"container_id": container_id, "error": err}
+
+    # def container_run(self, token, image_id, script):
+    # todo: create a run for a container that already exists
+    #     path = "/run"
+    #     parameters = {"user_token": token,
+    #                   "image_id": image_id,
+    #                   "script": script
+    #                   }
+    #     results = self.control.execute_post(path=path, parameters=parameters)
+    #     return {"container_id": container_id, "error": err}
 
     def container_delete(self, token, container_id):
         path = "/delete"
@@ -74,17 +96,6 @@ class CommandController(object):
         results = self.control.execute_get(path=path, parameters=parameters)
         # todo(jorgesece): implement message output
         return results
-
-    def container_run(self, token, image_id, script):
-        path = "/run"
-        parameters = {"user_token": token,
-                      "image_id": image_id,
-                      "script": script
-                      }
-        results = self.control.execute_post(path=path, parameters=parameters)
-        container_id = results["results"]["Id"]
-        err = results["results"]["Warnings"]
-        return {"container_id": container_id, "error": err}
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"

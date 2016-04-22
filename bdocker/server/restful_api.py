@@ -57,6 +57,23 @@ def pull():
     return utils.make_json_response(201, results)
 
 
+@app.route('/run', methods=['POST'])
+def run():
+    data = json.loads(request.data)
+    required = {'token','image_id', 'script'}
+    utils.validate(data, required)
+    token = data['token']
+    container_id = data['image_id']
+    script = data['script']
+    # credentials_module.authorize_container(token,
+    #                                        container_id)
+    results = docker_module.run_container(
+        container_id,
+        script)
+    credentials_module.add_container(token, results['Id'])
+    return utils.make_json_response(201, results)
+
+
 @app.route('/rm', methods=['DELETE'])
 def delete():
     data = request.args
@@ -120,23 +137,6 @@ def stop():
     results = docker_module.stop_container(
         container_id)
     return utils.make_json_response(200, results)
-
-
-@app.route('/run', methods=['POST'])
-def run():
-    data = json.loads(request.data)
-    required = {'token','image_id', 'script'}
-    utils.validate(data, required)
-    token = data['token']
-    container_id = data['image_id']
-    script = data['script']
-    # credentials_module.authorize_container(token,
-    #                                        container_id)
-    results = docker_module.run_container(
-        container_id,
-        script)
-    credentials_module.add_container(token, results['Id'])
-    return utils.make_json_response(201, results)
 
 
 @app.route('/accounting', methods=['GET'])

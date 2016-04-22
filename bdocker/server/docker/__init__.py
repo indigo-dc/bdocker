@@ -78,29 +78,43 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return out
 
-    # def start_container(self, container_id):
-    #     try:
-    #         docker_out = self.control.start(container=container_id)
-    #     except BaseException as e:
-    #         raise exceptions.DockerException(e.explanation,
-    #                                          e.response.status_code)
-    #     return docker_out
+    def start_container(self, container_id):
+        try:
+            docker_out = self.control.start(container=container_id)
+        except BaseException as e:
+            raise exceptions.DockerException(e.explanation,
+                                             e.response.status_code)
+        return docker_out
 
     def stop_container(self, container_id):
         self.control.stop(container=container_id)
         return "stop container"
 
-    def run_container(self, image_id, command, working_dir=None):
+    def run_container(self, image_id, detach, command,
+                      working_dir=None, host_dir=None, docker_dir=None):
         # todo:verify directory of working node to move things (HOME)
         # allow users to bind directories from the wd in the container
         try:
+            # volumes = None
+            host_config = None
+            if host_dir:
+                volumes = [host_dir],
+                host_config = self.control.create_host_config(
+                    binds=['%s:%s' % (host_dir, docker_dir)]
+                    )
             container_info = self.control.create_container(
-                image=image_id, command=command)
+                image=image_id,
+                command=command,
+                detach=detach,
+                host_config=host_config,
+                working_dir=working_dir
+                # volumes=volumes
+            )
             self.control.start(container=container_info['Id'])
             # todo: control Id exists
         except BaseException as e:
             raise exceptions.DockerException(e)
-        return container_info
+        return container_info['Id']
 
     def accounting_container(self, container_id):
         raise exceptions.DockerException()

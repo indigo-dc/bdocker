@@ -50,14 +50,29 @@ def credentials_create(ctx, uid):
                  help="Pull a container and"
                       " its intermediate layers.")
 @token_argument
+@d_option
 @source_argument
 @click.pass_context
-def container_pull(ctx, token, source):
+def container_pull(ctx, token, detach, source):
     try:
-        out = ctx.obj.container_pull(token, source)
+        out = ctx.obj.container_pull(token, detach, source)
         utils.print_message("Image id: %s" % out)
     except BaseException as e:
         utils.print_error(e)
+
+@bdocker.command('run', help="Creates a writeable container "
+                             "layer over the specified image,"
+                             " and executes the command.")
+@token_argument
+@container_id_argument
+@command_argument
+@click.pass_context
+def container_run(ctx, token, image_id, script):
+    try:
+        out = ctx.obj.task_run(token, image_id, script)
+        utils.print_message("Container Id: %s" % out)
+    except BaseException as e:
+            utils.print_error(e)
 
 
 @bdocker.command('rm', help="Delete a container.")
@@ -94,21 +109,6 @@ def container_logs(ctx, token, container_id):
         out = ctx.obj.container_logs(token, container_id)
         utils.print_message("List in table: %s" % out)
     # todo: list in table
-    except BaseException as e:
-            utils.print_error(e)
-
-
-@bdocker.command('run', help="Creates a writeable container "
-                             "layer over the specified image,"
-                             " and executes the command.")
-@token_argument
-@container_id_argument
-@command_argument
-@click.pass_context
-def container_run(ctx, token, image_id, script):
-    try:
-        out = ctx.obj.task_run(token, image_id, script)
-        utils.print_message("Container Id: %s" % out)
     except BaseException as e:
             utils.print_error(e)
 
