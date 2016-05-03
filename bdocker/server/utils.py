@@ -18,9 +18,9 @@ from flask import jsonify
 import webob
 
 from bdocker.common import exceptions
+from bdocker.server import docker_helper
 from bdocker.server.modules import batch
 from bdocker.server.modules import credentials
-from bdocker.server import docker
 
 
 def validate(fields, mandatory_keys):
@@ -49,7 +49,7 @@ def load_batch_module(conf):
 
 
 def load_docker_module(conf):
-    return docker.DockerController(conf['dockerAPI']['base_url'])
+    return docker_helper.DockerController(conf['dockerAPI']['base_url'])
 
 
 def make_json_response(status_code, description):

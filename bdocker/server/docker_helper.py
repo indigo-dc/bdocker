@@ -17,7 +17,7 @@
 import docker as docker_py
 
 from bdocker.common import exceptions
-from bdocker.server.docker import parsers
+from bdocker.server import parsers
 
 
 class DockerController(object):

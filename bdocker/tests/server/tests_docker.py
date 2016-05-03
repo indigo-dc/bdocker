@@ -18,8 +18,8 @@ import mock
 import testtools
 import uuid
 
-from bdocker.server import docker as control_docker
-from bdocker.server.docker import parsers
+from bdocker.server import docker_helper
+from bdocker.server import parsers
 from bdocker.common import exceptions
 from bdocker.tests.server import fake_docker_outputs
 
@@ -59,7 +59,7 @@ def create_generator(json_data):
         yield line
 
 
-class FakeDocker(control_docker.DockerController):
+class FakeDocker(docker_helper.DockerController):
     def __init__(self):
         super(FakeDocker,self).__init__()
 
@@ -89,7 +89,7 @@ class TestDocker(testtools.TestCase):
     def setUp(self):
         super(TestDocker, self).setUp()
         url = 'localhost:2375'
-        self.control = control_docker.DockerController(url)
+        self.control = docker_helper.DockerController(url)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull(self, m):

@@ -21,7 +21,7 @@ import mock
 
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
 
-from bdocker.server import docker
+from bdocker.server import docker_helper
 from bdocker.server.modules import credentials
 from bdocker.server import restful_api
 from bdocker.tests import server
@@ -71,7 +71,7 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(201, result.status_code)
 
 
-    @mock.patch.object(docker.DockerController, "pull_image")
+    @mock.patch.object(docker_helper.DockerController, "pull_image")
     @mock.patch.object(credentials.UserController,
                    "authorize")
     @mock.patch.object(credentials.UserController,
@@ -87,7 +87,7 @@ class TestREST(server.TestConfiguration):
                                      method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "pull_image")
+    @mock.patch.object(docker_helper.DockerController, "pull_image")
     def test_pull_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "repo": 'repoooo'}
@@ -98,7 +98,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "pull_image")
+    @mock.patch.object(docker_helper.DockerController, "pull_image")
     def test_pull_400(self, m):
         parameters = {"token":"tokennnnnn"}
         body = make_body(parameters)
@@ -108,7 +108,7 @@ class TestREST(server.TestConfiguration):
                                      method="put").get_response(self.app)
         self.assertEqual(400, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "delete_container")
+    @mock.patch.object(docker_helper.DockerController, "delete_container")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
     def test_delete(self, mu, md):
@@ -120,7 +120,7 @@ class TestREST(server.TestConfiguration):
                                      method="DELETE").get_response(self.app)
         self.assertEqual(204, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "delete_container")
+    @mock.patch.object(docker_helper.DockerController, "delete_container")
     def test_delete_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
@@ -129,7 +129,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "delete_container")
+    @mock.patch.object(docker_helper.DockerController, "delete_container")
     def test_delete(self, mu):
         mu.return_value = True
         parameters = {"token":"tokennnnnn",
@@ -139,7 +139,7 @@ class TestREST(server.TestConfiguration):
                                      method="DELETE").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "list_containers")
+    @mock.patch.object(docker_helper.DockerController, "list_containers")
     @mock.patch.object(credentials.UserController, "list_containers")
     @mock.patch.object(credentials.UserController,
                        "authorize")
@@ -149,19 +149,19 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "list_containers")
+    @mock.patch.object(docker_helper.DockerController, "list_containers")
     def test_ps_401(self, m):
         result = webob.Request.blank("/ps?token=333333",
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "list_containers")
+    @mock.patch.object(docker_helper.DockerController, "list_containers")
     def test_ps_405(self, m):
         result = webob.Request.blank("/ps?token=333333",
                                      method="PUT").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "logs_container")
+    @mock.patch.object(docker_helper.DockerController, "logs_container")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
     def test_logs(self, mu, md):
@@ -173,7 +173,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "logs_container")
+    @mock.patch.object(docker_helper.DockerController, "logs_container")
     def test_logs_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -182,7 +182,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "logs_container")
+    @mock.patch.object(docker_helper.DockerController, "logs_container")
     def test_logs_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -191,7 +191,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    # @mock.patch.object(docker.DockerController, "start_container")
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
     # @mock.patch.object(credentials.UserController,
     #                    "authorize_container")
     # def test_start(self, mu, md):
@@ -205,7 +205,7 @@ class TestREST(server.TestConfiguration):
     #                                  method="POST").get_response(self.app)
     #     self.assertEqual(201, result.status_code)
     #
-    # @mock.patch.object(docker.DockerController, "start_container")
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
     # def test_start_405(self, md):
     #     parameters = {"token":"tokennnnnn",
     #                   "container_id": 'containerrrrr'}
@@ -216,7 +216,7 @@ class TestREST(server.TestConfiguration):
     #                                  method="GET").get_response(self.app)
     #     self.assertEqual(405, result.status_code)
     #
-    # @mock.patch.object(docker.DockerController, "start_container")
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
     # def test_start_401(self, m):
     #     parameters = {"token":"tokennnnnn",
     #                   "container_id": 'containerrrrr'}
@@ -227,7 +227,7 @@ class TestREST(server.TestConfiguration):
     #                                  method="POST").get_response(self.app)
     #     self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "stop_container")
+    @mock.patch.object(docker_helper.DockerController, "stop_container")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
     def test_stop(self, mu, md):
@@ -241,7 +241,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "stop_container")
+    @mock.patch.object(docker_helper.DockerController, "stop_container")
     def test_stop_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -252,7 +252,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "stop_container")
+    @mock.patch.object(docker_helper.DockerController, "stop_container")
     def test_stop_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -263,14 +263,14 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "create_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,
                        "add_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "start_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "logs_container")
     def test_run(self, m_log, m_start, madd, math, md):
         madd.return_value = True
@@ -286,14 +286,14 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "create_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,
                        "add_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "start_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "logs_container")
     def test_run_405(self, m_log, m_start, madd, math, md):
         madd.return_value = True
@@ -308,7 +308,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "create_container")
     def test_run_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
@@ -320,14 +320,14 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "create_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,
                        "add_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "start_container")
-    @mock.patch.object(docker.DockerController,
+    @mock.patch.object(docker_helper.DockerController,
                        "logs_container")
     def test_run_400(self, m_log, m_start, madd, math, md):
         madd.return_value = True
@@ -341,7 +341,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(400, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "accounting_container")
+    @mock.patch.object(docker_helper.DockerController, "accounting_container")
     @mock.patch.object(credentials.UserController,
                        "authorize")
     def test_acc(self, mu, md):
@@ -353,7 +353,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "accounting_container")
+    @mock.patch.object(docker_helper.DockerController, "accounting_container")
     def test_acc_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -362,7 +362,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "accounting_container")
+    @mock.patch.object(docker_helper.DockerController, "accounting_container")
     def test_acc_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -371,7 +371,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "accounting_container")
+    @mock.patch.object(docker_helper.DockerController, "accounting_container")
     def test_acc_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -380,7 +380,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "output_task")
+    @mock.patch.object(docker_helper.DockerController, "output_task")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
     def test_output(self, mu, md):
@@ -393,7 +393,7 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(200, result.status_code)
 
 
-    @mock.patch.object(docker.DockerController, "output_task")
+    @mock.patch.object(docker_helper.DockerController, "output_task")
     def test_output_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
@@ -402,7 +402,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker.DockerController, "output_task")
+    @mock.patch.object(docker_helper.DockerController, "output_task")
     def test_output_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
