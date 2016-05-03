@@ -61,12 +61,12 @@ class TestUserCredentials(testtools.TestCase):
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
         self.assertIsNotNone(token)
-        self.control._save_token_file()
+        self.control.save_token_file()
         new_controller = credentials.UserController(self.path)
         user_info1 = new_controller._get_token_from_cache(token)
         self.assertEqual(2, user_info1.__len__())
         new_controller.remove_token_from_cache(token)
-        new_controller._save_token_file()
+        new_controller.save_token_file()
         self.assertRaises(exceptions.UserCredentialsException,
                           new_controller._get_token_from_cache,
                           token)
@@ -123,3 +123,46 @@ class TestUserCredentials(testtools.TestCase):
                          token_info['containers'].__len__())
         self.control.remove_container(token, c_id)
         self.assertNotIn('containers', token_info)
+
+    def test_authorize_images(self):
+        t = 'token2'
+        c = 'image1'
+        ath = self.control.authorize_image(
+            token=t,
+            image_id=c)
+        self.assertIs(True, ath)
+
+    def test_authorize_image_err(self):
+        t = 'token'
+        c = '84848'
+        self.assertRaises(exceptions.UserCredentialsException,
+            self.control.authorize_image, t, c)
+
+    def test_add_image(self):
+        token = "token2"
+        image_id = "image2"
+        token_info = self.control._get_token_from_cache(token)
+        self.assertIsNotNone(token_info['images'])
+        self.assertEqual(1,
+                         token_info['images'].__len__())
+        self.control.add_image(token, image_id)
+        self.assertIsNotNone(
+            token_info['images'])
+        self.assertEqual(2,
+                         token_info['images'].__len__())
+        self.control.remove_image(token, image_id)
+        self.assertIsNotNone(token_info['images'])
+        self.assertEqual(1,
+                         token_info['images'].__len__())
+
+    def test_create_remove_image(self):
+        token = "token1"
+        c_id = "image1"
+        token_info = self.control._get_token_from_cache(token)
+        self.assertNotIn('images', token_info)
+        self.control.add_image(token, c_id)
+        self.assertIsNotNone(token_info['images'])
+        self.assertEqual(1,
+                         token_info['images'].__len__())
+        self.control.remove_image(token, c_id)
+        self.assertNotIn('images', token_info)

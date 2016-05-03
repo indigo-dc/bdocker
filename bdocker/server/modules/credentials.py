@@ -26,7 +26,7 @@ class UserController(object):
         self.path = path
         self.token_store = utils.read_yaml_file(path)
 
-    def _save_token_file(self):
+    def save_token_file(self):
         """Save token store in the file
 
         """
@@ -114,9 +114,14 @@ class UserController(object):
         """Remove image to the token record.
 
         :param token: token
-        :param image_id: container id from dockers
+        :param image_id: image id from dockers
         """
-        raise exceptions.NoImplementedException
+        current_token = self._get_token_from_cache(token)
+        if current_token["images"].__len__() > 1:
+            current_token["images"].remove(image_id)
+        else:
+            del current_token["images"]
+        self.token_store.update({token: current_token})
 
     def add_container(self, token, container_id):
         """Add container to the token record.
@@ -178,7 +183,7 @@ class UserController(object):
         """Check user authorization to the container.
 
         :param token: user token
-        :param container_id: container id
+        :param image_id: image id
         """
         token_info = self._get_token_from_cache(token)
         if 'images' not in token_info:

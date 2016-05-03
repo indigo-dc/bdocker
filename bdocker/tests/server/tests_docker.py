@@ -164,11 +164,11 @@ class TestDocker(testtools.TestCase):
     #     self.assertIsNotNone(out)
     #     self.assertEqual(2, out.__len__())
     #
-    # def test_list_containers_real(self):
-    #     containers =['b5f659fba626','f20b77988e43']
-    #     out = self.control.list_containers(containers)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
+    def test_list_containers_real(self):
+        containers =['b5f659fba626','f20b77988e43']
+        out = self.control.list_containers(containers)
+        self.assertIsNotNone(out)
+        self.assertEqual(2, out.__len__())
     #
     # def test_run_container_real(self):
     #     image_id = 'c917d6497f55'

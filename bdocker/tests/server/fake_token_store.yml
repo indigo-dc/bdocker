@@ -9,5 +9,7 @@ token2:
   - cotainer1
   - container2
   gid: gid2
+  images:
+  - image1
   jobid: job2
   uid: uid2
