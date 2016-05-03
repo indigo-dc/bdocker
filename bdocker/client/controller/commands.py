@@ -32,7 +32,7 @@ class CommandController(object):
             self.token_file = conf["credentials"]['token_client_file']
             self.token_storage = conf["credentials"]['token_store']
         except Exception as e:
-            raise exceptions.ConfigurationException("")
+            raise exceptions.ConfigurationException("Reading file: %s" % conf_file)
 
     def create_credentials(self, uid):
         path = "/credentials"

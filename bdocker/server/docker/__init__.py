@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import docker
+import docker as docker_py
 import json
 
 from bdocker.common import exceptions
@@ -27,7 +27,7 @@ class DockerController(object):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
-        self.control = docker.Client(base_url=url, version='1.19')
+        self.control = docker_py.Client(base_url=url, version='1.19')
 
     def pull_image(self, repo, tag='latest'):
         try:
