@@ -140,12 +140,14 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "list_containers")
-    @mock.patch.object(credentials.UserController, "list_containers")
+    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
     @mock.patch.object(credentials.UserController,
                        "authorize")
-    def test_ps(self, mu, md,ml):
+    def test_ps(self, mu, mt, ml):
         mu.return_value = True
-        result = webob.Request.blank("/ps?token=333333",
+        token = "3333"
+        mt.return_value = {"token": token, "containers": ["A", "B"]}
+        result = webob.Request.blank("/ps?token=%s" % token,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 

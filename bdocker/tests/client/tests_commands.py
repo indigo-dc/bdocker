@@ -62,7 +62,7 @@ class TestCommands(testtools.TestCase):
         token = uuid.uuid4().hex
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
-        m_put.return_value = {"results": token}
+        m_put.return_value = token
         u = self.control.create_credentials(1000)
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
@@ -83,10 +83,23 @@ class TestCommands(testtools.TestCase):
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         err = None
-        m.return_value = {"results": {"Id": container_id, "Warnings": err}}
+        m.return_value = {"Id": container_id, "Warnings": err}
         results = self.control.container_run(token, image_id, '')
         self.assertEqual(container_id, results['container_id'])
         self.assertEqual(err, results['error'])
 
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_container_list(self, m):
+        token = uuid.uuid4().hex
+        containers = ["container_1", "container_2"]
+        m.return_value = {"results": containers}
+        results = self.control.container_list(token)
+        self.assertEqual(containers[0], results[0])
+        self.assertEqual(containers[1], results[1])
+
+
+    # def test_crendentials(self):
+    #     results = self.control.create_credentials(1000)
+    #     self.assertIsNotNone(results)
 
         # CREATE CONTAINER {'Id': '8a61192da2b3bb2d922875585e29b74ec0dc4e0117fcbf84c962204e97564cd7', 'Warnings': None}

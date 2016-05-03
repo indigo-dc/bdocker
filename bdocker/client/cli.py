@@ -19,7 +19,7 @@ from bdocker.client.controller import commands
 from bdocker.client.decorators import *
 from bdocker.client.controller import utils
 
-sys.tracebacklimit=0
+# sys.tracebacklimit=0
 
 
 @click.group()

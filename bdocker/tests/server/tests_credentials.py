@@ -166,3 +166,9 @@ class TestUserCredentials(testtools.TestCase):
                          token_info['images'].__len__())
         self.control.remove_image(token, c_id)
         self.assertNotIn('images', token_info)
+
+    def test_list_containers(self):
+        t = 'token2'
+        list = self.control.list_containers(
+            token=t)
+        self.assertIsNotNone(list)

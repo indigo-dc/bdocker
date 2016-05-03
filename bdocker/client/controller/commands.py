@@ -41,14 +41,14 @@ class CommandController(object):
         admin_token = utils.get_admin_token(self.token_storage)
         parameters = {"token": admin_token, "user_credentials": user_info}
         result = self.control.execute_put(path=path, parameters=parameters)
-        token = result["results"]
+        token = result
         token_path = "%s/%s" % (home_dir, self.token_file)
         utils.write_user_credentials(result, token_path)
         return {"token": token, "path": token_path}
 
     def container_pull(self, token, source):
         path = "/pull"
-        parameters = {"user_token": token, "container_source": source}
+        parameters = {"token": token, "container_source": source}
 
         results = self.control.execute_put(path=path, parameters=parameters)
         # fixme: parse out to id
@@ -56,19 +56,19 @@ class CommandController(object):
 
     def container_run(self, token, image_id, script):
         path = "/run"
-        parameters = {"user_token": token,
+        parameters = {"token": token,
                       "image_id": image_id,
                       "script": script
                       }
         results = self.control.execute_post(path=path, parameters=parameters)
-        container_id = results["results"]["Id"]
-        err = results["results"]["Warnings"]
+        container_id = results["Id"]
+        err = results["Warnings"]
         return {"container_id": container_id, "error": err}
 
     # def container_run(self, token, image_id, script):
     # todo: create a run for a container that already exists
     #     path = "/run"
-    #     parameters = {"user_token": token,
+    #     parameters = {"token": token,
     #                   "image_id": image_id,
     #                   "script": script
     #                   }
@@ -77,36 +77,37 @@ class CommandController(object):
 
     def container_delete(self, token, container_id):
         path = "/delete"
-        parameters = {"user_token": token, "container_id": container_id}
+        parameters = {"token": token, "container_id": container_id}
         self.control.execute_delete(path=path, parameters=parameters)
         # todo(jorgesece): implement message output
         message = "OK"
         return message
 
-    def container_list(self, token, container_id):
+    def container_list(self, token):
         path = "/ps"
-        parameters = {"user_token": token, "container_id": container_id}
+        parameters = {"token": token}
         results = self.control.execute_get(path=path, parameters=parameters)
+        containers = results["results"]
         # fixme: parse out to list
-        return results
+        return containers
 
     def container_logs(self, token, container_id):
         path = "/logs"
-        parameters = {"user_token": token, "container_id": container_id}
+        parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         # todo(jorgesece): implement message output
         return results
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
-        parameters = {"user_token": token, "container_id": container_id}
+        parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         # todo(jorgesece): implement message output
         return results
 
     # def container_start(self, token, container_id):
     #     path = "/start"
-    #     parameters = {"user_token": token, "container_id": container_id}
+    #     parameters = {"token": token, "container_id": container_id}
     #     results = self.control.execute_post(path=path, parameters=parameters)
     #     # todo(jorgesece): implement message output
     #     return results
@@ -114,7 +115,7 @@ class CommandController(object):
     #
     # def container_stop(self, token, container_id):
     #     path = "/stop"
-    #     parameters = {"user_token": token, "container_id": container_id}
+    #     parameters = {"token": token, "container_id": container_id}
     #     results = self.control.execute_post(path=path, parameters=parameters)
     #     # todo(jorgesece): implement message output
     #     return results
