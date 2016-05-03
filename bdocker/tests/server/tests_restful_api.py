@@ -14,9 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import json
-import mock
+import os
 import webob
 
+import mock
+
+os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
 
 from bdocker.server import docker
 from bdocker.server.modules import credentials

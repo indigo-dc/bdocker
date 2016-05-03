@@ -22,7 +22,6 @@ import uuid
 from bdocker.client.controller import commands
 from bdocker.client.controller import request
 from bdocker.common import exceptions
-from bdocker.common import utils
 
 
 class TestCommands(testtools.TestCase):
@@ -30,7 +29,9 @@ class TestCommands(testtools.TestCase):
 
     def setUp(self):
         super(TestCommands, self).setUp()
-        self.control = commands.CommandController()
+        path = ("/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/"
+                "bdocker/common/configure_bdocker.cfg")
+        self.control = commands.CommandController(path)
 
     def test_create_command_with_root_file(self):
         self.assertRaises(exceptions.UserCredentialsException,

@@ -15,7 +15,6 @@
 # under the License.
 
 import docker as docker_py
-import json
 
 from bdocker.common import exceptions
 from bdocker.server.docker import parsers
