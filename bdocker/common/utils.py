@@ -15,12 +15,11 @@
 # under the License.
 import yaml
 import ConfigParser
+import os
 
 from bdocker.common import exceptions
 
-default_conf_file = ("/home/jorge/Dropbox" +
-                     "/INDIGO_DOCKER/bdocker/" +
-                     "bdocker/common/"
+default_conf_file = ("/root/" +
                      "configure_bdocker.cfg"
                      )
 
@@ -29,7 +28,9 @@ def load_configuration(path=None):
 
     config = ConfigParser.SafeConfigParser()
     if not path:
-        path = default_conf_file
+        path = os.getenv(
+            'BDOCKER_CONF_FILE',
+            default_conf_file)
     try:
         with open(path) as f:
             config.readfp(f)
