@@ -102,9 +102,12 @@ def write_user_credentials(token, file_path):
 
 
 def print_message(message, type='OK'):
-    message = colors[type] + message + colors['ENDC']
+    if not isinstance(message, list):
+        message = [message]
     print
-    print '{:<}'.format(message)
+    for m in message:
+        m = colors[type] + m + colors['ENDC']
+        print '{:<}'.format(m)
     print
 
 

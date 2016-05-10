@@ -62,14 +62,14 @@ def container_pull(ctx, token, source):
                              "layer over the specified image,"
                              " and executes the command.")
 @token_argument
-@d_option
 @image_id_argument
 @command_argument
+@d_option
 @click.pass_context
-def container_run(ctx, token, detach, image_id, script):
+def container_run(ctx, token, image_id, script, detach):
     try:
         out = ctx.obj.container_run(token, image_id, detach, script)
-        utils.print_message("Container Id: %s" % out)
+        utils.print_message(out)
     except BaseException as e:
             utils.print_error(e)
 

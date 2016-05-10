@@ -13,8 +13,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import click
-
 from bdocker.client.controller import request
 from bdocker.common import exceptions
 from bdocker.common import utils as utils_common
@@ -62,9 +60,7 @@ class CommandController(object):
                       "detach": detach
                       }
         results = self.control.execute_post(path=path, parameters=parameters)
-        container_id = results["Id"]
-        err = results["Warnings"]
-        return {"container_id": container_id, "error": err}
+        return results
 
     # def container_run(self, token, image_id, script):
     # todo: create a run for a container that already exists
