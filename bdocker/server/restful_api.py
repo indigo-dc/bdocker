@@ -26,8 +26,6 @@ credentials_module = utils.load_credentials_module(conf)
 batch_module = utils.load_batch_module(conf)
 docker_module = utils.load_docker_module(conf)
 
-sys.tracebacklimit = 0
-
 app = Flask(__name__)
 
 utils.set_error_handler(app)
@@ -47,14 +45,18 @@ def credentials():
 @app.route('/pull', methods=['PUT'])
 def pull():
     data = request.get_json()
-    required = {'token','repo'}
+    required = {'token','source'}
     utils.validate(data, required)
     token = data['token']
-    repo = data['repo']
+    repo = data['source']
     credentials_module.authorize(token)
-    image_id = docker_module.pull_image(repo)
-    credentials_module.add_image(token, image_id)
-    return utils.make_json_response(201, image_id)
+    result = docker_module.pull_image(repo)
+    if 'image_id' in result:
+        credentials_module.add_image(token, result['image_id'])
+        output = utils.make_json_response(201, result)
+    else:
+        output = utils.make_json_response(500, result['status'])
+    return output
 
 
 @app.route('/run', methods=['POST'])

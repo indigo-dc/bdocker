@@ -84,7 +84,7 @@ class TestCommands(testtools.TestCase):
         container_id = uuid.uuid4().hex
         err = None
         m.return_value = {"Id": container_id, "Warnings": err}
-        results = self.control.container_run(token, image_id, '')
+        results = self.control.container_run(token, image_id, False,'')
         self.assertEqual(container_id, results['container_id'])
         self.assertEqual(err, results['error'])
 

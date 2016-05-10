@@ -1,15 +1,11 @@
-prolog:
-  token: token_prolog
-token1:
-  gid: gid1
-  jobid: job1
-  uid: uid1
+380aa539e31048b690ce0904d13920a6: {gid: gggggggggguuuiiidd, uid: uuuuuuuuuuiiiidddddd}
+a48b359d3b2946159ce92b7ee1136d60: {gid: gggggggggguuuiiidd, uid: uuuuuuuuuuiiiidddddd}
+ec6c9a0c49e649388bcbf217d0bb7654: {gid: gggggggggguuuiiidd, uid: uuuuuuuuuuiiiidddddd}
+prolog: {token: token_prolog}
+token1: {gid: gid1, jobid: job1, uid: uid1}
 token2:
-  containers:
-  - cotainer1
-  - container2
+  containers: [cotainer1, container2]
   gid: gid2
-  images:
-  - image1
+  images: [image1]
   jobid: job2
   uid: uid2

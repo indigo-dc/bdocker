@@ -87,6 +87,6 @@ def read_yaml_file(path):
 
 
 def write_yaml_file(path, data):
-    f = open(path, 'w')
-    f.write(yaml.dump(data, default_flow_style=False))
-    f.close()
+    #f = open(path, 'w')
+    yaml.safe_dump(data, file(path,'w'), encoding='utf-8', allow_unicode=True)
+    #f.close()

@@ -48,17 +48,18 @@ class CommandController(object):
 
     def container_pull(self, token, source):
         path = "/pull"
-        parameters = {"token": token, "container_source": source}
+        parameters = {"token": token, "source": source}
 
         results = self.control.execute_put(path=path, parameters=parameters)
         # fixme: parse out to id
         return results
 
-    def container_run(self, token, image_id, script):
+    def container_run(self, token, image_id, detach, script):
         path = "/run"
         parameters = {"token": token,
                       "image_id": image_id,
-                      "script": script
+                      "script": script,
+                      "detach": detach
                       }
         results = self.control.execute_post(path=path, parameters=parameters)
         container_id = results["Id"]

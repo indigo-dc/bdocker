@@ -77,9 +77,11 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(credentials.UserController,
                    "add_image")
     def test_pull(self, mc, mu, md):
-        mu.return_value=True
+        im_id = 'X'
+        mu.return_value = True
+        md.return_value = {'image_id': im_id, 'status':'OK'}
         parameters = {"token":"tokennnnnn",
-                      "repo": 'repoooo'}
+                      "source": 'repoooo'}
         body = make_body(parameters)
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
@@ -90,7 +92,7 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker_helper.DockerController, "pull_image")
     def test_pull_405(self, m):
         parameters = {"token":"tokennnnnn",
-                      "repo": 'repoooo'}
+                      "source": 'repoooo'}
         body = make_body(parameters)
         result = webob.Request.blank("/pull",
                                      content_type="application/json",

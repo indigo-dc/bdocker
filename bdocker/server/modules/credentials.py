@@ -13,11 +13,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import sys
 import uuid
 
 from bdocker.common import exceptions
 from bdocker.common import utils
+
+# sys.tracebacklimit = 0
 
 
 class UserController(object):
@@ -42,7 +44,7 @@ class UserController(object):
                 "User token not found")
         return self.token_store[token]
 
-    def _set_token_in_cache(self, user_info):
+    def _set_token(self, user_info):
         """Storage token and user information in token store
 
         :param user_info: dict that include uid, and gid
@@ -54,9 +56,10 @@ class UserController(object):
                             }
                     }
         self.token_store.update(new_token)
+        self.save_token_file()
         return token
 
-    def _update_token_in_cache(self, token, fields):
+    def _update_token(self, token, fields):
         """update field in the token record
 
         :param token: token of the registry
@@ -66,6 +69,7 @@ class UserController(object):
         for key, value in fields.items():
             current_token[key] = value
         self.token_store.update({token: current_token})
+        self.save_token_file()
 
     def authenticate(self, admin_token, user_data):
         """Authenticates a user in the system.
@@ -80,7 +84,7 @@ class UserController(object):
             raise exceptions.UserCredentialsException(
                 "Unauthorized user with token: %s" % admin_token)
         try:
-            token = self._set_token_in_cache(user_data)
+            token = self._set_token(user_data)
         except Exception as e:
             raise exceptions.UserCredentialsException(
                 "Invalid user information")
@@ -95,6 +99,7 @@ class UserController(object):
             raise exceptions.UserCredentialsException(
                 "Token not found")
         del self.token_store[token]
+        self.save_token_file()
 
     def add_image(self, token, image_id):
         """Add image to the token record.
@@ -108,7 +113,7 @@ class UserController(object):
             current_token["images"].append(image_id)
         else:
             current_token["images"] = [image_id]
-        self.token_store.update({token: current_token})
+        self._update_token(token, current_token)
 
     def remove_image(self, token, image_id):
         """Remove image to the token record.
@@ -121,7 +126,7 @@ class UserController(object):
             current_token["images"].remove(image_id)
         else:
             del current_token["images"]
-        self.token_store.update({token: current_token})
+        self._update_token(token, current_token)
 
     def add_container(self, token, container_id):
         """Add container to the token record.
@@ -134,7 +139,7 @@ class UserController(object):
             current_token["containers"].append(container_id)
         else:
             current_token["containers"] = [container_id]
-        self.token_store.update({token: current_token})
+        self._update_token(token, current_token)
         # todo: register in the file, it is needed in case
         # the service goes down
 
@@ -149,7 +154,7 @@ class UserController(object):
             current_token["containers"].remove(container_id)
         else:
             del current_token["containers"]
-        self.token_store.update({token: current_token})
+        self._update_token(token, current_token)
 
     def list_containers(self, token):
         """Return containers from a token record.

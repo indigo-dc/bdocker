@@ -13,12 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import sys
 
 import docker as docker_py
 
 from bdocker.common import exceptions
 from bdocker.server import parsers
 
+# sys.tracebacklimit = 0
 
 class DockerController(object):
 

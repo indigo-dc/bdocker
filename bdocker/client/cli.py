@@ -19,7 +19,6 @@ from bdocker.client.controller import commands
 from bdocker.client.decorators import *
 from bdocker.client.controller import utils
 
-# sys.tracebacklimit=0
 
 
 @click.group()
@@ -50,12 +49,11 @@ def credentials_create(ctx, uid):
                  help="Pull a container and"
                       " its intermediate layers.")
 @token_argument
-@d_option
 @source_argument
 @click.pass_context
-def container_pull(ctx, token, detach, source):
+def container_pull(ctx, token, source):
     try:
-        out = ctx.obj.container_pull(token, detach, source)
+        out = ctx.obj.container_pull(token, source)
         utils.print_message("Image id: %s" % out)
     except BaseException as e:
         utils.print_error(e)
@@ -64,12 +62,13 @@ def container_pull(ctx, token, detach, source):
                              "layer over the specified image,"
                              " and executes the command.")
 @token_argument
-@container_id_argument
+@d_option
+@image_id_argument
 @command_argument
 @click.pass_context
-def container_run(ctx, token, image_id, script):
+def container_run(ctx, token, detach, image_id, script):
     try:
-        out = ctx.obj.task_run(token, image_id, script)
+        out = ctx.obj.container_run(token, image_id, detach, script)
         utils.print_message("Container Id: %s" % out)
     except BaseException as e:
             utils.print_error(e)

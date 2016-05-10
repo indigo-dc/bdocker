@@ -36,6 +36,11 @@ def container_id_argument(f):
                           , type=click.STRING
                           )(f)
 
+def image_id_argument(f):
+    return click.argument("image_id"
+                          , type=click.STRING
+                          )(f)
+
 def command_argument(f):
     return click.argument("script"
                           , type=click.STRING
