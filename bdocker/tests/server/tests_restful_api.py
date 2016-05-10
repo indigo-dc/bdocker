@@ -15,12 +15,14 @@
 # under the License.
 import json
 import os
+import uuid
 import webob
 
 import mock
 
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
 
+from bdocker.client.controller import utils
 from bdocker.server import docker_helper
 from bdocker.server.modules import credentials
 from bdocker.server import restful_api
@@ -195,42 +197,6 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    # @mock.patch.object(docker_helper.DockerController, "start_container")
-    # @mock.patch.object(credentials.UserController,
-    #                    "authorize_container")
-    # def test_start(self, mu, md):
-    #     mu.return_value = True
-    #     parameters = {"token":"tokennnnnn",
-    #                   "container_id": 'containerrrrr'}
-    #     body = make_body(parameters)
-    #     result = webob.Request.blank("/start",
-    #                                  content_type="application/json",
-    #                                  body=body,
-    #                                  method="POST").get_response(self.app)
-    #     self.assertEqual(201, result.status_code)
-    #
-    # @mock.patch.object(docker_helper.DockerController, "start_container")
-    # def test_start_405(self, md):
-    #     parameters = {"token":"tokennnnnn",
-    #                   "container_id": 'containerrrrr'}
-    #     body = make_body(parameters)
-    #     result = webob.Request.blank("/start",
-    #                                  content_type="application/json",
-    #                                  body=body,
-    #                                  method="GET").get_response(self.app)
-    #     self.assertEqual(405, result.status_code)
-    #
-    # @mock.patch.object(docker_helper.DockerController, "start_container")
-    # def test_start_401(self, m):
-    #     parameters = {"token":"tokennnnnn",
-    #                   "container_id": 'containerrrrr'}
-    #     body = make_body(parameters)
-    #     result = webob.Request.blank("/start",
-    #                                  content_type="application/json",
-    #                                  body=body,
-    #                                  method="POST").get_response(self.app)
-    #     self.assertEqual(401, result.status_code)
-
     @mock.patch.object(docker_helper.DockerController, "stop_container")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
@@ -277,18 +243,26 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker_helper.DockerController,
                        "logs_container")
     def test_run(self, m_log, m_start, madd, math, md):
+        token = uuid.uuid4().hex
+        image_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        script = 'ls'
+        detach = False
         madd.return_value = True
         math.return_value = True
-        md.return_value = {'Id':'33333'}
-        parameters = {"token":"tokennnnnn",
-                      "image_id": 'containerrrrr',
-                      "script": "scriptttt"}
+        md.return_value = {'Id': container_id}
+        parameters = {"token": token,
+                      "image_id": image_id,
+                      "script": script,
+                      "detach": detach
+                      }
         body = make_body(parameters)
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
+        # todo: parse to get id
 
     @mock.patch.object(docker_helper.DockerController, "create_container")
     @mock.patch.object(credentials.UserController,
@@ -414,3 +388,56 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/output?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
+
+    # def test_run_real(self):
+    #     token = '1866e0ca1ad44a55952029817c2a5345'
+    #     image_id = 'a83540abf000'
+    #     script = 'ls'
+    #     detach = True
+    #     parameters = {"token": token,
+    #                   "image_id": image_id,
+    #                   "script": script,
+    #                   "detach": detach
+    #                   }
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/run",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="POST").get_response(self.app)
+    #     self.assertEqual(201, result.status_code)
+
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
+    # @mock.patch.object(credentials.UserController,
+    #                    "authorize_container")
+    # def test_start(self, mu, md):
+    #     mu.return_value = True
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="POST").get_response(self.app)
+    #     self.assertEqual(201, result.status_code)
+    #
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
+    # def test_start_405(self, md):
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="GET").get_response(self.app)
+    #     self.assertEqual(405, result.status_code)
+    #
+    # @mock.patch.object(docker_helper.DockerController, "start_container")
+    # def test_start_401(self, m):
+    #     parameters = {"token":"tokennnnnn",
+    #                   "container_id": 'containerrrrr'}
+    #     body = make_body(parameters)
+    #     result = webob.Request.blank("/start",
+    #                                  content_type="application/json",
+    #                                  body=body,
+    #                                  method="POST").get_response(self.app)
+    #     self.assertEqual(401, result.status_code)

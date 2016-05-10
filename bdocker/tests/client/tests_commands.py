@@ -83,10 +83,20 @@ class TestCommands(testtools.TestCase):
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         err = None
-        m.return_value = {"Id": container_id, "Warnings": err}
-        results = self.control.container_run(token, image_id, False,'')
-        self.assertEqual(container_id, results['container_id'])
-        self.assertEqual(err, results['error'])
+        m.return_value = container_id
+        results = self.control.container_run(token, image_id, False, 'ls')
+        self.assertEqual(container_id, results)
+
+    @mock.patch.object(request.RequestController, "execute_post")
+    def test_container_run(self, m):
+        token = uuid.uuid4().hex
+        image_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        out =  ['bin', 'etc', 'lib']
+        m.return_value = ['bin', 'etc', 'lib']
+        results = self.control.container_run(token, image_id, False, 'ls')
+        self.assertEqual(out, results)
+
 
     @mock.patch.object(request.RequestController, "execute_get")
     def test_container_list(self, m):
