@@ -150,8 +150,9 @@ class TestREST(server.TestConfiguration):
     def test_ps(self, mu, mt, ml):
         mu.return_value = True
         token = "3333"
+        all = True
         mt.return_value = {"token": token, "containers": ["A", "B"]}
-        result = webob.Request.blank("/ps?token=%s" % token,
+        result = webob.Request.blank("/ps?token=%s&%s" % (token ,all),
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
@@ -233,7 +234,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker_helper.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,
@@ -264,7 +265,7 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(201, result.status_code)
         # todo: parse to get id
 
-    @mock.patch.object(docker_helper.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,
@@ -286,7 +287,7 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(docker_helper.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "run_container")
     def test_run_401(self, m):
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
@@ -298,7 +299,7 @@ class TestREST(server.TestConfiguration):
                                      method="POST").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-    @mock.patch.object(docker_helper.DockerController, "create_container")
+    @mock.patch.object(docker_helper.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
                    "authorize_image")
     @mock.patch.object(credentials.UserController,

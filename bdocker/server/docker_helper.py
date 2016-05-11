@@ -24,11 +24,12 @@ from bdocker.server import parsers
 
 class DockerController(object):
 
-    def __init__(self, url):
+    def __init__(self, url, working_dir='/tmp'):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
         self.control = docker_py.Client(base_url=url, version='1.19')
+        self.working_dir = working_dir
 
     def pull_image(self, repo, tag='latest'):
         try:
@@ -104,7 +105,7 @@ class DockerController(object):
         self.control.stop(container=container_id)
         return "stop container"
 
-    def create_container(self, image_id, detach, command,
+    def run_container(self, image_id, detach, command,
                       working_dir=None, host_dir=None, docker_dir=None):
         # todo:verify directory of working node to move things (HOME)
         # allow users to bind directories from the wd in the container
@@ -113,7 +114,6 @@ class DockerController(object):
             # volumes = None
             host_config = None
             if host_dir:
-                volumes = [host_dir],
                 host_config = self.control.create_host_config(
                     binds=['%s:%s' % (host_dir, docker_dir)]
                     )
@@ -122,7 +122,7 @@ class DockerController(object):
                 command=command,
                 detach=detach,
                 host_config=host_config,
-                working_dir=working_dir
+                working_dir=docker_dir
                 # volumes=volumes
             )
             if 'Id' not in container_info:

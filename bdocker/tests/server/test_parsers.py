@@ -37,3 +37,16 @@ class TestParsers(testtools.TestCase):
     #     out.append([1, 1, 1])
     #     out.append([2, 2, 2])
     #     utils.print_table(out.pop(0), out)
+
+    def test_parse_vol(self):
+        h_dir = "/root/docker_test/"
+        d_dir = "/tmp"
+        volume_path = "%s:%s" % (h_dir, d_dir)
+        vol = utils.parse_volume(None, None, volume_path)
+        self.assertEqual(h_dir, vol['host_dir'])
+        self.assertEqual(d_dir, vol['docker_dir'])
+
+    def test_parse_vol_empty(self):
+        volume_path = None
+        vol = utils.parse_volume(None, None, volume_path)
+        self.assertIsNone(vol)

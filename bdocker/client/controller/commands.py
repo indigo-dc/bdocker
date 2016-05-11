@@ -51,13 +51,17 @@ class CommandController(object):
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
 
-    def container_run(self, token, image_id, detach, script):
+    def container_run(self, token, image_id, detach, script, volume=None):
         path = "/run"
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
-                      "detach": detach
+                      "detach": detach,
                       }
+        if volume:
+          parameters["host_dir"] = volume["host_dir"]
+          parameters["docker_dir"] = volume["docker_dir"]
+        # -v /root/docker_test/:/tmp
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
 

@@ -58,6 +58,7 @@ def container_pull(ctx, token, source):
     except BaseException as e:
         utils.print_error(e)
 
+
 @bdocker.command('run', help="Creates a writeable container "
                              "layer over the specified image,"
                              " and executes the command.")
@@ -65,10 +66,14 @@ def container_pull(ctx, token, source):
 @image_id_argument
 @command_argument
 @d_option
+@volume_option
 @click.pass_context
-def container_run(ctx, token, image_id, script, detach):
+def container_run(ctx, token, image_id, script, detach, volume):
     try:
-        out = ctx.obj.container_run(token, image_id, detach, script)
+        out = ctx.obj.container_run(
+            token, image_id, detach, script,
+            volume=volume
+        )
         utils.print_message(out)
     except BaseException as e:
             utils.print_error(e)

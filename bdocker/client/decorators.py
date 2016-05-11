@@ -15,6 +15,7 @@
 # under the License.
 
 import click
+from  bdocker.client.controller import utils
 
 
 def token_argument(f):
@@ -64,3 +65,9 @@ def all_option(f):
     return click.option('--all', '-a', default=False
               , type = click.BOOL, is_flag=True
               , help='Show all containers (default shows just running)')(f)
+
+
+def volume_option(f):
+    return click.option('--volume', '-v', default=None, type=click.STRING
+              , callback=utils.parse_volume
+              , help='Bind mount a volume')(f)

@@ -68,13 +68,21 @@ def run():
     image_id = data['image_id']
     script = data['script']
     detach = data.get('detach', False)
-    credentials_module.authorize_image(token,
-                                            image_id)
-
-    container_id = docker_module.create_container(
+    host_dir = data.get('host_dir', None)
+    docker_dir = data.get('docker_dir', None)
+    working_dir = data.get('working_dir', None)
+    credentials_module.authorize_image(
+        token,
+        image_id
+    )
+    container_id = docker_module.run_container(
         image_id,
         detach,
-        script)
+        script,
+        host_dir=host_dir,
+        docker_dir=docker_dir,
+        working_dir=working_dir
+    )
     credentials_module.add_container(token, container_id)
     docker_module.start_container(container_id)
     if detach:

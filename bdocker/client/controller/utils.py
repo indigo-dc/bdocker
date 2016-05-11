@@ -133,3 +133,19 @@ def print_table(headers, rows, title=None, err=False):
             print
     except Exception as e:
         print e.message
+
+
+def parse_volume(ctx, param, value):
+    result = None
+    if value:
+        try:
+            # /root/docker_test/:/tmp
+            volume_info = value.split(":")
+            h_dir = volume_info[0]
+            docker_dir = volume_info[1]
+            result = {"host_dir": h_dir,"docker_dir": docker_dir}
+        except Exception:
+            raise exceptions.ParseException(
+                "%s is not an absolute path" % value
+            )
+    return result
