@@ -104,8 +104,9 @@ def list():
     required = {'token'}
     utils.validate(data, required)
     token = data['token']
+    all_list = data.get('all', False)
     containers = credentials_module.list_containers(token)
-    results = docker_module.list_containers(containers)
+    results = docker_module.list_containers(containers, all_list)
     return utils.make_json_response(200, results)
 
 

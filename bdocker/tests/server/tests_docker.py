@@ -121,9 +121,17 @@ class TestDocker(testtools.TestCase):
         self.assertIsNotNone(out)
 
     @mock.patch.object(docker.Client, 'inspect_container')
+    def test_list_containers_details(self, m):
+        m.return_value = fake_docker_outputs.fake_container_details
+        containers = ['xxx','xxxx']
+        out = self.control.list_containers_details(containers)
+        self.assertIsNotNone(out)
+        self.assertEqual(2, out.__len__())
+
+    @mock.patch.object(docker.Client, 'containers')
     def test_list_containers(self, m):
         m.return_value = fake_docker_outputs.fake_container_info
-        containers = ['xxx','xxxx']
+        containers = fake_docker_outputs.fake_containers
         out = self.control.list_containers(containers)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
@@ -166,7 +174,7 @@ class TestDocker(testtools.TestCase):
     #
     def test_list_containers_real(self):
         containers =['b5f659fba626','f20b77988e43']
-        out = self.control.list_containers(containers)
+        out = self.control.list_containers(containers,all=True)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
     #

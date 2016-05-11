@@ -58,3 +58,9 @@ def d_option(f):
     return click.option('--detach', '-d', default=False
               , type = click.BOOL, is_flag=True
               , help='Run container in background and print container ID')(f)
+
+
+def all_option(f):
+    return click.option('--all', '-a', default=False
+              , type = click.BOOL, is_flag=True
+              , help='Show all containers (default shows just running)')(f)

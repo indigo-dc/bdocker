@@ -10,12 +10,37 @@ fake_pull = { 'imageOK': pull_out,
               'imageError': pull_out_error,
               'imageExist': pull_out_exist
               }
-fake_container_info = {'State': {'ExitCode': 0},
+
+fake_containers = [uuid.uuid4().hex, uuid.uuid4().hex]
+fake_images = [uuid.uuid4().hex, uuid.uuid4().hex]
+
+fake_container_info = [{'Status': 'Exit (0) 1 day ago',
+                        'Id': fake_containers[0],
+                        'Command': 'ls',
+                        'Created': 1458301235,
+                        'Names': ['fakename'],
+                        'Image': fake_images[0],
+                        'Ports': [],
+                        },
+                       {'Status': 'Exit (0) 2 day ago',
+                        'Id': fake_containers[1],
+                        'Command': 'ls',
+                        'Created': 1458301230,
+                        'Names': ['fakename'],
+                        'Image': fake_images[0],
+                        'Ports': []}
+                       ]
+fake_container_details = {'State': {'ExitCode': 0,
+                                    'FinishedAt':'2015-08-24T11:02:05.902348909Z'
+                                    },
                        'Config': {'Image': 'fakeimage',
                                  'Hostname': 'fakehostname',
-                                 'Cmd': 'fakecmd'},
-                       'Created': '2016-890234890234890',
-                       'Name': 'fakename'}
+                                 'Cmd': [ 'fakecmd']},
+                       'Created': '2015-08-25T11:02:05.902348902Z',
+                       'Name': 'fakename',
+                        'NetworkSettings': {"Ports": 2}
+                        }
+
 
 fake_create = {'Id': uuid.uuid4(),
                'Warnings': None

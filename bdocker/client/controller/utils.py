@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+from tabulate import tabulate
 import json
 import pwd
 import six
@@ -115,16 +115,21 @@ def print_error(e):
     print_message(e.message, 'FAIL')
 
 
-def print_table(title, headers, rows, err=False):
+def print_table(headers, rows, title=None, err=False):
     try:
-        if err:
-            message = colors['FAIL'] + ' ERROR ' + colors['ENDC']
-        else:
-            message = colors['OK'] + title.upper() + colors['ENDC']
         if headers:
             print
-            print '   =====> {:<} <====='.format(message)
-            #print tabulate(rows, headers=headers, tablefmt="orgtbl")
+            if title:
+                if err:
+                    message = colors['FAIL'] + ' ERROR ' + colors['ENDC']
+                else:
+                    message = colors['OK'] + title.upper() + colors['ENDC']
+
+                print '   =====> {:<} <====='.format(message)
+            print tabulate(
+                rows, headers=headers,
+                tablefmt="plain", numalign="left"
+            )
             print
-    except:
-        print messages["empty"]
+    except Exception as e:
+        print e.message

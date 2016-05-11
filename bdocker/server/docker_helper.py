@@ -57,13 +57,28 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return result
 
-    def list_containers(self, containers):
+    def list_containers_details(self, containers):
         result = []
         try:
             for container_id in containers:
                 docker_out = self.control.inspect_container(container_id)
-                dict_info = parsers.parse_list_container(docker_out)
-                result.append(dict_info)
+                container_row = parsers.parse_list_container_details(docker_out)
+                result.append(container_row)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return result
+
+    def list_containers(self, containers, all=False):
+        result = []
+        try:
+            docker_containers = self.control.containers(all=all)
+            for c in containers:
+               for d_c in docker_containers:
+                    if c in d_c["Id"]:
+                        d_c['Id'] = c[:12]
+                        # it set the short id like in docker
+                        container_row = parsers.parse_list_container(d_c)
+                        result.append(container_row)
         except BaseException as e:
             raise exceptions.DockerException(e)
         return result

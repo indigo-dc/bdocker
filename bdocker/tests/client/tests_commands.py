@@ -92,7 +92,7 @@ class TestCommands(testtools.TestCase):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
-        out =  ['bin', 'etc', 'lib']
+        out = ['bin', 'etc', 'lib']
         m.return_value = ['bin', 'etc', 'lib']
         results = self.control.container_run(token, image_id, False, 'ls')
         self.assertEqual(out, results)
@@ -102,7 +102,7 @@ class TestCommands(testtools.TestCase):
     def test_container_list(self, m):
         token = uuid.uuid4().hex
         containers = ["container_1", "container_2"]
-        m.return_value = {"results": containers}
+        m.return_value = containers
         results = self.control.container_list(token)
         self.assertEqual(containers[0], results[0])
         self.assertEqual(containers[1], results[1])

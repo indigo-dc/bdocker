@@ -49,7 +49,6 @@ class CommandController(object):
         parameters = {"token": token, "source": source}
 
         results = self.control.execute_put(path=path, parameters=parameters)
-        # fixme: parse out to id
         return results
 
     def container_run(self, token, image_id, detach, script):
@@ -80,13 +79,12 @@ class CommandController(object):
         message = "OK"
         return message
 
-    def container_list(self, token):
+    def container_list(self, token, all=False):
         path = "/ps"
-        parameters = {"token": token}
+        parameters = {"token": token, "all":all}
         results = self.control.execute_get(path=path, parameters=parameters)
-        containers = results["results"]
-        # fixme: parse out to list
-        return containers
+
+        return results
 
     def container_logs(self, token, container_id):
         path = "/logs"

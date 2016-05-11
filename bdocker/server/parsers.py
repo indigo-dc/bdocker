@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from datetime import datetime
 import json
 
 from bdocker.common import exceptions
@@ -53,16 +54,94 @@ def parse_docker_generator(gen_data, key='Status'):
                                         code=404)
 
 
-def parse_list_container(data):
+def get_date_diff(date_end, date_format=None):
+    if date_format:
+        date_ini = datetime.strptime(date_end, date_format)
+    else:
+        date_ini = datetime.fromtimestamp(date_end)
+    date_end = datetime.utcnow()
+    diferencia = date_end - date_ini
+    days = diferencia.days
+    seconds = diferencia.seconds
+    weeks = divmod(days, 7)[0]
+    minutes = divmod(seconds, 60)[0]
+    hours = divmod(seconds, 3600)[0]
+    if weeks > 0:
+        return "%s weeks ago" % weeks
+    if days > 0:
+        return "%s days ago" % days
+    if hours > 0:
+        return "%s hours ago" % hours
+    if minutes > 0:
+        return "%s minutes ago" % minutes
+    return "%s seconds ago" % seconds
+
+
+def parse_list_container_details(data):
     try:
-        dict_data = { 'exit': data['State']['ExitCode'],
-                      'image': data['Config']['Image'],
-                      'container': data['Config']['Hostname'],
-                      'command': data['Config']['Cmd'],
-                      'created': data['Created'],
-                      'name': data['Name']
-                      }
+        finish = get_date_diff(
+            data['State']['FinishedAt'][:-4],
+            "%Y-%m-%dT%H:%M:%S.%f"
+        )
+        created = get_date_diff(
+            data['Created'][:-4],
+            "%Y-%m-%dT%H:%M:%S.%f"
+        )
+        exit_data = "Excited (%s) %s" % (
+            data['State']['ExitCode'],
+            finish,
+        )
+        commands = ""
+        for i in data['Config']['Cmd']:
+            commands = "%s %s" % (commands, i)
+        dict_data = [
+            data['Config']['Hostname'],
+            data['Config']['Image'],
+            commands,
+            created,
+            exit_data,
+            data['NetworkSettings']['Ports'],
+            data['Name']
+        ]
+        #         dict_data = {
+        #     'CONTAINER_ID': data['Config']['Hostname'],
+        #     'IMAGE': data['Config']['Image'],
+        #     'COMMANDS': commands,
+        #     'CREATED': created,
+        #     'STATUS': exit_data,
+        #     'PORTS': data['NetworkSettings']['Ports'],
+        #     'NAMES': data['Name']
+        # }
+
     except BaseException as e:
         raise exceptions.ParseException('Container information error',
                                         code=406)
     return dict_data
+
+
+def parse_list_container(data):
+    try:
+        created = get_date_diff(
+            data['Created']
+        )
+        names = ""
+        for i in data['Names']:
+            names = "%s %s" % (names, str(i))
+        ports = ""
+        for i in data['Ports']:
+            ports = "%s %s" % (ports, str(i))
+        out = [
+            str(data['Id']),
+            str(data['Image']),
+            str(data['Command']),
+            str(created),
+            str(data['Status']),
+            ports,
+            names
+        ]
+    except BaseException as e:
+        raise exceptions.ParseException(
+            'Container information error',
+            code=406
+        )
+    return out

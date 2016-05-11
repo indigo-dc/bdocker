@@ -88,11 +88,14 @@ def container_delete(ctx, token, container_id):
 
 @bdocker.command('ps', help="Show all containers running.")
 @token_argument
+@all_option
 @click.pass_context
-def container_list(ctx, token):
+def container_list(ctx, token, all):
     try:
-        out = ctx.obj.container_list(token)
-        utils.print_message("List in table: %s" % out)
+        out = ctx.obj.container_list(token, all)
+        headers = ['CONTAINER ID', 'IMAGE', 'COMMAND',
+                   'CREATED', 'STATUS', 'PORTS', 'NAMES']
+        utils.print_table(headers, out)
     # todo: list in table
     except BaseException as e:
             utils.print_error(e)
