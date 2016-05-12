@@ -58,3 +58,4 @@ class TestRESTIntegration(TestIntegration):
 
         self.assertEqual(200, result.status_code)
         self.assertIsNot([], result.json_body['results'])
+

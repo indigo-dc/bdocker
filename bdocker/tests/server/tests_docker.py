@@ -97,8 +97,6 @@ class TestDocker(testtools.TestCase):
         m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
         out = self.control.pull_image(image)
         self.assertIsNotNone(out)
-        self.assertIn('image_id',out)
-        self.assertIn('status',out)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_exist(self, m):
@@ -162,10 +160,10 @@ class TestDocker(testtools.TestCase):
 #######
 
     # def test_pull_real(self):
-    #     image = 'busyboxy'
+    #     image = 'ubuntu'
     #     out = self.control.pull_image(image)
     #     self.assertIsNotNone(out)
-    #
+
     # def test_log_container_real(self):
     #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91'
     #     out = self.control.logs_container(container_id)

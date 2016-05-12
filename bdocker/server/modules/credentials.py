@@ -110,11 +110,11 @@ class UserController(object):
         """
         # todo: test this method
         current_token = self._get_token_from_cache(token)
-        if "images" in current_token:
+        if "images" not in current_token:
+            current_token["images"] = []
+        if image_id not in current_token["images"]:
             current_token["images"].append(image_id)
-        else:
-            current_token["images"] = [image_id]
-        self._update_token(token, current_token)
+            self._update_token(token, current_token)
 
     def remove_image(self, token, image_id):
         """Remove image to the token record.

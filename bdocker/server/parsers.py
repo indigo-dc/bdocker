@@ -27,7 +27,26 @@ def parse_docker_log(gen_data):
     return dict_data
 
 
-def parse_docker_generator(gen_data, key='Status'):
+def parse_docker_generator(gen_data):
+    out_data = []
+    try:
+        for row in gen_data:
+            json_row = json.loads(row)
+            if 'id' in json_row:
+                message = "%s: %s" % (
+                        json_row['id'],
+                        json_row['status']
+                    )
+            else:
+                    message = json_row['status']
+            out_data.append(message)
+        return out_data
+    except BaseException as e:
+        raise exceptions.ParseException('Pull output error',
+                                        code=406)
+
+
+def parse_docker_generator1(gen_data, key='Status'):
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())

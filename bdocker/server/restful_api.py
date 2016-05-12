@@ -54,11 +54,8 @@ def pull():
         repo = data['source']
         credentials_module.authorize(token)
         result = docker_module.pull_image(repo)
-        if 'image_id' in result:
-            credentials_module.add_image(token, result['image_id'])
-            output = utils.make_json_response(201, result)
-        else:
-            output = utils.make_json_response(404, result['status'])
+        # credentials_module.add_image(token, result['image_id'])
+        output = utils.make_json_response(201, result)
         return output
     except Exception as e:
             return utils.manage_exceptions(e)
@@ -77,10 +74,11 @@ def run():
         host_dir = data.get('host_dir', None)
         docker_dir = data.get('docker_dir', None)
         working_dir = data.get('working_dir', None)
-        credentials_module.authorize_image(
-            token,
-            image_id
-        )
+        # todo: control image private
+        # credentials_module.authorize_image(
+        #     token,
+        #     image_id
+        # )
         if host_dir:
             credentials_module.authorize_directory(token, host_dir)
         container_id = docker_module.run_container(
@@ -148,7 +146,6 @@ def delete():
     results = docker_module.delete_container(container_id)
     credentials_module.remove_container(token, container_id)
     return utils.make_json_response(204, results)
-
 
 
 @app.route('/stop', methods=['POST'])
