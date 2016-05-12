@@ -59,21 +59,10 @@ class CommandController(object):
                       "detach": detach,
                       }
         if volume:
-          parameters["host_dir"] = volume["host_dir"]
-          parameters["docker_dir"] = volume["docker_dir"]
-        # -v /root/docker_test/:/tmp
+            parameters["host_dir"] = volume["host_dir"]
+            parameters["docker_dir"] = volume["docker_dir"]
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
-
-    # def container_run(self, token, image_id, script):
-    # todo: create a run for a container that already exists
-    #     path = "/run"
-    #     parameters = {"token": token,
-    #                   "image_id": image_id,
-    #                   "script": script
-    #                   }
-    #     results = self.control.execute_post(path=path, parameters=parameters)
-    #     return {"container_id": container_id, "error": err}
 
     def container_delete(self, token, container_id):
         path = "/delete"
@@ -85,7 +74,7 @@ class CommandController(object):
 
     def container_list(self, token, all=False):
         path = "/ps"
-        parameters = {"token": token, "all":all}
+        parameters = {"token": token, "all": all}
         results = self.control.execute_get(path=path, parameters=parameters)
 
         return results

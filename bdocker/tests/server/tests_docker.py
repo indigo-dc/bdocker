@@ -174,7 +174,7 @@ class TestDocker(testtools.TestCase):
     #
     # def test_list_containers_real(self):
     #     containers =['b5f659fba626','f20b77988e43']
-    #     out = self.control.list_containers(containers,all=True)
+    #     out = self.control.list_containers(containers, all=False)
     #     self.assertIsNotNone(out)
     #     self.assertEqual(2, out.__len__())
     #

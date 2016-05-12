@@ -12,6 +12,7 @@ ef57533db8e54c91ab7cdaabccc6f015:
   containers: [e825276d3717ba6db3e342717eb6ef98d597d64daa3e31cefaeae1c47eeed995]
   gid: 1000
   uid: 1000
+  images: [a83540abf000]
 prolog: {token: token_prolog}
 token1: {gid: gid1, jobid: job1, uid: uid1}
 token2: {gid: gid2, jobid: job2, uid: uid2}

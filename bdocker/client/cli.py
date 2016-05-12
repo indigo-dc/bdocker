@@ -101,7 +101,6 @@ def container_list(ctx, token, all):
         headers = ['CONTAINER ID', 'IMAGE', 'COMMAND',
                    'CREATED', 'STATUS', 'PORTS', 'NAMES']
         utils.print_table(headers, out)
-    # todo: list in table
     except BaseException as e:
             utils.print_error(e)
 

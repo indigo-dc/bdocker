@@ -23,6 +23,14 @@ from bdocker.server.modules import batch
 from bdocker.server.modules import credentials
 
 
+def eval_bool(s):
+    if s:
+        if s == 'True':
+            return True
+        else:
+            return False
+
+
 def validate(fields, mandatory_keys):
     try:
         for key in mandatory_keys:
