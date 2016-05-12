@@ -116,8 +116,6 @@ class DockerController(object):
                 host_config = self.control.create_host_config(
                     binds=['%s:%s' % (host_dir, docker_dir)]
                     )
-                if not working_dir:
-                    working_dir = docker_dir
             container_info = self.control.create_container(
                 image=image_id,
                 command=command,

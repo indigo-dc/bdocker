@@ -66,13 +66,16 @@ def container_pull(ctx, token, source):
 @image_id_argument
 @command_argument
 @d_option
+@workdir_option
 @volume_option
 @click.pass_context
-def container_run(ctx, token, image_id, script, detach, volume):
+def container_run(ctx, token, image_id,
+                  script, detach, workdir, volume):
     try:
         out = ctx.obj.container_run(
             token, image_id, detach, script,
-            volume=volume
+            workdir,
+            volume
         )
         utils.print_message(out)
     except BaseException as e:

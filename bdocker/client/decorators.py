@@ -15,7 +15,8 @@
 # under the License.
 
 import click
-from  bdocker.client.controller import utils
+
+from bdocker.client.controller import utils
 
 
 def token_argument(f):
@@ -56,18 +57,31 @@ def user_credentials(f):
 
 
 def d_option(f):
-    return click.option('--detach', '-d', default=False
-              , type = click.BOOL, is_flag=True
-              , help='Run container in background and print container ID')(f)
+    return click.option(
+        '--detach', '-d', default=False
+        , type=click.BOOL, is_flag=True
+        , help='Run container in background and print container ID'
+    )(f)
 
 
 def all_option(f):
-    return click.option('--all', '-a', default=False
-              , type = click.BOOL, is_flag=True
-              , help='Show all containers (default shows just running)')(f)
+    return click.option(
+        '--all', '-a', default=False
+        , type=click.BOOL, is_flag=True
+        , help='Show all containers (default shows just running)'
+    )(f)
 
 
 def volume_option(f):
-    return click.option('--volume', '-v', default=None, type=click.STRING
-              , callback=utils.parse_volume
-              , help='Bind mount a volume')(f)
+    return click.option(
+        '--volume', '-v', default=None, type=click.STRING
+        , callback=utils.parse_volume
+        , help='Bind mount a volume'
+    )(f)
+
+
+def workdir_option(f):
+    return click.option(
+        '--workdir', '-w', default=None, type=click.STRING
+        , help='Working directory inside the container'
+    )(f)
