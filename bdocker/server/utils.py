@@ -14,12 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from flask import jsonify
 import webob
+from flask import jsonify
 
 from bdocker.common import exceptions
-from bdocker.server import docker_helper
-from bdocker.server.modules import batch
+from bdocker.server.modules import batch, docker_helper
 from bdocker.server.modules import credentials
 
 

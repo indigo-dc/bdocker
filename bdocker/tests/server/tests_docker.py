@@ -18,7 +18,7 @@ import mock
 import testtools
 import uuid
 
-from bdocker.server import docker_helper
+from bdocker.server.modules import docker_helper
 from bdocker.server import parsers
 from bdocker.common import exceptions
 from bdocker.tests.server import fake_docker_outputs

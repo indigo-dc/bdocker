@@ -20,7 +20,6 @@ from bdocker.client.decorators import *
 from bdocker.client.controller import utils
 
 
-
 @click.group()
 @click.version_option()
 @click.pass_context
@@ -82,18 +81,6 @@ def container_run(ctx, token, image_id,
             utils.print_error(e)
 
 
-@bdocker.command('rm', help="Delete a container.")
-@token_argument
-@container_id_argument
-@click.pass_context
-def container_delete(ctx, token, container_id):
-    try:
-        out = ctx.obj.container_delete(token, container_id)
-        utils.print_message("Deleted container: %s" % out)
-    except BaseException as e:
-            utils.print_error(e)
-
-
 @bdocker.command('ps', help="Show all containers running.")
 @token_argument
 @all_option
@@ -129,7 +116,18 @@ def container_logs(ctx, token, container_id):
 def accounting(ctx, token, container_id):
     try:
         out = ctx.obj.accounting_retrieve(token, container_id)
-        utils.print_message("List in table: %s" % out)
-    # todo: list in table
+        utils.print_message(out)
+    except BaseException as e:
+            utils.print_error(e)
+
+
+@bdocker.command('rm', help="Delete a container.")
+@token_argument
+@container_id_argument
+@click.pass_context
+def container_delete(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_delete(token, container_id)
+        utils.print_message("Deleted container: %s" % out)
     except BaseException as e:
             utils.print_error(e)

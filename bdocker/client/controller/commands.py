@@ -66,14 +66,6 @@ class CommandController(object):
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
 
-    def container_delete(self, token, container_id):
-        path = "/delete"
-        parameters = {"token": token, "container_id": container_id}
-        self.control.execute_delete(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
-        message = "OK"
-        return message
-
     def container_list(self, token, all=False):
         path = "/ps"
         parameters = {"token": token, "all": all}
@@ -91,8 +83,15 @@ class CommandController(object):
         path = "/accounting"
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
         return results
+
+    def container_delete(self, token, container_id):
+        # todo(jorgesece): implement it properly
+        path = "/delete"
+        parameters = {"token": token, "container_id": container_id}
+        self.control.execute_delete(path=path, parameters=parameters)
+        message = "OK"
+        return message
 
     # def container_start(self, token, container_id):
     #     path = "/start"
