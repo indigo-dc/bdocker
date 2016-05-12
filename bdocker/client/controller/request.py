@@ -134,7 +134,8 @@ class RequestController(object):
         """
         try:
             body = utils.make_body(parameters)
-            req = self._get_req(path, body=body, method="PUT")
+            req = self._get_req(path, content_type="application/json",
+                                body=body, method="PUT")
             response = req.get_response()
         except Exception as e:
              response = webob.Response(status=500, body=str(e))

@@ -38,7 +38,7 @@ class CommandController(object):
         home_dir = user_info.get('home')
         admin_token = utils.get_admin_token(self.token_storage)
         parameters = {"token": admin_token, "user_credentials": user_info}
-        result = self.control.execute_put(path=path, parameters=parameters)
+        result = self.control.execute_post(path=path, parameters=parameters)
         token = result
         token_path = "%s/%s" % (home_dir, self.token_file)
         utils.write_user_credentials(result, token_path)
@@ -48,7 +48,7 @@ class CommandController(object):
         path = "/pull"
         parameters = {"token": token, "source": source}
 
-        results = self.control.execute_put(path=path, parameters=parameters)
+        results = self.control.execute_post(path=path, parameters=parameters)
         return results
 
     def container_run(self, token, image_id, detach, script, working_dir=None, volume=None):
@@ -63,7 +63,7 @@ class CommandController(object):
             parameters["docker_dir"] = volume["docker_dir"]
         if working_dir:
             parameters["working_dir"] = working_dir
-        results = self.control.execute_post(path=path, parameters=parameters)
+        results = self.control.execute_put(path=path, parameters=parameters)
         return results
 
     def container_list(self, token, all=False):

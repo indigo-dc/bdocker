@@ -102,6 +102,11 @@ def write_user_credentials(token, file_path):
 
 
 def print_message(message, type='OK'):
+    if isinstance(message, dict):
+        m = []
+        for k,v in message.items():
+            m.append("%s: %s" % (k,v))
+        message = m
     if not isinstance(message, list):
         message = [message]
     print

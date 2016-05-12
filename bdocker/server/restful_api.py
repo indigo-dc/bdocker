@@ -30,7 +30,7 @@ app = Flask(__name__)
 utils.set_error_handler(app)
 
 
-@app.route('/credentials', methods=['PUT'])
+@app.route('/credentials', methods=['POST'])
 def credentials():
     data = request.get_json()
     required = {'token','user_credentials'}
@@ -44,7 +44,7 @@ def credentials():
             return utils.manage_exceptions(e)
 
 
-@app.route('/pull', methods=['PUT'])
+@app.route('/pull', methods=['POST'])
 def pull():
     data = request.get_json()
     required = {'token','source'}
@@ -64,7 +64,7 @@ def pull():
             return utils.manage_exceptions(e)
 
 
-@app.route('/run', methods=['POST'])
+@app.route('/run', methods=['PUT'])
 def run():
     data = json.loads(request.data)
     required = {'token','image_id', 'script'}

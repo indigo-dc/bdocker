@@ -55,7 +55,7 @@ class TestCommands(testtools.TestCase):
                           root_control.create_credentials,
                           1)
 
-    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
     def test_create_credentials_no_root(self, m_write, m_u, m_put):
@@ -68,7 +68,7 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
 
-    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch.object(request.RequestController, "execute_post")
     def test_container_pull(self, m):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
@@ -77,7 +77,7 @@ class TestCommands(testtools.TestCase):
         results = self.control.container_pull(token, source)
         self.assertEqual(image_id, results)
 
-    @mock.patch.object(request.RequestController, "execute_post")
+    @mock.patch.object(request.RequestController, "execute_put")
     def test_container_run(self, m):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
@@ -87,8 +87,8 @@ class TestCommands(testtools.TestCase):
         results = self.control.container_run(token, image_id, False, 'ls')
         self.assertEqual(container_id, results)
 
-    @mock.patch.object(request.RequestController, "execute_post")
-    def test_container_run(self, m):
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_container_run_2(self, m):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex

@@ -53,7 +53,7 @@ def credentials_create(ctx, uid):
 def container_pull(ctx, token, source):
     try:
         out = ctx.obj.container_pull(token, source)
-        utils.print_message("Image id: %s" % out)
+        utils.print_message(out)
     except BaseException as e:
         utils.print_error(e)
 

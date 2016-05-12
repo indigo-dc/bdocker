@@ -67,7 +67,7 @@ class TestREST(server.TestConfiguration):
                       }
         body = make_body(parameters)
         result = webob.Request.blank("/credentials",
-                                     method="PUT",
+                                     method="POST",
                                      content_type="application/json",
                                      body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
@@ -88,7 +88,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
-                                     method="PUT").get_response(self.app)
+                                     method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "pull_image")
@@ -99,7 +99,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
-                                     method="GET").get_response(self.app)
+                                     method="PUT").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "pull_image")
@@ -109,7 +109,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
-                                     method="put").get_response(self.app)
+                                     method="POST").get_response(self.app)
         self.assertEqual(400, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "delete_container")
@@ -261,7 +261,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
-                                     method="POST").get_response(self.app)
+                                     method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         # todo: parse to get id
 
@@ -296,7 +296,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
-                                     method="POST").get_response(self.app)
+                                     method="PUT").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "run_container")
@@ -317,7 +317,7 @@ class TestREST(server.TestConfiguration):
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
-                                     method="POST").get_response(self.app)
+                                     method="PUT").get_response(self.app)
         self.assertEqual(400, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "accounting_container")
