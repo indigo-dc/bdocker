@@ -85,7 +85,6 @@ class CommandController(object):
         path = "/logs"
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
-        # todo(jorgesece): implement message output
         return results
 
     def accounting_retrieve(self, token, container_id):

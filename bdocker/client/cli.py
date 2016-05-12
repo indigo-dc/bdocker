@@ -116,8 +116,7 @@ def container_list(ctx, token, all):
 def container_logs(ctx, token, container_id):
     try:
         out = ctx.obj.container_logs(token, container_id)
-        utils.print_message("List in table: %s" % out)
-    # todo: list in table
+        utils.print_message(out)
     except BaseException as e:
             utils.print_error(e)
 
