@@ -16,7 +16,6 @@
 
 from flask import Flask
 from flask import json, request
-import sys
 
 from bdocker.common import utils as utils_common
 from bdocker.server import utils

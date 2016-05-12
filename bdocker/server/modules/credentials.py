@@ -19,7 +19,7 @@ import uuid
 from bdocker.common import exceptions
 from bdocker.common import utils
 
-# sys.tracebacklimit = 0
+sys.tracebacklimit = 0
 
 
 class UserController(object):
@@ -209,7 +209,7 @@ class UserController(object):
         """
         # todo: add unittest
         token_info = self._get_token_from_cache(token)
-        utils.validate_directory(dir_path, token_info['home'])
+        utils.validate_directory(dir_path, token_info['home_dir'])
 
     def authorize(self, token):
         """Check token authorization.

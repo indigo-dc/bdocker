@@ -116,12 +116,14 @@ class DockerController(object):
                 host_config = self.control.create_host_config(
                     binds=['%s:%s' % (host_dir, docker_dir)]
                     )
+                if not working_dir:
+                    working_dir = docker_dir
             container_info = self.control.create_container(
                 image=image_id,
                 command=command,
                 detach=detach,
                 host_config=host_config,
-                working_dir=docker_dir
+                working_dir=working_dir
                 # volumes=volumes
             )
             if 'Id' not in container_info:
