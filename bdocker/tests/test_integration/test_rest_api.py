@@ -59,3 +59,14 @@ class TestRESTIntegration(TestIntegration):
         self.assertEqual(200, result.status_code)
         self.assertIsNot([], result.json_body['results'])
 
+    def test_delete_real_not_exits(self,):
+
+        token = "1866e0ca1ad44a55952029817c2a5345"
+        c = "ad79aed5d227"
+        path = "/rm?token=%s&container_id=%s" % (token, c)
+        req = self.create_request(path, method="DELETE")
+        result = req.get_response(self.app)
+
+        self.assertEqual(404, result.status_code)
+        #self.assertEqual([], result.json_body['results'])
+

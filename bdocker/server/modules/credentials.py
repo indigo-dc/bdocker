@@ -181,9 +181,13 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         if container_id not in token_info['containers']:
+            len = container_id.__len__()
+            for c in token_info['containers']:
+                if container_id == c[:len]:
+                    return c
             raise exceptions.UserCredentialsException(
                 "Unauthorization error")
-        return True
+        return container_id
 
     def authorize_image(self, token, image_id):
         """Check user authorization to the container.

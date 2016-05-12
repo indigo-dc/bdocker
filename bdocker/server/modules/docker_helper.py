@@ -49,13 +49,11 @@ class DockerController(object):
 
     def delete_container(self, container_id):
         try:
-            docker_out = self.control.remove_container(
+            self.control.remove_container(
                 container=container_id)
-            result = parsers.parse_docker_generator(docker_out,
-                                                    key='Deleted')
         except BaseException as e:
-            raise exceptions.DockerException(e)
-        return result
+            raise exceptions.NotFound(e)
+        return container_id
 
     def list_containers_details(self, containers):
         result = []

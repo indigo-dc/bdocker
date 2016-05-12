@@ -82,7 +82,7 @@ def manage_exceptions(e):
     if isinstance(e, exceptions.UserCredentialsException):
         return make_json_response(401, e.message)
     if isinstance(e, exceptions.DockerException):
-        return make_json_response(500, e.message)
+        return make_json_response(e.code, e.message)
     if isinstance(e, exceptions.ParseException):
         return make_json_response(400, e.message)
     return make_json_response(500, e.message)

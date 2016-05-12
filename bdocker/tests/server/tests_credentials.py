@@ -93,7 +93,7 @@ class TestUserCredentials(testtools.TestCase):
         ath = self.control.authorize_container(
             token=t,
             container_id=c)
-        self.assertIs(True, ath)
+        self.assertIs(c, ath)
 
     def test_authorize_container_err(self):
         t = 'token'

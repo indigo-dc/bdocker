@@ -138,14 +138,18 @@ def logs():
 def delete():
     data = request.args
     required = {'token', 'container_id'}
-    utils.validate(data, required)
-    token = data['token']
-    container_id = data['container_id']
-    credentials_module.authorize_container(token,
-                                           container_id)
-    results = docker_module.delete_container(container_id)
-    credentials_module.remove_container(token, container_id)
-    return utils.make_json_response(204, results)
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        c_id = credentials_module.authorize_container(
+            token,
+            container_id)
+        results = docker_module.delete_container(c_id)
+        credentials_module.remove_container(token, c_id)
+        return utils.make_json_response(204, results)
+    except Exception as e:
+        return utils.manage_exceptions(e)
 
 
 @app.route('/stop', methods=['POST'])
