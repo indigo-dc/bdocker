@@ -85,6 +85,15 @@ class ParseException(Exception):
         return repr(self.message)
 
 
+class NotFound(Exception):
+    def __init__(self, message, code=404):
+        self.message = message
+        self.code = code
+
+    def __str__(self):
+        return repr(self.message)
+
+
 class UserCredentialsException(Exception):
 
     def __init__(self, message):

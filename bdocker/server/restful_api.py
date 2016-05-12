@@ -34,64 +34,107 @@ utils.set_error_handler(app)
 def credentials():
     data = request.get_json()
     required = {'token','user_credentials'}
-    utils.validate(data, required)
-    token = data['token']
-    user = data['user_credentials']
-    results = credentials_module.authenticate(token, user)
-    return utils.make_json_response(201, results)
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        user = data['user_credentials']
+        results = credentials_module.authenticate(token, user)
+        return utils.make_json_response(201, results)
+    except Exception as e:
+            return utils.manage_exceptions(e)
 
 
 @app.route('/pull', methods=['PUT'])
 def pull():
     data = request.get_json()
     required = {'token','source'}
-    utils.validate(data, required)
-    token = data['token']
-    repo = data['source']
-    credentials_module.authorize(token)
-    result = docker_module.pull_image(repo)
-    if 'image_id' in result:
-        credentials_module.add_image(token, result['image_id'])
-        output = utils.make_json_response(201, result)
-    else:
-        output = utils.make_json_response(500, result['status'])
-    return output
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        repo = data['source']
+        credentials_module.authorize(token)
+        result = docker_module.pull_image(repo)
+        if 'image_id' in result:
+            credentials_module.add_image(token, result['image_id'])
+            output = utils.make_json_response(201, result)
+        else:
+            output = utils.make_json_response(404, result['status'])
+        return output
+    except Exception as e:
+            return utils.manage_exceptions(e)
 
 
 @app.route('/run', methods=['POST'])
 def run():
     data = json.loads(request.data)
     required = {'token','image_id', 'script'}
-    utils.validate(data, required)
-    token = data['token']
-    image_id = data['image_id']
-    script = data['script']
-    detach = data.get('detach', False)
-    host_dir = data.get('host_dir', None)
-    docker_dir = data.get('docker_dir', None)
-    working_dir = data.get('working_dir', None)
-    credentials_module.authorize_image(
-        token,
-        image_id
-    )
-    if host_dir:
-        credentials_module.authorize_directory(token, host_dir)
-    container_id = docker_module.run_container(
-        image_id,
-        detach,
-        script,
-        host_dir=host_dir,
-        docker_dir=docker_dir,
-        working_dir=working_dir
-    )
-    credentials_module.add_container(token, container_id)
-    docker_module.start_container(container_id)
-    if detach:
-        results = docker_module.logs_container(container_id)
-    else:
-        results = container_id
-    return utils.make_json_response(201, results)
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        image_id = data['image_id']
+        script = data['script']
+        detach = data.get('detach', False)
+        host_dir = data.get('host_dir', None)
+        docker_dir = data.get('docker_dir', None)
+        working_dir = data.get('working_dir', None)
+        credentials_module.authorize_image(
+            token,
+            image_id
+        )
+        if host_dir:
+            credentials_module.authorize_directory(token, host_dir)
+        container_id = docker_module.run_container(
+            image_id,
+            detach,
+            script,
+            host_dir=host_dir,
+            docker_dir=docker_dir,
+            working_dir=working_dir
+        )
+        credentials_module.add_container(token, container_id)
+        docker_module.start_container(container_id)
+        if detach:
+            results = docker_module.logs_container(container_id)
+        else:
+            results = container_id
+        return utils.make_json_response(201, results)
+    except Exception as e:
+        return utils.manage_exceptions(e)
 
+
+@app.route('/ps', methods=['GET'])
+def list():
+    data = request.args
+    required = {'token'}
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        all_list = utils.eval_bool(data.get('all', False))
+        containers = credentials_module.list_containers(token)
+        results = docker_module.list_containers(containers, all=all_list)
+        return utils.make_json_response(200, results)
+    except Exception as e:
+        return utils.manage_exceptions(e)
+
+
+@app.route('/logs', methods=['GET'])
+def logs():
+    data = request.args
+    required = {'token'}
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        credentials_module.authorize_container(token,
+                                               container_id)
+        results = docker_module.logs_container(container_id)
+        return utils.make_json_response(200, results)
+    except Exception as e:
+        return utils.manage_exceptions(e)
+
+########################
+### UN IMPLEMENTED ####
+######################
 
 @app.route('/rm', methods=['DELETE'])
 def delete():
@@ -106,43 +149,6 @@ def delete():
     credentials_module.remove_container(token, container_id)
     return utils.make_json_response(204, results)
 
-
-@app.route('/ps', methods=['GET'])
-def list():
-    data = request.args
-    required = {'token'}
-    utils.validate(data, required)
-    token = data['token']
-    all_list = utils.eval_bool(data.get('all', False))
-    containers = credentials_module.list_containers(token)
-    results = docker_module.list_containers(containers, all=all_list)
-    return utils.make_json_response(200, results)
-
-
-@app.route('/logs', methods=['GET'])
-def logs():
-    data = request.args
-    required = {'token'}
-    utils.validate(data, required)
-    token = data['token']
-    container_id = data['container_id']
-    credentials_module.authorize_container(token,
-                                           container_id)
-    results = docker_module.logs_container(container_id)
-    return utils.make_json_response(200, results)
-
-
-# @app.route('/start', methods=['POST'])
-# def start():
-#     data = json.loads(request.data)
-#     required = {'token','container_id'}
-#     utils.validate(data, required)
-#     token = data['token']
-#     container_id = data['container_id']
-#     credentials_module.authorize_container(token,
-#                                            container_id)
-#     results = docker_module.start_container(container_id)
-#     return utils.make_json_response(201, results)
 
 
 @app.route('/stop', methods=['POST'])
