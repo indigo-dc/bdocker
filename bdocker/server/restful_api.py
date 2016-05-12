@@ -75,6 +75,8 @@ def run():
         token,
         image_id
     )
+    if host_dir:
+        credentials_module.authorize_directory(token, host_dir)
     container_id = docker_module.run_container(
         image_id,
         detach,

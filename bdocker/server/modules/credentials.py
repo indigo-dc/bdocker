@@ -53,6 +53,7 @@ class UserController(object):
         new_token = {token: {
                             'uid': user_info['uid'],
                             'gid': user_info['gid'],
+                            'home_dir': user_info['home']
                             }
                     }
         self.token_store.update(new_token)
@@ -199,6 +200,16 @@ class UserController(object):
             raise exceptions.UserCredentialsException(
                 "Unauthorization error")
         return True
+
+    def authorize_directory(self, token, dir_path):
+        """Check user authorization to the container.
+
+        :param token: user token
+        :param dir_path: directory for validation
+        """
+        # todo: add unittest
+        token_info = self._get_token_from_cache(token)
+        utils.validate_directory(dir_path, token_info['home'])
 
     def authorize(self, token):
         """Check token authorization.

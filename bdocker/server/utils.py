@@ -58,8 +58,7 @@ def load_batch_module(conf):
 
 def load_docker_module(conf):
     return docker_helper.DockerController(
-        conf['dockerAPI']['base_url'],
-        conf['dockerAPI']['work_dir']
+        conf['dockerAPI']['base_url']
     )
 
 

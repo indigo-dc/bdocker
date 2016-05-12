@@ -6,13 +6,16 @@
     2375b2c894c653ad1de160ca2a1c615b75ed4a61a80de004c5d40c45326a3941, 95eb91dc2b97a09d910bad42f973d2a875d0f4505de8fcdfb75b84f40fe7fe7f,
     06b33f526331de4bd4869465c6c53e3312f19e88989b9ee25c72d81ad8744fa3, f1f5e1dbaf52b237eeba927ae8c39204aaa290f8008eb2090ba0bd6f5642bb49]
   gid: 1000
+  home_dir: /home/jorge
   images: [a83540abf000]
   uid: 1000
+7aea1d59551942e7a8931f40aa06e6e4: {gid: 1000, home_dir: /home/jorge, uid: 1000}
 ef57533db8e54c91ab7cdaabccc6f015:
   containers: [e825276d3717ba6db3e342717eb6ef98d597d64daa3e31cefaeae1c47eeed995]
   gid: 1000
-  uid: 1000
   images: [a83540abf000]
+  uid: 1000
+  home_dir: /home/jorge
 prolog: {token: token_prolog}
-token1: {gid: gid1, jobid: job1, uid: uid1}
-token2: {gid: gid2, jobid: job2, uid: uid2}
+token1: {gid: gid1, jobid: job1, uid: uid1, home_dir: /fake}
+token2: {gid: gid2, jobid: job2, uid: uid2, home_dir: /fake}

@@ -35,7 +35,7 @@ class CommandController(object):
     def create_credentials(self, uid):
         path = "/credentials"
         user_info = utils.get_user_credentials(uid)
-        home_dir = user_info.pop('home')
+        home_dir = user_info.get('home')
         admin_token = utils.get_admin_token(self.token_storage)
         parameters = {"token": admin_token, "user_credentials": user_info}
         result = self.control.execute_put(path=path, parameters=parameters)

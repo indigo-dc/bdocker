@@ -24,12 +24,11 @@ from bdocker.server import parsers
 
 class DockerController(object):
 
-    def __init__(self, url, working_dir='/tmp'):
+    def __init__(self, url):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
         self.control = docker_py.Client(base_url=url, version='1.19')
-        self.working_dir = working_dir
 
     def pull_image(self, repo, tag='latest'):
         try:

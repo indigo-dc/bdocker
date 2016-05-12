@@ -24,7 +24,8 @@ def create_parameters():
         parameters = {"token":"tokennnnnn"
                         ,"user_credentials":
                         {'uid': 'uuuuuuuuuuiiiidddddd',
-                         'gid': 'gggggggggguuuiiidd'}
+                         'gid': 'gggggggggguuuiiidd',
+                         'home': '/home'}
                     }
         return parameters
 
@@ -53,6 +54,7 @@ class TestUserCredentials(testtools.TestCase):
         u = create_parameters()['user_credentials']
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
+        self.control.remove_token_from_cache(token)
         self.assertIsNotNone(token)
 
     def test_authenticate_save_file(self):
@@ -61,12 +63,10 @@ class TestUserCredentials(testtools.TestCase):
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
         self.assertIsNotNone(token)
-        self.control.save_token_file()
         new_controller = credentials.UserController(self.path)
         user_info1 = new_controller._get_token_from_cache(token)
-        self.assertEqual(2, user_info1.__len__())
+        self.assertEqual(3, user_info1.__len__())
         new_controller.remove_token_from_cache(token)
-        new_controller.save_token_file()
         self.assertRaises(exceptions.UserCredentialsException,
                           new_controller._get_token_from_cache,
                           token)
@@ -75,6 +75,12 @@ class TestUserCredentials(testtools.TestCase):
         t = 'token2'
         ath = self.control.authorize(t)
         self.assertIsNotNone(ath)
+        self.assertIsNotNone(ath['uid'])
+        self.assertIsNotNone(ath['home_dir'])
+        self.assertIsNotNone(ath['gid'])
+        self.assertIsNotNone(ath['containers'])
+        self.assertIsNotNone(ath['images'])
+        self.assertIsNotNone(ath['jobid'])
 
     def test_authorize_err(self):
         t = 'token'

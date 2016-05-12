@@ -79,6 +79,17 @@ def validate_config(conf):
             raise exceptions.ParseException('dockerAPI:' + key)
 
 
+def validate_directory(dir_request, dir_user):
+    real_path = os.path.realpath(dir_request)
+    prefix = os.path.commonprefix([real_path, dir_user])
+    if prefix != dir_user:
+        raise exceptions.UserCredentialsException(
+            "User does not have permissons for %s"
+            % real_path
+        )
+
+
+
 def read_yaml_file(path):
     f = open(path, 'r')
     data = f.read()
