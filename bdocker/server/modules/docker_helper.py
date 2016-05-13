@@ -52,7 +52,7 @@ class DockerController(object):
             self.control.remove_container(
                 container=container_id)
         except BaseException as e:
-            raise exceptions.NotFound(e)
+            raise exceptions.DockerException(e)
         return container_id
 
     def list_containers_details(self, containers):
@@ -80,6 +80,15 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
         return result
+
+    def container_details(self, container_id):
+        result = []
+        try:
+            docker_out = self.control.inspect_container(container_id)
+            details = parsers.parse_list_container(docker_out)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return details
 
     def logs_container(self, container_id):
         try:
@@ -130,6 +139,7 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return container_id
 
+# NO IMPLEMENTED
     def accounting_container(self, container_id):
         raise exceptions.DockerException()
 

@@ -41,7 +41,7 @@ def credentials_create(ctx, uid):
             % (out["token"], out["path"])
         )
     except BaseException as e:
-        utils.print_error(e)
+        utils.print_error(e.message)
 
 
 @bdocker.command('pull',
@@ -55,7 +55,7 @@ def container_pull(ctx, token, source):
         out = ctx.obj.container_pull(token, source)
         utils.print_message(out)
     except BaseException as e:
-        utils.print_error(e)
+        utils.print_error(e.message)
 
 
 @bdocker.command('run', help="Creates a writeable container "
@@ -78,7 +78,7 @@ def container_run(ctx, token, image_id,
         )
         utils.print_message(out)
     except BaseException as e:
-            utils.print_error(e)
+        utils.print_error(e.message)
 
 
 @bdocker.command('ps', help="Show all containers running.")
@@ -92,7 +92,7 @@ def container_list(ctx, token, all):
                    'CREATED', 'STATUS', 'PORTS', 'NAMES']
         utils.print_table(headers, out)
     except BaseException as e:
-            utils.print_error(e)
+        utils.print_error(e.message)
 
 
 @bdocker.command('logs', help="Retrieves logs present at"
@@ -105,7 +105,35 @@ def container_logs(ctx, token, container_id):
         out = ctx.obj.container_logs(token, container_id)
         utils.print_message(out)
     except BaseException as e:
-            utils.print_error(e)
+        utils.print_error(e.message)
+
+
+@bdocker.command('inspect', help="Return low-level"
+                                 " information "
+                                 "on a container or image")
+@token_argument
+@container_id_argument
+@click.pass_context
+def container_inspect(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_inspect(token, container_id)
+        utils.print_message(out)
+    except BaseException as e:
+        utils.print_error(e.message)
+
+
+@bdocker.command('rm', help="Delete a container.")
+@token_argument
+@container_id_argument
+@click.pass_context
+def container_delete(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_delete(token, container_id)
+        utils.print_message(out)
+    except BaseException as e:
+        m = ("Error: failed to remove containers: [%s]" %
+             container_id)
+        utils.print_error(m)
 
 
 @bdocker.command('accounting',
@@ -118,16 +146,4 @@ def accounting(ctx, token, container_id):
         out = ctx.obj.accounting_retrieve(token, container_id)
         utils.print_message(out)
     except BaseException as e:
-            utils.print_error(e)
-
-
-@bdocker.command('rm', help="Delete a container.")
-@token_argument
-@container_id_argument
-@click.pass_context
-def container_delete(ctx, token, container_id):
-    try:
-        out = ctx.obj.container_delete(token, container_id)
-        utils.print_message("Deleted container: %s" % out)
-    except BaseException as e:
-            utils.print_error(e)
+        utils.print_error(e.message)

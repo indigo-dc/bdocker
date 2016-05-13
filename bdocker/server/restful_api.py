@@ -109,11 +109,28 @@ def list():
         token = data['token']
         all_list = utils.eval_bool(data.get('all', False))
         containers = credentials_module.list_containers(token)
-        results = docker_module.list_containers(containers, all=all_list)
+        results = docker_module.list_containers(containers,
+                                                all=all_list)
         return utils.make_json_response(200, results)
     except Exception as e:
         return utils.manage_exceptions(e)
 
+
+@app.route('/inspect', methods=['GET'])
+def show():
+    data = request.args
+    required = {'token'}
+    try:
+        utils.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        c_id = credentials_module.authorize_container(
+            token,
+            container_id)
+        results = docker_module.container_details(c_id)
+        return utils.make_json_response(200, results)
+    except Exception as e:
+        return utils.manage_exceptions(e)
 
 @app.route('/logs', methods=['GET'])
 def logs():
@@ -130,9 +147,6 @@ def logs():
     except Exception as e:
         return utils.manage_exceptions(e)
 
-########################
-### UN IMPLEMENTED ####
-######################
 
 @app.route('/rm', methods=['DELETE'])
 def delete():
@@ -150,6 +164,11 @@ def delete():
         return utils.make_json_response(204, results)
     except Exception as e:
         return utils.manage_exceptions(e)
+
+
+########################
+### UN IMPLEMENTED ####
+######################
 
 
 @app.route('/stop', methods=['POST'])

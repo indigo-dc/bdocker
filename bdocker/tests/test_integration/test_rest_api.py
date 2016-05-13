@@ -62,7 +62,7 @@ class TestRESTIntegration(TestIntegration):
     def test_delete_real_not_exits(self,):
 
         token = "1866e0ca1ad44a55952029817c2a5345"
-        c = "ad79aed5d227"
+        c = "15fab180d4cd"
         path = "/rm?token=%s&container_id=%s" % (token, c)
         req = self.create_request(path, method="DELETE")
         result = req.get_response(self.app)

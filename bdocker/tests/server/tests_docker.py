@@ -159,13 +159,13 @@ class TestDocker(testtools.TestCase):
 # REAL
 #######
 
-    # def test_pull_real(self):
-    #     image = 'ubuntu'
-    #     out = self.control.pull_image(image)
-    #     self.assertIsNotNone(out)
+    def test_pull_real(self):
+        image = 'ubuntu'
+        out = self.control.pull_image(image)
+        self.assertIsNotNone(out)
 
     # def test_log_container_real(self):
-    #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91'
+    #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91
     #     out = self.control.logs_container(container_id)
     #     self.assertIsNotNone(out)
     #     self.assertEqual(2, out.__len__())

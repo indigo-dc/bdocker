@@ -116,8 +116,8 @@ def print_message(message, type='OK'):
     print
 
 
-def print_error(e):
-    print_message(e.message, 'FAIL')
+def print_error(message):
+    print_message(message, 'FAIL')
 
 
 def print_table(headers, rows, title=None, err=False):

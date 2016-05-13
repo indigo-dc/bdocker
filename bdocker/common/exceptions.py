@@ -116,21 +116,17 @@ class DockerException(Exception):
         return repr(self.message)
 
 
-class NotFound(DockerException):
-    def __init__(self, exc):
-        super(NotFound, self).__init__(exc)
-        self.code=404
-
 def get_exception_details(ex=None, message=None, code=None):
     if ex:
-        if hasattr(ex, 'explanation'):
-            message = str(ex.explanation)
-        elif hasattr(ex, 'message'):
-            message = str(ex.message)
-
-        if hasattr(ex, 'status_code'):
+        if hasattr(ex, 'response'):
+            message = ex.response.text
             code = ex.response.status_code
-        elif hasattr(ex, 'code'):
-            code = ex.code
+        else:
+            if hasattr(ex, 'explanation'):
+                message = str(ex.explanation)
+            elif hasattr(ex, 'message'):
+                message = str(ex.message)
+            if hasattr(ex, 'code'):
+                code = ex.code
     details = {"message": message, "code": code}
     return details
