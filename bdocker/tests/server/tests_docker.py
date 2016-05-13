@@ -155,58 +155,5 @@ class TestDocker(testtools.TestCase):
     def test_accouning_error(self):
         self.assertRaises(exceptions.DockerException, self.control.accounting_container, None)
 
-#########
-# REAL
-#######
 
-    def test_pull_real(self):
-        image = 'ubuntu'
-        out = self.control.pull_image(image)
-        self.assertIsNotNone(out)
-
-    # def test_log_container_real(self):
-    #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91
-    #     out = self.control.logs_container(container_id)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
-    #
-    # def test_list_containers_real(self):
-    #     containers =['b5f659fba626','f20b77988e43']
-    #     out = self.control.list_containers(containers, all=False)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(2, out.__len__())
-    #
-    # def test_run_container_real(self):
-    #     image_id = 'a83540abf000'
-    #     script = './bdocker_script.sh'
-    #     detach = True
-    #     host_dir = "/root/docker_test/"
-    #     docker_dir = "/tmp"
-    #     container_id = self.control.run_container(image_id,
-    #                                          detach=detach,
-    #                                          command=script,
-    #                                          working_dir=docker_dir,
-    #                                          host_dir=host_dir,
-    #                                          docker_dir=docker_dir)
-    #     self.control.start_container(container_id)
-    #     out = self.control.logs_container(container_id)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(1, out.__len__())
-    #
-    # def test_run_container_real_ls(self):
-    #     image_id = 'a83540abf000'
-    #     script = 'ls'
-    #     detach = True
-    #     host_dir = None #"/root/docker_test/"
-    #     docker_dir = None # "/tmp"
-    #     container_id = self.control.run_container(image_id,
-    #                                          detach=detach,
-    #                                          command=script,
-    #                                          working_dir=docker_dir,
-    #                                          host_dir=host_dir,
-    #                                          docker_dir=docker_dir)
-    #     self.control.start_container(container_id)
-    #     out = self.control.logs_container(container_id)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(1, out.__len__())
 

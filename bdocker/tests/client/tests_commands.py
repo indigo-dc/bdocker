@@ -46,26 +46,24 @@ class TestCommands(testtools.TestCase):
                           commands.CommandController,
                           err_file)
 
-    def test_create_credentials_token_in_root(self):
-        err_file = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
-                    "bdocker/bdocker/tests/client/"
-                    "configure_bdocker_root.cfg")
-        root_control = commands.CommandController(err_file)
+    @mock.patch.object(request.RequestController, "execute_post")
+    def test_create_credentials_token_error(self, m):
+        m.side_effect = exceptions.UserCredentialsException('')
         self.assertRaises(exceptions.UserCredentialsException,
-                          root_control.create_credentials,
+                          self.control.create_credentials,
                           1)
 
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    def test_create_credentials_no_root(self, m_write, m_u, m_put):
-        token = uuid.uuid4().hex
+    def test_create_credentials(self, m_write, m_u, m_put):
+        admin_token = uuid.uuid4().hex
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
-        m_put.return_value = token
+        m_put.return_value = admin_token
         u = self.control.create_credentials(1000)
         self.assertIsNotNone(u)
-        self.assertEqual(token, u['token'])
+        self.assertEqual(admin_token, u['token'])
         self.assertIn(home_dir, u['path'])
 
     @mock.patch.object(request.RequestController, "execute_post")

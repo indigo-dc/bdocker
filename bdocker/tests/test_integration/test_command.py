@@ -37,8 +37,8 @@ class TestIntegration(testtools.TestCase):
 #         super(TestRESTIntegration, self).setUp()
 
 
-    def test_ps_real(self):
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        all = False
-        result = self.controller.container_list(token, all)
-        self.assertEqual([], result)
+    # def test_ps_real(self):
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     all = False
+    #     result = self.controller.container_list(token, all)
+    #     self.assertEqual([], result)

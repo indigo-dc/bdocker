@@ -37,46 +37,46 @@ class TestRESTIntegration(TestIntegration):
     def setUp(self):
         super(TestRESTIntegration, self).setUp()
 
-    def test_ps_real(self,):
-
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        all = False
-        path = "/ps?token=%s&all=%s" % (token, all)
-        req = self.create_request(path, method="GET")
-        result = req.get_response(self.app)
-
-        self.assertEqual(200, result.status_code)
-        self.assertEqual([], result.json_body['results'])
-
-    def test_ps_real_all(self):
-
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        all = True
-        path = "/ps?token=%s&all=%s" % (token, all)
-        req = self.create_request(path, method="GET")
-        result = req.get_response(self.app)
-
-        self.assertEqual(200, result.status_code)
-        self.assertIsNot([], result.json_body['results'])
-
-    def test_delete_real_not_exits(self,):
-
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        c = "15fab180d4cd"
-        path = "/rm?token=%s&container_id=%s" % (token, c)
-        req = self.create_request(path, method="DELETE")
-        result = req.get_response(self.app)
-
-        self.assertEqual(404, result.status_code)
-        #self.assertEqual([], result.json_body['results'])
-
-    def test_inspect(self):
-
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        c = "70f2bff1259a"
-        path = "/inspect?token=%s&container_id=%s" % (token, c)
-        req = self.create_request(path, method="GET")
-        result = req.get_response(self.app)
-
-        self.assertEqual(200, result.status_code)
+    # def test_ps_real(self,):
+    #
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     all = False
+    #     path = "/ps?token=%s&all=%s" % (token, all)
+    #     req = self.create_request(path, method="GET")
+    #     result = req.get_response(self.app)
+    #
+    #     self.assertEqual(200, result.status_code)
+    #     self.assertEqual([], result.json_body['results'])
+    #
+    # def test_ps_real_all(self):
+    #
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     all = True
+    #     path = "/ps?token=%s&all=%s" % (token, all)
+    #     req = self.create_request(path, method="GET")
+    #     result = req.get_response(self.app)
+    #
+    #     self.assertEqual(200, result.status_code)
+    #     self.assertIsNot([], result.json_body['results'])
+    #
+    # def test_delete_real_not_exits(self,):
+    #
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     c = "15fab180d4cd"
+    #     path = "/rm?token=%s&container_id=%s" % (token, c)
+    #     req = self.create_request(path, method="DELETE")
+    #     result = req.get_response(self.app)
+    #
+    #     self.assertEqual(404, result.status_code)
+    #     #self.assertEqual([], result.json_body['results'])
+    #
+    # def test_inspect(self):
+    #
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     c = "70f2bff1259a"
+    #     path = "/inspect?token=%s&container_id=%s" % (token, c)
+    #     req = self.create_request(path, method="GET")
+    #     result = req.get_response(self.app)
+    #
+    #     self.assertEqual(200, result.status_code)
 

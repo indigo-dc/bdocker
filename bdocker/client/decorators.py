@@ -19,6 +19,14 @@ import click
 from bdocker.client.controller import utils
 
 
+def endpoint_argument(f):
+    return click.option(
+        '--host', '-H', default=False
+        , type=click.STRING
+        , help='BDocker server endpoint'
+    )(f)
+
+
 def token_argument(f):
     return click.argument('token'
                           , type=click.STRING

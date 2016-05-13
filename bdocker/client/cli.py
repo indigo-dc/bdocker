@@ -22,10 +22,11 @@ from bdocker.client.controller import utils
 
 @click.group()
 @click.version_option()
+@endpoint_argument
 @click.pass_context
-def bdocker(ctx):
+def bdocker(ctx, host):
     """Manages docker execution on batch systems."""
-    ctx.obj = commands.CommandController()
+    ctx.obj = commands.CommandController(endpoint=host)
 
 
 @bdocker.command('credentials',
@@ -37,7 +38,7 @@ def credentials_create(ctx, uid):
     try:
         out = ctx.obj.create_credentials(uid)
         utils.print_message(
-            "User token: %s Path: %s"
+            "{User token: %s, Path: %s}"
             % (out["token"], out["path"])
         )
     except BaseException as e:

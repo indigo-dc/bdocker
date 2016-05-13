@@ -21,11 +21,12 @@ from bdocker.client.controller import utils
 
 class CommandController(object):
 
-    def __init__(self, conf_file=None):
+    def __init__(self, conf_file=None, endpoint=None):
         conf = utils_common.load_configuration(conf_file)
         try:
-            endpoint = "http://%s:%s" % (conf['server']['host'],
-                                         conf['server']['port'])
+            if not endpoint:
+                endpoint = "http://%s:%s" % (conf['server']['host'],
+                                             conf['server']['port'])
             self.control = request.RequestController(endopoint=endpoint)
             self.token_file = conf["credentials"]['token_client_file']
             self.token_storage = conf["credentials"]['token_store']
