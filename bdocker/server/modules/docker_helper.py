@@ -53,7 +53,6 @@ class DockerController(object):
                 container=container_id)
         except BaseException as e:
             raise exceptions.DockerException(e)
-        return container_id
 
     def list_containers_details(self, containers):
         result = []
@@ -82,10 +81,9 @@ class DockerController(object):
         return result
 
     def container_details(self, container_id):
-        result = []
         try:
             docker_out = self.control.inspect_container(container_id)
-            details = parsers.parse_list_container(docker_out)
+            details = parsers.parse_inspect_container(docker_out)
         except BaseException as e:
             raise exceptions.DockerException(e)
         return details
@@ -106,10 +104,6 @@ class DockerController(object):
             self.control.start(container=container_id)
         except BaseException as e:
             raise exceptions.DockerException(e)
-
-    def stop_container(self, container_id):
-        self.control.stop(container=container_id)
-        return "stop container"
 
     def run_container(self, image_id, detach, command,
                       working_dir=None, host_dir=None, docker_dir=None):
@@ -140,6 +134,11 @@ class DockerController(object):
         return container_id
 
 # NO IMPLEMENTED
+
+    def stop_container(self, container_id):
+        self.control.stop(container=container_id)
+        return "stop container"
+
     def accounting_container(self, container_id):
         raise exceptions.DockerException()
 

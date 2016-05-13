@@ -119,7 +119,9 @@ def container_inspect(ctx, token, container_id):
         out = ctx.obj.container_inspect(token, container_id)
         utils.print_message(out)
     except BaseException as e:
-        utils.print_error(e.message)
+        m = ("Error: failed to remove containers: [%s]" %
+             container_id)
+        utils.print_error(m)
 
 
 @bdocker.command('rm', help="Delete a container.")

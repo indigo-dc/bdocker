@@ -116,7 +116,7 @@ class DockerException(Exception):
         return repr(self.message)
 
 
-def get_exception_details(ex=None, message=None, code=None):
+def get_exception_details(ex=None, custom_message=None, custom_code=None):
     if ex:
         if hasattr(ex, 'response'):
             message = ex.response.text
@@ -128,5 +128,9 @@ def get_exception_details(ex=None, message=None, code=None):
                 message = str(ex.message)
             if hasattr(ex, 'code'):
                 code = ex.code
+    if custom_message:
+        message = custom_message
+    if custom_code:
+        code = custom_code
     details = {"message": message, "code": code}
     return details

@@ -164,3 +164,8 @@ def parse_list_container(data):
             code=406
         )
     return out
+
+
+def parse_inspect_container(data):
+    json_data = json.dumps([data], indent=2)
+    return json_data
