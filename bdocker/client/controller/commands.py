@@ -15,23 +15,23 @@
 # under the License.
 from bdocker.client.controller import request
 from bdocker.common import exceptions
-from bdocker.common import utils as utils_common
 from bdocker.client.controller import utils
 
 
 class CommandController(object):
 
-    def __init__(self, conf_file=None, endpoint=None):
-        conf = utils_common.load_configuration(conf_file)
+    def __init__(self, endpoint=None):
         try:
+            conf = utils.load_configuration()
             if not endpoint:
-                endpoint = "http://%s:%s" % (conf['server']['host'],
-                                             conf['server']['port'])
+                endpoint = conf['endpoint']
+            self.token_file = conf["token_file"]
+            self.token_storage = conf["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
-            self.token_file = conf["credentials"]['token_client_file']
-            self.token_storage = conf["credentials"]['token_store']
         except Exception as e:
-            raise exceptions.ConfigurationException("Reading file: %s" % conf_file)
+            raise exceptions.ConfigurationException("Configuring server %s"
+                                                    % endpoint
+                                                    )
 
     def create_credentials(self, uid):
         path = "/credentials"

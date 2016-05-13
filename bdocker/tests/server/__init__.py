@@ -16,7 +16,7 @@
 
 import testtools
 
-from bdocker.common import utils
+from bdocker.server import utils
 from bdocker.common import exceptions
 
 

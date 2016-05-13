@@ -23,8 +23,8 @@ from bdocker.client.controller import commands
 class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
-        conf = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
-        self.controller = commands.CommandController(conf)
+        endpoint = "http://127.0.0.33:5000"
+        self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",
 #                        **kwargs):
@@ -37,8 +37,8 @@ class TestIntegration(testtools.TestCase):
 #         super(TestRESTIntegration, self).setUp()
 
 
-    # def test_ps_real(self):
-    #     token = "1866e0ca1ad44a55952029817c2a5345"
-    #     all = False
-    #     result = self.controller.container_list(token, all)
-    #     self.assertEqual([], result)
+    def test_ps_real(self):
+        token = "1866e0ca1ad44a55952029817c2a5345"
+        all = False
+        result = self.controller.container_list(token, all)
+        self.assertEqual([], result)

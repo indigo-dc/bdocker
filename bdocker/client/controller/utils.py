@@ -13,9 +13,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from tabulate import tabulate
+import ConfigParser
 import json
+import os
 import pwd
+from tabulate import tabulate
 import six
 
 from bdocker.common import exceptions
@@ -35,6 +37,22 @@ colors = { 'FAIL' : '\033[91m',
 messages = { "empty": colors['FAIL'] + ' "Parsing error" ' + colors['ENDC'],
             "error": "There was an error"
           }
+
+
+def load_configuration():
+    token_store = os.getenv(
+        'BDOCKER_TOKEN_STORE',
+        '/root/.bdocker_token_store')
+    endpoint = os.getenv(
+        'BDOCKER_ENDPOINT',
+        'http://127.0.0.33:5000')
+    token_file = os.getenv(
+        'BDOCKER_USER_TOKEN_FILE',
+        '.bdocker')
+    return {'token_store':token_store,
+            'endpoint': endpoint,
+            'token_file': token_file
+            }
 
 
 def utf8(value):

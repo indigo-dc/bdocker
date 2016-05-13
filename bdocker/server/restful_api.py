@@ -17,10 +17,9 @@
 from flask import Flask
 from flask import json, request
 
-from bdocker.common import utils as utils_common
 from bdocker.server import utils
 
-conf = utils_common.load_configuration()
+conf = utils.load_configuration()
 credentials_module = utils.load_credentials_module(conf)
 batch_module = utils.load_batch_module(conf)
 docker_module = utils.load_docker_module(conf)

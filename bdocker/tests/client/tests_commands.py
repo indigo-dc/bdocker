@@ -33,18 +33,14 @@ class TestCommands(testtools.TestCase):
                 "bdocker/common/configure_bdocker.cfg")
         self.control = commands.CommandController(path)
 
-    def test_create_command_with_root_file(self):
-        self.assertRaises(exceptions.UserCredentialsException,
-                          commands.CommandController,
-                          '/root/.config')
 
-    def test_create_configuration_error(self):
-        err_file = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
-                    "bdocker/bdocker/tests/client/"
-                    "configure_bdocker_error.cfg")
+    @mock.patch('bdocker.client.controller.utils.load_configuration')
+    def test_create_configuration_error(self, m):
+        conf = {"token_file"}
+        m.return_value = conf
         self.assertRaises(exceptions.ConfigurationException,
-                          commands.CommandController,
-                          err_file)
+                          commands.CommandController
+                          )
 
     @mock.patch.object(request.RequestController, "execute_post")
     def test_create_credentials_token_error(self, m):
@@ -56,7 +52,8 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    def test_create_credentials(self, m_write, m_u, m_put):
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    def test_create_credentials(self, m_ad,m_write, m_u, m_put):
         admin_token = uuid.uuid4().hex
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
