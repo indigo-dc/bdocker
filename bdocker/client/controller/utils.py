@@ -42,10 +42,10 @@ messages = { "empty": colors['FAIL'] + ' "Parsing error" ' + colors['ENDC'],
 def load_configuration():
     token_store = os.getenv(
         'BDOCKER_TOKEN_STORE',
-        '/root/.bdocker_token_store')
+        '/root/.bdocker_token_store.yaml')
     endpoint = os.getenv(
         'BDOCKER_ENDPOINT',
-        'http://127.0.0.33:5000')
+        'http://localhost:5000')
     token_file = os.getenv(
         'BDOCKER_USER_TOKEN_FILE',
         '.bdocker')
