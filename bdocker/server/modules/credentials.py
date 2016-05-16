@@ -164,9 +164,9 @@ class UserController(object):
         """
         token_info = self._get_token_from_cache(token)
         if 'containers' not in token_info:
-            raise exceptions.UserCredentialsException(
-                "No container related to %s"
-                % token)
+            raise exceptions.DockerException(
+                message="No such container: %s"
+                % token, code=404)
         return token_info['containers']
 
     def authorize_container(self, token, container_id):

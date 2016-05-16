@@ -38,7 +38,7 @@ def credentials_create(ctx, uid):
     try:
         out = ctx.obj.create_credentials(uid)
         utils.print_message(
-            "{User token: %s, Path: %s}"
+            '{"token": %s, "path": %s}'
             % (out["token"], out["path"])
         )
     except BaseException as e:
