@@ -37,11 +37,13 @@ def parse_docker_generator(gen_data):
                         json_row['id'],
                         json_row['status']
                     )
+            elif 'status' in json_row:
+                message = json_row['status']
             else:
-                    message = json_row['status']
+                message = json_row['error']
             out_data.append(message)
         return out_data
-    except BaseException as e:
+    except KeyError as e:
         raise exceptions.ParseException('Pull output error',
                                         code=406)
 

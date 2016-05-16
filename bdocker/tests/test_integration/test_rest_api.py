@@ -20,6 +20,7 @@ import webob
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
 
 from bdocker.server import restful_api
+from bdocker.client.controller import utils
 
 
 class TestIntegration(testtools.TestCase):
@@ -36,6 +37,21 @@ class TestRESTIntegration(TestIntegration):
 
     def setUp(self):
         super(TestRESTIntegration, self).setUp()
+
+    # def test_pull_real(self,):
+    #
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     source = "ubuntu"
+    #     parameters = {"token": token, "source": source}
+    #     body = utils.make_body(parameters)
+    #     path = "/pull"
+    #     req = self.create_request(path, body=body,
+    #                               content_type="application/json",
+    #                               method="POST")
+    #     result = req.get_response(self.app)
+    #
+    #     self.assertEqual(200, result.status_code)
+    #     self.assertEqual([], result.json_body['results'])
 
     # def test_ps_real(self,):
     #

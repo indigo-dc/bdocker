@@ -23,7 +23,7 @@ from bdocker.client.controller import commands
 class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
-        endpoint = "http://127.0.0.33:5000"
+        endpoint = "http://localhost:5000"
         self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",
@@ -36,9 +36,9 @@ class TestIntegration(testtools.TestCase):
 #     def setUp(self):
 #         super(TestRESTIntegration, self).setUp()
 
-
-    def test_ps_real(self):
-        token = "1866e0ca1ad44a55952029817c2a5345"
-        all = False
-        result = self.controller.container_list(token, all)
-        self.assertEqual([], result)
+    #
+    # def test_ps_real(self):
+    #     token = "1866e0ca1ad44a55952029817c2a5345"
+    #     all = False
+    #     result = self.controller.container_list(token, all)
+    #     self.assertEqual([], result)
