@@ -26,11 +26,11 @@ class TestDockerIntegration(testtools.TestCase):
         url = 'localhost:2375'
         self.control = docker_helper.DockerController(url)
 
-    # def test_ps_real(self):
-    #     token = "1866e0ca1ad44a55952029817c2a5345"
-    #     all = False
-    #     result = self.control.list_containers(token, all)
-    #     self.assertEqual([], result)
+    def test_ps_real(self):
+        token = "1866e0ca1ad44a55952029817c2a5345"
+        all = False
+        result = self.control.list_containers(token, all)
+        self.assertEqual([], result)
 
      # def test_pull_real(self):
     #     image = 'ubuntu'
@@ -51,7 +51,7 @@ class TestDockerIntegration(testtools.TestCase):
     #
     # def test_run_container_real(self):
     #     image_id = 'a83540abf000'
-    #     script = './bdocker_script.sh'
+    #     script = './hostname.sh'
     #     detach = True
     #     host_dir = "/root/docker_test/"
     #     docker_dir = "/tmp"

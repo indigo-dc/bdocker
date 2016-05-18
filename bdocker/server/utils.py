@@ -63,7 +63,8 @@ def load_configuration(path=None):
 
 def validate_config(conf):
     section_keys = {'server', 'batch', 'credentials', 'dockerAPI'}
-    server_keys = {'host','port','environ'}
+    server_keys = {'host', 'port', 'environ'}
+    environ_options = {'public', 'debug', 'private'}
     batch_keys = {'system'}
     credentials_keys = {'token_store', 'token_client_file'}
     dockers_keys = {'base_url'}
@@ -72,7 +73,12 @@ def validate_config(conf):
             raise exceptions.ParseException(key)
     for key in server_keys:
         if key not in conf['server']:
-            raise exceptions.ParseException('server:' + key)
+            raise exceptions.ParseException('"server":' + key)
+
+    if conf['server']['environ'] not in environ_options:
+        raise exceptions.ParseException(
+            '"environ" has wrong value. It is'
+        )
     for key in batch_keys:
         if key not in conf['batch']:
             raise exceptions.ParseException('batch:' +key)
