@@ -24,7 +24,6 @@ from bdocker.server.modules import batch, docker_helper
 from bdocker.server.modules import credentials
 
 
-
 default_conf_file = ("/root/" +
                      "configure_bdocker.cfg"
                      )
@@ -83,6 +82,7 @@ def validate_config(conf):
     for key in dockers_keys:
         if key not in conf['dockerAPI']:
             raise exceptions.ParseException('dockerAPI:' + key)
+
 
 def eval_bool(s):
     if s:

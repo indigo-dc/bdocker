@@ -48,7 +48,7 @@ def load_configuration():
         'http://localhost:5000')
     token_file = os.getenv(
         'BDOCKER_USER_TOKEN_FILE',
-        '.bdocker')
+        '.bdocker_token')
     return {'token_store':token_store,
             'endpoint': endpoint,
             'token_file': token_file

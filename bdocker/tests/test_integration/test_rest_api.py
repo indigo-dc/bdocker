@@ -48,7 +48,7 @@ class TestRESTIntegration(TestIntegration):
     #     req = self.create_request(path, body=body,
     #                               content_type="application/json",
     #                               method="POST")
-    #     result = req.get_response(self.app)
+    #     result = req.get_response()
     #
     #     self.assertEqual(200, result.status_code)
     #     self.assertEqual([], result.json_body['results'])
@@ -59,7 +59,7 @@ class TestRESTIntegration(TestIntegration):
     #     all = False
     #     path = "/ps?token=%s&all=%s" % (token, all)
     #     req = self.create_request(path, method="GET")
-    #     result = req.get_response(self.app)
+    #     result = req.get_response()
     #
     #     self.assertEqual(200, result.status_code)
     #     self.assertEqual([], result.json_body['results'])
@@ -70,7 +70,7 @@ class TestRESTIntegration(TestIntegration):
     #     all = True
     #     path = "/ps?token=%s&all=%s" % (token, all)
     #     req = self.create_request(path, method="GET")
-    #     result = req.get_response(self.app)
+    #     result = req.get_response()
     #
     #     self.assertEqual(200, result.status_code)
     #     self.assertIsNot([], result.json_body['results'])
@@ -81,7 +81,7 @@ class TestRESTIntegration(TestIntegration):
     #     c = "15fab180d4cd"
     #     path = "/rm?token=%s&container_id=%s" % (token, c)
     #     req = self.create_request(path, method="DELETE")
-    #     result = req.get_response(self.app)
+    #     result = req.get_response()
     #
     #     self.assertEqual(404, result.status_code)
     #     #self.assertEqual([], result.json_body['results'])
@@ -92,7 +92,7 @@ class TestRESTIntegration(TestIntegration):
     #     c = "70f2bff1259a"
     #     path = "/inspect?token=%s&container_id=%s" % (token, c)
     #     req = self.create_request(path, method="GET")
-    #     result = req.get_response(self.app)
+    #     result = req.get_response()
     #
     #     self.assertEqual(200, result.status_code)
 

@@ -85,7 +85,7 @@ class RequestController(object):
             query_string = utils.get_query_string(parameters)
             req = self._get_req(path, query_string=query_string,
                                 method="GET")
-            response = req.get_response(None)
+            response = req.get_response()
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
@@ -102,7 +102,7 @@ class RequestController(object):
             body = utils.make_body(parameters)
             req = self._get_req(path, content_type="application/json",
                                 body=body, method="POST")
-            response = req.get_response(None)
+            response = req.get_response()
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
@@ -119,7 +119,7 @@ class RequestController(object):
             query_string = utils.get_query_string(parameters)
             req = self._get_req(path, method="DELETE",
                                 query_string=query_string)
-            response = req.get_response(None)
+            response = req.get_response()
         except Exception as e:
              response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
