@@ -73,7 +73,7 @@ def run():
         host_dir = data.get('host_dir', None)
         docker_dir = data.get('docker_dir', None)
         working_dir = data.get('working_dir', None)
-        # todo: control image private
+        # TODO(jorgesece): control image private
         # credentials_module.authorize_image(
         #     token,
         #     image_id

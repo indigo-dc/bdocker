@@ -29,7 +29,7 @@ class TestDockerIntegration(testtools.TestCase):
     # def test_ps_real(self):
     #     token = "1866e0ca1ad44a55952029817c2a5345"
     #     all = False
-    #     result = self.controller.container_list(token, all)
+    #     result = self.control.list_containers(token, all)
     #     self.assertEqual([], result)
 
      # def test_pull_real(self):

@@ -106,7 +106,7 @@ class ConfigurationException(Exception):
 
 
 class DockerException(Exception):
-    def __init__(self, exc=None, message='Internal Error', code='500'):
+    def __init__(self, exc=None, message=None, code=None):
         details = get_exception_details(exc, message, code)
         self.message = ("Error: "
                         + details['message'])
@@ -117,8 +117,10 @@ class DockerException(Exception):
 
 
 def get_exception_details(ex=None, custom_message=None, custom_code=None):
+    code = 500
+    message = 'Internal Error'
     if ex:
-        if hasattr(ex, 'response'):
+        if hasattr(ex, 'response') and ex.response:
             message = ex.response.text
             code = ex.response.status_code
         else:
