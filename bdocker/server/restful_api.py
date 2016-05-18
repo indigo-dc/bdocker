@@ -212,4 +212,4 @@ def output():
 if __name__ == '__main__':
     app.run(host=conf['server']['host'],
             port=int(conf['server']['port']),
-            debug=conf['server']['debug'])
+            debug=utils.eval_bool(conf['server']['debug']))

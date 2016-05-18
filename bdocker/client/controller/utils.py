@@ -135,8 +135,6 @@ def print_message(message, type='OK'):
 
 
 def print_error(message):
-    if 'results' in message:
-        message = message.results
     print_message(message, 'FAIL')
 
 
