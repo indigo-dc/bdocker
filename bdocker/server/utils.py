@@ -63,7 +63,7 @@ def load_configuration(path=None):
 
 def validate_config(conf):
     section_keys = {'server', 'batch', 'credentials', 'dockerAPI'}
-    server_keys = {'host','port','debug'}
+    server_keys = {'host','port','environ'}
     batch_keys = {'system'}
     credentials_keys = {'token_store', 'token_client_file'}
     dockers_keys = {'base_url'}

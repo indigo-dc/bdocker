@@ -210,6 +210,14 @@ def output():
 
 
 if __name__ == '__main__':
-    app.run(host=conf['server']['host'],
-            port=int(conf['server']['port']),
-            debug=utils.eval_bool(conf['server']['debug']))
+    environ = conf['server']['environ']
+    port = int(conf['server']['port'])
+    host = conf['server']['host']
+    debug = False
+    if environ == 'public':
+        host = '0.0.0.0'
+    elif environ == 'debug':
+        debug = True
+    app.run(host=host,
+                port=port,
+                debug=debug)
