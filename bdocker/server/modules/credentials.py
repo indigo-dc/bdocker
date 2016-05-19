@@ -188,8 +188,10 @@ class UserController(object):
             for c in token_info['containers']:
                 if container_id == c[:len]:
                     return c
-            raise exceptions.UserCredentialsException(
-                "Unauthorization error")
+            raise exceptions.DockerException(
+                "Error: No such container:"
+                " %s " % container_id,
+                code=404)
         return container_id
 
     def authorize_image(self, token, image_id):
@@ -204,8 +206,10 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         if image_id not in token_info['images']:
-            raise exceptions.UserCredentialsException(
-                "Unauthorization error")
+            raise exceptions.DockerException(
+                "Error: No such image:"
+                " %s " % image_id,
+                code=404)
         return True
 
     def authorize_directory(self, token, dir_path):

@@ -94,7 +94,7 @@ def get_user_credentials(uid):
         user = {'uid': uid, 'gid': info.pw_gid, 'home': home_dir}
     except BaseException:
         raise exceptions.UserCredentialsException(
-            "Parsing user information"
+            "User not found"
         )
     return user
 
