@@ -13,3 +13,25 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+from bdocker.common import exceptions
+from bdocker.server.modules import batch, docker_helper
+from bdocker.server.modules import credentials
+
+def load_credentials_module(conf):
+    path = conf["credentials"]['token_store']
+    return credentials.UserController(path)
+
+
+def load_batch_module(conf):
+    if 'batch' not in conf:
+        raise exceptions.ConfigurationException("Batch system is not defined")
+    if conf['batch']["system"] == 'SGE':
+        return batch.SGEController()
+    exceptions.ConfigurationException("Batch is not supported")
+
+
+def load_docker_module(conf):
+    return docker_helper.DockerController(
+        conf['dockerAPI']['base_url']
+    )

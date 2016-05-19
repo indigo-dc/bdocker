@@ -43,8 +43,13 @@ class TestCommands(testtools.TestCase):
                           )
 
     @mock.patch.object(request.RequestController, "execute_post")
-    def test_create_credentials_token_error(self, m):
-        m.side_effect = exceptions.UserCredentialsException('')
+    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    def test_create_credentials_token_error(self, m_ad,m_write, m_u, m_post):
+        home_dir = "/foo"
+        m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
+        m_post.side_effect = exceptions.UserCredentialsException('')
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.create_credentials,
                           1)

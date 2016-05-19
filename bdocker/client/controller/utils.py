@@ -90,7 +90,8 @@ def make_body(parameters):
 def get_user_credentials(uid):
     try:
         info = pwd.getpwuid(uid)
-        user = {'uid': uid, 'gid': info.pw_gid, 'home': info.pw_dir}
+        home_dir = os.path.realpath(info.pw_dir)
+        user = {'uid': uid, 'gid': info.pw_gid, 'home': home_dir}
     except BaseException:
         raise exceptions.UserCredentialsException(
             "Parsing user information"

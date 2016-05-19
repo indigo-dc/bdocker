@@ -17,7 +17,9 @@ import sys
 import uuid
 
 from bdocker.common import exceptions
-from bdocker.common import utils
+from bdocker.common import utils as utils_common
+from bdocker.server import utils
+
 
 sys.tracebacklimit = 0
 
@@ -26,13 +28,13 @@ class UserController(object):
 
     def __init__(self, path):
         self.path = path
-        self.token_store = utils.read_yaml_file(path)
+        self.token_store = utils_common.read_yaml_file(path)
 
     def save_token_file(self):
         """Save token store in the file
 
         """
-        utils.write_yaml_file(self.path, self.token_store)
+        utils_common.write_yaml_file(self.path, self.token_store)
 
     def _get_token_from_cache(self, token):
         """Get token from token store
@@ -84,6 +86,7 @@ class UserController(object):
         if admin_token != prolog_token['token']:
             raise exceptions.UserCredentialsException(
                 "Unauthorized user with token: %s" % admin_token)
+        utils.check_user_credentials(user_data)
         try:
             token = self._set_token(user_data)
         except Exception as e:

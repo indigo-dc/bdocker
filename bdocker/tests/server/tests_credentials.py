@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
 import testtools
 
 from bdocker.server.modules import credentials
@@ -48,7 +49,9 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(1, user_info.__len__())
         self.assertEqual("token_prolog", user_info['token'])
 
-    def test_authenticate(self):
+
+    @mock.patch('bdocker.server.utils.check_user_credentials')
+    def test_authenticate(self, m):
         t = self.control._get_token_from_cache(
             "prolog")['token']
         u = create_parameters()['user_credentials']
@@ -57,7 +60,8 @@ class TestUserCredentials(testtools.TestCase):
         self.control.remove_token_from_cache(token)
         self.assertIsNotNone(token)
 
-    def test_authenticate_save_file(self):
+    @mock.patch('bdocker.server.utils.check_user_credentials')
+    def test_authenticate_save_file(self, m):
         t = self.control._get_token_from_cache("prolog")['token']
         u = create_parameters()['user_credentials']
         token = self.control.authenticate(admin_token=t,

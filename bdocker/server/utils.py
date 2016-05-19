@@ -16,12 +16,11 @@
 
 import ConfigParser
 import os
+import pwd
 import webob
 from flask import jsonify
 
 from bdocker.common import exceptions
-from bdocker.server.modules import batch, docker_helper
-from bdocker.server.modules import credentials
 
 
 default_conf_file = ("/root/" +
@@ -53,11 +52,12 @@ def load_configuration(path=None):
         validate_config(conf)
     except exceptions.ParseException as e:
         raise exceptions.ConfigurationException(
-            "Parameter %s "
+            "Parameter %s"
             % e.message)
     except BaseException as e:
         raise exceptions.ConfigurationException(
-            "Error reading configuration file.")
+            "Error reading configuration file:"
+            " %s" % path)
     return conf
 
 
@@ -115,25 +115,6 @@ def validate(fields, mandatory_keys):
     return True
 
 
-def load_credentials_module(conf):
-    path = conf["credentials"]['token_store']
-    return credentials.UserController(path)
-
-
-def load_batch_module(conf):
-    if 'batch' not in conf:
-        raise exceptions.ConfigurationException("Batch system is not defined")
-    if conf['batch']["system"] == 'SGE':
-        return batch.SGEController()
-    exceptions.ConfigurationException("Batch is not supported")
-
-
-def load_docker_module(conf):
-    return docker_helper.DockerController(
-        conf['dockerAPI']['base_url']
-    )
-
-
 def make_json_response(status_code, description):
     return jsonify({
         'status_code': status_code,
@@ -151,6 +132,7 @@ def set_error_handler(app):
     for code in exceptions.default_exceptions.iterkeys():
         app.error_handler_spec[None][code] = error_json_handler
 
+
 def manage_exceptions(e):
     if isinstance(e, exceptions.UserCredentialsException):
         return make_json_response(401, e.message)
@@ -159,3 +141,25 @@ def manage_exceptions(e):
     if isinstance(e, exceptions.ParseException):
         return make_json_response(400, e.message)
     return make_json_response(500, e.message)
+
+
+def check_user_credentials(user_info):
+    try:
+        info = pwd.getpwuid(user_info['uid'])
+        if user_info['gid'] == info.pw_gid:
+            home_dir = os.path.realpath(info.pw_dir)
+            if user_info['home'] == home_dir:
+                return True
+    except BaseException:
+        raise exceptions.UserCredentialsException(
+            "Invalid user in the server"
+        )
+
+def validate_directory(dir_request, dir_user):
+    real_path = os.path.realpath(dir_request)
+    prefix = os.path.commonprefix([real_path, dir_user])
+    if prefix != dir_user:
+        raise exceptions.UserCredentialsException(
+            "User does not have permissons for %s"
+            % real_path
+        )

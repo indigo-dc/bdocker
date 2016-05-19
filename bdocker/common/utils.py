@@ -19,18 +19,6 @@ import os
 from bdocker.common import exceptions
 
 
-
-def validate_directory(dir_request, dir_user):
-    real_path = os.path.realpath(dir_request)
-    prefix = os.path.commonprefix([real_path, dir_user])
-    if prefix != dir_user:
-        raise exceptions.UserCredentialsException(
-            "User does not have permissons for %s"
-            % real_path
-        )
-
-
-
 def read_yaml_file(path):
     f = open(path, 'r')
     data = f.read()
@@ -39,6 +27,4 @@ def read_yaml_file(path):
 
 
 def write_yaml_file(path, data):
-    #f = open(path, 'w')
     yaml.safe_dump(data, file(path,'w'), encoding='utf-8', allow_unicode=True)
-    #f.close()

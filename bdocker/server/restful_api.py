@@ -17,12 +17,13 @@
 from flask import Flask
 from flask import json, request
 
+from bdocker import server
 from bdocker.server import utils
 
 conf = utils.load_configuration()
-credentials_module = utils.load_credentials_module(conf)
-batch_module = utils.load_batch_module(conf)
-docker_module = utils.load_docker_module(conf)
+credentials_module = server.load_credentials_module(conf)
+batch_module = server.load_batch_module(conf)
+docker_module = server.load_docker_module(conf)
 
 app = Flask(__name__)
 
