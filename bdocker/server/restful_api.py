@@ -91,7 +91,7 @@ def run():
         )
         credentials_module.add_container(token, container_id)
         docker_module.start_container(container_id)
-        if detach:
+        if not detach:
             results = docker_module.logs_container(container_id)
         else:
             results = container_id

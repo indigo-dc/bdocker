@@ -49,22 +49,22 @@ class TestDockerIntegration(testtools.TestCase):
     #     self.assertIsNotNone(out)
     #     self.assertEqual(2, out.__len__())
     #
-    # def test_run_container_real(self):
-    #     image_id = 'a83540abf000'
-    #     script = './hostname.sh'
-    #     detach = True
-    #     host_dir = "/root/docker_test/"
-    #     docker_dir = "/tmp"
-    #     container_id = self.control.run_container(image_id,
-    #                                          detach=detach,
-    #                                          command=script,
-    #                                          working_dir=docker_dir,
-    #                                          host_dir=host_dir,
-    #                                          docker_dir=docker_dir)
-    #     self.control.start_container(container_id)
-    #     out = self.control.logs_container(container_id)
-    #     self.assertIsNotNone(out)
-    #     self.assertEqual(1, out.__len__())
+    def test_run_container_real(self):
+        image_id = 'a83540abf000'
+        script = 'ls'
+        detach = False
+        host_dir = "/root/docker_test/"
+        docker_dir = "/tmp"
+        container_id = self.control.run_container(image_id,
+                                             detach=detach,
+                                             command=script,
+                                             working_dir=docker_dir,
+                                             host_dir=host_dir,
+                                             docker_dir=docker_dir)
+        outstart = self.control.start_container(container_id)
+        out = self.control.logs_container(container_id)
+        self.assertIsNotNone(out)
+        self.assertEqual(1, out.__len__())
     #
     # def test_run_container_real_ls(self):
     #     image_id = 'a83540abf000'

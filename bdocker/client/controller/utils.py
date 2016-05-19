@@ -128,11 +128,11 @@ def print_message(message, type='OK'):
         message = m
     if not isinstance(message, list):
         message = [message]
-    print
+    # print
     for m in message:
         m = colors[type] + m + colors['ENDC']
         print '{:<}'.format(m)
-    print
+    # print
 
 
 def print_error(message):
@@ -173,3 +173,15 @@ def parse_volume(ctx, param, value):
                 "%s is not an absolute path" % value
             )
     return result
+
+
+def parse_bool(ctx, param, value):
+    if value:
+        if value == 'True' or value == 'true':
+            return True
+        elif value == 'False' or value == 'false':
+            return False
+        else:
+            raise exceptions.ParseException(
+                'Value error: %s' % value
+            )
