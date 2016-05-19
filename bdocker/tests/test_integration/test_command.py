@@ -24,7 +24,7 @@ from bdocker.client.controller import utils
 class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
-        endpoint = "http://localhost:5001"
+        endpoint = "http://127.0.0.1:5001"
         self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",
@@ -63,4 +63,10 @@ class TestIntegration(testtools.TestCase):
         except BaseException as e:
             utils.print_error(e.message)
         result = self.controller.container_list(token, all)
+        self.assertEqual([], result)
+
+    def test_logs_real(self):
+        token = "f055450bf8c94390b12388cd06e60a56"
+        container_id = '88'
+        result = self.controller.container_logs(token, container_id)
         self.assertEqual([], result)

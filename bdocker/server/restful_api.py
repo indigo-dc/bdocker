@@ -109,8 +109,10 @@ def list():
         token = data['token']
         all_list = utils.eval_bool(data.get('all', False))
         containers = credentials_module.list_containers(token)
-        results = docker_module.list_containers(containers,
-                                                all=all_list)
+        results = []
+        if containers:
+            results = docker_module.list_containers(containers,
+                                                    all=all_list)
         return utils.make_json_response(200, results)
     except Exception as e:
         return utils.manage_exceptions(e)

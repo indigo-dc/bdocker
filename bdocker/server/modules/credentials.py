@@ -167,9 +167,7 @@ class UserController(object):
         """
         token_info = self._get_token_from_cache(token)
         if 'containers' not in token_info:
-            raise exceptions.DockerException(
-                message="No such container: %s"
-                % token, code=404)
+            return []
         return token_info['containers']
 
     def authorize_container(self, token, container_id):
@@ -189,7 +187,7 @@ class UserController(object):
                 if container_id == c[:len]:
                     return c
             raise exceptions.DockerException(
-                "Error: No such container:"
+                message="No such container:"
                 " %s " % container_id,
                 code=404)
         return container_id
@@ -207,7 +205,7 @@ class UserController(object):
                 % token)
         if image_id not in token_info['images']:
             raise exceptions.DockerException(
-                "Error: No such image:"
+                message="No such image:"
                 " %s " % image_id,
                 code=404)
         return True

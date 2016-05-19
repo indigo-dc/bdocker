@@ -120,7 +120,7 @@ def container_inspect(ctx, token, container_id):
         out = ctx.obj.container_inspect(token, container_id)
         utils.print_message(out)
     except BaseException as e:
-        m = ("Error: failed to remove containers: [%s]" %
+        m = ("Error: No such container: %s" %
              container_id)
         utils.print_error(m)
 
