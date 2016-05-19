@@ -144,16 +144,14 @@ def manage_exceptions(e):
 
 
 def check_user_credentials(user_info):
-    try:
-        info = pwd.getpwuid(user_info['uid'])
-        if user_info['gid'] == info.pw_gid:
-            home_dir = os.path.realpath(info.pw_dir)
-            if user_info['home'] == home_dir:
-                return True
-    except BaseException:
-        raise exceptions.UserCredentialsException(
-            "Invalid user in the server"
-        )
+    info = pwd.getpwuid(user_info['uid'])
+    if user_info['gid'] == info.pw_gid:
+        home_dir = os.path.realpath(info.pw_dir)
+        if user_info['home'] == home_dir:
+            return True
+    raise exceptions.UserCredentialsException(
+        "Invalid user in the server"
+    )
 
 def validate_directory(dir_request, dir_user):
     real_path = os.path.realpath(dir_request)
