@@ -11,7 +11,7 @@ environment variable ``BDOCKER_CONF_FILE``. If it is not configured the system l
     [server]
     host = localhost
     port = 5000
-    debug = True
+    environ = debug
 
     [batch]
     # system can be: SGE, ...(add more modules)
@@ -31,7 +31,9 @@ environment variable ``BDOCKER_CONF_FILE``. If it is not configured the system l
     ``server``                              Rest service access configuration
                       ``host``              Host in which the service will be provided
                       ``port``              Port in which the service will be provided
-                      ``debug``             Debug mode
+                      ``environ``           Run mode. It could be: debug, public, private.
+                                            In case of public, the service will listen from
+                                            all the local IPs, it will use 0.0.0.0 IP.
 
     ``batch``                               Batch system configuration
                       ``system``            Specify the type of resource manager

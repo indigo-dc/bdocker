@@ -53,7 +53,7 @@ def load_configuration(path=None):
         validate_config(conf)
     except exceptions.ParseException as e:
         raise exceptions.ConfigurationException(
-            "Parameter %s missed in configuration file."
+            "Parameter %s "
             % e.message)
     except BaseException as e:
         raise exceptions.ConfigurationException(
@@ -77,17 +77,22 @@ def validate_config(conf):
 
     if conf['server']['environ'] not in environ_options:
         raise exceptions.ParseException(
-            '"environ" has wrong value. It is'
+            '"environ" has wrong value.'
         )
     for key in batch_keys:
         if key not in conf['batch']:
-            raise exceptions.ParseException('batch:' +key)
+            raise exceptions.ParseException(
+                'batch: %s missed in configuration file' % key)
     for key in credentials_keys:
         if key not in conf['credentials']:
-            raise exceptions.ParseException('credentials:' + key)
+            raise exceptions.ParseException(
+                'credentials: %s missed in'
+                ' configuration file' % key)
     for key in dockers_keys:
         if key not in conf['dockerAPI']:
-            raise exceptions.ParseException('dockerAPI:' + key)
+            raise exceptions.ParseException(
+                'dockerAPI: %s missed in '
+                'configuration file' % key)
 
 
 def eval_bool(s):

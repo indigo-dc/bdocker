@@ -13,6 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import json
+
 from bdocker.client.controller import request
 from bdocker.common import exceptions
 from bdocker.client.controller import utils
@@ -43,7 +46,7 @@ class CommandController(object):
         token = result
         token_path = "%s/%s" % (home_dir, self.token_file)
         utils.write_user_credentials(result, token_path)
-        return {"token": token, "path": token_path}
+        return json.load({"token": token, "path": token_path})
 
     def container_pull(self, token, source):
         path = "/pull"
