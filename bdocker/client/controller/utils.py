@@ -128,14 +128,30 @@ def print_message(message, type='OK'):
         message = m
     if not isinstance(message, list):
         message = [message]
-    # print
     for m in message:
-        m = colors[type] + m + colors['ENDC']
-        print '{:<}'.format(m)
-    # print
-
+        print m
 
 def print_error(message):
+    print_message(message)
+
+
+def print_message_color(message, type='OK'):
+    if isinstance(message, dict):
+        m = []
+        for k,v in message.items():
+            m.append("%s: %s" % (k,v))
+        message = m
+    if not isinstance(message, list):
+        message = [message]
+    # print
+    for m in message:
+        # m = colors[type] + m + colors['ENDC']
+        # print '{:<}'.format(m)
+        print m
+    # print
+
+
+def print_error_color(message):
     print_message(message, 'FAIL')
 
 

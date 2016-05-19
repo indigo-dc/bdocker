@@ -27,4 +27,8 @@ def read_yaml_file(path):
 
 
 def write_yaml_file(path, data):
-    yaml.safe_dump(data, file(path,'w'), encoding='utf-8', allow_unicode=True)
+    with open(path,'w') as my_file:
+        data_yaml = yaml.safe_dump(data, None, encoding='utf-8', allow_unicode=True)
+        my_file.write(data_yaml)
+        my_file.flush()
+        my_file.close()

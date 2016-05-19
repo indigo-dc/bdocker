@@ -244,7 +244,7 @@ class TestCommandProject(TestCaseCommandLine):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
-        detach = '--detach=false'
+        detach = '--detach'
         result = self.runner.invoke(
             cli.bdocker, ['run', token, image_id,
                           command, detach]

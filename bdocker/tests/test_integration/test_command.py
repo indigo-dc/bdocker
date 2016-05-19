@@ -65,8 +65,8 @@ class TestIntegration(testtools.TestCase):
         result = self.controller.container_list(token, all)
         self.assertEqual([], result)
 
-    def test_logs_real(self):
-        token = "f055450bf8c94390b12388cd06e60a56"
-        container_id = '88'
-        result = self.controller.container_logs(token, container_id)
-        self.assertEqual([], result)
+    # def test_logs_real(self):
+    #     token = "f055450bf8c94390b12388cd06e60a56"
+    #     container_id = '88'
+    #     result = self.controller.container_logs(token, container_id)
+    #     self.assertEqual([], result)
