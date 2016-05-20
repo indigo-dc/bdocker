@@ -56,9 +56,15 @@ class CommandController(object):
         utils.write_user_credentials(result, token_path)
         return {"token": token, "path": token_path}
 
+    def clean_environment(self):
+        path = "/clean"
+        admin_token = utils.get_admin_token(self.token_storage)
+        parameters = {"token": admin_token}
+        self.control.execute_delete(path=path, parameters=parameters)
+
     def container_pull(self, token, source):
         path = "/pull"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "source": source}
         results = self.control.execute_post(path=path, parameters=parameters)
         return results

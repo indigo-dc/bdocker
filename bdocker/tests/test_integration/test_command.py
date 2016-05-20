@@ -26,6 +26,7 @@ class TestIntegration(testtools.TestCase):
         super(TestIntegration, self).setUp()
         endpoint = "http://127.0.0.1:5001"
         os.environ['BDOCKER_TOKEN_FILE'] = '.bdocker_token'
+        os.environ['BDOCKER_TOKEN_STORE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/token_store.yml"
         os.environ['JOB_ID'] = '1'
         self.controller = commands.CommandController(endpoint=endpoint)
 
@@ -40,6 +41,12 @@ class TestIntegration(testtools.TestCase):
 #         super(TestRESTIntegration, self).setUp()
 
     #
+
+    # def test_ps_clean(self):
+    #     all = False
+    #     result = self.controller.clean_environment()
+    #     self.assertEqual([], result)
+
     def test_ps_real(self):
         token = "1866e0ca1ad44a55952029817c2a5345"
         all = False

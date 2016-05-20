@@ -33,7 +33,7 @@ utils.set_error_handler(app)
 @app.route('/credentials', methods=['POST'])
 def credentials():
     data = request.get_json()
-    required = {'token','user_credentials'}
+    required = {'token', 'user_credentials'}
     try:
         utils.validate(data, required)
         token = data['token']
@@ -42,6 +42,26 @@ def credentials():
         return utils.make_json_response(201, results)
     except Exception as e:
             return utils.manage_exceptions(e)
+
+
+@app.route('/clean', methods=['DELETE'])
+def clean():
+    data = request.args
+    required = {'token'}
+    try:
+        utils.validate(data, required)
+        admin_token = data['token']
+        credentials_module.authorize_admin(admin_token)
+        job_info = batch_module.get_job_info()
+        token = credentials_module.get_token_from_file(
+            job_info['home'],
+            '.bdocker_token',
+            job_info['jobid'])
+        #docker_module.clean_containers(token)
+        #credentials_module.remove_token_from_cache(token)
+        return utils.make_json_response(204, [token])
+    except Exception as e:
+        return utils.manage_exceptions(e)
 
 
 @app.route('/pull', methods=['POST'])

@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 
 class BatchController(object):
 
@@ -32,4 +33,12 @@ class SGEController(BatchController):
     def __init__(self,*args,**kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
 
+    def get_job_info(self):
+        job_id = os.getenv(
+            'JOB_ID', None)
+        home = os.getenv(
+            'HOME', None)
 
+        return {'home': home,
+                'jobid': job_id
+                }

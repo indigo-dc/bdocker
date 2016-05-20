@@ -82,13 +82,10 @@ class UserController(object):
 
         Creates a token record. It could be invoked by the administrator
 
-        :param master_token: administration token
+        :param admin_token: administration token
         :param user_data: array of element to be updated
         """
-        prolog_token = self._get_token_from_cache("prolog")
-        if admin_token != prolog_token['token']:
-            raise exceptions.UserCredentialsException(
-                "Unauthorized user with token: %s" % admin_token)
+        self.authorize_admin(admin_token)
         utils.check_user_credentials(user_data)
         try:
             token = self._set_token(user_data)
@@ -96,6 +93,21 @@ class UserController(object):
             raise exceptions.UserCredentialsException(
                 "Invalid user information")
         return token
+
+    def authorize_admin(self, admin_token):
+        """Clean token from token store
+
+        :param admin_token: token looked for
+        """
+        prolog_token = self._get_token_from_cache("prolog")
+        if admin_token != prolog_token['token']:
+            raise exceptions.UserCredentialsException(
+                "Unauthorized user with token: %s" % admin_token)
+
+    def get_token_from_file(self, path, file_name, jobid):
+        path = "%s/%s_%s" % (path, file_name, jobid)
+        token = utils.read_user_credentials(path)
+        return self._get_token_from_cache(token)
 
     def remove_token_from_cache(self, token):
         """remove token from token store

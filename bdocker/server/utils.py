@@ -161,3 +161,10 @@ def validate_directory(dir_request, dir_user):
             "User does not have permissons for %s"
             % real_path
         )
+
+def read_user_credentials(file_path):
+    # TODO(jorgesece): add to the commom package
+    input = open(file_path,'r')
+    token = input.read().rstrip('\n')
+    input.close()
+    return token

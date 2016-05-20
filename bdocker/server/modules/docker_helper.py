@@ -54,6 +54,11 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
 
+    def clean_containers(self, token):
+        if 'contaniers' in token:
+            for c_id in token['containers']:
+                self.delete_container(c_id)
+
     def list_containers_details(self, containers):
         result = []
         try:

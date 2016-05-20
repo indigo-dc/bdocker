@@ -49,9 +49,13 @@ def load_configuration():
     token_file = os.getenv(
         'BDOCKER_TOKEN_FILE',
         '.bdocker_token')
+
+    # TODO(jorgesece):
+    # this variable could be different in other batch systems
     job_id = os.getenv(
         'JOB_ID',
         None)
+
     return {'token_store':token_store,
             'endpoint': endpoint,
             'token_file': token_file,
