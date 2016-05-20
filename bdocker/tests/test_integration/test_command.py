@@ -48,7 +48,7 @@ class TestIntegration(testtools.TestCase):
         token = None
         all = True
         result = self.controller.container_list(token, all)
-        self.assertEqual([], result)
+        self.assertNotEqual([], result)
 
     def test_ps_run(self):
         token = None # "1866e0ca1ad44a55952029817c2a5345"

@@ -42,6 +42,35 @@ class TestCommandProject(TestCaseCommandLine):
         super(TestCommandProject, self).setUp()
 
     @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "create_credentials")
+    def test_credentials(self, m_cre, m_ini):
+        m_ini.return_value = None
+        token = uuid.uuid4().hex
+        path = '/path'
+        m_cre.return_value = {"token": token, "path": path}
+        uid = '12'
+        result = self.runner.invoke(
+            cli.bdocker, ['credentials', uid]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "create_credentials")
+    def test_credentials_with_job(self, m_cre, m_ini):
+        m_ini.return_value = None
+        token = uuid.uuid4().hex
+        path = '/path'
+        m_cre.return_value = {"token": token, "path": path}
+        uid = '12'
+        job = '--jobid=9494'
+        result = self.runner.invoke(
+            cli.bdocker, ['credentials', uid, job]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_list")
     def test_docker_list(self, m_l, m_ini):
         m_ini.return_value = None

@@ -58,15 +58,38 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
     @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    def test_create_credentials(self, m_ad,m_write, m_u, m_put):
+    def test_create_credentials(self, m_ad,m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
-        m_put.return_value = admin_token
+        m_post.return_value = admin_token
         u = self.control.create_credentials(1000)
         self.assertIsNotNone(u)
         self.assertEqual(admin_token, u['token'])
         self.assertIn(home_dir, u['path'])
+
+    @mock.patch.object(request.RequestController, "execute_post")
+    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    def test_create_credentials_with_job(self, m_ad, m_write, m_u, m_post):
+        admin_token = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        home_dir = "/foo"
+        jobid = 8934
+        user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
+        m_u.return_value = user_credentials
+        m_post.return_value = token
+        m_ad.return_value = admin_token
+        u = self.control.create_credentials(1000, jobid)
+        self.assertIsNotNone(u)
+        self.assertEqual(token, u['token'])
+        self.assertIn(home_dir, u['path'])
+        self.assertIn('jobid', user_credentials)
+        expected = {"token": admin_token,
+                    "user_credentials": user_credentials}
+        m_post.assert_called_with(path='/credentials',
+                                 parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.controller.utils.token_parse")

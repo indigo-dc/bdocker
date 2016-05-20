@@ -32,12 +32,12 @@ def bdocker(ctx, host):
 @bdocker.command('credentials',
                  help="Request for user token.")
 @user_credentials
+@job_option
 @click.pass_context
-def credentials_create(ctx, uid):
+def credentials_create(ctx, uid, jobid):
     # Command executed by the root in prolog
     try:
-        # TODO(jorgesece): add job_id. It will take the value from #JOB_ID
-        out = ctx.obj.create_credentials(uid)
+        out = ctx.obj.create_credentials(uid, jobid)
         utils.print_message(
             '{"token": %s, "path": %s}'
             % (out["token"], out["path"])

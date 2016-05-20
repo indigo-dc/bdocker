@@ -40,11 +40,13 @@ class CommandController(object):
                                                     % endpoint
                                                     )
 
-    def create_credentials(self, uid, jobid):
+    def create_credentials(self, uid, jobid=None):
         path = "/credentials"
-        user_info = utils.get_user_credentials(uid)
-        home_dir = user_info.get('home')
         admin_token = utils.get_admin_token(self.token_storage)
+        user_info = utils.get_user_credentials(uid)
+        if jobid:
+            user_info.update({'jobid': jobid})
+        home_dir = user_info.get('home')
         parameters = {"token": admin_token, "user_credentials": user_info}
         result = self.control.execute_post(path=path, parameters=parameters)
         token = result

@@ -43,6 +43,14 @@ def token_option(f):
     )(f)
 
 
+def job_option(f):
+    return click.option(
+        '--jobid', '-j', default=None
+        , type=click.STRING
+        , help='The job ID'
+    )(f)
+
+
 def source_argument(f):
     return click.argument('source'
                           , type=click.STRING
@@ -67,8 +75,8 @@ def command_argument(f):
 
 def user_credentials(f):
     out = click.argument("uid"
-                          , type=click.INT
-                          )(f)
+                         , type=click.INT
+                         )(f)
     return out
 
 
