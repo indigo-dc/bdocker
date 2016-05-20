@@ -40,7 +40,7 @@ class CommandController(object):
                                                     % endpoint
                                                     )
 
-    def create_credentials(self, uid):
+    def create_credentials(self, uid, jobid):
         path = "/credentials"
         user_info = utils.get_user_credentials(uid)
         home_dir = user_info.get('home')

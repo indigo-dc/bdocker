@@ -128,9 +128,9 @@ def write_user_credentials(token, file_path):
 
 def read_user_credentials(file_path):
     input = open(file_path,'r')
-    token = input.read()
+    token = input.read().rstrip('\n')
     input.close()
-    return  token
+    return token
 
 
 def print_message(message, type='OK'):
