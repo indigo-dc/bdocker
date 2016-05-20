@@ -46,7 +46,7 @@ def token_option(f):
 def job_option(f):
     return click.option(
         '--jobid', '-j', default=None
-        , type=click.STRING
+        , type=click.INT
         , help='The job ID'
     )(f)
 

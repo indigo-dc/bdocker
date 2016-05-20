@@ -52,12 +52,15 @@ class UserController(object):
         :param user_info: dict that include uid, and gid
         """
         token = uuid.uuid4().hex
-        new_token = {token: {
-                            'uid': user_info['uid'],
-                            'gid': user_info['gid'],
-                            'home_dir': user_info['home']
-                            }
-                    }
+        token_content = {
+            'uid': user_info['uid'],
+            'gid': user_info['gid'],
+            'home_dir': user_info['home']
+        }
+        if 'jobid' in user_info:
+            token_content.update(
+                {'jobid': user_info['jobid']})
+        new_token = {token: token_content}
         self.token_store.update(new_token)
         self.save_token_file()
         return token
