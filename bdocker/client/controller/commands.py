@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
-
 from bdocker.client.controller import request
 from bdocker.common import exceptions
 from bdocker.client.controller import utils
@@ -28,8 +26,16 @@ class CommandController(object):
             conf = utils.load_configuration()
             if not endpoint:
                 endpoint = conf['endpoint']
-            self.token_file = conf["token_file"]
+            self.token_file = "%s_%s" % (
+                conf["token_file"]
+                , conf["job_id"]
+            )
+            self.job_id = conf["job_id"]
             self.token_storage = conf["token_store"]
+            self.home_token_file = "%s/%s" % (
+                utils.get_current_home(),
+                self.token_file
+                )
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"
@@ -37,12 +43,11 @@ class CommandController(object):
                                                     )
 
     def create_credentials(self, uid, jobid=None):
+        # TODO(jorgesece): check if jobid has to be removed
         path = "/credentials"
         admin_token = utils.get_admin_token(self.token_storage)
         user_info = utils.get_user_credentials(uid)
-        if jobid:
-            user_info.update({'jobid': jobid})
-            self.token_file = "%s_%s" % (self.token_file, jobid)
+        user_info.update({'jobid': self.job_id})
         home_dir = user_info.get('home')
         parameters = {"token": admin_token, "user_credentials": user_info}
         result = self.control.execute_post(path=path, parameters=parameters)
@@ -61,7 +66,7 @@ class CommandController(object):
     def container_run(self, token, image_id, detach, script,
                       working_dir=None, volume=None):
         path = "/run"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -77,7 +82,7 @@ class CommandController(object):
 
     def container_list(self, token, all=False):
         path = "/ps"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "all": all}
         results = self.control.execute_get(path=path, parameters=parameters)
 
@@ -85,28 +90,28 @@ class CommandController(object):
 
     def container_logs(self, token, container_id):
         path = "/logs"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_delete(self, token, container_id):
         path = "/rm"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         self.control.execute_delete(path=path, parameters=parameters)
         return container_id
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_inspect(self, token, container_id):
         path = "/inspect"
-        token = utils.token_parse(token, self.token_file)
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results

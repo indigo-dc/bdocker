@@ -25,7 +25,8 @@ class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
         endpoint = "http://127.0.0.1:5001"
-        os.environ['BDOCKER_TOKEN_FILE'] = '/home/jorge/.bdocker_token'
+        os.environ['BDOCKER_TOKEN_FILE'] = '.bdocker_token'
+        os.environ['JOB_ID'] = '1'
         self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",

@@ -27,11 +27,16 @@ from bdocker.common import exceptions
 class TestCommands(testtools.TestCase):
     """Test User Credential controller."""
 
-    def setUp(self):
+    @mock.patch('bdocker.client.controller.utils.load_configuration')
+    def setUp(self, m):
         super(TestCommands, self).setUp()
-        path = ("/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/"
-                "bdocker/common/configure_bdocker.cfg")
-        self.control = commands.CommandController(path)
+        self.job_id = uuid.uuid4().hex
+        m.return_value = {'token_store':'/foo',
+                          'endpoint': 'http://foo',
+                          'token_file': '.bdocker_token',
+                          'job_id': self.job_id
+                          }
+        self.control = commands.CommandController()
 
 
     @mock.patch('bdocker.client.controller.utils.load_configuration')
@@ -85,7 +90,7 @@ class TestCommands(testtools.TestCase):
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
-        token_file = "%s/.bdocker_token_%s" % (home_dir, jobid)
+        token_file = "%s/.bdocker_token_%s" % (home_dir, self.job_id)
         self.assertIn(token_file, u['path'])
         self.assertIn('jobid', user_credentials)
         expected = {"token": admin_token,
