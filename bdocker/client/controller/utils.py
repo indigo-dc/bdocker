@@ -55,6 +55,10 @@ def load_configuration():
             }
 
 
+def set_environ(key, value):
+    os.environ[key] = value
+
+
 def utf8(value):
     """Try to turn a string into utf-8 if possible.
 
@@ -121,8 +125,9 @@ def get_admin_token(path):
 
 def write_user_credentials(token, file_path):
     out = open(file_path,'w')
-    out.write(token)  # TODO(jorgesece):
-    #  control several jobs
+    out.write(token)
+    # set_environ('BDOCKER_TOKEN_FILE',
+    # file_path)
     out.close()
 
 

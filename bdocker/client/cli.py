@@ -16,8 +16,8 @@
 import sys
 
 from bdocker.client.controller import commands
-from bdocker.client.decorators import *
 from bdocker.client.controller import utils
+from bdocker.client.decorators import *
 
 
 @click.group()
@@ -106,7 +106,9 @@ def container_logs(ctx, token, container_id):
         out = ctx.obj.container_logs(token, container_id)
         utils.print_message(out)
     except BaseException as e:
-        utils.print_error(e.message)
+        m = ("Error: No container related to %s" %
+             container_id)
+        utils.print_error(m)
 
 
 @bdocker.command('inspect', help="Return low-level"
