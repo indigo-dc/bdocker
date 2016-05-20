@@ -85,6 +85,8 @@ class TestCommands(testtools.TestCase):
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
+        token_file = "%s/.bdocker_token_%s" % (home_dir, jobid)
+        self.assertIn(token_file, u['path'])
         self.assertIn('jobid', user_credentials)
         expected = {"token": admin_token,
                     "user_credentials": user_credentials}

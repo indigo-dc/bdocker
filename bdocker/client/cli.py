@@ -38,10 +38,7 @@ def credentials_create(ctx, uid, jobid):
     # Command executed by the root in prolog
     try:
         out = ctx.obj.create_credentials(uid, jobid)
-        utils.print_message(
-            '{"token": %s, "path": %s}'
-            % (out["token"], out["path"])
-        )
+        utils.print_message(out["path"])
     except BaseException as e:
         utils.print_error(e.message)
 

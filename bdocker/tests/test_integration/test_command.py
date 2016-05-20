@@ -15,7 +15,7 @@
 # under the License.
 import os
 import testtools
-import webob
+
 
 from bdocker.client.controller import commands
 from bdocker.client.controller import utils
@@ -25,6 +25,7 @@ class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
         endpoint = "http://127.0.0.1:5001"
+        os.environ['BDOCKER_TOKEN_FILE'] = '/home/jorge/.bdocker_token'
         self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",
@@ -60,6 +61,7 @@ class TestIntegration(testtools.TestCase):
         volume={"host_dir": "/home/jorgesece/docker_test/",
                "docker_dir": "/tmp"
         }
+        os.environ['BDOCKER_TOKEN_FILE'] = '/home/jorge/.bdocker_token'
         try:
             result = self.controller.container_run(
                 token, image_id, detach, script,
