@@ -35,6 +35,14 @@ def token_argument(f):
                           )(f)
 
 
+def token_option(f):
+    return click.option(
+        '--token', '-t', default=None
+        , type=click.STRING
+        , help='The token ID'
+    )(f)
+
+
 def source_argument(f):
     return click.argument('source'
                           , type=click.STRING

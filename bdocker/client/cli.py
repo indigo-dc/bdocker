@@ -36,6 +36,7 @@ def bdocker(ctx, host):
 def credentials_create(ctx, uid):
     # Command executed by the root in prolog
     try:
+        # TODO(jorgesece): add job_id. It will take the value from #JOB_ID
         out = ctx.obj.create_credentials(uid)
         utils.print_message(
             '{"token": %s, "path": %s}'
@@ -48,7 +49,7 @@ def credentials_create(ctx, uid):
 @bdocker.command('pull',
                  help="Pull a container and"
                       " its intermediate layers.")
-@token_argument
+@token_option
 @source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
@@ -62,7 +63,7 @@ def container_pull(ctx, token, source):
 @bdocker.command('run', help="Creates a writeable container "
                              "layer over the specified image,"
                              " and executes the command.")
-@token_argument
+@token_option
 @image_id_argument
 @command_argument
 @d_option
@@ -71,8 +72,8 @@ def container_pull(ctx, token, source):
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
-    # TODO(jorgesece): parameter detach doesn't allow
-    # assing a value. It is just a flag (true/false)
+    # TODO(jorgesece): parameter detach doesn't allow assing
+    # a value. It is just a flag (true/false)
     try:
         out = ctx.obj.container_run(
             token, image_id, detach, script,
@@ -85,7 +86,7 @@ def container_run(ctx, token, image_id,
 
 
 @bdocker.command('ps', help="Show all containers running.")
-@token_argument
+@token_option
 @all_option
 @click.pass_context
 def container_list(ctx, token, all):
@@ -100,7 +101,7 @@ def container_list(ctx, token, all):
 
 @bdocker.command('logs', help="Retrieves logs present at"
                               " the time of execution.")
-@token_argument
+@token_option
 @container_id_argument
 @click.pass_context
 def container_logs(ctx, token, container_id):
@@ -114,7 +115,7 @@ def container_logs(ctx, token, container_id):
 @bdocker.command('inspect', help="Return low-level"
                                  " information "
                                  "on a container or image")
-@token_argument
+@token_option
 @container_id_argument
 @click.pass_context
 def container_inspect(ctx, token, container_id):
@@ -128,7 +129,7 @@ def container_inspect(ctx, token, container_id):
 
 
 @bdocker.command('rm', help="Delete a container.")
-@token_argument
+@token_option
 @container_id_argument
 @click.pass_context
 def container_delete(ctx, token, container_id):
@@ -143,7 +144,7 @@ def container_delete(ctx, token, container_id):
 
 @bdocker.command('accounting',
                  help="Retrieve the job accounting.")
-@token_argument
+@token_option
 @container_id_argument
 @click.pass_context
 def accounting(ctx, token, container_id):

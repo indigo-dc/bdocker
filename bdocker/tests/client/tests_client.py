@@ -46,32 +46,24 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_list(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
-        result = self.runner.invoke(cli.bdocker, ['ps', token])
+        token = "--token=%s" % uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['ps', token]
+        )
         self.assertEqual(result.exit_code,0)
         self.assertIsNone(result.exception)
-
-    @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "container_list")
-    def test_docker_list_no_token(self, m_l, m_ini):
-        m_ini.return_value = None
-        m_l.return_value = {}
-        token = uuid.uuid4().hex
-        result = self.runner.invoke(cli.bdocker, ['ps'])
-        self.assertEqual(result.exit_code, 2)
-        self.assertIsNotNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_pull")
     def test_docker_pull(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         source = uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['pull', token, source]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -79,18 +71,19 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_pull_no_token(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
+        source = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['pull']
+            cli.bdocker, ['pull', source]
         )
-        self.assertEqual(result.exit_code, 2)
-        self.assertIsNotNone(result.exception)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_pull")
     def test_docker_pull_no_source(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['pull', token]
         )
@@ -102,12 +95,12 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_log(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['logs', token, container_id]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -115,18 +108,19 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_log_no_token(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
+        container_id = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['logs']
+            cli.bdocker, ['logs', container_id]
         )
-        self.assertEqual(result.exit_code, 2)
-        self.assertIsNotNone(result.exception)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_logs")
     def test_docker_log_no_id(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['logs', token]
         )
@@ -138,7 +132,7 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_inspect(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['inspect', token, container_id]
@@ -151,18 +145,19 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_linspect_no_token(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
+        contanier_id = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['inspect']
+            cli.bdocker, ['inspect', contanier_id]
         )
-        self.assertEqual(result.exit_code, 2)
-        self.assertIsNotNone(result.exception)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_inspect")
     def test_docker_inspect_no_id(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         result = self.runner.invoke(
             cli.bdocker, ['inspect', token]
         )
@@ -174,12 +169,12 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_delete(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['rm', token, container_id]
+            cli.bdocker, ['rm', container_id, token]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -187,11 +182,12 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_delete_no_token(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
+        container_id = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['rm']
+            cli.bdocker, ['rm', container_id]
         )
-        self.assertEqual(result.exit_code, 2)
-        self.assertIsNotNone(result.exception)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_delete")
@@ -200,7 +196,7 @@ class TestCommandProject(TestCaseCommandLine):
         m_l.return_value = {}
         token = uuid.uuid4().hex
         result = self.runner.invoke(
-            cli.bdocker, ['rm', token]
+            cli.bdocker, ['rm', "--token=%s" % token]
         )
         self.assertEqual(result.exit_code, 2)
         self.assertIsNotNone(result.exception)
@@ -210,7 +206,7 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         result = self.runner.invoke(
@@ -224,13 +220,14 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run_volume(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         volume = '--volume=fake'
         result = self.runner.invoke(
-            cli.bdocker, ['run', token, image_id,
-                          command,]
+            cli.bdocker, ['run', token,
+                          image_id,
+                          command]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
@@ -241,13 +238,14 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run_detach(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         detach = '--detach'
         result = self.runner.invoke(
-            cli.bdocker, ['run', token, image_id,
-                          command, detach]
+            cli.bdocker, ['run', token,
+                          image_id,
+                          command]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
@@ -257,7 +255,7 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run_workdir(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         workdir = '--workdir=fake'
@@ -273,7 +271,7 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run_err(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         workdir = '--workdddir=fake'
@@ -289,7 +287,7 @@ class TestCommandProject(TestCaseCommandLine):
     def test_docker_run_host(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = uuid.uuid4().hex
+        token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
         host = '--host=fake:5000'

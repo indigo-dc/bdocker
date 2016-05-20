@@ -87,8 +87,13 @@ def make_body(parameters):
         return json.dumps(body)
 
 
+def get_current_home():
+    return pwd.getpwuid( os.getuid()).pw_dir
+
+
 def get_user_credentials(uid):
     try:
+
         info = pwd.getpwuid(uid)
         home_dir = os.path.realpath(info.pw_dir)
         user = {'uid': uid, 'gid': info.pw_gid, 'home': home_dir}
@@ -116,8 +121,16 @@ def get_admin_token(path):
 
 def write_user_credentials(token, file_path):
     out = open(file_path,'w')
-    out.write(token) # todo: control several jobs
+    out.write(token)  # TODO(jorgesece):
+    #  control several jobs
     out.close()
+
+
+def read_user_credentials(file_path):
+    input = open(file_path,'r')
+    token = input.read()
+    input.close()
+    return  token
 
 
 def print_message(message, type='OK'):
@@ -175,6 +188,8 @@ def print_table(headers, rows, title=None, err=False):
         print e.message
 
 
+# Callbacks
+
 def parse_volume(ctx, param, value):
     result = None
     if value:
@@ -201,3 +216,14 @@ def parse_bool(ctx, param, value):
             raise exceptions.ParseException(
                 'Value error: %s' % value
             )
+
+
+def token_parse(value, path):
+    try:
+        if not value:
+            value = read_user_credentials(path)
+        return value
+    except BaseException:
+        raise exceptions.UserCredentialsException(
+            "Token not found"
+        )

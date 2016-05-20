@@ -30,6 +30,10 @@ class CommandController(object):
                 endpoint = conf['endpoint']
             self.token_file = conf["token_file"]
             self.token_storage = conf["token_store"]
+            self.home_token_file = "%s/%s" % (
+                utils.get_current_home(),
+                self.token_file
+                )
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"
@@ -50,13 +54,15 @@ class CommandController(object):
 
     def container_pull(self, token, source):
         path = "/pull"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "source": source}
-
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
 
-    def container_run(self, token, image_id, detach, script, working_dir=None, volume=None):
+    def container_run(self, token, image_id, detach, script,
+                      working_dir=None, volume=None):
         path = "/run"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -72,6 +78,7 @@ class CommandController(object):
 
     def container_list(self, token, all=False):
         path = "/ps"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "all": all}
         results = self.control.execute_get(path=path, parameters=parameters)
 
@@ -79,24 +86,28 @@ class CommandController(object):
 
     def container_logs(self, token, container_id):
         path = "/logs"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_delete(self, token, container_id):
         path = "/rm"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         self.control.execute_delete(path=path, parameters=parameters)
         return container_id
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_inspect(self, token, container_id):
         path = "/inspect"
+        token = utils.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results

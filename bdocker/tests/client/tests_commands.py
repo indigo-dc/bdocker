@@ -69,41 +69,45 @@ class TestCommands(testtools.TestCase):
         self.assertIn(home_dir, u['path'])
 
     @mock.patch.object(request.RequestController, "execute_post")
-    def test_container_pull(self, m):
-        token = uuid.uuid4().hex
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_container_pull(self, m_t, m):
+        m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         source = "foo"
         m.return_value = image_id
-        results = self.control.container_pull(token, source)
+        results = self.control.container_pull(None, source)
         self.assertEqual(image_id, results)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    def test_container_run(self, m):
-        token = uuid.uuid4().hex
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_container_run(self, m_t, m):
+        m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         err = None
         m.return_value = container_id
-        results = self.control.container_run(token, image_id, False, 'ls')
+        results = self.control.container_run(None, image_id, False, 'ls')
         self.assertEqual(container_id, results)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    def test_container_run_2(self, m):
-        token = uuid.uuid4().hex
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_container_run_2(self, m_t, m):
+        m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         out = ['bin', 'etc', 'lib']
         m.return_value = ['bin', 'etc', 'lib']
-        results = self.control.container_run(token, image_id, False, 'ls')
+        results = self.control.container_run(None, image_id, False, 'ls')
         self.assertEqual(out, results)
 
 
     @mock.patch.object(request.RequestController, "execute_get")
-    def test_container_list(self, m):
-        token = uuid.uuid4().hex
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_container_list(self, m_t, m):
+        m_t.return_value = uuid.uuid4().hex
         containers = ["container_1", "container_2"]
         m.return_value = containers
-        results = self.control.container_list(token)
+        results = self.control.container_list(None)
         self.assertEqual(containers[0], results[0])
         self.assertEqual(containers[1], results[1])
 

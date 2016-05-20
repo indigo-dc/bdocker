@@ -44,8 +44,14 @@ class TestIntegration(testtools.TestCase):
         result = self.controller.container_list(token, all)
         self.assertEqual([], result)
 
+    def test_ps_real_no_token(self):
+        token = None
+        all = False
+        result = self.controller.container_list(token, all)
+        self.assertEqual([], result)
+
     def test_ps_run(self):
-        token = "1866e0ca1ad44a55952029817c2a5345"
+        token = None # "1866e0ca1ad44a55952029817c2a5345"
         all = False
         image_id = "a83540abf000"
         detach = False

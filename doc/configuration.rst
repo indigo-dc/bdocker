@@ -58,3 +58,19 @@ client configuration
  ``BDOCKER_TOKEN_STORE``      /root/token_store.yml    File in which the tokens are store (root rights)
  ``BDOCKER_USER_TOKEN_FILE``  .bdocker_token           Tokens are stored in $HOME/``.token_client_file``
 
+BATCH configuration
+********************
+
+Epilog::
+
+    #########
+    ## BDOCKER
+    # export BDOCKER_ENDPOINT=http://0.0.0.0:5000
+    # export BDOCKER_TOKEN_STORE=...
+    # user_id=`id -u`
+    # job_id=$JOB_ID
+    ## It will store the token in $HOME/.bdocker_token
+    # bdocker -H $BDOCKER_ENDPOINT credentials $user_id $job_id
+    #
+
+
