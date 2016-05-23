@@ -232,7 +232,7 @@ def token_parse(value, path):
         if not value:
             value = read_user_credentials(path)
         return value
-    except BaseException:
+    except BaseException as e:
         raise exceptions.UserCredentialsException(
-            "Token not found"
+            "Token not found: %s " % e.message
         )
