@@ -23,9 +23,9 @@ from bdocker.common import utils as utils_common
 class CommandController(object):
 
     def __init__(self, endpoint=None):
+        conf = utils_common.load_configuration_from_file()
+        batch_module = modules.load_batch_module(conf)
         try:
-            conf = utils_common.load_configuration_from_file()
-            batch_module = modules.load_batch_module(conf)
             job_info = batch_module.get_job_info()
             if not endpoint:
                 endpoint = 'http://%s:%s' % (
@@ -41,11 +41,6 @@ class CommandController(object):
             self.job_id = job_info["job_id"]
             self.token_storage = conf['credentials']["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
-        except IOError as e:
-            # TODO(jorgesece): TEST for it
-            raise exceptions.ConfigurationException(" %s. %s"
-                                                    (e.errno, e.strerror)
-                                                    )
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"
                                                     % endpoint
