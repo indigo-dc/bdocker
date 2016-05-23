@@ -14,15 +14,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
-import testtools
+import os
 import uuid
 
+import mock
+import testtools
 
 from bdocker.client.controller import commands
 from bdocker.client.controller import request
 from bdocker.common import exceptions
+from bdocker.common.modules import batch
 
+os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/" \
+                                  "common/configure_bdocker.cfg"
 
 class TestCommands(testtools.TestCase):
     """Test User Credential controller."""
@@ -39,7 +43,7 @@ class TestCommands(testtools.TestCase):
         self.control = commands.CommandController()
 
 
-    @mock.patch('bdocker.client.controller.utils.load_configuration')
+    @mock.patch('bdocker.common.utils.load_configuration_from_file')
     def test_create_configuration_error(self, m):
         conf = {"token_file"}
         m.return_value = conf
@@ -51,7 +55,7 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
     @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    def test_create_credentials_token_error(self, m_ad,m_write, m_u, m_post):
+    def test_create_credentials_token_error(self, m_ad, m_write, m_u, m_post):
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.side_effect = exceptions.UserCredentialsException('')
@@ -63,12 +67,19 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
     @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    def test_create_credentials(self, m_ad,m_write, m_u, m_post):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_create_credentials(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
         home_dir = "/foo"
+        job_id = '88'
+        user = 'peter'
+        m_conf.return_value = {'home': home_dir,
+                               'job_id': job_id,
+                               'user': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
-        u = self.control.create_credentials(1000)
+        controller = commands.CommandController()
+        u = controller.create_credentials()
         self.assertIsNotNone(u)
         self.assertEqual(admin_token, u['token'])
         self.assertIn(home_dir, u['path'])
@@ -77,20 +88,26 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.controller.utils.get_user_credentials")
     @mock.patch("bdocker.client.controller.utils.write_user_credentials")
     @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    def test_create_credentials_with_job(self, m_ad, m_write, m_u, m_post):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_create_credentials_with_job(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
         token = uuid.uuid4().hex
         home_dir = "/foo"
         jobid = 8934
+        user = 'peter'
+        m_conf.return_value = {'home': home_dir,
+                       'job_id': jobid,
+                       'user': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
         m_ad.return_value = admin_token
-        u = self.control.create_credentials(1000, jobid)
+        controller = commands.CommandController()
+        u = controller.create_credentials(1000, jobid)
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
-        token_file = "%s/.bdocker_token_%s" % (home_dir, self.job_id)
+        token_file = "%s/.bdocker_token_%s" % (home_dir, jobid)
         self.assertIn(token_file, u['path'])
         self.assertIn('jobid', user_credentials)
         expected = {"token": admin_token,

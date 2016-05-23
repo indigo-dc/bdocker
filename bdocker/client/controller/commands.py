@@ -15,56 +15,61 @@
 # under the License.
 
 from bdocker.client.controller import request
+from bdocker.client.controller import utils as utils_cli
+from bdocker.common import modules
 from bdocker.common import exceptions
-from bdocker.client.controller import utils
+from bdocker.common import utils as utils_common
 
 
 class CommandController(object):
 
     def __init__(self, endpoint=None):
         try:
-            conf = utils.load_configuration()
+            conf = utils_common.load_configuration_from_file()
+            batch_module = modules.load_batch_module(conf)
+            job_info = batch_module.get_job_info()
             if not endpoint:
-                endpoint = conf['endpoint']
-            self.token_file = "%s_%s" % (
-                conf["token_file"]
-                , conf["job_id"]
-            )
-            self.job_id = conf["job_id"]
-            self.token_storage = conf["token_store"]
-            self.home_token_file = "%s/%s" % (
-                utils.get_current_home(),
-                self.token_file
+                endpoint = 'http://%s:%s' % (
+                    conf['server']['host'],
+                    conf['server']['port']
                 )
+            self.token_file = "%s/%s_%s" % (
+                job_info['home'],
+                conf['credentials']["token_client_file"],
+                job_info["job_id"]
+            )
+            self.user_name = job_info['user']
+            self.job_id = job_info["job_id"]
+            self.token_storage = conf['credentials']["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"
                                                     % endpoint
                                                     )
 
-    def create_credentials(self, uid, jobid=None):
+    def create_credentials(self, user_name=None, jobid=None):
         # TODO(jorgesece): check if jobid has to be removed
         path = "/credentials"
-        admin_token = utils.get_admin_token(self.token_storage)
-        user_info = utils.get_user_credentials(uid)
+        admin_token = utils_cli.get_admin_token(self.token_storage)
+        if user_name:
+            self.user_name = user_name
+        user_info = utils_cli.get_user_credentials(user_name)
         user_info.update({'jobid': self.job_id})
-        home_dir = user_info.get('home')
         parameters = {"token": admin_token, "user_credentials": user_info}
-        result = self.control.execute_post(path=path, parameters=parameters)
-        token = result
-        token_path = "%s/%s" % (home_dir, self.token_file)
-        utils.write_user_credentials(result, token_path)
-        return {"token": token, "path": token_path}
+        token = self.control.execute_post(path=path, parameters=parameters)
+        utils_cli.write_user_credentials(token, self.token_file)
+        return {"token": token, "path": self.token_file}
 
-    def clean_environment(self):
+    def clean_environment(self, token):
         path = "/clean"
-        admin_token = utils.get_admin_token(self.token_storage)
-        parameters = {"token": admin_token}
+        admin_token = utils_cli.get_admin_token(self.token_storage)
+        token = utils_cli.token_parse(token, self.token_file)
+        parameters = {"admin_token": admin_token, 'token': token}
         self.control.execute_delete(path=path, parameters=parameters)
 
     def container_pull(self, token, source):
         path = "/pull"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "source": source}
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
@@ -72,7 +77,7 @@ class CommandController(object):
     def container_run(self, token, image_id, detach, script,
                       working_dir=None, volume=None):
         path = "/run"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -88,7 +93,7 @@ class CommandController(object):
 
     def container_list(self, token, all=False):
         path = "/ps"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "all": all}
         results = self.control.execute_get(path=path, parameters=parameters)
 
@@ -96,28 +101,28 @@ class CommandController(object):
 
     def container_logs(self, token, container_id):
         path = "/logs"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_delete(self, token, container_id):
         path = "/rm"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "container_id": container_id}
         self.control.execute_delete(path=path, parameters=parameters)
         return container_id
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_inspect(self, token, container_id):
         path = "/inspect"
-        token = utils.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.home_token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results

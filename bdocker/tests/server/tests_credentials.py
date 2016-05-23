@@ -17,7 +17,7 @@
 import mock
 import testtools
 
-from bdocker.server.modules import credentials
+from bdocker.common.modules import credentials
 from bdocker.common import exceptions
 
 
@@ -50,7 +50,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual("token_prolog", user_info['token'])
 
 
-    @mock.patch('bdocker.server.utils.check_user_credentials')
+    @mock.patch('bdocker.common.utils.check_user_credentials')
     def test_authenticate(self, m):
         t = self.control._get_token_from_cache(
             "prolog")['token']
@@ -60,7 +60,7 @@ class TestUserCredentials(testtools.TestCase):
         self.control.remove_token_from_cache(token)
         self.assertIsNotNone(token)
 
-    @mock.patch('bdocker.server.utils.check_user_credentials')
+    @mock.patch('bdocker.common.utils.check_user_credentials')
     def test_authenticate_save_file(self, m):
         t = self.control._get_token_from_cache("prolog")['token']
         u = create_parameters()['user_credentials']

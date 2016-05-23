@@ -32,13 +32,16 @@ def bdocker(ctx, host):
 @bdocker.command('credentials',
                  help="Request for user token."
                       " ROOT privileges needed")
-@user_credentials
+@user_option
 @job_option
 @click.pass_context
-def credentials_create(ctx, uid, jobid):
+def credentials_create(ctx, user, jobid):
     # Command executed by the root in prolog
     try:
-        out = ctx.obj.create_credentials(uid, jobid)
+        out = ctx.obj.create_credentials(
+            user,
+            jobid
+        )
         utils.print_message(out["path"])
     except BaseException as e:
         utils.print_error(e.message)
@@ -46,11 +49,12 @@ def credentials_create(ctx, uid, jobid):
 @bdocker.command('clean',
                  help="Clean work environment."
                       " ROOT privileges needed")
+@token_option
 @click.pass_context
-def credentials_clean(ctx):
+def credentials_clean(ctx, token):
     # Command executed by the root in epilog
     try:
-        out = ctx.obj.clean_environment()
+        out = ctx.obj.clean_environment(token)
         utils.print_message(out["path"])
     except BaseException as e:
         utils.print_error(e.message)

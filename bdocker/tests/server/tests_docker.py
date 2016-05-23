@@ -13,14 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import uuid
+
 import docker
 import mock
 import testtools
-import uuid
 
-from bdocker.server.modules import docker_helper
-from bdocker.server import parsers
 from bdocker.common import exceptions
+from bdocker.common.modules import docker_helper
 from bdocker.tests.server import fake_docker_outputs
 
 container1 = {'Command': '/bin/sleep 30',

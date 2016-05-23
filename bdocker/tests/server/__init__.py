@@ -16,7 +16,7 @@
 
 import testtools
 
-from bdocker.server import utils
+from bdocker.common import utils
 from bdocker.common import exceptions
 
 
@@ -27,7 +27,7 @@ class TestConfiguration(testtools.TestCase):
         super(TestConfiguration, self).setUp()
 
     def test_load_config_file(self):
-        conf = utils.load_configuration(
+        conf = utils.load_configuration_from_file(
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
             'bdocker/bdocker/tests/server/'
             'fake_configure_file.cfg')
@@ -36,7 +36,7 @@ class TestConfiguration(testtools.TestCase):
 
     def test_load_config_file_error(self):
         self.assertRaises(exceptions.ConfigurationException,
-                          utils.load_configuration,
+                          utils.load_configuration_from_file,
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
             'bdocker/bdocker/tests/server/'
             'fake_configure_file_error.cfg')

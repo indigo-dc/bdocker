@@ -80,6 +80,14 @@ def user_credentials(f):
     return out
 
 
+def user_option(f):
+    return click.option(
+        '--user', '-u', default=None
+        , type=click.STRING
+        , help='User name'
+    )(f)
+
+
 def d_option(f):
     return click.option(
         '--detach', '-d', default=False

@@ -18,8 +18,10 @@ import testtools
 
 from bdocker.client.controller import utils
 from bdocker.common import exceptions
+from bdocker.common import parsers
+from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
-from bdocker.server import parsers
+
 
 class TestParsers(testtools.TestCase):
     """Test User Parsers."""
@@ -57,7 +59,7 @@ class TestParsers(testtools.TestCase):
         home_path = '/home/jorge'
         req_path = '%s/nuevo/script_dir' % home_path
 
-        result = utils_server.validate_directory(req_path, home_path)
+        result = utils_common.validate_directory(req_path, home_path)
         self.assertIsNone(result)
 
     def test_validate_dir_invalid(self):
@@ -65,6 +67,6 @@ class TestParsers(testtools.TestCase):
         req_path = '/root/nuevo/script_dir'
 
         self.assertRaises(exceptions.UserCredentialsException,
-                          utils_server.validate_directory,
+                          utils_common.validate_directory,
                           req_path, home_path)
 

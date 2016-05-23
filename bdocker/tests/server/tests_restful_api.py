@@ -23,8 +23,8 @@ import mock
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
 
 from bdocker.client.controller import utils
-from bdocker.server.modules import credentials
-from bdocker.server.modules import docker_helper
+from bdocker.common.modules import credentials
+from bdocker.common.modules import docker_helper
 from bdocker.server import restful_api
 from bdocker.tests import server
 

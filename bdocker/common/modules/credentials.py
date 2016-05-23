@@ -18,8 +18,6 @@ import uuid
 
 from bdocker.common import exceptions
 from bdocker.common import utils as utils_common
-from bdocker.server import utils
-
 
 sys.tracebacklimit = 0
 
@@ -86,7 +84,7 @@ class UserController(object):
         :param user_data: array of element to be updated
         """
         self.authorize_admin(admin_token)
-        utils.check_user_credentials(user_data)
+        utils_common.check_user_credentials(user_data)
         try:
             token = self._set_token(user_data)
         except Exception as e:
@@ -106,7 +104,7 @@ class UserController(object):
 
     def get_token_from_file(self, path, file_name, jobid):
         path = "%s/%s_%s" % (path, file_name, jobid)
-        token = utils.read_user_credentials(path)
+        token = utils_common.read_user_credentials(path)
         return self._get_token_from_cache(token)
 
     def remove_token_from_cache(self, token):
@@ -233,7 +231,7 @@ class UserController(object):
         """
         # todo: add unittest
         token_info = self._get_token_from_cache(token)
-        utils.validate_directory(dir_path, token_info['home_dir'])
+        utils_common.validate_directory(dir_path, token_info['home_dir'])
 
     def authorize(self, token):
         """Check token authorization.

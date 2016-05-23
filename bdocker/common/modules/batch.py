@@ -13,8 +13,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 import os
+
 
 class BatchController(object):
 
@@ -38,7 +38,10 @@ class SGEController(BatchController):
             'JOB_ID', None)
         home = os.getenv(
             'HOME', None)
+        user = os.getenv(
+            'USER', None)
 
         return {'home': home,
-                'jobid': job_id
+                'job_id': job_id,
+                'user': user
                 }

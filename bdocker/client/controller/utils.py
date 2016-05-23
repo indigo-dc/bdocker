@@ -99,16 +99,13 @@ def make_body(parameters):
         return json.dumps(body)
 
 
-def get_current_home():
-    return pwd.getpwuid( os.getuid()).pw_dir
-
-
-def get_user_credentials(uid):
+def get_user_credentials(name):
+    # getpwnam('someuser')
     try:
-
-        info = pwd.getpwuid(uid)
+        info = pwd.getpwnam(name)
         home_dir = os.path.realpath(info.pw_dir)
-        user = {'uid': uid, 'gid': info.pw_gid, 'home': home_dir}
+        user = {'uid': info.pw_uid, 'gid': info.pw_gid,
+                'home': home_dir}
     except BaseException:
         raise exceptions.UserCredentialsException(
             "User not found"

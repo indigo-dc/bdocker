@@ -24,9 +24,8 @@ from bdocker.client.controller import utils
 class TestIntegration(testtools.TestCase):
     def setUp(self):
         super(TestIntegration, self).setUp()
-        endpoint = "http://127.0.0.1:5001"
-        os.environ['BDOCKER_TOKEN_FILE'] = '.bdocker_token'
-        os.environ['BDOCKER_TOKEN_STORE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/token_store.yml"
+        endpoint = "http://localhost:5001"
+        os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
         os.environ['JOB_ID'] = '1'
         self.controller = commands.CommandController(endpoint=endpoint)
 
@@ -42,10 +41,10 @@ class TestIntegration(testtools.TestCase):
 
     #
 
-    # def test_ps_clean(self):
-    #     all = False
-    #     result = self.controller.clean_environment()
-    #     self.assertEqual([], result)
+    def test_clean(self):
+        all = False
+        result = self.controller.clean_environment(None)
+        self.assertEqual([], result)
 
     def test_ps_real(self):
         token = "1866e0ca1ad44a55952029817c2a5345"

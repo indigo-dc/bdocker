@@ -48,9 +48,9 @@ class TestCommandProject(TestCaseCommandLine):
         token = uuid.uuid4().hex
         path = '/path'
         m_cre.return_value = {"token": token, "path": path}
-        uid = '12'
+        user_name = '--user=foo'
         result = self.runner.invoke(
-            cli.bdocker, ['credentials', uid]
+            cli.bdocker, ['credentials', user_name]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
@@ -62,10 +62,10 @@ class TestCommandProject(TestCaseCommandLine):
         token = uuid.uuid4().hex
         path = '/path'
         m_cre.return_value = {"token": token, "path": path}
-        uid = '12'
+        user_name = '--user=foo'
         job = '--jobid=9494'
         result = self.runner.invoke(
-            cli.bdocker, ['credentials', uid, job]
+            cli.bdocker, ['credentials', user_name, job]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
