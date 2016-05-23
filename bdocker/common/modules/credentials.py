@@ -59,6 +59,10 @@ class UserController(object):
             token_content.update(
                 {'jobid': user_info['jobid']})
         new_token = {token: token_content}
+        #  TODO(jorgesece): create refresh tokens.
+        self.token_store = utils_common.read_yaml_file(
+            self.path
+        )
         self.token_store.update(new_token)
         self.save_token_file()
         return token

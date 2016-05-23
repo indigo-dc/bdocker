@@ -234,5 +234,5 @@ def token_parse(value, path):
         return value
     except BaseException as e:
         raise exceptions.UserCredentialsException(
-            "Token not found: %s " % e.message
+            "Token can not be found in %s " % path
         )
