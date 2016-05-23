@@ -41,6 +41,11 @@ class CommandController(object):
             self.job_id = job_info["job_id"]
             self.token_storage = conf['credentials']["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
+        except IOError as e:
+            # TODO(jorgesece): TEST for it
+            raise exceptions.ConfigurationException(" %s. %s"
+                                                    (e.errno, e.strerror)
+                                                    )
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"
                                                     % endpoint
