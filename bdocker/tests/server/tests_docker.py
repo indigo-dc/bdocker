@@ -13,6 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
 import uuid
 
 import docker
@@ -113,18 +114,77 @@ class TestDocker(testtools.TestCase):
 
     @mock.patch.object(docker.Client, 'remove_image')
     def test_delete_image(self, m):
-        image = 'f1e4b055fb65'
+        image = uuid.uuid4().hex
         m.return_value = None
         out = self.control.delete_image(image)
-        self.assertIsNotNone(out)
+        self.assertIsNone(out)
+
+    @mock.patch.object(docker.Client, 'remove_container')
+    def test_delete_container(self, m):
+        container_id = uuid.uuid4().hex
+        m.return_value = None
+        out = self.control.delete_container(container_id)
+        self.assertIsNone(out)
+
+    @mock.patch.object(docker.Client, 'remove_container')
+    def test_clean_containers(self, m):
+        m.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        c_1 = uuid.uuid4().hex
+        self.assertRaises(exceptions.DockerException,
+                          self.control.delete_container,
+                          c_1)
+
+    @mock.patch.object(docker.Client, 'remove_container')
+    def test_clean_containers(self, m):
+        c_1 = uuid.uuid4().hex
+        c_2 = uuid.uuid4().hex
+        containers = [c_1, c_2]
+        m.side_effect = {c_1, c_2}
+        out = self.control.clean_containers(containers)
+        self.assertIsNone(out)
+
+    @mock.patch.object(docker.Client, 'remove_container')
+    def test_clean_containers(self, m):
+        out = self.control.clean_containers(None)
+        self.assertIsNone(out)
+
+    @mock.patch.object(docker.Client, 'remove_container')
+    def test_clean_containers_err(self, m):
+        m.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        c_1 = [uuid.uuid4().hex]
+        self.assertRaises(exceptions.DockerException,
+                          self.control.clean_containers,
+                          c_1)
 
     @mock.patch.object(docker.Client, 'inspect_container')
     def test_list_containers_details(self, m):
         m.return_value = fake_docker_outputs.fake_container_details
-        containers = ['xxx','xxxx']
+        containers = [uuid.uuid4().hex, uuid.uuid4().hex]
         out = self.control.list_containers_details(containers)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
+
+    def test_list_containers_details_empty(self):
+        out = self.control.list_containers_details([])
+        self.assertIsNotNone(out)
+        self.assertEqual(0, out.__len__())
+
+    @mock.patch.object(docker.Client, 'inspect_container')
+    def test_list_containers_details_err(self, m):
+        m.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        containers = [uuid.uuid4().hex, uuid.uuid4().hex]
+        self.assertRaises(exceptions.DockerException,
+                  self.control.clean_containers,
+                  containers[0])
 
     @mock.patch.object(docker.Client, 'containers')
     def test_list_containers(self, m):
@@ -150,6 +210,70 @@ class TestDocker(testtools.TestCase):
         self.assertIsNotNone(out_put)
         self.assertEqual(out_put, fake_docker_outputs.fake_log)
 
+    @mock.patch.object(docker.Client, 'inspect_container')
+    @mock.patch("bdocker.common.parsers.parse_inspect_container")
+    def test_containers_details(self, m_parse, m_ins):
+        details = fake_docker_outputs.fake_container_details
+        m_parse.return_value = json.dumps(details)
+        m_ins.return_value = fake_docker_outputs.create_generator(details)
+        container_id = uuid.uuid4().hex
+        out = self.control.container_details(container_id)
+        self.assertIsNotNone(out)
+        json_data = json.loads(out)
+        self.assertIn("State", json_data)
+
+    @mock.patch.object(docker.Client, 'inspect_container')
+    @mock.patch("bdocker.common.parsers.parse_inspect_container")
+    def test_containers_details_err(self, m_parse, m_ins):
+        container_id = uuid.uuid4().hex
+        m_ins.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        self.assertRaises(exceptions.DockerException,
+                  self.control.container_details,
+                  container_id)
+
+    @mock.patch.object(docker.Client, 'logs')
+    @mock.patch("bdocker.common.parsers.parse_docker_log")
+    def test_logs(self, m_parse, m_log):
+        logs = fake_docker_outputs.fake_log
+        m_parse.return_value = logs
+        m_log.return_value = fake_docker_outputs.create_generator(logs)
+        container_id = uuid.uuid4().hex
+        out = self.control.logs_container(container_id)
+        self.assertIsNotNone(out)
+        self.assertEqual(logs, out)
+
+    @mock.patch.object(docker.Client, 'logs')
+    @mock.patch("bdocker.common.parsers.parse_docker_log")
+    def test_logs_err(self, m_parse, m_log):
+        container_id = uuid.uuid4().hex
+        m_log.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        self.assertRaises(exceptions.DockerException,
+                  self.control.container_details,
+                  container_id)
+
+    @mock.patch.object(docker.Client, 'start')
+    def test_start(self, m):
+        m.return_value = None
+        container_id = uuid.uuid4().hex
+        out = self.control.start_container(container_id)
+        self.assertIsNone(out)
+
+    @mock.patch.object(docker.Client, 'start')
+    def test_start_err(self, m):
+        container_id = uuid.uuid4().hex
+        m.side_effect = exceptions.DockerException(
+            code=204,
+            message="Not Found"
+        )
+        self.assertRaises(exceptions.DockerException,
+                  self.control.start_container,
+                  container_id)
 # todo: test run with volume
 
     def test_accouning_error(self):

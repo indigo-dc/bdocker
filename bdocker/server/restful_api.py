@@ -54,12 +54,10 @@ def clean():
         admin_token = data['admin_token']
         credentials_module.authorize_admin(admin_token)
         token = data['token']
-        # token = credentials_module.get_token_from_file(
-        #     job_info['home'],
-        #     '.bdocker_token',
-        #     job_info['jobid'])
-        #docker_module.clean_containers(token)
-        #credentials_module.remove_token_from_cache(token)
+        containers = credentials_module.list_containers(token)
+        if containers:
+            docker_module.clean_containers(containers)
+        credentials_module.remove_token_from_cache(token)
         return utils_server.make_json_response(204, [token])
     except Exception as e:
         return utils_server.manage_exceptions(e)

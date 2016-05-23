@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import json
 import testtools
 
 from bdocker.client.controller import utils
@@ -21,7 +21,7 @@ from bdocker.common import exceptions
 from bdocker.common import parsers
 from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
-
+from bdocker.tests.server import fake_docker_outputs
 
 class TestParsers(testtools.TestCase):
     """Test User Parsers."""
@@ -69,4 +69,18 @@ class TestParsers(testtools.TestCase):
         self.assertRaises(exceptions.UserCredentialsException,
                           utils_common.validate_directory,
                           req_path, home_path)
+
+    def test_logs(self):
+        log_list = fake_docker_outputs.fake_log
+        log_gen = fake_docker_outputs.create_generator(log_list)
+        out = parsers.parse_docker_log(log_gen)
+        self.assertIsNotNone(out)
+        self.assertEqual(log_list, out)
+
+    def test_details(self):
+        details = fake_docker_outputs.fake_container_details
+        out = parsers.parse_inspect_container(details)
+        self.assertIsNotNone(out)
+        # json_data = json.loads(out)
+       # self.assertIn("State", json_data)
 

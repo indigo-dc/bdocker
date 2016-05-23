@@ -46,3 +46,10 @@ fake_create = {'Id': uuid.uuid4(),
                'Warnings': None
                }
 fake_log = ['root', 'home']
+
+
+def create_generator(n):
+    i = 0
+    while i < n.__len__():
+        yield n[i]
+        i += 1

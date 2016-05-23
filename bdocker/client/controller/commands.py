@@ -66,6 +66,7 @@ class CommandController(object):
         token = utils_cli.token_parse(token, self.token_file)
         parameters = {"admin_token": admin_token, 'token': token}
         self.control.execute_delete(path=path, parameters=parameters)
+        return token
 
     def container_pull(self, token, source):
         path = "/pull"

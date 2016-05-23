@@ -40,22 +40,25 @@ class DockerController(object):
     def delete_image(self, image_id):
         try:
             docker_out = self.control.remove_image(container=image_id)
-            if docker_out is None:
-                return True
+            return docker_out
         except BaseException as e:
             raise exceptions.DockerException(e)
 
     def delete_container(self, container_id):
         try:
-            self.control.remove_container(
+            docker_out = self.control.remove_container(
                 container=container_id)
+            return docker_out
         except BaseException as e:
             raise exceptions.DockerException(e)
 
-    def clean_containers(self, token):
-        if 'contaniers' in token:
-            for c_id in token['containers']:
-                self.delete_container(c_id)
+    def clean_containers(self, containers):
+        try:
+            if containers:
+                for c_id in containers:
+                    self.delete_container(c_id)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
 
     def list_containers_details(self, containers):
         result = []
