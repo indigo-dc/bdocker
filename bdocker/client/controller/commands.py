@@ -52,7 +52,7 @@ class CommandController(object):
         admin_token = utils_cli.get_admin_token(self.token_storage)
         if user_name:
             self.user_name = user_name
-        user_info = utils_cli.get_user_credentials(user_name)
+        user_info = utils_cli.get_user_credentials(self.user_name)
         user_info.update({'jobid': self.job_id})
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)

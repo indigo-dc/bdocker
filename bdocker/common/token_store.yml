@@ -32,6 +32,12 @@
   images: [a83540abf000]
   uid: 1000
 1fe029116cbf4a228a3bee861bffded5: {gid: 1000, home_dir: /home/jorge, uid: 1000}
+22e441824ca64523a7c75fcbf4779287:
+  containers: [59ece5ab83454633d72832e06e913caf87912b895156ad74e9a33567037129dd]
+  gid: 1000
+  home_dir: /home/jorge
+  jobid: null
+  uid: 1000
 343144d2396f41718ed5697ea0c3aaea: {gid: 1000, home_dir: /home/jorge, uid: 1000}
 508dd5523fba4a6395d6c6cc254221fa: {gid: 1000, home_dir: /home/jorge, uid: 1000}
 6d68e70814994649aeabc2179ccbd877:
@@ -51,15 +57,6 @@ accb0b70c5e34e35862e24aaf9edba16: {gid: '', home_dir: /foo, uid: ''}
 ded185f3c9644f32bccba310d2dfe338: {gid: 1000, home_dir: /home/jorge, jobid: 33, uid: 1000}
 e275383cd3c942dd8ea1282236473990: {gid: '', home_dir: /foo, uid: ''}
 eaad3ee6c3044e21ae29f1028e26e014: {gid: 1000, home_dir: /home/jorge, uid: 1000}
-edde5999c8a94244a25b1d2a3548fad4:
-  containers: [5ab1edc785db94bb2fbc9eee4ed71fb9b49c2c75fa43253a1fb972dea74debe9, f70ac627c36a2905eca851992e914c4e165a66835f96724bd08f3782ba8c8686,
-    b2d9f6ab0933142690e7b299b4ade7af0032d57a39ee980c9a770811f4564424, 32a248457f2e12e3de5f8bbfced67202587d1f5308120f476c21413c6ed1abde,
-    9d55f061fdfc0c6b1ca2f1d7a5a6d2b6ba8fe4227f575f9a71f71fe9a8ba4221, 2091bceb0aa585bdf4fdb7cd0fbcfadf3aee5fb853614255069d256fd4f7a8b1,
-    5fbca21265bba7e9435969d3e412c6ce9c95fc32b4a46ff1715081c4d0d348a4]
-  gid: 1000
-  home_dir: /home/jorgesece
-  images: [a83540abf000]
-  uid: 1000
 ee3391841cee44e08d84150f1925a30b: {gid: 1000, home_dir: /home/jorge, jobid: '33',
   uid: 1000}
 ef57533db8e54c91ab7cdaabccc6f015:

@@ -42,7 +42,7 @@ class TestIntegration(testtools.TestCase):
     #
 
     # def test_clean(self):
-    #     token = "1ab99f76cc1f45a1925e04f8ddb4a396"
+    #     token = "22e441824ca64523a7c75fcbf4779287"
     #     result = self.controller.clean_environment(None)
     #     self.assertEqual(token, result)
 

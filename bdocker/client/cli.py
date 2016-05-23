@@ -55,7 +55,7 @@ def credentials_clean(ctx, token):
     # Command executed by the root in epilog
     try:
         out = ctx.obj.clean_environment(token)
-        utils.print_message(out["path"])
+        utils.print_message(out)
     except BaseException as e:
         utils.print_error(e.message)
 

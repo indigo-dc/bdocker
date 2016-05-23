@@ -100,7 +100,6 @@ def make_body(parameters):
 
 
 def get_user_credentials(name):
-    # getpwnam('someuser')
     try:
         info = pwd.getpwnam(name)
         home_dir = os.path.realpath(info.pw_dir)
@@ -108,7 +107,7 @@ def get_user_credentials(name):
                 'home': home_dir}
     except BaseException:
         raise exceptions.UserCredentialsException(
-            "User not found"
+            "User %s not found: " % name
         )
     return user
 
