@@ -25,6 +25,7 @@ sys.tracebacklimit = 0
 class UserController(object):
 
     def __init__(self, path):
+        # TODO(jorgesece): control refresh token
         self.path = path
         self.token_store = utils_common.read_yaml_file(path)
 
@@ -59,7 +60,6 @@ class UserController(object):
             token_content.update(
                 {'jobid': user_info['jobid']})
         new_token = {token: token_content}
-        #  TODO(jorgesece): create refresh tokens.
         self.token_store = utils_common.read_yaml_file(
             self.path
         )
@@ -76,6 +76,9 @@ class UserController(object):
         current_token = self._get_token_from_cache(token)
         for key, value in fields.items():
             current_token[key] = value
+        self.token_store = utils_common.read_yaml_file(
+            self.path
+        )
         self.token_store.update({token: current_token})
         self.save_token_file()
 
@@ -119,6 +122,9 @@ class UserController(object):
         if token not in self.token_store:
             raise exceptions.UserCredentialsException(
                 "Token not found")
+        self.token_store = utils_common.read_yaml_file(
+            self.path
+        )
         del self.token_store[token]
         self.save_token_file()
 
