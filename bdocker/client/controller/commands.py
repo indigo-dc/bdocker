@@ -13,7 +13,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 from bdocker.client.controller import request
 from bdocker.client.controller import utils as utils_cli
 from bdocker.common import modules

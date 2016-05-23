@@ -122,6 +122,9 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(2,
                          token_info['containers'].__len__())
 
+    def test_add_container_err(self):
+        pass
+
     def test_create_remove_container(self):
         token = "token1"
         c_id = "container1"
@@ -182,3 +185,33 @@ class TestUserCredentials(testtools.TestCase):
         list = self.control.list_containers(
             token=t)
         self.assertIsNotNone(list)
+
+    def test_authorize_admin(self):
+        pass
+
+    def remove_container(self):
+        pass
+
+    def remove_container_err(self):
+        pass
+
+    def test_list_containers(self):
+        pass
+
+    def test_list_containers_err(self):
+        pass
+
+    def test_authorize_directory(self):
+        pass
+
+    def test_authorize_directory_err(self):
+        pass
+
+    def test_update_token(self):
+        pass
+
+    def test_set_token(self):
+        pass
+
+    def test_get_token(self):
+        pass

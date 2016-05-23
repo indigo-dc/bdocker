@@ -274,7 +274,8 @@ class TestDocker(testtools.TestCase):
         self.assertRaises(exceptions.DockerException,
                   self.control.start_container,
                   container_id)
-# todo: test run with volume
+
+# TODO(jorgesece): implement and test it
 
     def test_accouning_error(self):
         self.assertRaises(exceptions.DockerException, self.control.accounting_container, None)

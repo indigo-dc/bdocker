@@ -390,6 +390,9 @@ class TestREST(server.TestConfiguration):
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
+
+    # TODO(jorgesece): test for inspect and clean
+
     # def test_run_real(self):
     #     token = '1866e0ca1ad44a55952029817c2a5345'
     #     image_id = 'a83540abf000'
