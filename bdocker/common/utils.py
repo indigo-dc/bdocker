@@ -121,7 +121,8 @@ def check_user_credentials(user_info):
 
 def validate_directory(dir_request, dir_user):
     real_path = os.path.realpath(dir_request)
-    prefix = os.path.commonprefix([real_path, dir_user])
+    user_real_path = os.path.realpath(dir_user)
+    prefix = os.path.commonprefix([real_path, user_real_path])
     if prefix != dir_user:
         raise exceptions.UserCredentialsException(
             "User does not have permissons for %s"

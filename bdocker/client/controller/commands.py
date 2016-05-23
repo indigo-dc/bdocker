@@ -32,13 +32,16 @@ class CommandController(object):
                     conf['server']['host'],
                     conf['server']['port']
                 )
+            self.defaul_token_name = (
+                conf['credentials']["token_client_file"]
+            )
+            self.job_id = job_info["job_id"]
             self.token_file = "%s/%s_%s" % (
                 job_info['home'],
-                conf['credentials']["token_client_file"],
-                job_info["job_id"]
+                self.defaul_token_name,
+                self.job_id
             )
             self.user_name = job_info['user']
-            self.job_id = job_info["job_id"]
             self.token_storage = conf['credentials']["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
@@ -52,7 +55,14 @@ class CommandController(object):
         admin_token = utils_cli.get_admin_token(self.token_storage)
         if user_name:
             self.user_name = user_name
-        user_info = utils_cli.get_user_credentials(self.user_name)
+            user_info = utils_cli.get_user_credentials(self.user_name)
+            self.token_file = "%s/%s_%s" % (
+                user_info.get("home"),
+                self.defaul_token_name,
+                self.job_id
+            )
+        else:
+            user_info = utils_cli.get_user_credentials(self.user_name)
         user_info.update({'jobid': self.job_id})
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
