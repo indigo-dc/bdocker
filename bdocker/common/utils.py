@@ -36,7 +36,7 @@ def write_yaml_file(path, data):
         my_file.close()
 
 
-default_conf_file = ("/root/" +
+default_conf_file = ("/etc/" +
                      "configure_bdocker.cfg"
                      )
 

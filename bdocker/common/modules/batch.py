@@ -36,8 +36,8 @@ class SGEController(BatchController):
     def get_job_info(self):
         job_id = os.getenv(
             'JOB_ID', None)
-        home = os.getenv(
-            'HOME', None)
+        home = os.path.realpath(os.getenv(
+            'HOME', None))
         user = os.getenv(
             'USER', None)
 
