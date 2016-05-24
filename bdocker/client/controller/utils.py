@@ -150,11 +150,14 @@ def get_admin_token(path):
     return token
 
 
-def write_user_credentials(token, file_path, uid=None):
+def write_user_credentials(token, file_path,
+                           uid=None, gid=None):
     """Write token in file and change its owner,
 
     :param token: token ID
     :param file_path: file to write it
+    :param uid: user id
+    :param gid: user group id
     """
     out = open(file_path,'w')
     out.write(token)
@@ -162,7 +165,7 @@ def write_user_credentials(token, file_path, uid=None):
     # file_path)
     out.close()
     if uid:
-        os.chown(file_path, uid)
+        os.chown(file_path, uid, gid)
 
 
 def read_user_credentials(file_path):

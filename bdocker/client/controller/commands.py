@@ -66,7 +66,8 @@ class CommandController(object):
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         utils_cli.write_user_credentials(token, self.token_file,
-                                         user_info['uid'])
+                                         user_info['uid'],
+                                         user_info['gid'])
         return {"token": token, "path": self.token_file}
 
     def clean_environment(self, token):
