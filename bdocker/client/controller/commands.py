@@ -50,7 +50,6 @@ class CommandController(object):
                                                     )
 
     def create_credentials(self, user_name=None, jobid=None):
-        # TODO(jorgesece): check if jobid has to be removed
         path = "/credentials"
         admin_token = utils_cli.get_admin_token(self.token_storage)
         if user_name:
@@ -66,7 +65,8 @@ class CommandController(object):
         user_info.update({'jobid': self.job_id})
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
-        utils_cli.write_user_credentials(token, self.token_file)
+        utils_cli.write_user_credentials(token, self.token_file,
+                                         user_info['uid'])
         return {"token": token, "path": self.token_file}
 
     def clean_environment(self, token):

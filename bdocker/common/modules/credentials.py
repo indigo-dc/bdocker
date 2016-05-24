@@ -68,7 +68,7 @@ class UserController(object):
         return token
 
     def _update_token(self, token, fields):
-        """update field in the token record
+        """update field in the token store
 
         :param token: token of the registry
         :param fields: array of element to be updated

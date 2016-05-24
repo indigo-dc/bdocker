@@ -19,6 +19,7 @@ import os
 import pwd
 from tabulate import tabulate
 import six
+import six.moves.urllib.parse as urlparse
 
 from bdocker.common import exceptions
 from bdocker.common import utils
@@ -40,6 +41,13 @@ messages = { "empty": colors['FAIL'] + ' "Parsing error" ' + colors['ENDC'],
 
 
 def load_configuration():
+    """Load configuration from environment variables
+
+    DEPRECATED
+
+    :param key: name of variable
+    :param key: value of variable
+    """
     token_store = os.getenv(
         'BDOCKER_TOKEN_STORE',
         '/root/.bdocker_token_store.yaml')
@@ -49,9 +57,6 @@ def load_configuration():
     token_file = os.getenv(
         'BDOCKER_TOKEN_FILE',
         '.bdocker_token')
-
-    # TODO(jorgesece):
-    # this variable could be different in other batch systems
     job_id = os.getenv(
         'JOB_ID',
         None)
@@ -64,6 +69,11 @@ def load_configuration():
 
 
 def set_environ(key, value):
+    """Set variable in environment
+
+    :param key: name of variable
+    :param key: value of variable
+    """
     os.environ[key] = value
 
 
@@ -81,25 +91,34 @@ def utf8(value):
 
 
 def get_query_string(parameters):
-        query_string = ""
-        if parameters is None:
-            return None
+    """Get request query string from parameters
 
-        for key in parameters.keys():
-            query_string = ("%s%s=%s&" % (query_string, key, parameters[key]))
-
-        return query_string[:-1] # delete last character
+    :param name: name of the user
+    """
+    if parameters is None:
+        query_string = None
+    else:
+        query_string = urlparse.urlencode(parameters)
+    return query_string
 
 
 def make_body(parameters):
-        body = {}
-        for key in parameters.keys():
-            body[key] = parameters[key]
+    """Create json body request
 
-        return json.dumps(body)
+    :param parameters: dict of parameters to include
+    """
+    body = {}
+    for key in parameters.keys():
+        body[key] = parameters[key]
+
+    return json.dumps(body)
 
 
 def get_user_credentials(name):
+    """Read user information from user
+
+    :param name: name of the user
+    """
     try:
         info = pwd.getpwnam(name)
         home_dir = os.path.realpath(info.pw_dir)
@@ -113,6 +132,10 @@ def get_user_credentials(name):
 
 
 def get_admin_token(path):
+    """Get admin token from path file
+
+    :param path: file to be read
+    """
     try:
         token_store = utils.read_yaml_file(path)
         token = token_store['prolog']['token']
@@ -127,22 +150,38 @@ def get_admin_token(path):
     return token
 
 
-def write_user_credentials(token, file_path):
+def write_user_credentials(token, file_path, uid=None):
+    """Write token in file and change its owner,
+
+    :param token: token ID
+    :param file_path: file to write it
+    """
     out = open(file_path,'w')
     out.write(token)
     # set_environ('BDOCKER_TOKEN_FILE',
     # file_path)
     out.close()
+    if uid:
+        os.chown(file_path, uid)
 
 
 def read_user_credentials(file_path):
+    """Read token file in YAML format
+
+    :param token: token of the registry
+    :param fields: array of element to be updated
+    """
     input = open(file_path,'r')
     token = input.read().rstrip('\n')
     input.close()
     return token
 
 
-def print_message(message, type='OK'):
+def print_message(message):
+    """Print message
+
+    :param message: message list
+    """
     if isinstance(message, dict):
         m = []
         for k,v in message.items():
@@ -153,11 +192,23 @@ def print_message(message, type='OK'):
     for m in message:
         print m
 
+
 def print_error(message):
+    """Print message  error
+
+    :param message: message list
+    """
     print_message(message)
 
 
 def print_message_color(message, type='OK'):
+    """Print message color
+
+    DEPRECATED: it provokes error in parse output string
+
+    :param message: message list
+    :param type: type of message
+    """
     if isinstance(message, dict):
         m = []
         for k,v in message.items():
@@ -167,17 +218,30 @@ def print_message_color(message, type='OK'):
         message = [message]
     # print
     for m in message:
-        # m = colors[type] + m + colors['ENDC']
-        # print '{:<}'.format(m)
+        m = colors[type] + m + colors['ENDC']
+        print '{:<}'.format(m)
         print m
     # print
 
 
 def print_error_color(message):
+    """Print message error in color
+
+    DEPRECATED: it provokes error in parse output string
+
+    :param message: message list
+    """
     print_message(message, 'FAIL')
 
 
 def print_table(headers, rows, title=None, err=False):
+    """Print table from list of messages
+
+    :param headers: table headers
+    :param rows: row of messages
+    :param title: tile of the table
+    :param err: error bool
+    """
     try:
         if headers:
             print
@@ -197,9 +261,34 @@ def print_table(headers, rows, title=None, err=False):
         print e.message
 
 
+def token_parse(value, path):
+    """Parse token
+
+    If value is null, it read the token from the
+    $HOME/.bdocker_token_$JOBID file
+
+    :param param: parameters
+    :param value: input value
+    """
+    try:
+        if not value:
+            value = read_user_credentials(path)
+        return value
+    except BaseException as e:
+        raise exceptions.UserCredentialsException(
+            "Token can not be found in %s " % path
+        )
+
+
 # Callbacks
 
 def parse_volume(ctx, param, value):
+    """Command Client Callback. Parse volume
+
+    :param ctx: contex
+    :param param: parameters
+    :param value: input value
+    """
     result = None
     if value:
         try:
@@ -216,6 +305,13 @@ def parse_volume(ctx, param, value):
 
 
 def parse_bool(ctx, param, value):
+    """Command Client Callback. Parse bool
+
+    :param ctx: contex
+    :param param: parameters
+    :param value: input value
+    """
+
     if value:
         if value == 'True' or value == 'true':
             return True
@@ -225,14 +321,3 @@ def parse_bool(ctx, param, value):
             raise exceptions.ParseException(
                 'Value error: %s' % value
             )
-
-
-def token_parse(value, path):
-    try:
-        if not value:
-            value = read_user_credentials(path)
-        return value
-    except BaseException as e:
-        raise exceptions.UserCredentialsException(
-            "Token can not be found in %s " % path
-        )
