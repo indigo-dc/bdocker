@@ -133,7 +133,7 @@ class CommandController(object):
 
     def container_inspect(self, token, container_id):
         path = "/inspect"
-        token = utils_cli.token_parse(token, self.home_token_file)
+        token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
