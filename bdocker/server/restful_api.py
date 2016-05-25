@@ -16,7 +16,9 @@
 
 from flask import Flask
 from flask import json, request
+import logging
 
+from bdocker.common import exceptions
 from bdocker.common import modules as modules_common
 from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
@@ -27,6 +29,8 @@ batch_module = modules_common.load_batch_module(conf)
 docker_module = modules_common.load_docker_module(conf)
 
 app = Flask(__name__)
+
+LOG = logging.getLogger(__name__)
 
 utils_server.set_error_handler(app)
 
@@ -123,7 +127,7 @@ def run():
 
 
 @app.route('/ps', methods=['GET'])
-def list():
+def list_containers():
     data = request.args
     required = {'token'}
     try:
@@ -172,23 +176,32 @@ def logs():
         return utils_server.manage_exceptions(e)
 
 
-@app.route('/rm', methods=['DELETE'])
+@app.route('/rm', methods=['PUT'])
 def delete():
-    data = request.args
+    data = json.loads(request.data)
     required = {'token', 'container_id'}
     try:
         utils_server.validate(data, required)
         token = data['token']
-        container_id = data['container_id']
+        container_ids = data['container_id']
         force = utils_server.eval_bool(
             data.get('force', False)
         )
-        c_id = credentials_module.authorize_container(
-            token,
-            container_id)
-        results = docker_module.delete_container(c_id, force)
-        credentials_module.remove_container(token, c_id)
-        return utils_server.make_json_response(204, results)
+        docker_out = []
+        if not isinstance(container_ids, list):
+            container_ids = [container_ids]
+        for c_id in container_ids:
+            try:
+                full_id = credentials_module.authorize_container(
+                    token,
+                    c_id)
+                docker_module.delete_container(full_id, force)
+                credentials_module.remove_container(token, full_id)
+                docker_out.append(full_id)
+            except BaseException as e:
+                LOG.exception(e.message)
+                docker_out.append(e.message)
+        return utils_server.make_json_response(200, docker_out)
     except Exception as e:
         return utils_server.manage_exceptions(e)
 

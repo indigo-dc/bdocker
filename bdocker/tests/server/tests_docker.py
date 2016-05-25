@@ -124,7 +124,7 @@ class TestDocker(testtools.TestCase):
         container_id = uuid.uuid4().hex
         m.return_value = None
         out = self.control.delete_container(container_id)
-        self.assertEqual([container_id], out)
+        self.assertEqual(container_id, out)
 
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_containers(self, m):
@@ -133,23 +133,23 @@ class TestDocker(testtools.TestCase):
             message="Not Found"
         )
         c_1 = uuid.uuid4().hex
-        self.assertRaises(exceptions.DockerException,
-                          self.control.delete_container,
-                          c_1)
+        out = self.control.delete_container(c_1)
+        self.assertEqual([], out)
+
 
     @mock.patch.object(docker.Client, 'remove_container')
-    def test_clean_containers(self, m):
+    def test_clean_several_containers(self, m):
         c_1 = uuid.uuid4().hex
         c_2 = uuid.uuid4().hex
         containers = [c_1, c_2]
         m.side_effect = {c_1, c_2}
         out = self.control.clean_containers(containers)
-        self.assertIsNone(out)
+        self.assertEqual(containers.__len__(), out.__len__())
 
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_containers(self, m):
         out = self.control.clean_containers(None)
-        self.assertIsNone(out)
+        self.assertEqual([], out)
 
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_containers_err(self, m):
@@ -158,9 +158,8 @@ class TestDocker(testtools.TestCase):
             message="Not Found"
         )
         c_1 = [uuid.uuid4().hex]
-        self.assertRaises(exceptions.DockerException,
-                          self.control.clean_containers,
-                          c_1)
+        out = self.control.clean_containers(c_1)
+        self.assertIn('Error', out[0])
 
     @mock.patch.object(docker.Client, 'inspect_container')
     def test_list_containers_details(self, m):
@@ -183,7 +182,7 @@ class TestDocker(testtools.TestCase):
         )
         containers = [uuid.uuid4().hex, uuid.uuid4().hex]
         self.assertRaises(exceptions.DockerException,
-                  self.control.clean_containers,
+                  self.control.list_containers_details,
                   containers[0])
 
     @mock.patch.object(docker.Client, 'containers')

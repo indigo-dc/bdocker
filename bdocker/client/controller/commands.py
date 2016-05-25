@@ -118,12 +118,12 @@ class CommandController(object):
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
-    def container_delete(self, token, container_ids, force):
+    def container_delete(self, token, container_ids, force=False):
         path = "/rm"
         token = utils_cli.token_parse(token, self.token_file)
         parameters = {"token": token, "container_id": container_ids,
                       "force": force}
-        out = self.control.execute_delete(path=path, parameters=parameters)
+        out = self.control.execute_put(path=path, parameters=parameters)
         return out
 
     def accounting_retrieve(self, token, container_id):

@@ -58,10 +58,11 @@ class TestIntegration(testtools.TestCase):
         result = self.controller.container_list(token, all)
         self.assertNotEqual([], result)
 
-    def test_delete_real_no_token(self):
+    def test_delete_real_several(self):
         token = None
         all = True
-        result = self.controller.container_delete(token, all)
+        containers = ["f057e3e091ec", "d439e0abf365"]
+        result = self.controller.container_delete(token, containers)
         self.assertNotEqual([], result)
 
     def test_ps_run(self):

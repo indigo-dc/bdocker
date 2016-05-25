@@ -115,14 +115,40 @@ class TestREST(server.TestConfiguration):
     @mock.patch.object(docker_helper.DockerController, "delete_container")
     @mock.patch.object(credentials.UserController,
                        "authorize_container")
-    def test_delete(self, mu, md):
+    @mock.patch.object(credentials.UserController,
+                       "remove_container")
+    def test_delete(self, mr, mu, md):
+        mr.return_value = True
         mu.return_value = True
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
-        query = get_query_string(parameters)
-        result = webob.Request.blank("/rm?%s" % query,
-                                     method="DELETE").get_response(self.app)
-        self.assertEqual(204, result.status_code)
+        body = make_body(parameters)
+        result = webob.Request.blank("/rm",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(200, result.status_code)
+
+    @mock.patch.object(docker_helper.DockerController, "delete_container")
+    @mock.patch.object(credentials.UserController,
+                       "authorize_container")
+    @mock.patch.object(credentials.UserController,
+                       "remove_container")
+    def test_delete_several(self, mr, mu, md):
+        c1 = uuid.uuid4().hex
+        c2 = uuid.uuid4().hex
+        mr.return_value = True
+        mu.side_effect = [c1, c2]
+        parameters = {"token":"tokennnnnn",
+                      "container_id": [c1, c2]}
+        body = make_body(parameters)
+        result = webob.Request.blank("/rm",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(200, result.status_code)
+        self.assertEqual(c1, result.json_body["results"][0])
+        self.assertEqual(c2, result.json_body["results"][1])
 
     @mock.patch.object(docker_helper.DockerController, "delete_container")
     def test_delete_405(self, m):
@@ -134,19 +160,27 @@ class TestREST(server.TestConfiguration):
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(docker_helper.DockerController, "delete_container")
-    def test_delete(self, mu):
-        mu.return_value = True
+    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    def test_delete_401(self, m_t, mu):
+        m_t.return_value = {'containers':['c1']}
+        c1 = uuid.uuid4().hex
+        c2 = uuid.uuid4().hex
+        mu.side_effect = [c1, c2]
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'repoooo'}
-        query = get_query_string(parameters)
-        result = webob.Request.blank("/rm?%s" % query,
-                                     method="DELETE").get_response(self.app)
-        self.assertEqual(401, result.status_code)
+                      "container_id": [c1, c2]}
+        body = make_body(parameters)
+        result = webob.Request.blank("/rm",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(200, result.status_code)
+        self.assertIn("Error", result.json_body["results"][0])
 
     @mock.patch.object(docker_helper.DockerController, "list_containers")
     @mock.patch.object(credentials.UserController, "_get_token_from_cache")
     @mock.patch.object(credentials.UserController,
                        "authorize")
+
     def test_ps(self, mu, mt, ml):
         mu.return_value = True
         token = "3333"
