@@ -6,7 +6,7 @@ server configuration
 
 The server daemon is configured by using a configuration file, the administrator has to configure this file in the
 environment variable ``BDOCKER_CONF_FILE``. If it is not configured the system looks for the file in
-``/root/configure_bdocker.cfg``. The file has the following fields::
+``/etc/configure_bdocker.cfg``. The file has the following fields::
 
     [server]
     host = localhost

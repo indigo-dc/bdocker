@@ -14,11 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import docker as docker_py
+import logging
 
 from bdocker.common import exceptions
 from bdocker.common import parsers
 
 # sys.tracebacklimit = 0
+
+LOG = logging.getLogger(__name__)
 
 class DockerController(object):
 
@@ -44,19 +47,23 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
 
-    def delete_container(self, container_id):
+    def delete_container(self, container_id, force=False):
         try:
             docker_out = self.control.remove_container(
-                container=container_id)
+                container=container_id, force=force)
             return docker_out
         except BaseException as e:
             raise exceptions.DockerException(e)
 
-    def clean_containers(self, containers):
+    def clean_containers(self, containers, force=False):
         try:
             if containers:
                 for c_id in containers:
-                    self.delete_container(c_id)
+                    try:
+                        self.delete_container(c_id, force)
+                    except exceptions.DockerException as e:
+                        LOG.exception(e.message)
+                        continue
         except BaseException as e:
             raise exceptions.DockerException(e)
 

@@ -104,6 +104,14 @@ def all_option(f):
     )(f)
 
 
+def force_option(f):
+    return click.option(
+        '--force', '-f', default=False
+        , type=click.BOOL, is_flag=True
+        , help='Force the removal of a running container (uses SIGKILL)'
+    )(f)
+
+
 def volume_option(f):
     return click.option(
         '--volume', '-v', default=None, type=click.STRING

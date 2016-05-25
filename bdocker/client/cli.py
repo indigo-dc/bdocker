@@ -50,11 +50,12 @@ def credentials_create(ctx, user, jobid):
                  help="Clean work environment."
                       " ROOT privileges needed")
 @token_option
+@force_option
 @click.pass_context
-def credentials_clean(ctx, token):
+def credentials_clean(ctx, token, force):
     # Command executed by the root in epilog
     try:
-        out = ctx.obj.clean_environment(token)
+        out = ctx.obj.clean_environment(token, force)
         utils.print_message(out)
     except BaseException as e:
         utils.print_error(e.message)
@@ -146,10 +147,11 @@ def container_inspect(ctx, token, container_id):
 @bdocker.command('rm', help="Delete a container.")
 @token_option
 @container_id_argument
+@force_option
 @click.pass_context
-def container_delete(ctx, token, container_id):
+def container_delete(ctx, token, container_id, force):
     try:
-        out = ctx.obj.container_delete(token, container_id)
+        out = ctx.obj.container_delete(token, container_id, force)
         utils.print_message(out)
     except BaseException as e:
         m = ("Error: failed to remove containers: [%s]" %

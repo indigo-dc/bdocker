@@ -13,9 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 from datetime import datetime
 import json
+import re
 
 from bdocker.common import exceptions
 
@@ -147,7 +147,8 @@ def parse_list_container(data):
         )
         names = ""
         for i in data['Names']:
-            names = "%s %s" % (names, str(i))
+            name = re.sub('/', '', str(i))
+            names = "%s %s" % (names, name)
         ports = ""
         for i in data['Ports']:
             ports = "%s %s" % (ports, str(i))

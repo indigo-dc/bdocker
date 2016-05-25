@@ -52,11 +52,14 @@ def clean():
     try:
         utils_server.validate(data, required)
         admin_token = data['admin_token']
+        force = utils_server.eval_bool(
+            data.get('force', False)
+        )
         credentials_module.authorize_admin(admin_token)
         token = data['token']
         containers = credentials_module.list_containers(token)
         if containers:
-            docker_module.clean_containers(containers)
+            docker_module.clean_containers(containers, force)
         credentials_module.remove_token_from_cache(token)
         return utils_server.make_json_response(204, [token])
     except Exception as e:
@@ -177,10 +180,13 @@ def delete():
         utils_server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
+        force = utils_server.eval_bool(
+            data.get('force', False)
+        )
         c_id = credentials_module.authorize_container(
             token,
             container_id)
-        results = docker_module.delete_container(c_id)
+        results = docker_module.delete_container(c_id, force)
         credentials_module.remove_container(token, c_id)
         return utils_server.make_json_response(204, results)
     except Exception as e:

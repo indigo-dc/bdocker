@@ -70,11 +70,12 @@ class CommandController(object):
                                          user_info['gid'])
         return {"token": token, "path": self.token_file}
 
-    def clean_environment(self, token):
+    def clean_environment(self, token, force):
         path = "/clean"
         admin_token = utils_cli.get_admin_token(self.token_storage)
         token = utils_cli.token_parse(token, self.token_file)
-        parameters = {"admin_token": admin_token, 'token': token}
+        parameters = {"admin_token": admin_token, 'token': token,
+                      "force": force}
         self.control.execute_delete(path=path, parameters=parameters)
         return token
 
@@ -117,10 +118,11 @@ class CommandController(object):
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
-    def container_delete(self, token, container_id):
+    def container_delete(self, token, container_id, force):
         path = "/rm"
         token = utils_cli.token_parse(token, self.token_file)
-        parameters = {"token": token, "container_id": container_id}
+        parameters = {"token": token, "container_id": container_id,
+                      "force": force}
         self.control.execute_delete(path=path, parameters=parameters)
         return container_id
 
