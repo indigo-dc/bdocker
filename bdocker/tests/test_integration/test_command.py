@@ -26,7 +26,7 @@ class TestIntegration(testtools.TestCase):
         super(TestIntegration, self).setUp()
         endpoint = "http://localhost:5001"
         os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/common/configure_bdocker.cfg"
-        os.environ['JOB_ID'] = '1'
+        os.environ['JOB_ID'] = 'None'
         self.controller = commands.CommandController(endpoint=endpoint)
 
 #     def create_request(self, path="/",
@@ -47,7 +47,7 @@ class TestIntegration(testtools.TestCase):
     #     self.assertEqual(token, result)
 
     def test_ps_real(self):
-        token = "1866e0ca1ad44a55952029817c2a5345"
+        token = "b633b5a7c2f545de9bec6db41b8c831d"
         all = False
         result = self.controller.container_list(token, all)
         self.assertEqual([], result)
@@ -56,6 +56,12 @@ class TestIntegration(testtools.TestCase):
         token = None
         all = True
         result = self.controller.container_list(token, all)
+        self.assertNotEqual([], result)
+
+    def test_delete_real_no_token(self):
+        token = None
+        all = True
+        result = self.controller.container_delete(token, all)
         self.assertNotEqual([], result)
 
     def test_ps_run(self):

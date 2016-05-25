@@ -47,23 +47,26 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
 
-    def delete_container(self, container_id, force=False):
-        try:
-            docker_out = self.control.remove_container(
-                container=container_id, force=force)
-            return docker_out
-        except BaseException as e:
-            raise exceptions.DockerException(e)
+    def delete_container(self, container_ids, force=False):
+        docker_out = []
+        if not isinstance(container_ids, list):
+            container_ids = [container_ids]
+        for c_id in container_ids:
+            try:
+                self.control.remove_container(
+                    container=c_id, force=force)
+                docker_out.append(c_id)
+            except BaseException as e:
+                e2 = exceptions.DockerException(e)
+                LOG.exception(e2.message)
+                docker_out.append(e2.message)
+        return docker_out
 
     def clean_containers(self, containers, force=False):
         try:
             if containers:
-                for c_id in containers:
-                    try:
-                        self.delete_container(c_id, force)
-                    except exceptions.DockerException as e:
-                        LOG.exception(e.message)
-                        continue
+                self.delete_container(
+                    container=containers, force=force)
         except BaseException as e:
             raise exceptions.DockerException(e)
 

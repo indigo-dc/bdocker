@@ -1,7 +1,8 @@
 543bf1489f114f6285702e6fc88d03cd: {gid: 1000, home_dir: /home/jorge, jobid: null,
   uid: 1000}
 b633b5a7c2f545de9bec6db41b8c831d:
-  containers: [33b9c5dc0086df7613441d8c3dbe90a05ff75ec15f33a4d31fdad856c641bbc2]
+  containers: [33b9c5dc0086df7613441d8c3dbe90a05ff75ec15f33a4d31fdad856c641bbc2, d439e0abf36542a29ba05a4e5927ec4e2bcb4a237966b528d4391cfa7b86f9b0,
+    f057e3e091ecf031734589e198d7bee139b1b8f4da5809b7463bfe9afe7846a6]
   gid: 1000
   home_dir: /home/jorge
   jobid: null

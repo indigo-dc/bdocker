@@ -13,11 +13,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import sys
 
 from bdocker.client.controller import commands
-from bdocker.client.controller import utils
 from bdocker.client.decorators import *
+from bdocker.common import exceptions
 
 
 @click.group()
@@ -146,16 +145,15 @@ def container_inspect(ctx, token, container_id):
 
 @bdocker.command('rm', help="Delete a container.")
 @token_option
-@container_id_argument
+@container_ids_argument
 @force_option
 @click.pass_context
-def container_delete(ctx, token, container_id, force):
+def container_delete(ctx, token, container_ids, force):
     try:
-        out = ctx.obj.container_delete(token, container_id, force)
+        out = ctx.obj.container_delete(token, container_ids, force)
         utils.print_message(out)
-    except BaseException as e:
-        m = ("Error: failed to remove containers: [%s]" %
-             container_id)
+    except exceptions.DockerException as e:
+        m = e.message
         utils.print_error(m)
 
 

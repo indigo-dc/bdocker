@@ -124,7 +124,7 @@ class TestDocker(testtools.TestCase):
         container_id = uuid.uuid4().hex
         m.return_value = None
         out = self.control.delete_container(container_id)
-        self.assertIsNone(out)
+        self.assertEqual([container_id], out)
 
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_containers(self, m):

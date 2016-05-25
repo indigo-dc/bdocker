@@ -62,6 +62,15 @@ def container_id_argument(f):
                           , type=click.STRING
                           )(f)
 
+
+def container_ids_argument(f):
+    return click.argument("container_ids"
+                          , type=click.STRING
+                          , nargs=-1
+                          , required=True
+                          )(f)
+
+
 def image_id_argument(f):
     return click.argument("image_id"
                           , type=click.STRING

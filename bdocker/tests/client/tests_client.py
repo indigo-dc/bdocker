@@ -231,6 +231,20 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertIsNotNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "container_delete")
+    def test_docker_delete_list(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        c1 = uuid.uuid4().hex
+        c2 = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['rm', "--token=%s" % token, c1, c2]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_run")
     def test_docker_run(self, m_l, m_ini):
         m_ini.return_value = None
