@@ -22,7 +22,7 @@ from bdocker.common import parsers
 
 class DockerController(object):
 
-    def __init__(self, url):
+    def __init__(self, url, cgroup=None):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
@@ -116,7 +116,8 @@ class DockerController(object):
             raise exceptions.DockerException(e)
 
     def run_container(self, image_id, detach, command,
-                      working_dir=None, host_dir=None, docker_dir=None):
+                      working_dir=None, host_dir=None, docker_dir=None,
+                      cgroup=None):
         # todo:verify directory of working node to move things (HOME)
         # allow users to bind directories from the wd in the container
         out_put = None
@@ -124,9 +125,11 @@ class DockerController(object):
             # volumes = None
             host_config = None
             if host_dir:
-                host_config = self.control.create_host_config(
-                    binds=['%s:%s' % (host_dir, docker_dir)]
-                    )
+                binds = ['%s:%s' % (host_dir, docker_dir)]
+            host_config = self.control.create_host_config(
+                binds = binds,
+                cgroup_parent=cgroup
+                )
             container_info = self.control.create_container(
                 image=image_id,
                 command=command,

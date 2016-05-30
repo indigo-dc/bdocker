@@ -13,6 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import os
 import testtools
 
 from bdocker.common.modules import docker_helper
@@ -35,7 +36,7 @@ class TestDockerIntegration(testtools.TestCase):
     #     out = self.control.pull_image(image)
     #     self.assertIsNotNone(out)
 
-    # def test_log_container_real(self):
+    # def test_log_container_real(self):3413
     #     container_id = '15e3b92d919f441719704fa1287ea73a35faf26533c32bf58f4f642e9aac1a91
     #     out = self.control.logs_container(container_id)
     #     self.assertIsNotNone(out)
@@ -49,8 +50,8 @@ class TestDockerIntegration(testtools.TestCase):
     #
     def test_run_container_real(self):
         image_id = 'a83540abf000'
-        script = 'ls'
-        detach = False
+        script = 'sleep 360'
+        detach = True
         host_dir = "/root/docker_test/"
         docker_dir = "/tmp"
         container_id = self.control.run_container(image_id,
@@ -59,7 +60,9 @@ class TestDockerIntegration(testtools.TestCase):
                                              working_dir=docker_dir,
                                              host_dir=host_dir,
                                              docker_dir=docker_dir)
+
         outstart = self.control.start_container(container_id)
+        details = self.control.container_details(container_id)
         out = self.control.logs_container(container_id)
         self.assertIsNotNone(out)
         self.assertIsNotNone(out.__len__())

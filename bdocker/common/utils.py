@@ -131,7 +131,10 @@ def validate_directory(dir_request, dir_user):
 
 
 def read_user_credentials(file_path):
-    # TODO(jorgesece): add to the commom package
+    return read_file(file_path)
+
+
+def read_file(file_path):
     input = open(file_path,'r')
     token = input.read().rstrip('\n')
     input.close()

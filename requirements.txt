@@ -7,3 +7,4 @@ Flask
 six
 pyyaml
 docker-py
+cgroupspy

@@ -42,6 +42,7 @@ class CommandController(object):
                 self.job_id
             )
             self.user_name = job_info['user']
+            self.job_cgroup = job_info['cgroup']
             self.token_storage = conf['credentials']["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
@@ -100,6 +101,8 @@ class CommandController(object):
             parameters["docker_dir"] = volume["docker_dir"]
         if working_dir:
             parameters["working_dir"] = working_dir
+        if self.job_cgroup:
+            parameters["cgroup"] = self.job_cgroup
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
 

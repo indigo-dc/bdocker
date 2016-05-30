@@ -100,6 +100,7 @@ def run():
         host_dir = data.get('host_dir', None)
         docker_dir = data.get('docker_dir', None)
         working_dir = data.get('working_dir', None)
+        cgroup = data.get('cgroup', None)
         # TODO(jorgesece): control image private
         # credentials_module.authorize_image(
         #     token,
@@ -113,7 +114,8 @@ def run():
             script,
             host_dir=host_dir,
             docker_dir=docker_dir,
-            working_dir=working_dir
+            working_dir=working_dir,
+            cgroup=cgroup
         )
         credentials_module.add_container(token, container_id)
         docker_module.start_container(container_id)
