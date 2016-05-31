@@ -16,6 +16,7 @@
 
 import mock
 import testtools
+import uuid
 
 from bdocker.common.modules import credentials
 from bdocker.common import exceptions
@@ -215,3 +216,20 @@ class TestUserCredentials(testtools.TestCase):
 
     def test_get_token(self):
         pass
+
+    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    def test_get_job_from_token(self, m_gt):
+        uid = uuid.uuid4().hex
+        jobid = uuid.uuid4().hex
+        token_info = {"uid": uid,
+                      "jobid": jobid}
+        m_gt.return_value = token_info
+        result = self.control.get_job_from_token(uid)
+        self.assertEqual(jobid, result)
+
+    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    def test_get_job_from_token(self, m_gt):
+        m_gt.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.get_job_from_token,
+                          None)

@@ -70,6 +70,40 @@ def clean():
         return utils_server.manage_exceptions(e)
 
 
+@app.route('/batchconf', methods=['PUT'])
+def batch_conf():
+    data = request.get_json()
+    required = {'admin_token', 'token'}
+    try:
+        utils_server.validate(data, required)
+        admin_token = data['admin_token']
+        token = data['token']
+        credentials_module.authorize_admin(admin_token)
+        job_id = credentials_module.get_job_from_token(token)
+        batch_module.conf_environment(job_id)
+        return utils_server.make_json_response(
+            201, ["Batch system configured"]
+        )
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
+
+
+@app.route('/batchclean', methods=['DELETE'])
+def batch_clean():
+    data = request.args
+    required = {'admin_token', 'token'}
+    try:
+        utils_server.validate(data, required)
+        admin_token = data['admin_token']
+        token = data['token']
+        credentials_module.authorize_admin(admin_token)
+        job_id = credentials_module.get_job_from_token(token)
+        batch_module.clean_environment(job_id)
+        return utils_server.make_json_response(204, [])
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
+
+
 @app.route('/pull', methods=['POST'])
 def pull():
     data = request.get_json()

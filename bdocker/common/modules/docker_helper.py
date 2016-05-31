@@ -123,11 +123,11 @@ class DockerController(object):
         out_put = None
         try:
             # volumes = None
-            host_config = None
+            binds = None
             if host_dir:
                 binds = ['%s:%s' % (host_dir, docker_dir)]
             host_config = self.control.create_host_config(
-                binds = binds,
+                binds=binds,
                 cgroup_parent=cgroup
                 )
             container_info = self.control.create_container(

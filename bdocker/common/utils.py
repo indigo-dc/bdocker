@@ -139,3 +139,10 @@ def read_file(file_path):
     token = input.read().rstrip('\n')
     input.close()
     return token
+
+
+def add_to_file(file_path, data):
+    with open(file_path, 'a') as file_obj:
+        file_obj.write(data)
+    file_obj.close()
+    return True

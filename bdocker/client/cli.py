@@ -59,6 +59,33 @@ def credentials_clean(ctx, token, force):
     except BaseException as e:
         utils.print_error(e.message)
 
+
+@bdocker.command('batch_config',
+                 help="Request batch system configuration"
+                      " to the server. ROOT privileges needed")
+@token_option
+@click.pass_context
+def batch_config(ctx, token):
+    try:
+        out = ctx.obj.batch_config(token)
+        utils.print_message(out)
+    except BaseException as e:
+        utils.print_error(e.message)
+
+
+@bdocker.command('batch_clean',
+                 help="Request clean the batch system environment"
+                      " to the server. ROOT privileges needed")
+@token_option
+@click.pass_context
+def batch_clean(ctx, token):
+    try:
+        out = ctx.obj.batch_clean(token)
+        utils.print_message(out)
+    except BaseException as e:
+        utils.print_error(e.message)
+
+
 @bdocker.command('pull',
                  help="Pull a container and"
                       " its intermediate layers.")

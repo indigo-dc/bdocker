@@ -147,7 +147,6 @@ class TestCommands(testtools.TestCase):
         results = self.control.container_run(None, image_id, False, 'ls')
         self.assertEqual(out, results)
 
-
     @mock.patch.object(request.RequestController, "execute_get")
     @mock.patch("bdocker.client.controller.utils.token_parse")
     def test_container_list(self, m_t, m):
@@ -158,6 +157,73 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(containers[0], results[0])
         self.assertEqual(containers[1], results[1])
 
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_config(self, m_t, m_ad, m_put):
+        token = uuid.uuid4().hex
+        admin_token = uuid.uuid4().hex
+        m_t.return_value = token
+        m_ad.return_value = admin_token
+        containers = ["container_1", "container_2"]
+        m_put.return_value = containers
+        self.control.batch_config(None)
+        expected = {"admin_token": admin_token,
+                    "token": token}
+        m_put.assert_called_with(path='/batchconf',
+                                 parameters=expected)
+
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_config_admin_err(self, m_t, m_ad, m_put):
+        m_ad.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.batch_config,
+                          None)
+
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_config_token_err(self, m_t, m_ad, m_put):
+        m_t.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.batch_config,
+                          None)
+
+    @mock.patch.object(request.RequestController, "execute_delete")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_clean(self, m_t, m_ad, m_del):
+        token = uuid.uuid4().hex
+        admin_token = uuid.uuid4().hex
+        m_t.return_value = token
+        m_ad.return_value = admin_token
+        containers = ["container_1", "container_2"]
+        m_del.return_value = containers
+        self.control.batch_clean(None)
+        expected = {"admin_token": admin_token,
+                    "token": token}
+        m_del.assert_called_with(path='/batchclean',
+                                 parameters=expected)
+
+    @mock.patch.object(request.RequestController, "execute_delete")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_clean_admin_err(self, m_t, m_ad, m_del):
+        m_ad.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.batch_clean,
+                          None)
+
+    @mock.patch.object(request.RequestController, "execute_delete")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_batch_clean_token_err(self, m_t, m_ad, m_del):
+        m_t.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.batch_clean,
+                          None)
 
     # def test_crendentials(self):
     #     results = self.control.create_credentials(1000)

@@ -36,6 +36,7 @@ class UserController(object):
         utils_common.write_yaml_file(self.path, self.token_store)
 
     def _get_token_from_cache(self, token):
+        # TODO(jorgesece): refresh from file?
         """Get token from token store
 
         :param token: token looked for
@@ -250,3 +251,10 @@ class UserController(object):
         """
         token_info = self._get_token_from_cache(token)
         return token_info
+
+    def get_job_from_token(self, token):
+        token_info = self._get_token_from_cache(token)
+        if "jobid" not in token_info:
+            raise exceptions.UserCredentialsException(
+                "Job not found in token %s" % token)
+        return token_info["jobid"]

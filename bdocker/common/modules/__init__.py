@@ -27,7 +27,7 @@ def load_batch_module(conf):
     if 'batch' not in conf:
         raise exceptions.ConfigurationException("Batch system is not defined")
     if conf['batch']["system"] == 'SGE':
-        return batch.SGEController()
+        return batch.SGEController(conf['batch'])
     exceptions.ConfigurationException("Batch is not supported")
 
 

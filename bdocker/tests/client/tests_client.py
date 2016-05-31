@@ -340,3 +340,64 @@ class TestCommandProject(TestCaseCommandLine):
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "batch_config")
+    def test_batch_config(self, m_cre, m_ini):
+        m_ini.return_value = None
+        result = self.runner.invoke(
+            cli.bdocker, ['batch_config']
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "batch_config")
+    def test_batch_config_with_token(self, m_cre, m_ini):
+        m_ini.return_value = None
+        token = uuid.uuid4().hex
+        m_cre.return_value = {"token": token}
+        token_var = '--token=%s' % token
+        result = self.runner.invoke(
+            cli.bdocker, ['batch_config', token_var]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "batch_config")
+    def test_batch_clean(self, m_cre, m_ini):
+        m_ini.return_value = None
+        result = self.runner.invoke(
+            cli.bdocker, ['batch_config']
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "batch_clean")
+    def test_batch_clean(self, m_cre, m_ini):
+        m_ini.return_value = None
+        result = self.runner.invoke(
+            cli.bdocker, ['batch_clean']
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "batch_clean")
+    def test_batch_clean_with_token(self, m_cre, m_ini):
+        m_ini.return_value = None
+        token = uuid.uuid4().hex
+        m_cre.return_value = {"token": token}
+        token_var = '--token=%s' % token
+        result = self.runner.invoke(
+            cli.bdocker, ['batch_clean', token_var]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    # TODO(jorgesece): include teste for
+    # clean
+    # detele with force
+    # more....
