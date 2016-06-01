@@ -46,23 +46,27 @@ class TestSGEController(testtools.TestCase):
         c_trees = trees.GroupedTree()
         list_node = []
         print("nodes")
-        for node in c_trees.walk():
-            list_node.append(node.path)
+#        for node in c_trees.walk():
+#            list_node.append(node.path)
         print("system.slice")
         parent_node = c_trees.get_node_by_path("/system.slice")
-        print(parent_node.path)
+        if parent_node.path:
+            print(parent_node.path)
         print
         list_1 = []
         for node in parent_node.nodes:
-            list_1.append(node.path)
-            print(node.path)
+            if node.path:
+                list_1.append(node.path)
+                print(node.path)
         print("system.slice/docker.service")
         parent_node = c_trees.get_node_by_path("/system.slice/docker.service")
-        print(parent_node.path)
+        if parent_node.path:
+            print(parent_node.path)
         list_2 = []
         for node in parent_node.nodes:
-            list_2.append(node.path)
-            print(node.path)
+            if node.path:
+                list_2.append(node.path)
+                print(node.path)
 
 
 if __name__ == '__main__':
