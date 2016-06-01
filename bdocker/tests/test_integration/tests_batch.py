@@ -50,21 +50,21 @@ class TestSGEController(testtools.TestCase):
 #            list_node.append(node.path)
         print("system.slice")
         parent_node = c_trees.get_node_by_path("/system.slice")
-        if parent_node.path:
+        if parent_node:
             print(parent_node.path)
         print
         list_1 = []
         for node in parent_node.nodes:
-            if node.path:
+            if node:
                 list_1.append(node.path)
                 print(node.path)
         print("system.slice/docker.service")
         parent_node = c_trees.get_node_by_path("/system.slice/docker.service")
-        if parent_node.path:
+        if parent_node:
             print(parent_node.path)
         list_2 = []
         for node in parent_node.nodes:
-            if node.path:
+            if node:
                 list_2.append(node.path)
                 print(node.path)
 
