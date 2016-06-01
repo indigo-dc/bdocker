@@ -56,16 +56,15 @@ class BatchController(object):
 class SGEController(BatchController):
 
     def __init__(self, conf):
-        root_cgroup = conf.get("cgroup", None)
-        self.root_cgroup = root_cgroup
+        self.root_cgroup = conf.get("cgroups_dir",
+                                    "/sys/fs/cgroup")
+        self.parent_groups = conf.get("cgroups", [])
 
-    def conf_environment(self, job_id):
-        if self.root_cgroup:
-            spool_dir = os.getenv("SGE_JOB_SPOOL_DIR")
+    def conf_environment(self, job_id, spool_dir):
+        if self.parent_groups:
             parent_pid = utils.read_file("%s/pid" % spool_dir)
-            parent_groups = ['/cpu/']
             create_cgroups(job_id,
-                           parent_groups,
+                           self.parent_groups,
                            root_parent=self.root_cgroup,
                            pid=parent_pid)
 
@@ -73,11 +72,10 @@ class SGEController(BatchController):
         # TODO(jorgesece): it is needed to delete or auto?
         # TODO(jorgesece): Analize when delete it, if has processes error
         # WE COULD CHANGE THEM TO SGEEX.SERVICE/tasks
-        if self.root_cgroup:
-            parent_groups = ['/cpu/']
+        if self.parent_groups:
             delete_cgroups(job_id,
-                           parent_groups,
-                           self.root_cgroup)
+                          self.parent_groups,
+                          root_parent=self.root_cgroup)
 
     def get_job_info(self):
         job_id = os.getenv(
@@ -86,12 +84,12 @@ class SGEController(BatchController):
             'HOME', None))
         user = os.getenv(
             'USER', None)
-
-        # cgroup = self._get_cgroup(job_id)
+        spool_dir = os.getenv(
+            "SGE_JOB_SPOOL_DIR", None)
         return {'home': home,
                 'job_id': job_id,
                 'user': user,
-                # 'cgroup':cgroup
+                'spool': spool_dir
                 }
 
     # def _get_cgroup(self, job_id):

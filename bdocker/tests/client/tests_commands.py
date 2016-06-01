@@ -72,9 +72,11 @@ class TestCommands(testtools.TestCase):
         admin_token = uuid.uuid4().hex
         home_dir = "/foo"
         job_id = '88'
+        spool = "/faa"
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
                                'job_id': job_id,
+                               'spool': spool,
                                'user': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
@@ -93,23 +95,25 @@ class TestCommands(testtools.TestCase):
         admin_token = uuid.uuid4().hex
         token = uuid.uuid4().hex
         home_dir = "/foo"
-        jobid = 8934
+        spool = "/faa"
+        job_id = 8934
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                       'job_id': jobid,
-                       'user': user}
+                               'job_id': job_id,
+                               'spool': spool,
+                               'user': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
         m_ad.return_value = admin_token
         controller = commands.CommandController()
-        u = controller.create_credentials(1000, jobid)
+        u = controller.create_credentials(1000, job_id)
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
-        token_file = "%s/.bdocker_token_%s" % (home_dir, jobid)
+        token_file = "%s/.bdocker_token_%s" % (home_dir, job_id)
         self.assertIn(token_file, u['path'])
-        self.assertIn('jobid', user_credentials)
+        self.assertIn('job', user_credentials)
         expected = {"token": admin_token,
                     "user_credentials": user_credentials}
         m_post.assert_called_with(path='/credentials',

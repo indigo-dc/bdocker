@@ -36,6 +36,7 @@ class CommandController(object):
                 conf['credentials']["token_client_file"]
             )
             self.job_id = job_info["job_id"]
+            self.spool_dir = job_info["spool"]
             self.token_file = "%s/%s_%s" % (
                 job_info['home'],
                 self.defaul_token_name,
@@ -62,7 +63,8 @@ class CommandController(object):
             )
         else:
             user_info = utils_cli.get_user_credentials(self.user_name)
-        user_info.update({'jobid': self.job_id})
+        user_info.update({'job':{'id': self.job_id,
+                          'spool': self.spool_dir}})
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         utils_cli.write_user_credentials(token, self.token_file,
@@ -84,7 +86,8 @@ class CommandController(object):
         admin_token = utils_cli.get_admin_token(self.token_storage)
         token = utils_cli.token_parse(token, self.token_file)
         parameters = {"admin_token": admin_token,
-                      "token": token}
+                      "token": token,
+                      }
         out = self.control.execute_put(path=path, parameters=parameters)
         return out
 

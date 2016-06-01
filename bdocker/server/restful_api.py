@@ -79,8 +79,8 @@ def batch_conf():
         admin_token = data['admin_token']
         token = data['token']
         credentials_module.authorize_admin(admin_token)
-        job_id = credentials_module.get_job_from_token(token)
-        batch_module.conf_environment(job_id)
+        job = credentials_module.get_job_from_token(token)
+        batch_module.conf_environment(job['id'], job['spool'])
         return utils_server.make_json_response(
             201, ["Batch system configured"]
         )

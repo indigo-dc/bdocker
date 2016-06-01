@@ -254,7 +254,7 @@ class UserController(object):
 
     def get_job_from_token(self, token):
         token_info = self._get_token_from_cache(token)
-        if "jobid" not in token_info:
+        if "job" not in token_info:
             raise exceptions.UserCredentialsException(
                 "Job not found in token %s" % token)
-        return token_info["jobid"]
+        return token_info["job"]
