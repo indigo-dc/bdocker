@@ -39,6 +39,7 @@ def create_tree_cgroups(group_name, parent_group,
         parent_node = c_trees.get_node_by_path(parent_group)
         if parent_node:
             for node in parent_node.nodes:
+                LOG.exception("Node: %s" % node.full_path)
                 new_node = node.create_cgroup(group_name)
                 if pid:
                     task_to_cgroup(new_node.full_path, pid)

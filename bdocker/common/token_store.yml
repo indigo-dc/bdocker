@@ -1,5 +1,35 @@
+3e0b80e480f849f3a13e5fa280182391:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {id: '3', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
 543bf1489f114f6285702e6fc88d03cd: {gid: 1000, home_dir: /home/jorge, jobid: null,
   uid: 1000}
+a77cdcf07e01441f8305daa169583ad9:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: //2, id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+c2dbe5ea172a4457bd8ea2868791e506:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: /user/4, id: '4', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+d76a175134e24e53b6bb9a2b33b4ce72:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: /3, id: '3', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+ee5ce79f4bb34c848676b288f25b14c1:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+f3c69d5928124fb4bed595f02d6f4445:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: //1, id: '1', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
 prolog: {token: token_prolog}
 token1: {gid: gid1, home_dir: /fake, jobid: job1, uid: uid1}
 token2: {gid: gid2, home_dir: /fake, jobid: job2, uid: uid2}
