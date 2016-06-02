@@ -87,7 +87,8 @@ def load_configuration_from_file(path=None):
             config.readfp(f)
     except IOError:
         raise exceptions.UserCredentialsException(
-            "No administration permission"
+            "Error reading configuration file: %s"
+            % path
         )
     try:
         conf = {

@@ -122,7 +122,11 @@ class SGEController(BatchController):
                                 self.parent_group,
                                 root_parent=self.root_cgroup,
                                 pid=parent_pid)
-            cgroup_parent = "%s/%s" % (self.parent_group, job_id)
+            if self.parent_group == "/":
+                cgroup_parent = "/%s" % job_id
+            else:
+                cgroup_parent = "%s/%s" % (self.parent_group, job_id)
+
         else:
             LOG.exception("CGROUP CONTROL NOT ACTIVATED")
             cgroup_parent = None
