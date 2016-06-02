@@ -31,11 +31,25 @@ def task_to_cgroup(cgroup_dir, pid):
                       %(pid, tasks, e.message))
 
 
+def  parse_cgroup_name(name):
+    """
+    Clean name. It is needed because cgroupspy clean them
+    :param name:
+    :return: name without extensions
+    """
+    extensions = ['.slice', '.scope', '.partition']
+    new_name = str(name)
+    for ex in extensions:
+        new_name = new_name.replace(ex, "")
+    return new_name
+
+
 def create_tree_cgroups(group_name, parent_group,
                         pid=None,
                         root_parent="/sys/fs/cgroup"):
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
+        parent_group = parse_cgroup_name(parent_group)
         parent_node = c_trees.get_node_by_path(parent_group)
         if parent_node:
             for node in parent_node.nodes:
@@ -64,6 +78,7 @@ def delete_tree_cgroups(group_name, parent_group,
                          root_parent="/sys/fs/cgroup"):
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
+        parent_group = parse_cgroup_name(parent_group)
         parent_node = c_trees.get_node_by_path(parent_group)
         for node in parent_node.nodes:
             node.delete_cgroup(group_name)
