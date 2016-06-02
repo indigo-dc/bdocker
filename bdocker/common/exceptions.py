@@ -107,6 +107,15 @@ class ConfigurationException(Exception):
         return repr(self.message)
 
 
+class BatchException(Exception):
+    def __init__(self, message):
+        self.message = ("Batch Exception: "
+                       + message)
+
+    def __str__(self):
+        return repr(self.message)
+
+
 class DockerException(Exception):
     def __init__(self, exc=None, message=None, code=None):
         details = get_exception_details(exc, message, code)

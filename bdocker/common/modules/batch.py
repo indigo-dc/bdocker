@@ -32,15 +32,19 @@ def task_to_cgroup(cgroup_dir, pid):
 
 
 def create_tree_cgroups(group_name, parent_group,
-                         pid=None,
-                         root_parent="/sys/fs/cgroup"):
+                        pid=None,
+                        root_parent="/sys/fs/cgroup"):
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
         parent_node = c_trees.get_node_by_path(parent_group)
-        for node in parent_node.nodes:
-            new_node = node.create_cgroup(group_name)
-            if pid:
-                task_to_cgroup(new_node.full_path, pid)
+        if parent_node:
+            for node in parent_node.nodes:
+                new_node = node.create_cgroup(group_name)
+                if pid:
+                    task_to_cgroup(new_node.full_path, pid)
+        else:
+            raise exceptions.BatchException("Not found cgroup parent: %s"
+                                            % parent_group)
     except BaseException as e:
         LOG.exception("CGROUPS creation problem. %s"
                       % e.message)
