@@ -40,7 +40,13 @@ def create_tree_cgroups(group_name, parent_group,
         if parent_node:
             for node in parent_node.nodes:
                 LOG.exception("Node: %s" % node.full_path)
-                new_node = node.create_cgroup(group_name)
+                try:
+                    new_node = node.create_cgroup(group_name)
+                except IOError as e:
+                    if e.errno == 17:
+                        LOG.exception(e.message)
+                    else:
+                        raise e
                 if pid:
                     task_to_cgroup(new_node.full_path, pid)
         else:
