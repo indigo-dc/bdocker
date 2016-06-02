@@ -43,8 +43,9 @@ def create_tree_cgroups(group_name, parent_group,
                 if pid:
                     task_to_cgroup(new_node.full_path, pid)
         else:
-            raise exceptions.BatchException("Not found cgroup parent: %s"
-                                            % parent_group)
+            raise exceptions.BatchException("Not found cgroup parent: %s,"
+                                            " in root: %s"
+                                            % (parent_group, root_parent))
     except BaseException as e:
         LOG.exception("CGROUPS creation problem. %s"
                       % e.message)
