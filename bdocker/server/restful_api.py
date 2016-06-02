@@ -146,6 +146,7 @@ def run():
         if host_dir:
             credentials_module.authorize_directory(token, host_dir)
         job_info = credentials_module.get_job_from_token(token)
+        cgroup_parent=job_info.get('cgroup', None)
         container_id = docker_module.run_container(
             image_id,
             detach,
@@ -153,7 +154,7 @@ def run():
             host_dir=host_dir,
             docker_dir=docker_dir,
             working_dir=working_dir,
-            cgroup=job_info['cgroup']
+            cgroup=cgroup_parent
         )
         credentials_module.add_container(token, container_id)
         docker_module.start_container(container_id)
