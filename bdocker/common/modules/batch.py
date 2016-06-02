@@ -42,7 +42,7 @@ def create_tree_cgroups(group_name, parent_group,
                 LOG.exception("Node: %s" % node.full_path)
                 try:
                     new_node = node.create_cgroup(group_name)
-                except IOError as e:
+                except OSError as e:
                     if e.errno == 17:
                         LOG.exception(e.message)
                     else:
