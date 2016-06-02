@@ -63,7 +63,7 @@ class CommandController(object):
             )
         else:
             user_info = utils_cli.get_user_credentials(self.user_name)
-        user_info.update({'job':{'id': self.job_id,
+        user_info.update({'job': {'id': self.job_id,
                           'spool': self.spool_dir}})
         parameters = {"token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)

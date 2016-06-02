@@ -112,7 +112,6 @@ class SGEController(BatchController):
                                 self.parent_group,
                                 root_parent=self.root_cgroup)
 
-
     def get_job_info(self):
         job_id = os.getenv(
             'JOB_ID', None)

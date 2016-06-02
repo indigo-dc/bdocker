@@ -100,7 +100,7 @@ class TestCommands(testtools.TestCase):
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
                                'job_id': job_id,
-                               'spool': spool,
+                                'spool': spool,
                                'user': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials

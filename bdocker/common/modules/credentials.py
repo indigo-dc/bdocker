@@ -57,9 +57,11 @@ class UserController(object):
             'gid': user_info['gid'],
             'home_dir': user_info['home']
         }
-        if 'jobid' in user_info:
-            token_content.update(
-                {'jobid': user_info['jobid']})
+        if 'job' in user_info:
+            token_content['job'] = {
+                    "id": user_info['job']['id'],
+                    "spool": user_info['job']['spool']
+                }
         new_token = {token: token_content}
         self.token_store = utils_common.read_yaml_file(
             self.path
@@ -263,7 +265,7 @@ class UserController(object):
                 "Job not found in token %s" % token)
         return token_info["job"]
 
-    def set_token_cgroup(self, token, job, cgroup):
+    def set_token_cgroup(self, token, cgroup):
         """Set job cgroup to the token record.
 
         :param token: token

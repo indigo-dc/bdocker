@@ -27,7 +27,8 @@ def create_parameters():
                         ,"user_credentials":
                         {'uid': 'uuuuuuuuuuiiiidddddd',
                          'gid': 'gggggggggguuuiiidd',
-                         'home': '/home'}
+                         'home': '/home',
+                         }
                     }
         return parameters
 
@@ -58,6 +59,53 @@ class TestUserCredentials(testtools.TestCase):
         u = create_parameters()['user_credentials']
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
+        self.assertIsNotNone(token)
+        token_info = self.control._get_token_from_cache(token)
+        self.assertEqual(u['uid'], token_info['uid'])
+        self.assertEqual(u['home'], token_info['home_dir'])
+        self.assertEqual(u['gid'], token_info['gid'])
+        self.assertNotIn('job', token_info)
+        self.control.remove_token_from_cache(token)
+
+    @mock.patch('bdocker.common.utils.check_user_credentials')
+    def test_authenticate_with_job(self, m):
+        jobid = uuid.uuid4().hex
+        spool = uuid.uuid4().hex
+        t = self.control._get_token_from_cache(
+            "prolog")['token']
+        u = create_parameters()['user_credentials']
+        u.update({'job': {'id': jobid,
+                         'spool': spool}
+                  })
+        token = self.control.authenticate(admin_token=t,
+                                          user_data=u)
+        self.assertIsNotNone(token)
+        job_info = self.control.get_job_from_token(token)
+        self.assertEqual(jobid, job_info['id'])
+        self.assertEqual(spool, job_info['spool'])
+        self.assertNotIn('cgroup', job_info)
+        self.control.remove_token_from_cache(token)
+
+
+
+    @mock.patch('bdocker.common.utils.check_user_credentials')
+    def test_authenticate_with_job_cgroup(self, m):
+        jobid = uuid.uuid4().hex
+        spool = uuid.uuid4().hex
+        cgroup = uuid.uuid4().hex
+        t = self.control._get_token_from_cache(
+            "prolog")['token']
+        u = create_parameters()['user_credentials']
+        u.update({'job': {'id': jobid,
+                         'spool': spool}
+                  })
+        token = self.control.authenticate(admin_token=t,
+                                          user_data=u)
+        self.control.set_token_cgroup(token, cgroup)
+        job_info = self.control.get_job_from_token(token)
+        self.assertEqual(jobid, job_info['id'])
+        self.assertEqual(spool, job_info['spool'])
+        self.assertEqual(cgroup, job_info['cgroup'])
         self.control.remove_token_from_cache(token)
         self.assertIsNotNone(token)
 
