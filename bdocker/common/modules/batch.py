@@ -95,13 +95,18 @@ class SGEController(BatchController):
 
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
+            LOG.info("CGROUP CONTROL ACTIVATED ON: %s "
+                     % self.parent_group)
             parent_pid = utils.read_file("%s/pid" % spool_dir)
             create_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup,
                                 pid=parent_pid)
             cgroup_parent = "%s/%s" % (self.parent_group, job_id)
-            return cgroup_parent
+        else:
+            LOG.info("CGROUP CONTROL NOT ACTIVATED")
+            cgroup_parent = None
+        return cgroup_parent
 
     def clean_environment(self, job_id):
         # TODO(jorgesece): it is needed to delete or auto?
