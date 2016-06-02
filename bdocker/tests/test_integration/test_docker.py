@@ -22,7 +22,7 @@ from bdocker.common.modules import docker_helper
 class TestDockerIntegration(testtools.TestCase):
     def setUp(self):
         super(TestDockerIntegration, self).setUp()
-        url = 'localhost:2375'
+        url = 'unix://var/run/docker.sock' #'localhost:2375'
         self.control = docker_helper.DockerController(url)
 
     def test_ps_real(self):
@@ -49,17 +49,19 @@ class TestDockerIntegration(testtools.TestCase):
     #     self.assertEqual(2, out.__len__())
     #
     def test_run_container_real(self):
-        image_id = 'a83540abf000'
+        image_id = '2fa927b5cdd3'
         script = 'sleep 360'
         detach = True
         host_dir = "/root/docker_test/"
         docker_dir = "/tmp"
+        cgroup = '/user/bdocker.test'
         container_id = self.control.run_container(image_id,
                                              detach=detach,
                                              command=script,
                                              working_dir=docker_dir,
                                              host_dir=host_dir,
-                                             docker_dir=docker_dir)
+                                             docker_dir=docker_dir,
+                                             cgroup=cgroup)
 
         outstart = self.control.start_container(container_id)
         details = self.control.container_details(container_id)

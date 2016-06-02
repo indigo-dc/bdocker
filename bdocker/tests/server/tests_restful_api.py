@@ -25,6 +25,7 @@ os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdo
 from bdocker.client.controller import utils
 from bdocker.common.modules import credentials
 from bdocker.common.modules import docker_helper
+from bdocker.common.modules import batch
 from bdocker.server import restful_api
 from bdocker.tests import server
 
@@ -280,7 +281,9 @@ class TestREST(server.TestConfiguration):
                        "start_container")
     @mock.patch.object(docker_helper.DockerController,
                        "logs_container")
-    def test_run(self, m_log, m_start, madd, math, md):
+    @mock.patch.object(credentials.UserController,
+                       "get_job_from_token")
+    def test_run(self, m_get_j, m_log, m_start, madd, math, md):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex

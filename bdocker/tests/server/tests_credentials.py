@@ -221,14 +221,21 @@ class TestUserCredentials(testtools.TestCase):
     def test_get_job_from_token(self, m_gt):
         uid = uuid.uuid4().hex
         jobid = uuid.uuid4().hex
-        token_info = {"uid": uid,
-                      "jobid": jobid}
+        spool = uuid.uuid4().hex
+        cgroup = uuid.uuid4().hex
+        token_info = {"job": {
+            "id": jobid,
+            "cgroup": cgroup,
+            "spool": spool}
+        }
         m_gt.return_value = token_info
         result = self.control.get_job_from_token(uid)
-        self.assertEqual(jobid, result)
+        self.assertEqual(jobid, result['id'])
+        self.assertEqual(cgroup, result['cgroup'])
+        self.assertEqual(spool, result['spool'])
 
     @mock.patch.object(credentials.UserController, "_get_token_from_cache")
-    def test_get_job_from_token(self, m_gt):
+    def test_get_job_from_token_err(self, m_gt):
         m_gt.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.get_job_from_token,

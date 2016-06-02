@@ -118,11 +118,7 @@ class DockerController(object):
     def run_container(self, image_id, detach, command,
                       working_dir=None, host_dir=None, docker_dir=None,
                       cgroup=None):
-        # todo:verify directory of working node to move things (HOME)
-        # allow users to bind directories from the wd in the container
-        out_put = None
         try:
-            # volumes = None
             binds = None
             if host_dir:
                 binds = ['%s:%s' % (host_dir, docker_dir)]

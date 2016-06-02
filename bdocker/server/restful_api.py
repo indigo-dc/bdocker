@@ -80,7 +80,10 @@ def batch_conf():
         token = data['token']
         credentials_module.authorize_admin(admin_token)
         job = credentials_module.get_job_from_token(token)
-        batch_module.conf_environment(job['id'], job['spool'])
+        cgroup = batch_module.conf_environment(
+            job['id'], job['spool']
+        )
+        credentials_module.set_token_cgroup(token, cgroup)
         return utils_server.make_json_response(
             201, ["Batch system configured"]
         )
@@ -134,7 +137,7 @@ def run():
         host_dir = data.get('host_dir', None)
         docker_dir = data.get('docker_dir', None)
         working_dir = data.get('working_dir', None)
-        cgroup = data.get('cgroup', None)
+        # cgroup = data.get('cgroup', None)
         # TODO(jorgesece): control image private
         # credentials_module.authorize_image(
         #     token,
@@ -142,6 +145,7 @@ def run():
         # )
         if host_dir:
             credentials_module.authorize_directory(token, host_dir)
+        job_info = credentials_module.get_job_from_token(token)
         container_id = docker_module.run_container(
             image_id,
             detach,
@@ -149,7 +153,7 @@ def run():
             host_dir=host_dir,
             docker_dir=docker_dir,
             working_dir=working_dir,
-            cgroup=cgroup
+            cgroup=job_info['cgroup']
         )
         credentials_module.add_container(token, container_id)
         docker_module.start_container(container_id)

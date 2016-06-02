@@ -14,9 +14,41 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from cgroupspy import trees
+import logging
 import os
 
 from bdocker.common import utils
+
+LOG = logging.getLogger(__name__)
+
+
+def task_to_cgroup(cgroup_dir, pid):
+    try:
+        tasks = "%s/tasks" % cgroup_dir
+        utils.add_to_file(tasks, pid)
+    except IOError as e:
+        LOG.exception("Error when assign %s to %s. %s"
+                      %(pid, tasks, e.message))
+
+
+def create_tree_cgroups(group_name, parent_group,
+                         pid=None,
+                         root_parent="/sys/fs/cgroup"):
+    c_trees = trees.GroupedTree(root_path=root_parent)
+    parent_node = c_trees.get_node_by_path(parent_group)
+    for node in parent_node.nodes:
+        new_node = node.create_cgroup(group_name)
+        if pid:
+            task_to_cgroup(new_node.full_path, pid)
+
+
+def delete_tree_cgroups(group_name, parent_group,
+                         pid=None,
+                         root_parent="/sys/fs/cgroup"):
+    c_trees = trees.GroupedTree(root_path=root_parent)
+    parent_node = c_trees.get_node_by_path(parent_group)
+    for node in parent_node.nodes:
+        node.delete_cgroup(group_name)
 
 
 def create_cgroups(group_name, parent_groups, pid=None,
@@ -28,8 +60,7 @@ def create_cgroups(group_name, parent_groups, pid=None,
         parent_node = c_tree.get_node_by_path(parent)
         node = parent_node.create_cgroup(group_name)
         if pid:
-            tasks = "%s/tasks" % node.full_path
-            utils.add_to_file(tasks, pid)
+            task_to_cgroup(node.full_path, pid)
 
 
 def delete_cgroups(group_name, parent_groups,
@@ -56,26 +87,31 @@ class BatchController(object):
 class SGEController(BatchController):
 
     def __init__(self, conf):
+        self.enable_cgroups = conf.get("enable_groups",
+                                    False)
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
-        self.parent_groups = conf.get("cgroups", [])
+        self.parent_group = conf.get("parent_cgroup", '/')
 
     def conf_environment(self, job_id, spool_dir):
-        if self.parent_groups:
+        if self.enable_cgroups:
             parent_pid = utils.read_file("%s/pid" % spool_dir)
-            create_cgroups(job_id,
-                           self.parent_groups,
-                           root_parent=self.root_cgroup,
-                           pid=parent_pid)
+            create_tree_cgroups(job_id,
+                                self.parent_group,
+                                root_parent=self.root_cgroup,
+                                pid=parent_pid)
+            cgroup_parent = "%s/%s" % (self.parent_group, job_id)
+            return cgroup_parent
 
     def clean_environment(self, job_id):
         # TODO(jorgesece): it is needed to delete or auto?
         # TODO(jorgesece): Analize when delete it, if has processes error
         # WE COULD CHANGE THEM TO SGEEX.SERVICE/tasks
-        if self.parent_groups:
-            delete_cgroups(job_id,
-                          self.parent_groups,
-                          root_parent=self.root_cgroup)
+        if self.enable_cgroups:
+            delete_tree_cgroups(job_id,
+                                self.parent_group,
+                                root_parent=self.root_cgroup)
+
 
     def get_job_info(self):
         job_id = os.getenv(

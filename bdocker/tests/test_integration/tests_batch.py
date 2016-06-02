@@ -25,19 +25,21 @@ class TestSGEController(testtools.TestCase):
     def setUp(self):
         super(TestSGEController, self).setUp()
         self.parent_path = "/systemd/user/"
+        self.name = "bdocker.test"
+        self.parent = "/user"
         # self.control = batch.SGEController({})
 
     def test_create_cgroup(self):
-        parent_groups = ["/systemd/user/"]
-        out = batch.create_cgroups("66",
+        parent_groups = self.parent
+        out = batch.create_tree_cgroups(self.name,
                                   parent_groups,
-                                  pid='19858'
+                                  pid='30084'
                                   )
         self.assertIsNone(out)
 
     def test_delete_cgroup(self):
-        parent_groups = ["/systemd/user/"]
-        out = batch.delete_cgroups("66",
+        parent_groups = self.parent
+        out = batch.delete_tree_cgroups(self.name,
                                    parent_groups
                                    )
         self.assertIsNone(out)
@@ -48,8 +50,8 @@ class TestSGEController(testtools.TestCase):
         print("nodes")
 #        for node in c_trees.walk():
 #            list_node.append(node.path)
-        print("system.slice")
-        parent_node = c_trees.get_node_by_path("/system.slice")
+        print("docker")
+        parent_node = c_trees.get_node_by_path("/docker")
         if parent_node:
             print(parent_node.path)
         print
@@ -58,8 +60,8 @@ class TestSGEController(testtools.TestCase):
             if node:
                 list_1.append(node.path)
                 print(node.path)
-        print("system.slice/docker.service")
-        parent_node = c_trees.get_node_by_path("/system.slice/docker.service")
+        print("/user/1000.user/")
+        parent_node = c_trees.get_node_by_path("/user/1000.user/")
         if parent_node:
             print(parent_node.path)
         list_2 = []

@@ -253,8 +253,22 @@ class UserController(object):
         return token_info
 
     def get_job_from_token(self, token):
+        """Return the job of the token record.
+
+        :param token: token
+        """
         token_info = self._get_token_from_cache(token)
         if "job" not in token_info:
             raise exceptions.UserCredentialsException(
                 "Job not found in token %s" % token)
         return token_info["job"]
+
+    def set_token_cgroup(self, token, job, cgroup):
+        """Set job cgroup to the token record.
+
+        :param token: token
+        :param cgroup: cgroup
+        """
+        current_token = self._get_token_from_cache(token)
+        current_token["job"]["cgroup"] = cgroup
+        self._update_token(token, current_token)
