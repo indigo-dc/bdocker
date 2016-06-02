@@ -118,10 +118,16 @@ class DockerException(Exception):
         return repr(self.message)
 
 
-def get_exception_details(ex=None, custom_message=None, custom_code=None):
+def get_exception_details(ex=None, custom_message=None,
+                          custom_code=None):
     code = 500
     message = 'Internal Error'
     if ex:
+        if isinstance(ex, OSError):
+            if ex.errno == 13:
+                message = "%s:%s" % (ex.strerror, ex.filename)
+                return {"message": message,
+                        "code": 401}
         if hasattr(ex, 'response') and ex.response:
             message = ex.response.text
             code = ex.response.status_code

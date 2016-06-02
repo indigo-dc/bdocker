@@ -14,12 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import cgroupspy
+import exceptions
 import mock
 import os
 import testtools
 import uuid
 
 from bdocker.common.modules import batch
+from bdocker.common import exceptions as bdocker_exceptions
 
 
 class TestSGEController(testtools.TestCase):
@@ -27,7 +29,113 @@ class TestSGEController(testtools.TestCase):
     def setUp(self):
         super(TestSGEController, self).setUp()
         self.parent_path = "/systemd/user/"
-        #
+
+
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
+    @mock.patch("bdocker.common.modules.batch.task_to_cgroup")
+    def test_create_tree_cgroup(self, m_add, m_cre, m_path):
+        gnodes = cgroupspy.nodes.NodeControlGroup("na")
+        gnodes.nodes = [cgroupspy.nodes.Node]
+        m_path.side_effect = [gnodes,
+                              ]
+        #m_cre.side_effect = exceptions.OSError(13, "err", "file")
+
+        out = batch.create_tree_cgroups("66",
+                                   self.parent_path,
+                                   pid='19858'
+                                   )
+        self.assertIsNone(out)
+        self.assertEqual(
+            self.parent_path,
+            m_path.call_args_list[0][0][0]
+        )
+        self.assertEqual(1, m_add.call_count)
+
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
+    @mock.patch("bdocker.common.modules.batch.task_to_cgroup")
+    def test_create_tree_cgroup_several(self, m_add, m_cre, m_path):
+        gnodes = cgroupspy.nodes.NodeControlGroup("na")
+        gnodes.nodes = [cgroupspy.nodes.Node,
+                        cgroupspy.nodes.Node
+                        ]
+        m_path.side_effect = [gnodes]
+
+        out = batch.create_tree_cgroups("66",
+                                   self.parent_path,
+                                   pid='19858'
+                                   )
+        self.assertIsNone(out)
+        self.assertEqual(
+            self.parent_path,
+            m_path.call_args_list[0][0][0]
+        )
+        self.assertEqual(2, m_add.call_count)
+
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
+    @mock.patch("bdocker.common.modules.batch.task_to_cgroup")
+    def test_create_tree_cgroup_exception(self, m_add, m_cre, m_path):
+        gnodes = cgroupspy.nodes.NodeControlGroup("na")
+        gnodes.nodes = [cgroupspy.nodes.Node]
+        m_path.side_effect = [gnodes,
+                              ]
+        m_cre.side_effect = exceptions.OSError(13, "err", "file")
+
+        self.assertRaises(bdocker_exceptions.DockerException,
+                          batch.create_tree_cgroups,
+                          "66",
+                          self.parent_path,
+                          pid='19858',
+                          )
+
+    @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
+    def test_delete_tree_cgroup(self,m_del, m_path):
+        gnodes = cgroupspy.nodes.NodeControlGroup("na")
+        gnodes.nodes = [cgroupspy.nodes.Node]
+        m_path.side_effect = [gnodes,
+                              ]
+        name = uuid.uuid4().hex
+        out = batch.delete_tree_cgroups(name,
+                                   self.parent_path
+                                   )
+        self.assertIsNone(out)
+        self.assertEqual(1, m_del.call_count)
+        self.assertEqual(
+            name,
+            m_del.call_args_list[0][0][0]
+        )
+        self.assertEqual(1, m_path.call_count)
+        self.assertEqual(
+            self.parent_path,
+            m_path.call_args_list[0][0][0]
+        )
+
+    @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
+    def test_delete_tree_cgroup_several_nodes(self,m_del, m_path):
+        gnodes = cgroupspy.nodes.NodeControlGroup("na")
+        gnodes.nodes = [cgroupspy.nodes.Node,
+                        cgroupspy.nodes.Node]
+        m_path.side_effect = [gnodes,
+                              ]
+        name = uuid.uuid4().hex
+        out = batch.delete_tree_cgroups(name,
+                                   self.parent_path
+                                   )
+        self.assertIsNone(out)
+        self.assertEqual(2, m_del.call_count)
+        self.assertEqual(
+            name,
+            m_del.call_args_list[0][0][0]
+        )
+        self.assertEqual(1, m_path.call_count)
+        self.assertEqual(
+            self.parent_path,
+            m_path.call_args_list[0][0][0]
+        )
 
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
@@ -183,7 +291,7 @@ class TestSGEController(testtools.TestCase):
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {"cgroups_dir": "/foo",
-                "enable_groups": True,
+                "enable_cgroups": True,
                 "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf)
@@ -201,13 +309,13 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.modules.batch.create_tree_cgroups")
-    def test_conf_environment_no_root_dir(self, m_cre, m_read):
+    def test_conf_environment_no_root_dir(self, m_cre,  m_read):
         spool_dir = "/foo"
         job_id = uuid.uuid4().hex
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {
-            "enable_groups": True,
+            "enable_cgroups": True,
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf)
@@ -242,7 +350,7 @@ class TestSGEController(testtools.TestCase):
     def test_clean_environment(self, m_del):
         job_id = uuid.uuid4().hex
         conf = {"cgroups_dir": "/foo",
-                "enable_groups": True,
+                "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
         controller = batch.SGEController(conf)
         controller.clean_environment(job_id)

@@ -17,8 +17,8 @@ from cgroupspy import trees
 import logging
 import os
 
+from bdocker.common import exceptions
 from bdocker.common import utils
-
 LOG = logging.getLogger(__name__)
 
 
@@ -34,42 +34,62 @@ def task_to_cgroup(cgroup_dir, pid):
 def create_tree_cgroups(group_name, parent_group,
                          pid=None,
                          root_parent="/sys/fs/cgroup"):
-    c_trees = trees.GroupedTree(root_path=root_parent)
-    parent_node = c_trees.get_node_by_path(parent_group)
-    for node in parent_node.nodes:
-        new_node = node.create_cgroup(group_name)
-        if pid:
-            task_to_cgroup(new_node.full_path, pid)
+    try:
+        c_trees = trees.GroupedTree(root_path=root_parent)
+        parent_node = c_trees.get_node_by_path(parent_group)
+        for node in parent_node.nodes:
+            new_node = node.create_cgroup(group_name)
+            if pid:
+                task_to_cgroup(new_node.full_path, pid)
+    except BaseException as e:
+        LOG.exception("CGROUPS creation problem. %s"
+                      % e.message)
+        raise exceptions.DockerException(e)
 
 
 def delete_tree_cgroups(group_name, parent_group,
                          pid=None,
                          root_parent="/sys/fs/cgroup"):
-    c_trees = trees.GroupedTree(root_path=root_parent)
-    parent_node = c_trees.get_node_by_path(parent_group)
-    for node in parent_node.nodes:
-        node.delete_cgroup(group_name)
+    try:
+        c_trees = trees.GroupedTree(root_path=root_parent)
+        parent_node = c_trees.get_node_by_path(parent_group)
+        for node in parent_node.nodes:
+            node.delete_cgroup(group_name)
+    except BaseException as e:
+        LOG.exception("CGROUPS delete problem. %s"
+                      % e.message)
+        raise exceptions.DockerException(e)
 
 
 def create_cgroups(group_name, parent_groups, pid=None,
                   root_parent="/sys/fs/cgroup"):
-    c_tree = trees.Tree(root_path=root_parent)
-    # test it GroupedTree
-    for parent in parent_groups:
-        parent = "/%s/" % parent
-        parent_node = c_tree.get_node_by_path(parent)
-        node = parent_node.create_cgroup(group_name)
-        if pid:
-            task_to_cgroup(node.full_path, pid)
+    try:
+        c_tree = trees.Tree(root_path=root_parent)
+        # test it GroupedTree
+        for parent in parent_groups:
+            parent = "/%s/" % parent
+            parent_node = c_tree.get_node_by_path(parent)
+            node = parent_node.create_cgroup(group_name)
+            if pid:
+                task_to_cgroup(node.full_path, pid)
+    except BaseException as e:
+        LOG.exception("CGROUPS creation problem. %s"
+                      % e.message)
+        raise exceptions.DockerException(e)
 
 
 def delete_cgroups(group_name, parent_groups,
                   root_parent="/sys/fs/cgroup"):
-    c_tree = trees.Tree(root_path=root_parent)
-    for parent in parent_groups:
-        parent = "/%s/" % parent
-        parent_node = c_tree.get_node_by_path(parent)
-        parent_node.delete_cgroup(group_name)
+    try:
+        c_tree = trees.Tree(root_path=root_parent)
+        for parent in parent_groups:
+            parent = "/%s/" % parent
+            parent_node = c_tree.get_node_by_path(parent)
+            parent_node.delete_cgroup(group_name)
+    except BaseException as e:
+        LOG.exception("CGROUPS delete problem. %s"
+                      % e.message)
+        raise exceptions.DockerException(e)
 
 
 class BatchController(object):
@@ -87,7 +107,7 @@ class BatchController(object):
 class SGEController(BatchController):
 
     def __init__(self, conf):
-        self.enable_cgroups = conf.get("enable_groups",
+        self.enable_cgroups = conf.get("enable_cgroups",
                                     False)
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
@@ -95,7 +115,7 @@ class SGEController(BatchController):
 
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
-            LOG.info("CGROUP CONTROL ACTIVATED ON: %s "
+            LOG.exception("CGROUP CONTROL ACTIVATED ON: %s "
                      % self.parent_group)
             parent_pid = utils.read_file("%s/pid" % spool_dir)
             create_tree_cgroups(job_id,
@@ -104,8 +124,9 @@ class SGEController(BatchController):
                                 pid=parent_pid)
             cgroup_parent = "%s/%s" % (self.parent_group, job_id)
         else:
-            LOG.info("CGROUP CONTROL NOT ACTIVATED")
+            LOG.exception("CGROUP CONTROL NOT ACTIVATED")
             cgroup_parent = None
+        LOG.exception("CGROUP is %s" % cgroup_parent)
         return cgroup_parent
 
     def clean_environment(self, job_id):
