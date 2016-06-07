@@ -22,6 +22,13 @@ from bdocker.common import utils
 LOG = logging.getLogger(__name__)
 
 
+def get_pids_from_cgroup(cgroup):
+    tasks_path = "%s/tasks" % cgroup
+    job_pids = utils.read_file(tasks_path)
+    array_pids = job_pids.split()
+    return array_pids
+
+
 def task_to_cgroup(cgroup_dir, pid):
     try:
         tasks = "%s/tasks" % cgroup_dir
@@ -29,6 +36,15 @@ def task_to_cgroup(cgroup_dir, pid):
     except IOError as e:
         LOG.exception("Error when assign %s to %s. %s"
                       %(pid, tasks, e.message))
+
+
+def remove_tasks(cgroup_name, cgroup_parent):
+    child_path = "%s/%s" % (cgroup_parent, cgroup_name)
+    LOG.exception("TESTS: DELETING %s" % child_path)
+    job_pids = get_pids_from_cgroup(child_path)
+    for pid in job_pids:
+        LOG.exception("TESTS: PID TO %s" % cgroup_parent)
+        task_to_cgroup(cgroup_parent, pid)
 
 
 def  parse_cgroup_name(name):
@@ -44,12 +60,12 @@ def  parse_cgroup_name(name):
     return new_name
 
 
-def create_tree_cgroups(group_name, parent_group,
+def create_tree_cgroups(group_name, parent_group_dir,
                         pid=None,
                         root_parent="/sys/fs/cgroup"):
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
-        parent_group = parse_cgroup_name(parent_group)
+        parent_group = parse_cgroup_name(parent_group_dir)
         parent_node = c_trees.get_node_by_path(parent_group)
         if parent_node:
             for node in parent_node.nodes:
@@ -64,9 +80,10 @@ def create_tree_cgroups(group_name, parent_group,
                 if pid:
                     task_to_cgroup(new_node.full_path, pid)
         else:
-            raise exceptions.BatchException("Not found cgroup parent: %s,"
-                                            " in root: %s"
-                                            % (parent_group, root_parent))
+            raise exceptions.BatchException(
+                "Not found cgroup parent: %s,"
+                " in root: %s"
+                % (parent_group_dir, root_parent))
     except BaseException as e:
         LOG.exception("CGROUPS creation problem. %s"
                       % e.message)
@@ -74,14 +91,20 @@ def create_tree_cgroups(group_name, parent_group,
 
 
 def delete_tree_cgroups(group_name, parent_group,
-                         pid=None,
-                         root_parent="/sys/fs/cgroup"):
+                        root_parent="/sys/fs/cgroup"):
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
         parent_group = parse_cgroup_name(parent_group)
         parent_node = c_trees.get_node_by_path(parent_group)
         for node in parent_node.nodes:
-            node.delete_cgroup(group_name)
+            try:
+                remove_tasks(group_name, node.full_path)
+                node.delete_cgroup(group_name)
+            except IOError as e:
+                if e.errno == 2:
+                    LOG.exception(e.message)
+                else:
+                    raise e
     except BaseException as e:
         LOG.exception("CGROUPS delete problem. %s"
                       % e.message)
@@ -135,14 +158,14 @@ class SGEController(BatchController):
 
     def __init__(self, conf):
         self.enable_cgroups = conf.get("enable_cgroups",
-                                    False)
+                                       False)
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
 
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
-            LOG.exception("CGROUP CONTROL ACTIVATED ON: %s "
+            LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                      % self.parent_group)
             parent_pid = utils.read_file("%s/pid" % spool_dir)
             create_tree_cgroups(job_id,
@@ -150,24 +173,25 @@ class SGEController(BatchController):
                                 root_parent=self.root_cgroup,
                                 pid=parent_pid)
             if self.parent_group == "/":
-                cgroup_parent = "/%s" % job_id
+                cgroup_job = "/%s" % job_id
             else:
-                cgroup_parent = "%s/%s" % (self.parent_group, job_id)
+                cgroup_job = "%s/%s" % (self.parent_group, job_id)
 
         else:
-            LOG.exception("CGROUP CONTROL NOT ACTIVATED")
-            cgroup_parent = None
-        LOG.exception("CGROUP is %s" % cgroup_parent)
-        return cgroup_parent
+            LOG.debug("CGROUP CONTROL NOT ACTIVATED")
+            cgroup_job = None
+        LOG.debug("CGROUP is %s" % cgroup_job)
+        return cgroup_job
 
     def clean_environment(self, job_id):
-        # TODO(jorgesece): it is needed to delete or auto?
         # TODO(jorgesece): Analize when delete it, if has processes error
         # WE COULD CHANGE THEM TO SGEEX.SERVICE/tasks
         if self.enable_cgroups:
+            # job_ids = utils.read_file("%s/tasks" % cgroups)
+            # task_to_cgroup(self.parent_group, job_ids)
             delete_tree_cgroups(job_id,
                                 self.parent_group,
-                                root_parent=self.root_cgroup)
+                                root_parent=self.root_cgroup,)
 
     def get_job_info(self):
         job_id = os.getenv(

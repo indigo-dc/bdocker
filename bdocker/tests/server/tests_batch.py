@@ -92,11 +92,13 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
-    def test_delete_tree_cgroup(self,m_del, m_path):
+    @mock.patch("bdocker.common.modules.batch.task_to_cgroup")
+    @mock.patch("bdocker.common.utils.read_file")
+    def test_delete_tree_cgroup(self, m_rad, m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
-        gnodes.nodes = [cgroupspy.nodes.Node]
-        m_path.side_effect = [gnodes,
-                              ]
+        parent_node = cgroupspy.nodes.Node("parent")
+        gnodes.nodes = [cgroupspy.nodes.Node("", parent=parent_node)]
+        m_path.side_effect = [gnodes]
         name = uuid.uuid4().hex
         out = batch.delete_tree_cgroups(name,
                                    self.parent_path
@@ -115,10 +117,13 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
-    def test_delete_tree_cgroup_several_nodes(self,m_del, m_path):
+    @mock.patch("bdocker.common.modules.batch.task_to_cgroup")
+    @mock.patch("bdocker.common.utils.read_file")
+    def test_delete_tree_cgroup_several_nodes(self, m_rad, m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
-        gnodes.nodes = [cgroupspy.nodes.Node,
-                        cgroupspy.nodes.Node]
+        parent_node = cgroupspy.nodes.Node("parent")
+        gnodes.nodes = [cgroupspy.nodes.Node("", parent=parent_node),
+                        cgroupspy.nodes.Node("", parent=parent_node)]
         m_path.side_effect = [gnodes,
                               ]
         name = uuid.uuid4().hex
@@ -197,7 +202,6 @@ class TestSGEController(testtools.TestCase):
             m_path.call_args_list[2][0][0]
         )
 
-
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.common.utils.add_to_file")
@@ -251,7 +255,6 @@ class TestSGEController(testtools.TestCase):
             "/%s/" % parent_groups[0],
             m_path.call_args_list[0][0][0]
         )
-
 
     @mock.patch.object(cgroupspy.trees.Tree,"get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
@@ -353,7 +356,7 @@ class TestSGEController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
         controller = batch.SGEController(conf)
-        controller.clean_environment(job_id)
+        controller.clean_environment(job_id,)
         self.assertIs(True, m_del.called)
         m_del.assert_called_with(
             job_id,

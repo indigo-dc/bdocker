@@ -17,6 +17,7 @@ from cgroupspy import trees
 import testtools
 
 from bdocker.common.modules import batch
+from bdocker.common import utils
 
 
 
@@ -24,7 +25,6 @@ class TestSGEController(testtools.TestCase):
     """Test SGE Batch controller."""
     def setUp(self):
         super(TestSGEController, self).setUp()
-        self.parent_path = "/systemd/user/"
         self.name = "bdocker.test"
         self.parent = "/user"
         # self.control = batch.SGEController({})
@@ -70,6 +70,29 @@ class TestSGEController(testtools.TestCase):
                 list_2.append(node.path)
                 print(node.path)
 
+
+    def test_create_cgroup_several_pids(self):
+
+        out = batch.create_tree_cgroups(self.name,
+                                  self.parent,
+                                    pid="12823"
+                                  )
+        cgroup_job = "/sys/fs/cgroup/cpu%s/%s" % (
+            self.parent, self.name
+        )
+        batch.task_to_cgroup(cgroup_job,"12824")
+        self.assertIsNone(out)
+
+    def test_delete_cgroup_serveral_pids(self):
+        # cgroup_job = "%s/%s/tasks" % (self.parent, self.name)
+        # read from job cgroup
+        # job_pids = utils.read_file(cgroup_job)
+        # # add
+        # batch.task_to_cgroup(self.parent,job_pids)
+        out = batch.delete_tree_cgroups(self.name,
+                                        self.parent
+                                        )
+        self.assertIsNone(out)
 
 if __name__ == '__main__':
     testtools.sys.argv.insert(1,'--verbose')
