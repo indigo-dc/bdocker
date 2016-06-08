@@ -18,16 +18,10 @@ from flask import Flask
 from flask import json, request
 import logging
 
-#from bdocker.common import modules as modules_common
 from bdocker.server import controller
-from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
 
-conf = utils_common.load_configuration_from_file()
-server_controller = controller.ServerController(conf)
-#credentials_module = modules_common.load_credentials_module(conf)
-#batch_module = modules_common.load_batch_module(conf)
-#docker_module = modules_common.load_docker_module(conf)
+server_controller = controller.ServerController()
 
 app = Flask(__name__)
 
@@ -44,8 +38,11 @@ def credentials():
     """
     data = request.get_json()
     required = {'admin_token', 'user_credentials'}
-    utils_server.validate(data, required)
-    user_token = server_controller.credentials(data)
+    try:
+        utils_server.validate(data, required)
+        user_token = server_controller.credentials(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(
         201, user_token
     )
@@ -59,8 +56,11 @@ def batch_conf():
     """
     data = request.get_json()
     required = {'admin_token', 'token'}
-    utils_server.validate(data, required)
-    server_controller.batch_configuration()
+    try:
+        utils_server.validate(data, required)
+        server_controller.batch_configuration()
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(
         201, ["Batch system configured"]
     )
@@ -76,8 +76,11 @@ def configuration():
     """
     data = request.get_json()
     required = {'admin_token', 'user_credentials'}
-    utils_server.validate(data, required)
-    user_token = server_controller.configuration(data)
+    try:
+        utils_server.validate(data, required)
+        user_token = server_controller.configuration(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(
         201, user_token
     )
@@ -93,9 +96,11 @@ def clean():
     """
     data = request.args
     required = {'admin_token', 'token'}
-    utils_server.validate(data, required)
-    result = server_controller.clean(data)
-
+    try:
+        utils_server.validate(data, required)
+        result = server_controller.clean(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(204, [result])
 
 
@@ -108,8 +113,11 @@ def pull():
     """
     data = request.get_json()
     required = {'token','source'}
-    utils_server.validate(data, required)
-    result = server_controller.pull(data)
+    try:
+        utils_server.validate(data, required)
+        result = server_controller.pull(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(201, result)
 
 
@@ -121,8 +129,11 @@ def run():
     """
     data = json.loads(request.data)
     required = {'token','image_id', 'script'}
-    utils_server.validate(data, required)
-    results = server_controller.run(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.run(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(201, results)
 
 
@@ -134,8 +145,11 @@ def list_containers():
     """
     data = request.args
     required = {'token'}
-    utils_server.validate(data, required)
-    results = server_controller.list_containers(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.list_containers(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, results)
 
 
@@ -147,8 +161,11 @@ def show():
     """
     data = request.args
     required = {'token'}
-    utils_server.validate(data, required)
-    results = server_controller.show(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.show(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, results)
 
 
@@ -160,8 +177,12 @@ def logs():
     """
     data = request.args
     required = {'token', "container_id"}
-    utils_server.validate(data, required)
-    results = server_controller.logs(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.logs(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
+
     return utils_server.make_json_response(200, results)
 
 
@@ -173,8 +194,11 @@ def delete():
     """
     data = json.loads(request.data)
     required = {'token', 'container_id'}
-    utils_server.validate(data, required)
-    docker_out = server_controller.delete(data)
+    try:
+        utils_server.validate(data, required)
+        docker_out = server_controller.delete_container(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, docker_out)
 
 
@@ -187,8 +211,11 @@ def delete():
 def stop():
     data = json.loads(request.data)
     required = {'token','container_id'}
-    utils_server.validate(data, required)
-    results = server_controller.delete_container(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.stop_container(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, results)
 
 
@@ -196,8 +223,11 @@ def stop():
 def accounting():
     data = request.args
     required = {'token'}
-    utils_server.validate(data, required)
-    results = server_controller.accounting(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.accounting(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, results)
 
 
@@ -205,8 +235,11 @@ def accounting():
 def output():
     data = request.args
     required = {'token','container_id'}
-    utils_server.validate(data, required)
-    results = server_controller.output(data)
+    try:
+        utils_server.validate(data, required)
+        results = server_controller.output(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(200, results)
 
 #####  UNIMPLEMETED  ######

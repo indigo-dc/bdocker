@@ -18,14 +18,15 @@ import json
 import logging
 
 from bdocker.common import modules as modules_common
+from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
-
 
 LOG = logging.getLogger(__name__)
 
-class ServerController(object):
 
-    def __init__(self, conf):
+class ServerController(object):
+    def __init__(self):
+        conf = utils_common.load_configuration_from_file()
         self.credentials_module = modules_common.load_credentials_module(conf)
         self.batch_module = modules_common.load_batch_module(conf)
         self.docker_module = modules_common.load_docker_module(conf)
@@ -37,24 +38,22 @@ class ServerController(object):
 
         :return: user_token
         """
-        try:
-            admin_token = data['admin_token']
-            user = data['user_credentials']
+        admin_token = data['admin_token']
+        user = data['user_credentials']
 
-            user_token = self.credentials_module.authenticate(
-                admin_token, user
-            )
-            LOG.info("Authentication. Token: %s" % user_token)
+        user_token = self.credentials_module.authenticate(
+            admin_token, user
+        )
+        LOG.info("Authentication. Token: %s" % user_token)
 
-            job = data['user_credentials']
-            cgroup = self.batch_module.conf_environment(
-                job['id'], job['spool']
-            )
-            self.credentials_module.set_token_cgroup(user_token, cgroup)
-            LOG.info("Batch system configured")
-            return user_token
-        except Exception as e:
-                return utils_server.manage_exceptions(e)
+        job = data['user_credentials']
+        cgroup = self.batch_module.conf_environment(
+            job['id'], job['spool']
+        )
+        self.credentials_module.set_token_cgroup(user_token, cgroup)
+        LOG.info("Batch system configured")
+        return user_token
+
 
     def credentials(self, data):
         """
