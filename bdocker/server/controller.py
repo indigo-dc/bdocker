@@ -17,15 +17,13 @@
 import logging
 
 from bdocker.common import modules as modules_common
-from bdocker.common import utils as utils_common
 from bdocker.server import utils as utils_server
 
 LOG = logging.getLogger(__name__)
 
 
 class ServerController(object):
-    def __init__(self):
-        conf = utils_common.load_configuration_from_file()
+    def __init__(self, conf):
         self.credentials_module = modules_common.load_credentials_module(conf)
         self.batch_module = modules_common.load_batch_module(conf)
         self.docker_module = modules_common.load_docker_module(conf)
@@ -44,11 +42,13 @@ class ServerController(object):
             admin_token, user
         )
         LOG.info("Authentication. Token: %s" % user_token)
-
-        job = data['user_credentials']
+        # TODO(jorgesece): control this dict access
+        job = data['user_credentials']["job"]
         cgroup = self.batch_module.conf_environment(
             job['id'], job['spool']
         )
+        # FIXME(jorgesece): check if it is neede. We need to make standard,
+        # so, we need to check if cgroup is comming from the batch configuration
         self.credentials_module.set_token_cgroup(user_token, cgroup)
         LOG.info("Batch system configured")
         return user_token

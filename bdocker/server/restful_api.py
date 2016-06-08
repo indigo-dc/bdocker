@@ -20,8 +20,10 @@ import logging
 
 from bdocker.server import controller
 from bdocker.server import utils as utils_server
+from bdocker.common import utils as utils_common
 
-server_controller = controller.ServerController()
+conf = utils_common.load_configuration_from_file()
+server_controller = controller.ServerController(conf)
 
 app = Flask(__name__)
 

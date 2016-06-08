@@ -22,9 +22,17 @@ import mock
 from bdocker.common.modules import credentials
 from bdocker.common.modules import docker_helper
 from bdocker.common.modules import batch
+from bdocker.common import utils
 from bdocker.common import exceptions
 from bdocker.server import controller
 from bdocker.tests import server
+
+FAKE_CONF = {
+    'server': mock.MagicMock(),
+    'batch': mock.MagicMock(),
+    'credentials': mock.MagicMock(),
+    'dockerAPI': mock.MagicMock(),
+}
 
 
 class TestServerController(server.TestConfiguration):
@@ -32,10 +40,28 @@ class TestServerController(server.TestConfiguration):
 
     def setUp(self):
         super(TestServerController, self).setUp()
-        os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
+        path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
                                           "bdocker/bdocker/common/" \
                                           "configure_bdocker.cfg"
-        self.controller = controller.ServerController()
+        # TODO(jorgesece): create a fake conf without need a file
+        conf = utils.load_configuration_from_file(path)
+        self.controller = controller.ServerController(conf)
+
+    @mock.patch.object(credentials.UserController, "authenticate")
+    @mock.patch.object(credentials.UserController, "set_token_cgroup")
+    @mock.patch.object(batch.SGEController, "conf_environment")
+    def test_configuration(self, m_conf, m_t, m_au):
+        token = uuid.uuid4().hex
+        m_au.return_value = token
+        data = {"admin_token": "tokennnnnn",
+                "user_credentials": {"job":{
+                    "id": uuid.uuid4().hex,
+                    "spool": "/foo"
+                }}
+                }
+        result = self.controller.configuration(data)
+
+        self.assertEqual(token, result)
 
     @mock.patch.object(credentials.UserController, "authenticate")
     def test_credentials(self, m):

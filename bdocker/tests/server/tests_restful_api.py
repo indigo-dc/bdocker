@@ -42,19 +42,14 @@ def get_query_string(parameters):
 
         return query_string[:-1] # delete last character
 
-FAKE_CONF = {
-    'server': mock.MagicMock(),
-    'batch': mock.MagicMock(),
-    'credentials': mock.MagicMock(),
-    'dockerAPI': mock.MagicMock(),
-}
 
 class TestREST(server.TestConfiguration):
     """Test REST request mapping."""
 
 
+    @mock.patch("bdocker.common.utils.load_configuration_from_file")
     @mock.patch.object(controller.ServerController, "__init__")
-    def setUp(self, m_conf):
+    def setUp(self, m_conf, m_load):
         super(TestREST, self).setUp()
         m_conf.return_value = None
         from bdocker.server import restful_api
