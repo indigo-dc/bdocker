@@ -135,7 +135,7 @@ class DockerController(object):
                 # volumes=volumes
             )
             if 'Id' not in container_info:
-                # todo: check warnings
+                # TODO(jorgesece): check warnings
                 raise exceptions.DockerException()
             container_id = container_info['Id']
         except BaseException as e:
