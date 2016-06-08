@@ -28,9 +28,30 @@ def bdocker(ctx, host):
     ctx.obj = commands.CommandController(endpoint=host)
 
 
+@bdocker.command('configuration',
+                 help="Configution of the environment."
+                      "It request for user token and"
+                      "prepare the batch environment."
+                      " ROOT privileges needed")
+@user_option
+@job_option
+@click.pass_context
+def configure_environment(ctx, user, jobid):
+    # Command executed by the root in prolog
+    try:
+        out = ctx.obj.configuration(
+            user,
+            jobid
+        )
+        utils.print_message(out["path"])
+    except BaseException as e:
+        utils.print_error(e.message)
+
+
 @bdocker.command('credentials',
                  help="Request for user token."
-                      " ROOT privileges needed")
+                      " ROOT privileges needed."
+                      "[DEPRECATED. Now use configuration]")
 @user_option
 @job_option
 @click.pass_context
@@ -45,13 +66,15 @@ def credentials_create(ctx, user, jobid):
     except BaseException as e:
         utils.print_error(e.message)
 
+
 @bdocker.command('clean',
-                 help="Clean work environment."
+                 help="Clean work environment including"
+                      "the batch system."
                       " ROOT privileges needed")
 @token_option
 @force_option
 @click.pass_context
-def credentials_clean(ctx, token, force):
+def clean_environment(ctx, token, force):
     # Command executed by the root in epilog
     try:
         out = ctx.obj.clean_environment(token, force)
@@ -62,7 +85,8 @@ def credentials_clean(ctx, token, force):
 
 @bdocker.command('batch_config',
                  help="Request batch system configuration"
-                      " to the server. ROOT privileges needed")
+                      " to the server. ROOT privileges needed"
+                      "[DEPRECATED. Now use configuration]")
 @token_option
 @click.pass_context
 def batch_config(ctx, token):
@@ -75,7 +99,8 @@ def batch_config(ctx, token):
 
 @bdocker.command('batch_clean',
                  help="Request clean the batch system environment"
-                      " to the server. ROOT privileges needed")
+                      " to the server. ROOT privileges needed."
+                      "[DEPRECATED. Now use clean]")
 @token_option
 @click.pass_context
 def batch_clean(ctx, token):

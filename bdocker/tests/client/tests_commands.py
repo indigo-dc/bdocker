@@ -114,7 +114,7 @@ class TestCommands(testtools.TestCase):
         token_file = "%s/.bdocker_token_%s" % (home_dir, job_id)
         self.assertIn(token_file, u['path'])
         self.assertIn('job', user_credentials)
-        expected = {"token": admin_token,
+        expected = {"admin_token": admin_token,
                     "user_credentials": user_credentials}
         m_post.assert_called_with(path='/credentials',
                                  parameters=expected)
@@ -169,8 +169,6 @@ class TestCommands(testtools.TestCase):
         admin_token = uuid.uuid4().hex
         m_t.return_value = token
         m_ad.return_value = admin_token
-        containers = ["container_1", "container_2"]
-        m_put.return_value = containers
         self.control.batch_config(None)
         expected = {"admin_token": admin_token,
                     "token": token}
@@ -228,6 +226,39 @@ class TestCommands(testtools.TestCase):
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.batch_clean,
                           None)
+
+    @mock.patch.object(request.RequestController, "execute_post")
+    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_full_configuration(self, m_conf, m_ad, m_write, m_u, m_post):
+        admin_token = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        home_dir = "/foo"
+        spool = "/faa"
+        job_id = 8934
+        user = 'peter'
+        m_conf.return_value = {'home': home_dir,
+                               'job_id': job_id,
+                                'spool': spool,
+                               'user': user}
+        user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
+        m_u.return_value = user_credentials
+        m_post.return_value = token
+        m_ad.return_value = admin_token
+        controller = commands.CommandController()
+        u = controller.configuration(1000, job_id)
+        self.assertIsNotNone(u)
+        self.assertEqual(token, u['token'])
+        self.assertIn(home_dir, u['path'])
+        token_file = "%s/.bdocker_token_%s" % (home_dir, job_id)
+        self.assertIn(token_file, u['path'])
+        self.assertIn('job', user_credentials)
+        expected = {"admin_token": admin_token,
+                    "user_credentials": user_credentials}
+        m_post.assert_called_with(path='/configuration',
+                                 parameters=expected)
 
     # def test_crendentials(self):
     #     results = self.control.create_credentials(1000)

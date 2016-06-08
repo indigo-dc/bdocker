@@ -55,8 +55,8 @@ class ServerController(object):
 
 
     def credentials(self, data):
-        """
-        DEPRECATED
+        """ Create user token environment
+        DEPRECATED. Included in clean
         :return:
         """
         try:
@@ -69,8 +69,8 @@ class ServerController(object):
                 return utils_server.manage_exceptions(e)
 
     def batch_configuration(self, data):
-        """
-        DEPRECATED
+        """ Config batch system environment
+        DEPRECATED. Included in clean
         :return:
         """
         admin_token = data['admin_token']
@@ -82,6 +82,18 @@ class ServerController(object):
         )
         self.credentials_module.set_token_cgroup(token, cgroup)
         LOG.info("Batch system configured")
+
+    def batch_clean(self, data):
+        """ Clean batch system environment
+        DEPRECATED. Included in clean
+        :return:
+        """
+        admin_token = data['admin_token']
+        token = data['token']
+        self.credentials_module.authorize_admin(admin_token)
+        job = self.credentials_module.get_job_from_token(token)
+        self.batch_module.clean_environment(job['id'])
+        return []
 
     def clean(self, data):
         """Clean bdocker user environment.

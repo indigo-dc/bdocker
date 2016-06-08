@@ -50,6 +50,28 @@ class CommandController(object):
                                                     % endpoint
                                                     )
 
+    def configuration(self, user_name=None, jobid=None):
+        path = "/configuration"
+        admin_token = utils_cli.get_admin_token(self.token_storage)
+        if user_name:
+            self.user_name = user_name
+            user_info = utils_cli.get_user_credentials(self.user_name)
+            self.token_file = "%s/%s_%s" % (
+                user_info.get("home"),
+                self.defaul_token_name,
+                self.job_id
+            )
+        else:
+            user_info = utils_cli.get_user_credentials(self.user_name)
+        user_info.update({'job': {'id': self.job_id,
+                          'spool': self.spool_dir}})
+        parameters = {"admin_token": admin_token, "user_credentials": user_info}
+        token = self.control.execute_post(path=path, parameters=parameters)
+        utils_cli.write_user_credentials(token, self.token_file,
+                                         user_info['uid'],
+                                         user_info['gid'])
+        return {"token": token, "path": self.token_file}
+
     def create_credentials(self, user_name=None, jobid=None):
         path = "/credentials"
         admin_token = utils_cli.get_admin_token(self.token_storage)
@@ -65,7 +87,7 @@ class CommandController(object):
             user_info = utils_cli.get_user_credentials(self.user_name)
         user_info.update({'job': {'id': self.job_id,
                           'spool': self.spool_dir}})
-        parameters = {"token": admin_token, "user_credentials": user_info}
+        parameters = {"admin_token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         utils_cli.write_user_credentials(token, self.token_file,
                                          user_info['uid'],

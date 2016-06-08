@@ -32,10 +32,10 @@ utils_server.set_error_handler(app)
 
 @app.route('/credentials', methods=['POST'])
 def credentials():
-    """
-    DEPRECATED
+    """ Create user token environment
+    DEPRECATED. Included in clean
     :return:
-    """
+        """
     data = request.get_json()
     required = {'admin_token', 'user_credentials'}
     try:
@@ -50,8 +50,8 @@ def credentials():
 
 @app.route('/batchconf', methods=['PUT'])
 def batch_conf():
-    """
-    DEPRECATED
+    """ Config batch system environment
+    DEPRECATED. Included in clean
     :return:
     """
     data = request.get_json()
@@ -64,6 +64,21 @@ def batch_conf():
     return utils_server.make_json_response(
         201, ["Batch system configured"]
     )
+
+@app.route('/batchclean', methods=['DELETE'])
+def batch_clean():
+    """ Clean batch system environment
+    DEPRECATED. Included in clean
+    :return:
+    """
+    data = request.args
+    required = {'admin_token', 'token'}
+    try:
+        utils_server.validate(data, required)
+        server_controller.batch_clean(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
+    return utils_server.make_json_response(204, [])
 
 
 @app.route('/configuration', methods=['POST'])
