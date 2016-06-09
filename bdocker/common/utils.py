@@ -137,9 +137,9 @@ def read_user_credentials(file_path):
 
 def read_file(file_path):
     input = open(file_path,'r')
-    data = input.read().rstrip('\n')
+    token = input.read().rstrip('\n')
     input.close()
-    return data
+    return token
 
 
 def add_to_file(file_path, data):
@@ -147,3 +147,4 @@ def add_to_file(file_path, data):
         file_obj.write(data)
     file_obj.close()
     return True
+

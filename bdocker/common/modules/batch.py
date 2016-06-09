@@ -16,7 +16,9 @@
 from cgroupspy import trees
 import logging
 import os
+import time
 
+from bdocker.common import daemon_utils
 from bdocker.common import exceptions
 from bdocker.common import utils
 LOG = logging.getLogger(__name__)
@@ -157,8 +159,6 @@ class BatchController(object):
 
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
-            LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
-                     % self.parent_group)
             parent_pid = utils.read_file("%s/pid" % spool_dir)
             create_tree_cgroups(job_id,
                                 self.parent_group,
@@ -168,13 +168,32 @@ class BatchController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
+            self._launch_job_control(job_id, cgroup_job)
             batch_info = {"cgroup": cgroup_job}
-            LOG.debug("CGROUP is %s" % cgroup_job)
+            LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
+                      "JOB CGROUP: % "
+                     % (self.parent_group, cgroup_job))
         else:
             LOG.debug("CGROUP CONTROL NOT ACTIVATED")
             batch_info = None
-
         return batch_info
+
+    def _launch_job_control(self, job_id, cgroup, cuotas=None):
+        retCode = daemon_utils.create_daemon_dependent()
+        time.sleep(20)
+        procParams = """
+        return code = %s
+        process ID = %s
+        parent process ID = %s
+        process group ID = %s
+        session ID = %s
+        user ID = %s
+        effective user ID = %s
+        real group ID = %s
+        effective group ID = %s
+        """ % (retCode, os.getpid(), os.getppid(), os.getpgrp(), os.getsid(0),
+        os.getuid(), os.geteuid(), os.getgid(), os.getegid())
+        open("createDaemon.log", "w").write(procParams + "\n")
 
     def clean_environment(self, job_id):
         if self.enable_cgroups:
@@ -205,3 +224,6 @@ class SGEController(BatchController):
                 'user': user,
                 'spool': spool_dir
                 }
+
+    def check_accounting(self, job_id, job_batch_info):
+        cgroup = job_batch_info[""]

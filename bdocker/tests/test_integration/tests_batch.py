@@ -30,6 +30,19 @@ class TestSGEController(testtools.TestCase):
         # self.control = batch.SGEController({})
 
     def test_create_cgroup(self):
+        conf = {"enable_cgroups": True,
+                "parent_cgroup": "/user/1000.user/"
+                }
+        job_id = 33
+        spool = "/home/jorge/FAKE_JOB"
+        controller = batch.SGEController(conf)
+        out = controller.conf_environment(job_id=job_id,
+                                    spool_dir=spool
+                                    )
+        expected = {"cgroup": "/user/1000.user/%s" % job_id}
+        self.assertEqual(expected, out)
+
+    def test_create_cgroup(self):
         parent_groups = self.parent
         out = batch.create_tree_cgroups(self.name,
                                   parent_groups,
