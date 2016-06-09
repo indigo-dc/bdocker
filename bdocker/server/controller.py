@@ -16,6 +16,7 @@
 
 import logging
 
+from bdocker.common import exceptions
 from bdocker.common import modules as modules_common
 from bdocker.server import utils as utils_server
 
@@ -35,21 +36,26 @@ class ServerController(object):
 
         :return: user_token
         """
+        required = {'admin_token', 'user_credentials'}
+        utils_server.validate(data, required)
         admin_token = data['admin_token']
         user = data['user_credentials']
-
+        try:
+            job_id = user["job"]['id']
+            job_spool = user['job']['spool']
+        except KeyError as e:
+            message = ("Job information error %s"
+                       % e.message)
+            raise exceptions.ParseException(message=message)
         user_token = self.credentials_module.authenticate(
             admin_token, user
         )
         LOG.info("Authentication. Token: %s" % user_token)
-        # TODO(jorgesece): control this dict access
-        job = data['user_credentials']["job"]
-        cgroup = self.batch_module.conf_environment(
-            job['id'], job['spool']
+
+        batch_info = self.batch_module.conf_environment(
+            job_id, job_spool
         )
-        # FIXME(jorgesece): check if it is neede. We need to make standard,
-        # so, we need to check if cgroup is comming from the batch configuration
-        self.credentials_module.set_token_cgroup(user_token, cgroup)
+        self.credentials_module.set_token_batch_info(user_token, batch_info)
         LOG.info("Batch system configured")
         return user_token
 
@@ -59,6 +65,8 @@ class ServerController(object):
         DEPRECATED. Included in clean
         :return:
         """
+        required = {'admin_token', 'user_credentials'}
+        utils_server.validate(data, required)
         try:
             token = data['admin_token']
             user = data['user_credentials']
@@ -73,14 +81,23 @@ class ServerController(object):
         DEPRECATED. Included in clean
         :return:
         """
+        required = {'admin_token', 'token'}
+        utils_server.validate(data, required)
         admin_token = data['admin_token']
         token = data['token']
         self.credentials_module.authorize_admin(admin_token)
         job = self.credentials_module.get_job_from_token(token)
-        cgroup = self.batch_module.conf_environment(
-            job['id'], job['spool']
+        try:
+            job_id = job['id']
+            job_spool = job['spool']
+        except KeyError as e:
+            message = ("Job information error %s"
+                       % e.message)
+            raise exceptions.ParseException(message=message)
+        batch_info = self.batch_module.conf_environment(
+            job_id, job_spool
         )
-        self.credentials_module.set_token_cgroup(token, cgroup)
+        self.credentials_module.set_token_batch_info(token, batch_info)
         LOG.info("Batch system configured")
 
     def batch_clean(self, data):
@@ -88,6 +105,8 @@ class ServerController(object):
         DEPRECATED. Included in clean
         :return:
         """
+        required = {'admin_token', 'token'}
+        utils_server.validate(data, required)
         admin_token = data['admin_token']
         token = data['token']
         self.credentials_module.authorize_admin(admin_token)
@@ -102,6 +121,8 @@ class ServerController(object):
 
         :return: user_token
         """
+        required = {'admin_token', 'token'}
+        utils_server.validate(data, required)
         admin_token = data['admin_token']
         force = utils_server.eval_bool(
             data.get('force', False)
@@ -127,6 +148,8 @@ class ServerController(object):
 
         :return: output
         """
+        required = {'token', 'source'}
+        utils_server.validate(data, required)
         token = data['token']
         repo = data['source']
         self.credentials_module.authorize(token)
@@ -140,6 +163,8 @@ class ServerController(object):
 
         :return: Request 201 with results
         """
+        required = {'token','image_id', 'script'}
+        utils_server.validate(data, required)
         token = data['token']
         image_id = data['image_id']
         script = data['script']
@@ -180,6 +205,8 @@ class ServerController(object):
 
         :return: Request 200 with results
         """
+        required = {'token'}
+        utils_server.validate(data, required)
         token = data['token']
         all_list = utils_server.eval_bool(data.get('all', False))
         containers = self.credentials_module.list_containers(token)
@@ -195,6 +222,8 @@ class ServerController(object):
 
         :return: Request 200 with results
         """
+        required = {'token', 'container_id'}
+        utils_server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         c_id = self.credentials_module.authorize_container(
@@ -209,6 +238,8 @@ class ServerController(object):
 
         :return: Request 200 with results
         """
+        required = {'token', 'container_id'}
+        utils_server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,
@@ -221,6 +252,8 @@ class ServerController(object):
 
         :return: Request 200 with results
         """
+        required = {'token', 'container_id'}
+        utils_server.validate(data, required)
         token = data['token']
         container_ids = data['container_id']
         force = utils_server.eval_bool(
@@ -248,6 +281,8 @@ class ServerController(object):
     ######################
 
     def stop_container(self, data):
+        required = {'token', 'container_id'}
+        utils_server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,
@@ -257,6 +292,8 @@ class ServerController(object):
         return results
 
     def accounting(self, data):
+        required = {'token'}
+        utils_server.validate(data, required)
         token = data['token']
         # todo: study the implementation
         token_info = self.credentials_module.authorize_container(token)
@@ -264,6 +301,8 @@ class ServerController(object):
         return results
 
     def output(self, data):
+        required = {'token', 'container_id'}
+        utils_server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,

@@ -176,12 +176,13 @@ class SGEController(BatchController):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
-
+            batch_info = {"cgroup": cgroup_job}
+            LOG.debug("CGROUP is %s" % cgroup_job)
         else:
             LOG.debug("CGROUP CONTROL NOT ACTIVATED")
-            cgroup_job = None
-        LOG.debug("CGROUP is %s" % cgroup_job)
-        return cgroup_job
+            batch_info = None
+
+        return batch_info
 
     def clean_environment(self, job_id):
         # TODO(jorgesece): Analize when delete it, if has processes error

@@ -48,7 +48,7 @@ class TestServerController(server.TestConfiguration):
         self.controller = controller.ServerController(conf)
 
     @mock.patch.object(credentials.UserController, "authenticate")
-    @mock.patch.object(credentials.UserController, "set_token_cgroup")
+    @mock.patch.object(credentials.UserController, "set_token_batch_info")
     @mock.patch.object(batch.SGEController, "conf_environment")
     def test_configuration(self, m_conf, m_t, m_au):
         token = uuid.uuid4().hex

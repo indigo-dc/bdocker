@@ -265,12 +265,12 @@ class UserController(object):
                 "Job not found in token %s" % token)
         return token_info["job"]
 
-    def set_token_cgroup(self, token, cgroup):
-        """Set job cgroup to the token record.
+    def set_token_batch_info(self, token, batch_info):
+        """Set job information related to the batch enviroment.
 
         :param token: token
-        :param cgroup: cgroup
+        :param batch_info: information from the bath env
         """
         current_token = self._get_token_from_cache(token)
-        current_token["job"]["cgroup"] = cgroup
+        current_token["job"].update(batch_info)
         self._update_token(token, current_token)

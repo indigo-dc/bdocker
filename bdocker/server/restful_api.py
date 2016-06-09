@@ -39,9 +39,7 @@ def credentials():
     :return:
         """
     data = request.get_json()
-    required = {'admin_token', 'user_credentials'}
     try:
-        utils_server.validate(data, required)
         user_token = server_controller.credentials(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -57,10 +55,8 @@ def batch_conf():
     :return:
     """
     data = request.get_json()
-    required = {'admin_token', 'token'}
     try:
-        utils_server.validate(data, required)
-        server_controller.batch_configuration()
+        server_controller.batch_configuration(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
     return utils_server.make_json_response(
@@ -74,9 +70,7 @@ def batch_clean():
     :return:
     """
     data = request.args
-    required = {'admin_token', 'token'}
     try:
-        utils_server.validate(data, required)
         server_controller.batch_clean(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -92,9 +86,7 @@ def configuration():
     :return: user_token
     """
     data = request.get_json()
-    required = {'admin_token', 'user_credentials'}
     try:
-        utils_server.validate(data, required)
         user_token = server_controller.configuration(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -112,9 +104,7 @@ def clean():
     :return: Request 204 with user_token
     """
     data = request.args
-    required = {'admin_token', 'token'}
     try:
-        utils_server.validate(data, required)
         result = server_controller.clean(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -129,9 +119,7 @@ def pull():
     :return: Request 201 with output
     """
     data = request.get_json()
-    required = {'token','source'}
     try:
-        utils_server.validate(data, required)
         result = server_controller.pull(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -145,9 +133,7 @@ def run():
     :return: Request 201 with results
     """
     data = json.loads(request.data)
-    required = {'token','image_id', 'script'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.run(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -161,9 +147,7 @@ def list_containers():
     :return: Request 200 with results
     """
     data = request.args
-    required = {'token'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.list_containers(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -177,9 +161,7 @@ def show():
     :return: Request 200 with results
     """
     data = request.args
-    required = {'token'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.show(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -193,9 +175,7 @@ def logs():
     :return: Request 200 with results
     """
     data = request.args
-    required = {'token', "container_id"}
     try:
-        utils_server.validate(data, required)
         results = server_controller.logs(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -210,9 +190,7 @@ def delete():
     :return: Request 200 with results
     """
     data = json.loads(request.data)
-    required = {'token', 'container_id'}
     try:
-        utils_server.validate(data, required)
         docker_out = server_controller.delete_container(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -227,9 +205,7 @@ def delete():
 @app.route('/stop', methods=['POST'])
 def stop():
     data = json.loads(request.data)
-    required = {'token','container_id'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.stop_container(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -239,9 +215,7 @@ def stop():
 @app.route('/accounting', methods=['GET'])
 def accounting():
     data = request.args
-    required = {'token'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.accounting(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
@@ -251,9 +225,7 @@ def accounting():
 @app.route('/output', methods=['GET'])
 def output():
     data = request.args
-    required = {'token','container_id'}
     try:
-        utils_server.validate(data, required)
         results = server_controller.output(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)

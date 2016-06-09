@@ -298,9 +298,9 @@ class TestSGEController(testtools.TestCase):
                 "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf)
-        cgroup = controller.conf_environment(job_id, spool_dir)
-        expected_cgroup = "%s/%s" % (parent_dir, job_id)
-        self.assertEqual(expected_cgroup, cgroup)
+        batch_info = controller.conf_environment(job_id, spool_dir)
+        expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
+        self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
         m_cre.assert_called_with(
@@ -322,9 +322,9 @@ class TestSGEController(testtools.TestCase):
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf)
-        cgroup = controller.conf_environment(job_id, spool_dir)
-        expected_cgroup = "%s/%s" % (parent_dir, job_id)
-        self.assertEqual(expected_cgroup, cgroup)
+        batch_info = controller.conf_environment(job_id, spool_dir)
+        expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
+        self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
         m_cre.assert_called_with(
@@ -344,8 +344,8 @@ class TestSGEController(testtools.TestCase):
                 "parent_cgroup": "/bdocker.test"}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf)
-        cgroup = controller.conf_environment(job_id, spool_dir)
-        self.assertIsNone(cgroup)
+        batch_info = controller.conf_environment(job_id, spool_dir)
+        self.assertIsNone(batch_info)
         self.assertIs(False, m_read.called)
         self.assertIs(False, m_cre.called)
 

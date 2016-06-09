@@ -165,6 +165,7 @@ class TestREST(server.TestConfiguration):
     def test_pull_400(self, m):
         parameters = {"token":"tokennnnnn"}
         body = make_body(parameters)
+        m.side_effect = exceptions.ParseException("")
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
@@ -372,6 +373,7 @@ class TestREST(server.TestConfiguration):
         parameters = {"token":"tokennnnnn",
                       "script": "scriptttt"}
         body = make_body(parameters)
+        md.side_effect = exceptions.ParseException("")
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,

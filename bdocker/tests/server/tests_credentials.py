@@ -89,10 +89,11 @@ class TestUserCredentials(testtools.TestCase):
 
 
     @mock.patch('bdocker.common.utils.check_user_credentials')
-    def test_authenticate_with_job_cgroup(self, m):
+    def test_authenticate_with_job_batch_info(self, m):
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
+        batch_info = {"cgroup" : cgroup}
         t = self.control._get_token_from_cache(
             "prolog")['token']
         u = create_parameters()['user_credentials']
@@ -101,7 +102,7 @@ class TestUserCredentials(testtools.TestCase):
                   })
         token = self.control.authenticate(admin_token=t,
                                           user_data=u)
-        self.control.set_token_cgroup(token, cgroup)
+        self.control.set_token_batch_info(token, batch_info)
         job_info = self.control.get_job_from_token(token)
         self.assertEqual(jobid, job_info['id'])
         self.assertEqual(spool, job_info['spool'])
