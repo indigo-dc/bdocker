@@ -153,3 +153,11 @@ def get_exception_details(ex=None, custom_message=None,
         code = custom_code
     details = {"message": message, "code": code}
     return details
+
+
+class UnImplementeException(DockerException):
+
+    def __init__(self, message, code=501):
+        super(UnImplementeException, self).__init__(
+            message=message, code=code
+        )

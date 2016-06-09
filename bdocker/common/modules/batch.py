@@ -144,24 +144,16 @@ def delete_cgroups(group_name, parent_groups,
 
 class BatchController(object):
 
-    def __init__(self):
-        pass
-
-    def get_job_info(self):
-        return "retrieving job info"
-
-    def get_cuotas(self):
-        return "retrieving cuotas"
-
-
-class SGEController(BatchController):
-
     def __init__(self, conf):
         self.enable_cgroups = conf.get("enable_cgroups",
                                        False)
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
+
+    def get_job_info(self):
+        raise exceptions.UnImplemented("Get job information"
+                                       "method")
 
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
@@ -185,14 +177,19 @@ class SGEController(BatchController):
         return batch_info
 
     def clean_environment(self, job_id):
-        # TODO(jorgesece): Analize when delete it, if has processes error
-        # WE COULD CHANGE THEM TO SGEEX.SERVICE/tasks
         if self.enable_cgroups:
-            # job_ids = utils.read_file("%s/tasks" % cgroups)
-            # task_to_cgroup(self.parent_group, job_ids)
             delete_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup,)
+
+    def check_accounting(self):
+        return "retrieving job info"
+
+
+class SGEController(BatchController):
+
+    def __init__(self, *args, **kwargs):
+        super(SGEController, self).__init__(*args, **kwargs)
 
     def get_job_info(self):
         job_id = os.getenv(
@@ -208,24 +205,3 @@ class SGEController(BatchController):
                 'user': user,
                 'spool': spool_dir
                 }
-
-    # def _get_cgroup(self, job_id):
-    #     spool_dir = os.getenv("SGE_JOB_SPOOL_DIR", None)
-    #     job_pid = utils.read_file("%s/job_pid" % spool_dir)
-    #     cgroup_file = "/proc/%/cgroup" % job_pid
-    #     p_cgroup = utils.read_file(cgroup_file)
-    #
-    #     # 10:devices:/system.slice/sgeexecd.service
-    #     # 9:perf_event:/
-    #     # 8:cpuset:/
-    #     # 7:memory:/system.slice/sgeexecd.service
-    #     # 6:net_cls:/
-    #     # 5:cpuacct,cpu:/system.slice/sgeexecd.service
-    #     # 4:freezer:/
-    #     # 3:blkio:/system.slice/sgeexecd.service
-    #     # 2:hugetlb:/
-    #     # 1:name=systemd:/system.slice/sgeexecd.service
-    #
-    #     cgroup = "/sys/fs/cgroup/" % p_cgroup
-    #     job_id = utils.read_file("%s/job_pid" % spool_dir)
-    #     return None
