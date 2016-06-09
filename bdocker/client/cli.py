@@ -28,7 +28,7 @@ def bdocker(ctx, host):
     ctx.obj = commands.CommandController(endpoint=host)
 
 
-@bdocker.command('configuration',
+@bdocker.command('configure',
                  help="Configution of the environment."
                       "It request for user token and"
                       "prepare the batch environment."

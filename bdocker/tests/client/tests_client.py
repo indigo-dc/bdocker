@@ -42,6 +42,20 @@ class TestCommandProject(TestCaseCommandLine):
         super(TestCommandProject, self).setUp()
 
     @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "configuration")
+    def test_configure(self, m_cre, m_ini):
+        m_ini.return_value = None
+        token = uuid.uuid4().hex
+        path = '/path'
+        m_cre.return_value = {"token": token, "path": path}
+        user_name = '--user=foo'
+        result = self.runner.invoke(
+            cli.bdocker, ['configure', user_name]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "create_credentials")
     def test_credentials(self, m_cre, m_ini):
         m_ini.return_value = None
