@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2016 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -13,135 +13,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from cgroupspy import trees
 import logging
 import os
 import time
 
-from bdocker.common import daemon_utils
+from bdocker.common import cgroups_utils
 from bdocker.common import exceptions
 from bdocker.common import utils
+
 LOG = logging.getLogger(__name__)
-
-
-def get_pids_from_cgroup(cgroup):
-    tasks_path = "%s/tasks" % cgroup
-    job_pids = utils.read_file(tasks_path)
-    array_pids = job_pids.split()
-    return array_pids
-
-
-def task_to_cgroup(cgroup_dir, pid):
-    try:
-        tasks = "%s/tasks" % cgroup_dir
-        utils.add_to_file(tasks, pid)
-    except IOError as e:
-        LOG.exception("Error when assign %s to %s. %s"
-                      %(pid, tasks, e.message))
-
-
-def remove_tasks(cgroup_name, cgroup_parent):
-    child_path = "%s/%s" % (cgroup_parent, cgroup_name)
-    LOG.exception("TESTS: DELETING %s" % child_path)
-    job_pids = get_pids_from_cgroup(child_path)
-    for pid in job_pids:
-        LOG.exception("TESTS: PID TO %s" % cgroup_parent)
-        task_to_cgroup(cgroup_parent, pid)
-
-
-def  parse_cgroup_name(name):
-    """
-    Clean name. It is needed because cgroupspy clean them
-    :param name:
-    :return: name without extensions
-    """
-    extensions = ['.slice', '.scope', '.partition']
-    new_name = str(name)
-    for ex in extensions:
-        new_name = new_name.replace(ex, "")
-    return new_name
-
-
-def create_tree_cgroups(group_name, parent_group_dir,
-                        pid=None,
-                        root_parent="/sys/fs/cgroup"):
-    try:
-        c_trees = trees.GroupedTree(root_path=root_parent)
-        parent_group = parse_cgroup_name(parent_group_dir)
-        parent_node = c_trees.get_node_by_path(parent_group)
-        if parent_node:
-            for node in parent_node.nodes:
-                LOG.exception("Node: %s" % node.full_path)
-                try:
-                    new_node = node.create_cgroup(group_name)
-                except OSError as e:
-                    if e.errno == 17:
-                        LOG.exception(e.message)
-                    else:
-                        raise e
-                if pid:
-                    task_to_cgroup(new_node.full_path, pid)
-        else:
-            raise exceptions.BatchException(
-                "Not found cgroup parent: %s,"
-                " in root: %s"
-                % (parent_group_dir, root_parent))
-    except BaseException as e:
-        LOG.exception("CGROUPS creation problem. %s"
-                      % e.message)
-        raise exceptions.DockerException(e)
-
-
-def delete_tree_cgroups(group_name, parent_group,
-                        root_parent="/sys/fs/cgroup"):
-    try:
-        c_trees = trees.GroupedTree(root_path=root_parent)
-        parent_group = parse_cgroup_name(parent_group)
-        parent_node = c_trees.get_node_by_path(parent_group)
-        for node in parent_node.nodes:
-            try:
-                remove_tasks(group_name, node.full_path)
-                node.delete_cgroup(group_name)
-            except IOError as e:
-                if e.errno == 2:
-                    LOG.exception(e.message)
-                else:
-                    raise e
-    except BaseException as e:
-        LOG.exception("CGROUPS delete problem. %s"
-                      % e.message)
-        raise exceptions.DockerException(e)
-
-
-def create_cgroups(group_name, parent_groups, pid=None,
-                  root_parent="/sys/fs/cgroup"):
-    try:
-        c_tree = trees.Tree(root_path=root_parent)
-        # test it GroupedTree
-        for parent in parent_groups:
-            parent = "/%s/" % parent
-            parent_node = c_tree.get_node_by_path(parent)
-            node = parent_node.create_cgroup(group_name)
-            if pid:
-                task_to_cgroup(node.full_path, pid)
-    except BaseException as e:
-        LOG.exception("CGROUPS creation problem. %s"
-                      % e.message)
-        raise exceptions.DockerException(e)
-
-
-def delete_cgroups(group_name, parent_groups,
-                  root_parent="/sys/fs/cgroup"):
-    try:
-        c_tree = trees.Tree(root_path=root_parent)
-        for parent in parent_groups:
-            parent = "/%s/" % parent
-            parent_node = c_tree.get_node_by_path(parent)
-            parent_node.delete_cgroup(group_name)
-    except BaseException as e:
-        LOG.exception("CGROUPS delete problem. %s"
-                      % e.message)
-        raise exceptions.DockerException(e)
 
 
 class BatchController(object):
@@ -160,7 +40,7 @@ class BatchController(object):
     def conf_environment(self, job_id, spool_dir):
         if self.enable_cgroups:
             parent_pid = utils.read_file("%s/pid" % spool_dir)
-            create_tree_cgroups(job_id,
+            cgroups_utils.create_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup,
                                 pid=parent_pid)
@@ -168,10 +48,13 @@ class BatchController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
-            self._launch_job_control(job_id, cgroup_job)
+            print "father %s" % os.getpid()
+            self._launch_job_control(os.getpid(), cgroup_job)
+            print "father? %s" % os.getpid()
+            open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
-                      "JOB CGROUP: % "
+                      "JOB CGROUP: %s "
                      % (self.parent_group, cgroup_job))
         else:
             LOG.debug("CGROUP CONTROL NOT ACTIVATED")
@@ -179,36 +62,45 @@ class BatchController(object):
         return batch_info
 
     def _launch_job_control(self, job_id, cgroup, cuotas=None):
-        retCode = daemon_utils.create_daemon_dependent()
-        time.sleep(20)
-        procParams = """
-        return code = %s
-        process ID = %s
-        parent process ID = %s
-        process group ID = %s
-        session ID = %s
-        user ID = %s
-        effective user ID = %s
-        real group ID = %s
-        effective group ID = %s
-        """ % (retCode, os.getpid(), os.getppid(), os.getpgrp(), os.getsid(0),
-        os.getuid(), os.geteuid(), os.getgid(), os.getegid())
-        open("createDaemon.log", "w").write(procParams + "\n")
+        # todo(jorgesece): protect the file accounting for several access
+        retCode = job_id
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # Exit parent process
+                return 0
+        except OSError, e:
+            raise exceptions.BatchException("fork failed: %d (%s)" % (e.errno, e.strerror))
+            os.exit(1)
+
+        # Configure the child processes environment
+        #os.chdir("/")
+        os.setsid()
+        #os.umask(0)
+        print "child %s" % os.getpid()
+        print "sleeping..."
+        time.sleep(10)
+        print "...waking up"
+        os._exit(0)
 
     def clean_environment(self, job_id):
         if self.enable_cgroups:
-            delete_tree_cgroups(job_id,
+            cgroups_utils.delete_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup,)
 
     def check_accounting(self):
         return "retrieving job info"
 
+    def write_accounting(self):
+        return "writing account"
+
 
 class SGEController(BatchController):
 
-    def __init__(self, *args, **kwargs):
-        super(SGEController, self).__init__(*args, **kwargs)
+    def __init__(self, conf):
+        super(SGEController, self).__init__(conf=conf)
+        self.accounting_file = conf.get("accounting_file")
 
     def get_job_info(self):
         job_id = os.getenv(
@@ -226,4 +118,73 @@ class SGEController(BatchController):
                 }
 
     def check_accounting(self, job_id, job_batch_info):
-        cgroup = job_batch_info[""]
+        pass
+
+    def _update_accounting(self, job_id, cpu, end_time=None,
+                           failed=None, status=None, memory=None,
+                           io_data=None):
+        # todo(jorgesece): read char from job_id
+        full_string = utils.read_file(self.accounting_file)
+        string_splitted = full_string.split(":")
+        start_time = string_splitted[9]
+        if failed:   # position 12
+            string_splitted[11] = failed
+
+        if status:   # position 13
+            string_splitted[12] = status
+
+        if end_time:
+            string_splitted[10] = end_time  # position 11
+            ru_wallclock = end_time - start_time  # POS 14
+            string_splitted[13] = ru_wallclock
+
+        if cpu:   # position 37
+            string_splitted[36] = cpu
+
+        if memory:   # position 38
+            string_splitted[37] = memory
+
+        if io_data:   # position 39
+            string_splitted[38] = io_data
+        # todo(jorgesece): write the line in file
+
+    def create_accounting(self):
+        # Create in prolog
+
+        # docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:
+        # 1465486332:1465486332:0:127:0:0.053201:0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:
+        # 72:0:0:0:242:55:NONE:sysusers:NONE:1:0:0.000000:0.000000:0.000000:-U sysusers:0.000000:
+        # NONE:0.000000:0:0
+        qname = os.getenv(
+            'QUEUE')
+        hostname = os.getenv(
+            'HOSTNAME')  # only available in prolog
+        group = "0"  # we do not need it for bdocker
+        logname = os.getenv(
+            'SGE_O_LOGNAME')
+        job_name = os.getenv(
+            'JOB_NAME')
+        job_id = os.getenv(
+            'JOB_ID')
+        account = os.getenv(
+            'SGE_ACCOUNT')
+        priority = '0'
+        submission_time = '0'  # position 9
+        start_time = int(time.time())  # position 10
+        end_time = 'get time end from epoch'  # position 11
+        failed = "0"  # position 12. Set 37 in case we kill it
+        status = "get status"  # pos 13. 0 for ok, 137 time end
+        ru_wallclock = end_time - start_time  # pos 14
+        cpu = "get from cgproups" # position 37
+        memory = "0" # position 38
+        io = "0" # position 39
+
+        full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
+                       ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+                       ":%s:%s:%s"
+                       ":0:0:0:0:0:0" %
+                       (qname, hostname, logname, job_name, job_id, account, priority,
+                        submission_time, start_time, end_time, failed, status,
+                        ru_wallclock, cpu, memory, io))
+
+        utils.add_to_file(self.accounting_file, full_string)

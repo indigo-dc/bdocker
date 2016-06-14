@@ -13,7 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import grp
 from cgroupspy import trees
+import mock
 import testtools
 
 from bdocker.common.modules import batch
@@ -29,10 +31,12 @@ class TestSGEController(testtools.TestCase):
         self.parent = "/user"
         # self.control = batch.SGEController({})
 
-    def test_create_cgroup(self):
+    @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
+    def test_create_config(self, m):
         conf = {"enable_cgroups": True,
-                "parent_cgroup": "/user/1000.user/"
+                "parent_cgroup": "/user/1000.user"
                 }
+        group = grp.getgrnam()
         job_id = 33
         spool = "/home/jorge/FAKE_JOB"
         controller = batch.SGEController(conf)
@@ -46,7 +50,7 @@ class TestSGEController(testtools.TestCase):
         parent_groups = self.parent
         out = batch.create_tree_cgroups(self.name,
                                   parent_groups,
-                                  pid='30084'
+                                  pid='11393'
                                   )
         self.assertIsNone(out)
 
