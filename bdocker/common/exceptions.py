@@ -68,63 +68,77 @@ def manage_http_exception(code, message):
     return exc(message=("%s") %(message))
 
 
-class NoImplementedException(Exception):
-    def __init__(self, message='', code=501):
-        self.message = ("Method not implemeted: "
-                       + message)
-        self.code = code
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class ParseException(Exception):
-    def __init__(self, message, code=400):
-        self.message = message
-        self.code = code
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class UserCredentialsException(Exception):
-
-    def __init__(self, message):
-        self.message = ("User Credentials Exception: "
-                       + message)
-        self.code = 401
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class ConfigurationException(Exception):
-    def __init__(self, message):
-        self.message = ("Configuration Exception: "
-                       + message)
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class BatchException(Exception):
-    def __init__(self, message):
-        self.message = ("Batch Exception: "
-                       + message)
-
-    def __str__(self):
-        return repr(self.message)
-
-
-class DockerException(Exception):
+class BDockerException(Exception):
     def __init__(self, exc=None, message=None, code=None):
         details = get_exception_details(exc, message, code)
-        self.message = ("Error: "
-                        + details['message'])
+        self.message =  details['message']
         self.code = details['code']
 
     def __str__(self):
         return repr(self.message)
+
+
+class NoImplementedException(BDockerException):
+
+    def __init__(self, message, e=None, code=501):
+        super(NoImplementedException, self).__init__(
+            message=message, code=code
+        )
+        self.message = ("Not implemeted: %s "
+                        % self.message)
+
+
+class ParseException(Exception):
+    def __init__(self, message, exc=None, code=400):
+        super(ParseException, self).__init__(
+            exc, message, code
+        )
+
+
+class UserCredentialsException(Exception):
+    def __init__(self, message, exc=None, code=401):
+        super(UserCredentialsException, self).__init__(
+            exc, message, code
+        )
+        self.message = ("User Credentials Exception: %s "
+                        % self.message)
+
+
+class ConfigurationException(BDockerException):
+    def __init__(self, message, exc=None, code=None):
+        super(ConfigurationException, self).__init__(
+            exc, message, code
+        )
+        self.message = ("Configuration Exception: %s "
+                        % self.message)
+
+
+class BatchException(BDockerException):
+     def __init__(self, message, e=None, code=None):
+        super(BatchException, self).__init__(
+            e, message, code
+        )
+        self.message = ("Batch Exception: %s "
+                        % self.message)
+
+
+class DockerException(BDockerException):
+    def __init__(self, exc=None, message=None, code=None):
+        super(DockerException, self).__init__(
+            exc, message, code
+        )
+        self.message = ("Error: %s "
+                        % self.message)
+
+
+class CgroupException(BDockerException):
+    def __init__(self, e=None, message=None, code=None):
+
+        super(CgroupException, self).__init__(
+            e, message, code
+        )
+        self.message = ("Cgroup Exception: %s"
+                       % self.message)
 
 
 def get_exception_details(ex=None, custom_message=None,
@@ -154,10 +168,3 @@ def get_exception_details(ex=None, custom_message=None,
     details = {"message": message, "code": code}
     return details
 
-
-class UnImplementeException(DockerException):
-
-    def __init__(self, message, code=501):
-        super(UnImplementeException, self).__init__(
-            message=message, code=code
-        )

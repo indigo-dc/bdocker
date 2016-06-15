@@ -34,7 +34,7 @@ class BatchController(object):
         self.parent_group = conf.get("parent_cgroup", '/')
 
     def get_job_info(self):
-        raise exceptions.UnImplemented("Get job information"
+        raise exceptions.NoImplementedException("Get job information"
                                        "method")
 
     def conf_environment(self, job_id, spool_dir):
@@ -118,7 +118,7 @@ class SGEController(BatchController):
                 }
 
     def check_accounting(self, job_id, job_batch_info):
-        pass
+        raise exceptions.NoImplementedException(message="Still not supported")
 
     def _update_accounting(self, job_id, cpu, end_time=None,
                            failed=None, status=None, memory=None,
@@ -183,7 +183,7 @@ class SGEController(BatchController):
                        ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
                        ":%s:%s:%s"
                        ":0:0:0:0:0:0" %
-                       (qname, hostname, logname, job_name, job_id, account, priority,
+                       (qname, hostname, group, logname, job_name, job_id, account, priority,
                         submission_time, start_time, end_time, failed, status,
                         ru_wallclock, cpu, memory, io))
 

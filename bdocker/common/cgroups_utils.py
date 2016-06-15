@@ -88,7 +88,7 @@ def create_tree_cgroups(group_name, parent_group_dir,
     except BaseException as e:
         LOG.exception("CGROUPS creation problem. %s"
                       % e.message)
-        raise exceptions.DockerException(e)
+        raise exceptions.CgroupException(e)
 
 
 def delete_tree_cgroups(group_name, parent_group,
@@ -109,7 +109,7 @@ def delete_tree_cgroups(group_name, parent_group,
     except BaseException as e:
         LOG.exception("CGROUPS delete problem. %s"
                       % e.message)
-        raise exceptions.DockerException(e)
+        raise exceptions.CgroupException(e)
 
 
 def create_cgroups(group_name, parent_groups, pid=None,
@@ -126,7 +126,7 @@ def create_cgroups(group_name, parent_groups, pid=None,
     except BaseException as e:
         LOG.exception("CGROUPS creation problem. %s"
                       % e.message)
-        raise exceptions.DockerException(e)
+        raise exceptions.CgroupException(e)
 
 
 def delete_cgroups(group_name, parent_groups,
@@ -140,13 +140,27 @@ def delete_cgroups(group_name, parent_groups,
     except BaseException as e:
         LOG.exception("CGROUPS delete problem. %s"
                       % e.message)
-        raise exceptions.DockerException(e)
+        raise exceptions.CgroupException(e)
 
 
-def check_accounting(self, limits, usage):
-    for field,value in usage.items():
-        pass
-    mem_limit = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.limit_in_bytes"
-    cpu_limi = "/sys/fs/cgroup/cpu/user/1000.user/c1.session/cpu.cfs_period_us"
-    cpu_usage = "/sys/fs/cgroup/cpuacct/user/1000.user/c1.session/cpuacct.usage"
-    memory_usage = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.usage_in_bytes"
+def get_accounting(group_name, parent_group,
+                        root_parent="/sys/fs/cgroup"):
+    memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
+        root_parent, parent_group, group_name
+    )
+    cpu_file = "%s/memory%s/%s/cpuacct.usage" % (
+        root_parent, parent_group, group_name
+    )
+    try:
+        memory_usage = utils.read_file(memory_file)
+        cpu_usage = utils.read_file(cpu_file)
+    except BaseException as e:
+        LOG.exception("CGROUP get accouting problem. %s"
+                      % e.message)
+        raise exceptions.CgroupException(e)
+    # memory_limit = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.limit_in_bytes"
+    # cpu_limit = "/sys/fs/cgroup/cpu/user/1000.user/c1.session/cpu.cfs_period_us"
+    # cpu_usage = "/sys/fs/cgroup/cpuacct/user/1000.user/c1.session/cpuacct.usage"
+    # memory_usage = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.usage_in_bytes"
+    return {"mem_usage": memory_usage,
+            "cpu_usage": cpu_usage}

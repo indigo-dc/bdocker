@@ -83,7 +83,7 @@ class TestCgroups(testtools.TestCase):
                               ]
         m_cre.side_effect = exceptions.OSError(13, "err", "file")
 
-        self.assertRaises(bdocker_exceptions.DockerException,
+        self.assertRaises(bdocker_exceptions.CgroupException,
                           cgroups_utils.create_tree_cgroups,
                           "66",
                           self.parent_path,

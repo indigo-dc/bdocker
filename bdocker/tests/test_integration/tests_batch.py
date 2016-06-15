@@ -19,7 +19,6 @@ import mock
 import testtools
 
 from bdocker.common.modules import batch
-from bdocker.common import utils
 
 
 
