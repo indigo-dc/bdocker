@@ -20,17 +20,39 @@ from bdocker.common import utils
 from bdocker.common import exceptions
 
 
-class TestConfiguration(testtools.TestCase):
+class TestConfigurationWorkingNode(testtools.TestCase):
     """Test Configuration on Loading."""
 
     def setUp(self):
-        super(TestConfiguration, self).setUp()
+        super(TestConfigurationWorkingNode, self).setUp()
 
     def test_load_config_file(self):
         conf = utils.load_configuration_from_file(
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
             'bdocker/bdocker/tests/server/'
             'fake_configure_file.cfg')
+        self.assertIsNotNone(conf)
+        self.assertEqual(6, conf.items().__len__())
+
+    def test_load_config_file_error(self):
+        self.assertRaises(exceptions.ConfigurationException,
+                          utils.load_configuration_from_file,
+            '/home/jorge/Dropbox/INDIGO_DOCKER/'
+            'bdocker/bdocker/tests/server/'
+            'fake_configure_file_error.cfg')
+
+
+class TestConfigurationMaster(testtools.TestCase):
+    """Test Configuration on Loading."""
+
+    def setUp(self):
+        super(TestConfigurationMaster, self).setUp()
+
+    def test_load_config_file(self):
+        conf = utils.load_configuration_from_file(
+            '/home/jorge/Dropbox/INDIGO_DOCKER/'
+            'bdocker/bdocker/tests/server/'
+            'fake_configure_file_accounting.cfg')
         self.assertIsNotNone(conf)
         self.assertEqual(4, conf.items().__len__())
 

@@ -19,6 +19,8 @@ from bdocker.common import modules
 from bdocker.common import exceptions
 from bdocker.common import utils as utils_common
 
+TOKEN_FILE_NAME = '.bdocker_token'
+
 
 class CommandController(object):
 
@@ -32,8 +34,10 @@ class CommandController(object):
                     conf['server']['host'],
                     conf['server']['port']
                 )
+            cred_info = conf['credentials']
             self.defaul_token_name = (
-                conf['credentials']["token_client_file"]
+                cred_info.get("token_client_file",
+                              TOKEN_FILE_NAME)
             )
             self.job_id = job_info["job_id"]
             self.spool_dir = job_info["spool"]
@@ -43,7 +47,7 @@ class CommandController(object):
                 self.job_id
             )
             self.user_name = job_info['user']
-            self.token_storage = conf['credentials']["token_store"]
+            self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
             raise exceptions.ConfigurationException("Configuring server %s"

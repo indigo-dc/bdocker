@@ -21,6 +21,8 @@ import yaml
 from bdocker.common import exceptions
 
 
+WORKING_NODE='working'
+
 def read_yaml_file(path):
     f = open(path, 'r')
     data = f.read()
@@ -36,43 +38,70 @@ def write_yaml_file(path, data):
         my_file.close()
 
 
-default_conf_file = ("/etc/" +
-                     "configure_bdocker.cfg"
-                     )
+default_conf_file = ("/etc/configure_bdocker.cfg")
 
 
 def validate_config(conf):
-    section_keys = {'server', 'batch', 'credentials', 'dockerAPI'}
+    section_keys = {'resource', 'server', 'batch',
+                    'credentials'}
     server_keys = {'host', 'port', 'environ'}
+    acc_server_keys = {'host', 'port'}
+    resource_options = {'working', 'accounting'}
     environ_options = {'public', 'debug', 'private'}
     batch_keys = {'system'}
-    credentials_keys = {'token_store', 'token_client_file'}
+    credentials_keys = {'token_store'}
     dockers_keys = {'base_url'}
     for key in section_keys:
         if key not in conf:
             raise exceptions.ParseException(key)
-    for key in server_keys:
-        if key not in conf['server']:
-            raise exceptions.ParseException('"server":' + key)
-
-    if conf['server']['environ'] not in environ_options:
+    # RESOURCE
+    if conf['resource']["role"] not in resource_options:
         raise exceptions.ParseException(
-            '"environ" has wrong value.'
+            '"resource" has wrong value.'
         )
+    role = conf['resource']["role"]
+    # SERVER API
+    server = conf['server']
+    for key in server_keys:
+        if key not in server:
+            raise exceptions.ParseException(
+                '"Working node server":' + key
+            )
+    if server['environ'] not in environ_options:
+        raise exceptions.ParseException(
+            '"environ" has wrong value in the server.'
+        )
+
+    # BATCH MODULE
     for key in batch_keys:
         if key not in conf['batch']:
             raise exceptions.ParseException(
-                'batch: %s missed in configuration file' % key)
+                'batch: %s missed in configuration file'
+                % key)
+    # CREDENTIAL MODULE
     for key in credentials_keys:
         if key not in conf['credentials']:
             raise exceptions.ParseException(
                 'credentials: %s missed in'
                 ' configuration file' % key)
-    for key in dockers_keys:
-        if key not in conf['dockerAPI']:
-            raise exceptions.ParseException(
-                'dockerAPI: %s missed in '
-                'configuration file' % key)
+
+    # WORKING NODE CONFIGURATION
+    if WORKING_NODE == role:
+        # ACCOUNTING SERVER
+        acc_server = conf['accounting_server']
+        for key in acc_server_keys:
+            if key not in acc_server:
+                raise exceptions.ParseException(
+                    '"Accounting server configuration": %s'
+                    % key
+                )
+        # DOCKER MODULE
+        docker_info = conf['dockerAPI']
+        for key in dockers_keys:
+            if key not in docker_info:
+                raise exceptions.ParseException(
+                    'dockerAPI: %s missed in '
+                    'configuration file' % key)
 
 
 def load_configuration_from_file(path=None):
@@ -92,20 +121,26 @@ def load_configuration_from_file(path=None):
         )
     try:
         conf = {
+            'resource': dict(config.items("resource")),
             'server': dict(config.items("server")),
             'batch': dict(config.items("batch")),
             'credentials': dict(config.items("credentials")),
-            'dockerAPI': dict(config.items("dockerAPI"))
         }
+        if WORKING_NODE == conf["resource"]["role"]:
+            conf.update(
+                {'accounting_server':
+                     dict(config.items("accounting_server")),
+                 'dockerAPI': dict(config.items("dockerAPI"))
+                 }
+            )
         validate_config(conf)
     except exceptions.ParseException as e:
         raise exceptions.ConfigurationException(
-            "Parameter %s"
+            '"%s" nor found'
             % e.message)
     except BaseException as e:
         raise exceptions.ConfigurationException(
-            "Error reading configuration file:"
-            " %s" % path)
+            message=None, exc=e)
     return conf
 
 
