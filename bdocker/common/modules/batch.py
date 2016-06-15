@@ -48,10 +48,10 @@ class BatchController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
-            print "father %s" % os.getpid()
-            self._launch_job_control(os.getpid(), cgroup_job)
-            print "father? %s" % os.getpid()
-            open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
+            # print "father %s" % os.getpid()
+            # self._launch_job_control(os.getpid(), cgroup_job)
+            # print "father? %s" % os.getpid()
+            # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
