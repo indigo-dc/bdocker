@@ -148,7 +148,7 @@ def get_accounting(group_name, parent_group,
     memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
         root_parent, parent_group, group_name
     )
-    cpu_file = "%s/memory%s/%s/cpuacct.usage" % (
+    cpu_file = "%s/cpuacct%s/%s/cpuacct.usage" % (
         root_parent, parent_group, group_name
     )
     try:
@@ -158,9 +158,5 @@ def get_accounting(group_name, parent_group,
         LOG.exception("CGROUP get accouting problem. %s"
                       % e.message)
         raise exceptions.CgroupException(e)
-    # memory_limit = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.limit_in_bytes"
-    # cpu_limit = "/sys/fs/cgroup/cpu/user/1000.user/c1.session/cpu.cfs_period_us"
-    # cpu_usage = "/sys/fs/cgroup/cpuacct/user/1000.user/c1.session/cpuacct.usage"
-    # memory_usage = "/sys/fs/cgroup/memory/user/1000.user/c1.session/memory.usage_in_bytes"
-    return {"mem_usage": memory_usage,
+    return {"memory_usage": memory_usage,
             "cpu_usage": cpu_usage}

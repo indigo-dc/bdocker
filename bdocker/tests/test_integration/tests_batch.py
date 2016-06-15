@@ -19,10 +19,11 @@ import mock
 import testtools
 
 from bdocker.common.modules import batch
-
+from bdocker.common import cgroups_utils
 
 
 class TestSGEController(testtools.TestCase):
+
     """Test SGE Batch controller."""
     def setUp(self):
         super(TestSGEController, self).setUp()
@@ -35,7 +36,6 @@ class TestSGEController(testtools.TestCase):
         conf = {"enable_cgroups": True,
                 "parent_cgroup": "/user/1000.user"
                 }
-        group = grp.getgrnam()
         job_id = 33
         spool = "/home/jorge/FAKE_JOB"
         controller = batch.SGEController(conf)
@@ -47,15 +47,24 @@ class TestSGEController(testtools.TestCase):
 
     def test_create_cgroup(self):
         parent_groups = self.parent
-        out = batch.create_tree_cgroups(self.name,
+        out = cgroups_utils.create_tree_cgroups(self.name,
                                   parent_groups,
                                   pid='11393'
                                   )
         self.assertIsNone(out)
 
+    def test_get_accounting(self):
+        #/sys/fs/cgroup/cpuacct/user/1000.user/cpuacct.usage
+        name = "1000.user"
+        parent_groups = self.parent
+        out = cgroups_utils.get_accounting(name,
+                                  parent_groups
+                                  )
+        self.assertIsNone(out)
+
     def test_delete_cgroup(self):
         parent_groups = self.parent
-        out = batch.delete_tree_cgroups(self.name,
+        out = cgroups_utils.delete_tree_cgroups(self.name,
                                    parent_groups
                                    )
         self.assertIsNone(out)
@@ -89,14 +98,14 @@ class TestSGEController(testtools.TestCase):
 
     def test_create_cgroup_several_pids(self):
 
-        out = batch.create_tree_cgroups(self.name,
+        out = cgroups_utils.create_tree_cgroups(self.name,
                                   self.parent,
                                     pid="12823"
                                   )
         cgroup_job = "/sys/fs/cgroup/cpu%s/%s" % (
             self.parent, self.name
         )
-        batch.task_to_cgroup(cgroup_job,"12824")
+        cgroups_utils.task_to_cgroup(cgroup_job,"12824")
         self.assertIsNone(out)
 
     def test_delete_cgroup_serveral_pids(self):
@@ -105,7 +114,7 @@ class TestSGEController(testtools.TestCase):
         # job_pids = utils.read_file(cgroup_job)
         # # add
         # batch.task_to_cgroup(self.parent,job_pids)
-        out = batch.delete_tree_cgroups(self.name,
+        out = cgroups_utils.delete_tree_cgroups(self.name,
                                         self.parent
                                         )
         self.assertIsNone(out)
