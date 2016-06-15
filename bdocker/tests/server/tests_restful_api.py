@@ -13,7 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import json
+import testtools
 import uuid
 import webob
 
@@ -21,7 +23,7 @@ import mock
 
 from bdocker.common import exceptions
 from bdocker.server import controller
-from bdocker.tests import server
+
 
 
 def make_body(parameters):
@@ -43,17 +45,49 @@ def get_query_string(parameters):
         return query_string[:-1] # delete last character
 
 
-class TestREST(server.TestConfiguration):
+class TestMasterRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
 
     @mock.patch("bdocker.common.utils.load_configuration_from_file")
     @mock.patch.object(controller.ServerController, "__init__")
     def setUp(self, m_conf, m_load):
-        super(TestREST, self).setUp()
+        super(TestMasterRESTAPI, self).setUp()
         m_conf.return_value = None
-        from bdocker.server import restful_api
-        self.app = restful_api.app
+        from bdocker.server import accounting_rest_api
+        self.app = accounting_rest_api.app
+
+    # @mock.patch.object(controller.ServerController, "master_account")
+    # def test_master_account(self, m):
+    #     pass
+        # m.return_value = 'tokenresult'
+        # parameters = {"admin_token": "tokennnnnn",
+        #               "user_credentials":
+        #                   {'uid': 'uuuuuuuuuuiiiidddddd',
+        #                    'gid': 'gggggggggguuuiiidd',
+        #                    'job': {'id':'gggggggggguuuiiidd',
+        #                            'spool':'/faa'}
+        #                    }
+        #               }
+        # body = make_body(parameters)
+        # result = webob.Request.blank("/credentials",
+        #                              method="POST",
+        #                              content_type="application/json",
+        #                              body=body).get_response(self.app)
+        # self.assertEqual(201, result.status_code)
+
+
+class TestWorkingNodeRESTAPI(testtools.TestCase):
+    """Test REST request mapping."""
+
+
+    @mock.patch("bdocker.common.utils.load_configuration_from_file")
+    @mock.patch.object(controller.ServerController, "__init__")
+    def setUp(self, m_conf, m_load):
+        super(TestWorkingNodeRESTAPI, self).setUp()
+        m_conf.return_value = None
+        from bdocker.server import working_rest_api
+        self.app = working_rest_api.app
 
     @mock.patch.object(controller.ServerController, "configuration")
     def test_configuration(self, m):

@@ -20,7 +20,38 @@ import testtools
 import uuid
 
 from bdocker.common.modules import batch
+from bdocker.common import exceptions
 
+
+class TestSGEAccController(testtools.TestCase):
+    """Test ACCOUNTING SGE Batch controller."""
+    def setUp(self):
+        super(TestSGEAccController, self).setUp()
+
+    def test_accounting_configuration(self):
+        conf = {"bdocker_accounting": "/foo",
+                "sge_accounting": "/baa",
+                }
+        controller = batch.SGEAccountingController(conf)
+        self.assertEqual(conf["bdocker_accounting"], controller.bdocker_accounting)
+        self.assertEqual(conf["sge_accounting"], controller.sge_accounting)
+
+    def test_default_accounting_configuration(self):
+        bdocker_accounting = "/etc/bdocker_accounting"
+        sge_accounting = "/opt/sge/default/common/accounting"
+
+        controller = batch.SGEAccountingController({})
+        self.assertEqual(bdocker_accounting, controller.bdocker_accounting)
+        self.assertEqual(sge_accounting, controller.sge_accounting)
+
+    def test_update_accounting(self):
+        conf = {"bdocker_accounting": "/foo",
+                "sge_accounting": "/baa",
+                }
+        controller = batch.SGEAccountingController(conf)
+        self.assertRaises(exceptions.NoImplementedException,
+                          controller.update_accounting,
+                          None, None, None,None)
 
 class TestSGEController(testtools.TestCase):
     """Test SGE Batch controller."""

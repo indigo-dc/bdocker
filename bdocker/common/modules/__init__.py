@@ -31,6 +31,14 @@ def load_batch_module(conf):
     exceptions.ConfigurationException("Batch is not supported")
 
 
+def load_batch_accounting_module(conf):
+    if 'batch' not in conf:
+        raise exceptions.ConfigurationException("Batch system is not defined")
+    if conf['batch']["system"] == 'SGE':
+        return batch.SGEAccountingController(conf['batch'])
+    exceptions.ConfigurationException("Batch is not supported")
+
+
 def load_docker_module(conf):
     return docker_helper.DockerController(
         conf['dockerAPI']['base_url']

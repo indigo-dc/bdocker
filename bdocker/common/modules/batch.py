@@ -24,7 +24,47 @@ from bdocker.common import utils
 LOG = logging.getLogger(__name__)
 
 
-class BatchController(object):
+class BatchMasterController(object):
+    def __init__(self, conf):
+        pass
+
+
+class SGEAccountingController(BatchMasterController):
+
+    def __init__(self, conf):
+        super(SGEAccountingController, self).__init__(conf=conf)
+        if 'bdocker_accounting' in conf:
+            self.bdocker_accounting = conf["bdocker_accounting"]
+        else:
+            self.bdocker_accounting = "/etc/bdocker_accounting"
+            LOG.exception("bdocker_accounting parameter is not defined."
+                          " Using %s by default. " %
+                          self.bdocker_accounting)
+
+        if 'sge_accounting' in conf:
+            self.sge_accounting = conf["sge_accounting"]
+        else:
+            self.sge_accounting = "/opt/sge/default/common/accounting"
+            LOG.exception("sge_accounting parameter is not defined."
+                          " Using %s by default. " %
+                          self.bdocker_accounting)
+
+    def update_accounting(self, host_name, job_id, cpu, memory):
+        raise exceptions.NoImplementedException("Needs to be implemented"
+                                                "--update_accounting()--")
+        # # todo(jorgesece): read char from job_id
+        # full_string = utils.read_file(self.sge_accounting)
+        # string_splitted = full_string.split(":")
+        # if cpu:   # position 37
+        #     string_splitted[36] = cpu
+        # if memory:   # position 38
+        #     string_splitted[37] = memory
+        #
+        # utils.add_to_file(self.bdocker_accounting, string_splitted)
+        # # todo(jorgesece): write the line in file
+
+
+class BatchWNController(object):
 
     def __init__(self, conf):
         self.enable_cgroups = conf.get("enable_cgroups",
@@ -51,7 +91,7 @@ class BatchController(object):
             # print "father %s" % os.getpid()
             # self._launch_job_control(os.getpid(), cgroup_job)
             # print "father? %s" % os.getpid()
-            # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
+            open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
@@ -89,18 +129,27 @@ class BatchController(object):
                                 self.parent_group,
                                 root_parent=self.root_cgroup,)
 
+    def write_accounting(self, job_id):
+        if self.enable_cgroups:
+            accounting = cgroups_utils.get_accounting(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup
+            )
+        # TODO(jorgesece): write in file
+
     def check_accounting(self):
         return "retrieving job info"
 
-    def write_accounting(self):
-        return "writing account"
 
-
-class SGEController(BatchController):
+class SGEController(BatchWNController):
 
     def __init__(self, conf):
         super(SGEController, self).__init__(conf=conf)
-        self.accounting_file = conf.get("accounting_file")
+        self.bdocker_accounting = conf.get("bdokcer_accounting",
+                                            "/etc/bdocker_accounting")
+        self.sge_accounting = conf.get("sge_accounting",
+                                            "/opt/sge/default/common/accounting")
 
     def get_job_info(self):
         job_id = os.getenv(
@@ -120,33 +169,6 @@ class SGEController(BatchController):
     def check_accounting(self, job_id, job_batch_info):
         raise exceptions.NoImplementedException(message="Still not supported")
 
-    def _update_accounting(self, job_id, cpu, end_time=None,
-                           failed=None, status=None, memory=None,
-                           io_data=None):
-        # todo(jorgesece): read char from job_id
-        full_string = utils.read_file(self.accounting_file)
-        string_splitted = full_string.split(":")
-        start_time = string_splitted[9]
-        if failed:   # position 12
-            string_splitted[11] = failed
-
-        if status:   # position 13
-            string_splitted[12] = status
-
-        if end_time:
-            string_splitted[10] = end_time  # position 11
-            ru_wallclock = end_time - start_time  # POS 14
-            string_splitted[13] = ru_wallclock
-
-        if cpu:   # position 37
-            string_splitted[36] = cpu
-
-        if memory:   # position 38
-            string_splitted[37] = memory
-
-        if io_data:   # position 39
-            string_splitted[38] = io_data
-        # todo(jorgesece): write the line in file
 
     def create_accounting(self):
         # Create in prolog

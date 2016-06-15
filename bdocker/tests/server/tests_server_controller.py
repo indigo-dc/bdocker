@@ -13,9 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import os
+
 import uuid
-import webob
+import testtools
 
 import mock
 
@@ -25,7 +25,6 @@ from bdocker.common.modules import batch
 from bdocker.common import utils
 from bdocker.common import exceptions
 from bdocker.server import controller
-from bdocker.tests import server
 
 FAKE_CONF = {
     'server': mock.MagicMock(),
@@ -35,7 +34,42 @@ FAKE_CONF = {
 }
 
 
-class TestServerController(server.TestConfiguration):
+class TestAccountingServerController(testtools.TestCase):
+    """Test Server Controller class."""
+
+    def setUp(self):
+        super(TestAccountingServerController, self).setUp()
+        path = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
+                "bdocker/bdocker/common/"
+                "configure_bdocker_accounting.cfg")
+        # TODO(jorgesece): create a fake conf without need a file
+        conf = utils.load_configuration_from_file(path)
+        self.controller = controller.AccountingServerController(conf)
+
+    @mock.patch.object(credentials.UserController, "authorize_admin")
+    @mock.patch.object(batch.SGEAccountingController, "update_accounting")
+    def test_set_job_accounting(self, m, m_au):
+        token = uuid.uuid4().hex
+        hostname = "/foo"
+        job_id = uuid.uuid4().hex
+        cpu = uuid.uuid4().hex
+        mem = uuid.uuid4().hex
+        m_au.return_value = token
+        expected = uuid.uuid4().hex
+        m.return_value = expected
+        data = {'admin_token': token,
+                    'hostname': hostname,
+                    'job_id': job_id,
+                    'cpu_usage': cpu,
+                    'memory_usage': mem}
+
+        result = self.controller.set_job_accounting(data)
+
+        self.assertEqual(expected, result)
+
+
+
+class TestServerController(testtools.TestCase):
     """Test Server Controller class."""
 
     def setUp(self):

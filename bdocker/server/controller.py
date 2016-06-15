@@ -23,6 +23,33 @@ from bdocker.server import utils as utils_server
 LOG = logging.getLogger(__name__)
 
 
+class AccountingServerController(object):
+    def __init__(self, conf):
+        self.credentials_module = modules_common.load_credentials_module(conf)
+        self.batch_module = modules_common.load_batch_accounting_module(conf)
+
+    def set_job_accounting(self, data):
+        """ Process the accounting file using the incoming data
+        :return: job
+        """
+        required = {'admin_token',
+                    'hostname',
+                    'job_id',
+                    'cpu_usage',
+                    'memory_usage'}
+        utils_server.validate(data, required)
+        admin_token = data['admin_token']
+        hostname = data['hostname']
+        job_id = data['job_id']
+        cpu_usage = data['cpu_usage']
+        memory_usage = data['memory_usage']
+        self.credentials_module.authorize_admin(admin_token)
+        data = self.batch_module.update_accounting(
+            hostname, job_id, cpu_usage, memory_usage
+        )
+        return data
+
+
 class ServerController(object):
     def __init__(self, conf):
         self.credentials_module = modules_common.load_credentials_module(conf)
