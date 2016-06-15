@@ -20,6 +20,9 @@ FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger('tcpserver')
 
+LOG = logging.getLogger(__name__)
+
+
 default_exceptions = {
     400: webob.exc.HTTPBadRequest,
     401: webob.exc.HTTPUnauthorized,
@@ -71,8 +74,9 @@ def manage_http_exception(code, message):
 class BDockerException(Exception):
     def __init__(self, exc=None, message=None, code=None):
         details = get_exception_details(exc, message, code)
-        self.message =  details['message']
+        self.message = details['message']
         self.code = details['code']
+        LOG.exception(message)
 
     def __str__(self):
         return repr(self.message)
@@ -88,14 +92,14 @@ class NoImplementedException(BDockerException):
                         % self.message)
 
 
-class ParseException(Exception):
+class ParseException(BDockerException):
     def __init__(self, message, exc=None, code=400):
         super(ParseException, self).__init__(
             exc, message, code
         )
 
 
-class UserCredentialsException(Exception):
+class UserCredentialsException(BDockerException):
     def __init__(self, message, exc=None, code=401):
         super(UserCredentialsException, self).__init__(
             exc, message, code
