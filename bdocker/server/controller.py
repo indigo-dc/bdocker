@@ -86,7 +86,6 @@ class ServerController(object):
         LOG.info("Batch system configured")
         return user_token
 
-
     def credentials(self, data):
         """ Create user token environment
         DEPRECATED. Included in clean
@@ -168,7 +167,6 @@ class ServerController(object):
         LOG.info("Delete token: %s" % token)
         return token
 
-
     def pull(self, data):
         """Pull request.
         Download a docker image from a repository
@@ -183,7 +181,6 @@ class ServerController(object):
         result = self.docker_module.pull_image(repo)
         # credentials_module.add_image(token, result['image_id'])
         return result
-
 
     def run(self, data):
         """Execute command in container.
@@ -226,7 +223,6 @@ class ServerController(object):
             results = container_id
         return  results
 
-
     def list_containers(self, data):
         """List containers.
 
@@ -243,7 +239,6 @@ class ServerController(object):
                                                     all=all_list)
         return results
 
-
     def show(self, data):
         """Show container information.
 
@@ -258,7 +253,6 @@ class ServerController(object):
             container_id)
         results = self.docker_module.container_details(c_id)
         return results
-
 
     def logs(self, data):
         """Log from a contaniner.
@@ -301,6 +295,22 @@ class ServerController(object):
                 LOG.exception(e.message)
                 docker_out.append(e.message)
         return docker_out
+
+    def notify_accounting(self, data):
+        """Notify accounting.
+
+        Send the accounting information to the accounting
+        server. [DEPRECATED]
+
+        :return: output
+        """
+        required = {'admin_token', 'token'}
+        utils_server.validate(data, required)
+        admin_token = data['admin_token']
+        self.credentials_module.authorize_admin(admin_token)
+        token = data['token']
+        job = self.credentials_module.get_job_from_token(token)
+        self.batch_module.notify_accounting(job['id'])
 
 
     ########################

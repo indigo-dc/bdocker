@@ -215,7 +215,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(200, result.status_code)
+        self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "delete_container")
     def test_delete_several(self, md):
@@ -229,7 +229,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(200, result.status_code)
+        self.assertEqual(201, result.status_code)
         self.assertEqual(c1, result.json_body["results"][0])
         self.assertEqual(c2, result.json_body["results"][1])
 
@@ -413,6 +413,38 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      body=body,
                                      method="PUT").get_response(self.app)
         self.assertEqual(400, result.status_code)
+
+    @mock.patch.object(controller.ServerController, "notify_accounting")
+    def test_notify_acc(self, md):
+        parameters = {"token": uuid.uuid4().hex,
+                      "admin_token": uuid.uuid4().hex}
+        body = make_body(parameters)
+        result = webob.Request.blank("/notify_accounting",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)
+
+    @mock.patch.object(controller.ServerController, "notify_accounting")
+    def test_notify_acc_401(self, m):
+        m.side_effect = exceptions.UserCredentialsException("")
+        parameters = {"token": uuid.uuid4().hex,
+                      "admin_token": uuid.uuid4().hex}
+        body = make_body(parameters)
+        result = webob.Request.blank("/notify_accounting",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(401, result.status_code)
+
+    @mock.patch.object(controller.ServerController, "notify_accounting")
+    def test_notify_acc_405(self, m):
+        parameters = {"token": uuid.uuid4().hex,
+                      "admin_token": uuid.uuid4().hex}
+        query = get_query_string(parameters)
+        result = webob.Request.blank("/notify_accounting?%s" % query,
+                                     method="GET").get_response(self.app)
+        self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "accounting")
     def test_acc(self, md):

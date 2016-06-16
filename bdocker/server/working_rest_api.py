@@ -35,7 +35,7 @@ utils_server.set_error_handler(app)
 @app.route('/credentials', methods=['POST'])
 def credentials():
     """ Create user token environment
-    DEPRECATED. Included in clean
+    [DEPRECATED]. Included in clean
     :return:
         """
     data = request.get_json()
@@ -51,7 +51,7 @@ def credentials():
 @app.route('/batchconf', methods=['PUT'])
 def batch_conf():
     """ Config batch system environment
-    DEPRECATED. Included in clean
+    [DEPRECATED]. Included in clean
     :return:
     """
     data = request.get_json()
@@ -66,7 +66,7 @@ def batch_conf():
 @app.route('/batchclean', methods=['DELETE'])
 def batch_clean():
     """ Clean batch system environment
-    DEPRECATED. Included in clean
+    [DEPRECATED]. Included in clean
     :return:
     """
     data = request.args
@@ -187,15 +187,32 @@ def logs():
 def delete():
     """Delete a container.
 
-    :return: Request 200 with results
+    :return: Request 201 with results
     """
     data = json.loads(request.data)
     try:
         docker_out = server_controller.delete_container(data)
     except Exception as e:
         return utils_server.manage_exceptions(e)
-    return utils_server.make_json_response(200, docker_out)
+    return utils_server.make_json_response(201, docker_out)
 
+
+@app.route('/notify_accounting', methods=['PUT'])
+def notify_accounting():
+    """Notify accounting.
+     Send the accounting information to the
+     accounting server.
+     [DEPRECATED. It is included in the batch daemon]
+
+    :return: Request 201 with results
+    """
+
+    data = json.loads(request.data)
+    try:
+        results = server_controller.notify_accounting(data)
+    except Exception as e:
+        return utils_server.manage_exceptions(e)
+    return utils_server.make_json_response(201, results)
 
 ########################
 ### UN IMPLEMENTED ####

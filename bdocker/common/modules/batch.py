@@ -127,7 +127,7 @@ class BatchWNController(object):
         if self.enable_cgroups:
             cgroups_utils.delete_tree_cgroups(job_id,
                                 self.parent_group,
-                                root_parent=self.root_cgroup,)
+                                root_parent=self.root_cgroup)
 
     def write_accounting(self, job_id):
         if self.enable_cgroups:
@@ -138,8 +138,20 @@ class BatchWNController(object):
             )
         # TODO(jorgesece): write in file
 
-    def check_accounting(self):
-        return "retrieving job info"
+    def check_accounting(self, job_id, job_batch_info):
+        raise exceptions.NoImplementedException(
+            message="Still not supported")
+
+    def notify_accounting(self, job_id):
+        if self.enable_cgroups:
+            acc = cgroups_utils.get_accounting(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup)
+
+        else:
+            raise exceptions.NoImplementedException(
+                message="Still not supported")
 
 
 class SGEController(BatchWNController):
@@ -166,11 +178,7 @@ class SGEController(BatchWNController):
                 'spool': spool_dir
                 }
 
-    def check_accounting(self, job_id, job_batch_info):
-        raise exceptions.NoImplementedException(message="Still not supported")
-
-
-    def create_accounting(self):
+    def create_accounting_file(self):
         # Create in prolog
 
         # docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:

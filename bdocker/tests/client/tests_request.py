@@ -20,7 +20,7 @@ import testtools
 import webob
 
 
-from bdocker.client.controller import request
+from bdocker.common import request
 
 
 def create_fake_json_resp(data, status=200):

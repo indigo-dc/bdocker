@@ -452,6 +452,26 @@ class TestServerController(testtools.TestCase):
                           self.controller.run,
                           parameters)
 
+    @mock.patch.object(credentials.UserController, "get_job_from_token")
+    @mock.patch.object(credentials.UserController, "authorize_admin")
+    @mock.patch.object(batch.SGEController, "notify_accounting")
+    def test_notify_accounting(self, macc, mad, mjob):
+        c1 = uuid.uuid4().hex
+        parameters = {"token": uuid.uuid4().hex,
+                      'admin_token': uuid.uuid4().hex}
+        results = self.controller.notify_accounting(parameters)
+
+    @mock.patch.object(docker_helper.DockerController, "accounting_container")
+    @mock.patch.object(credentials.UserController, "authorize_container")
+    @mock.patch.object(batch.SGEController, "notify_accounting")
+    def test_notify_accounting_unauthorized(self, mac, mu, ml):
+        mu.side_effect = exceptions.UserCredentialsException("")
+        parameters = {"token": uuid.uuid4().hex,
+                      'admin_token': uuid.uuid4().hex}
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.controller.notify_accounting,
+                          parameters)
+
     @mock.patch.object(docker_helper.DockerController, "stop_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     def test_stop(self, mu, ml):

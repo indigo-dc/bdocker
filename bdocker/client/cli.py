@@ -209,6 +209,19 @@ def container_delete(ctx, token, container_ids, force):
         utils.print_error(m)
 
 
+@bdocker.command('notify_accounting',
+                 help="Send accounting to the server.")
+@token_option
+@click.pass_context
+def notify_accounting(ctx, token, force):
+    # Command executed by the root in epilog
+    try:
+        out = ctx.obj.notify_accounting(token)
+        utils.print_message(out)
+    except BaseException as e:
+        utils.print_error(e.message)
+
+
 @bdocker.command('accounting',
                  help="Retrieve the job accounting.")
 @token_option

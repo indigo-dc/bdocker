@@ -13,10 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from bdocker.client.controller import request
 from bdocker.client.controller import utils as utils_cli
-from bdocker.common import modules
 from bdocker.common import exceptions
+from bdocker.common import modules, request
 from bdocker.common import utils as utils_common
 
 TOKEN_FILE_NAME = '.bdocker_token'
@@ -172,6 +171,14 @@ class CommandController(object):
                       "force": force}
         out = self.control.execute_put(path=path, parameters=parameters)
         return out
+
+    def notify_accounting(self, token):
+        path = "/notify_accounting"
+        admin_token = utils_cli.get_admin_token(self.token_storage)
+        token = utils_cli.token_parse(token, self.token_file)
+        parameters = {"admin_token": admin_token, 'token': token}
+        self.control.execute_put(path=path, parameters=parameters)
+        return token
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"

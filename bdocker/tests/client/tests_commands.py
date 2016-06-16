@@ -21,9 +21,9 @@ import mock
 import testtools
 
 from bdocker.client.controller import commands
-from bdocker.client.controller import request
 from bdocker.common import exceptions
 from bdocker.common.modules import batch
+from bdocker.common import request
 
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/" \
                                   "common/configure_bdocker.cfg"
@@ -260,6 +260,19 @@ class TestCommands(testtools.TestCase):
         m_post.assert_called_with(path='/configuration',
                                  parameters=expected)
 
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.controller.utils.token_parse")
+    def test_notify_accounting(self, m_t, m_ad, m_del):
+        token = uuid.uuid4().hex
+        admin_token = uuid.uuid4().hex
+        m_t.return_value = token
+        m_ad.return_value = admin_token
+        self.control.notify_accounting(None)
+        expected = {"admin_token": admin_token,
+                    "token": token}
+        m_del.assert_called_with(path='/notify_accounting',
+                                 parameters=expected)
     # def test_crendentials(self):
     #     results = self.control.create_credentials(1000)
     #     self.assertIsNotNone(results)

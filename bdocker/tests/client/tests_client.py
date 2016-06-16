@@ -411,7 +411,9 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
+
     # TODO(jorgesece): include teste for
     # clean
     # detele with force
+    # notify_accounting
     # more....
