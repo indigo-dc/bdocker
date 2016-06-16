@@ -14,10 +14,49 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
+import six
+import six.moves.urllib.parse as urlparse
 import webob
 
 from bdocker.common import exceptions
-from bdocker.client.controller import utils
+
+
+def utf8(value):
+    """Try to turn a string into utf-8 if possible.
+
+    Code is modified from the utf8 function in
+    http://github.com/facebook/tornado/blob/master/tornado/escape.py
+
+    """
+    if isinstance(value, six.text_type):
+        return value.encode('utf-8')
+    assert isinstance(value, str)
+    return value
+
+
+def get_query_string(parameters):
+    """Get request query string from parameters
+
+    :param name: name of the user
+    """
+    if parameters is None:
+        query_string = None
+    else:
+        query_string = urlparse.urlencode(parameters)
+    return query_string
+
+
+def make_body(parameters):
+    """Create json body request
+
+    :param parameters: dict of parameters to include
+    """
+    body = {}
+    for key in parameters.keys():
+        body[key] = parameters[key]
+
+    return json.dumps(body)
 
 
 class RequestController(object):
@@ -71,7 +110,7 @@ class RequestController(object):
         if content_type is not None:
             new_req.content_type = content_type
         if body is not None:
-            new_req.body = utils.utf8(body)
+            new_req.body = utf8(body)
         return new_req
 
     def execute_get(self, path, parameters):
@@ -82,7 +121,7 @@ class RequestController(object):
         :param parameters: parameters to include in the request
         """
         try:
-            query_string = utils.get_query_string(parameters)
+            query_string = get_query_string(parameters)
             req = self._get_req(path, query_string=query_string,
                                 method="GET")
             response = req.get_response()
@@ -99,7 +138,7 @@ class RequestController(object):
         :param parameters: parameters to include in the request
         """
         try:
-            body = utils.make_body(parameters)
+            body = make_body(parameters)
             req = self._get_req(path, content_type="application/json",
                                 body=body, method="POST")
             response = req.get_response()
@@ -116,7 +155,7 @@ class RequestController(object):
         :param parameters: parameters to include in the request
         """
         try:
-            query_string = utils.get_query_string(parameters)
+            query_string = get_query_string(parameters)
             req = self._get_req(path, method="DELETE",
                                 query_string=query_string)
             response = req.get_response(None)
@@ -133,7 +172,7 @@ class RequestController(object):
         :param parameters: parameters to include in the request
         """
         try:
-            body = utils.make_body(parameters)
+            body = make_body(parameters)
             req = self._get_req(path, content_type="application/json",
                                 body=body, method="PUT")
             response = req.get_response()

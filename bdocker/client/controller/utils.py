@@ -18,8 +18,7 @@ import json
 import os
 import pwd
 from tabulate import tabulate
-import six
-import six.moves.urllib.parse as urlparse
+
 
 from bdocker.common import exceptions
 from bdocker.common import utils
@@ -75,43 +74,6 @@ def set_environ(key, value):
     :param key: value of variable
     """
     os.environ[key] = value
-
-
-def utf8(value):
-    """Try to turn a string into utf-8 if possible.
-
-    Code is modified from the utf8 function in
-    http://github.com/facebook/tornado/blob/master/tornado/escape.py
-
-    """
-    if isinstance(value, six.text_type):
-        return value.encode('utf-8')
-    assert isinstance(value, str)
-    return value
-
-
-def get_query_string(parameters):
-    """Get request query string from parameters
-
-    :param name: name of the user
-    """
-    if parameters is None:
-        query_string = None
-    else:
-        query_string = urlparse.urlencode(parameters)
-    return query_string
-
-
-def make_body(parameters):
-    """Create json body request
-
-    :param parameters: dict of parameters to include
-    """
-    body = {}
-    for key in parameters.keys():
-        body[key] = parameters[key]
-
-    return json.dumps(body)
 
 
 def get_user_credentials(name):
