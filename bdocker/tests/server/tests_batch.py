@@ -53,6 +53,7 @@ class TestSGEAccController(testtools.TestCase):
                           controller.update_accounting,
                           None, None, None,None)
 
+
 class TestSGEController(testtools.TestCase):
     """Test SGE Batch controller."""
     def setUp(self):

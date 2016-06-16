@@ -52,7 +52,7 @@ class SGEAccountingController(BatchMasterController):
     def update_accounting(self, host_name, job_id, cpu, memory):
         raise exceptions.NoImplementedException("Needs to be implemented"
                                                 "--update_accounting()--")
-        # # todo(jorgesece): read char from job_id
+        # # TODO(jorgesece): read char from job_id
         # full_string = utils.read_file(self.sge_accounting)
         # string_splitted = full_string.split(":")
         # if cpu:   # position 37
@@ -91,7 +91,7 @@ class BatchWNController(object):
             # print "father %s" % os.getpid()
             # self._launch_job_control(os.getpid(), cgroup_job)
             # print "father? %s" % os.getpid()
-            open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
+            # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
