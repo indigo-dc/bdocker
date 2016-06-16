@@ -22,37 +22,18 @@ import webob
 import mock
 
 from bdocker.common import exceptions
+from bdocker.common import request
 from bdocker.server import controller
 
 
-
-def make_body(parameters):
-        body = {}
-        for key in parameters.keys():
-            body[key] = parameters[key]
-
-        return json.dumps(body)
-
-
-def get_query_string(parameters):
-        query_string = ""
-        if parameters is None:
-            return None
-
-        for key in parameters.keys():
-            query_string = ("%s%s=%s&" % (query_string, key, parameters[key]))
-
-        return query_string[:-1] # delete last character
-
-
-class TestMasterRESTAPI(testtools.TestCase):
+class TestAccRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
 
     @mock.patch("bdocker.common.utils.load_configuration_from_file")
     @mock.patch.object(controller.ServerController, "__init__")
     def setUp(self, m_conf, m_load):
-        super(TestMasterRESTAPI, self).setUp()
+        super(TestAccRESTAPI, self).setUp()
         m_conf.return_value = None
         from bdocker.server import accounting_rest_api
         self.app = accounting_rest_api.app
@@ -100,7 +81,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                    'spool':'/faa'}
                            }
                       }
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/configuration",
                                      method="POST",
                                      content_type="application/json",
@@ -118,7 +99,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                    'spool':'/faa'}
                            }
                       }
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/configuration",
                                      method="POST",
                                      content_type="application/json",
@@ -131,7 +112,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         token = uuid.uuid4().hex
         m.return_value = token
         parameters = {"admin_token": token_admin, "token": token}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/clean?%s" % query,
                                      method="DELETE",
                                      content_type="application/json"
@@ -144,7 +125,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         token = uuid.uuid4().hex
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"admin_token": token_admin, "token": token}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/clean?%s" % query,
                                      method="DELETE",
                                      content_type="application/json"
@@ -163,7 +144,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                    'spool':'/faa'}
                            }
                       }
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/credentials",
                                      method="POST",
                                      content_type="application/json",
@@ -177,7 +158,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         md.return_value = {'image_id': im_id, 'status':'OK'}
         parameters = {"token":"tokennnnnn",
                       "source": 'repoooo'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
@@ -188,7 +169,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_pull_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "source": 'repoooo'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
                                      body=body,
@@ -198,7 +179,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "pull")
     def test_pull_400(self, m):
         parameters = {"token":"tokennnnnn"}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         m.side_effect = exceptions.ParseException("")
         result = webob.Request.blank("/pull",
                                      content_type="application/json",
@@ -210,7 +191,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_delete(self, md):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
                                      content_type="application/json",
                                      body=body,
@@ -224,7 +205,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         md.return_value = [c1, c2]
         parameters = {"token":"tokennnnnn",
                       "container_id": [c1, c2]}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
                                      content_type="application/json",
                                      body=body,
@@ -237,7 +218,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_delete_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'repoooo'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/rm?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
@@ -249,7 +230,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         mu.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
                       "container_id": [c1, c2]}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
                                      content_type="application/json",
                                      body=body,
@@ -280,7 +261,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "show")
     def test_show(self, md):
         parameters = {"token":"tokennnnnn"}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/inspect?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
@@ -289,7 +270,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_show_401(self, md):
         md.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn"}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/inspect?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
@@ -298,7 +279,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_logs(self, md):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
@@ -308,7 +289,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
@@ -317,7 +298,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_logs_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
@@ -326,7 +307,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_stop(self, md):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
                                      content_type="application/json",
                                      body=body,
@@ -337,7 +318,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_stop_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
                                      content_type="application/json",
                                      body=body,
@@ -349,7 +330,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
                                      content_type="application/json",
                                      body=body,
@@ -369,7 +350,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "script": script,
                       "detach": detach
                       }
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
@@ -382,7 +363,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
@@ -395,7 +376,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token":"tokennnnnn",
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/run",
                                      content_type="application/json",
                                      body=body,
@@ -406,7 +387,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_run_400(self, md):
         parameters = {"token":"tokennnnnn",
                       "script": "scriptttt"}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         md.side_effect = exceptions.ParseException("")
         result = webob.Request.blank("/run",
                                      content_type="application/json",
@@ -418,7 +399,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_notify_acc(self, md):
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/notify_accounting",
                                      content_type="application/json",
                                      body=body,
@@ -430,7 +411,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
-        body = make_body(parameters)
+        body = request.make_body(parameters)
         result = webob.Request.blank("/notify_accounting",
                                      content_type="application/json",
                                      body=body,
@@ -441,7 +422,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_notify_acc_405(self, m):
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/notify_accounting?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
@@ -450,7 +431,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_acc(self, md):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/accounting?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
@@ -460,7 +441,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/accounting?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
@@ -469,7 +450,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_acc_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/accounting?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
@@ -478,7 +459,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_output(self, md):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/output?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
@@ -487,7 +468,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_output_405(self, m):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/output?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
@@ -497,7 +478,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr'}
-        query = get_query_string(parameters)
+        query = request.get_query_string(parameters)
         result = webob.Request.blank("/output?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
