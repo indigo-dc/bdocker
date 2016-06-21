@@ -58,8 +58,10 @@ class UserController(object):
             'home_dir': user_info['home']
         }
         if 'job' in user_info:
-            token_content['job'] = user_info['job']
-
+            token_content['job'] = {
+                    "id": user_info['job']['id'],
+                    "spool": user_info['job']['spool']
+                }
         new_token = {token: token_content}
         self.token_store = utils_common.read_yaml_file(
             self.path

@@ -128,10 +128,10 @@ class TestSGEController(testtools.TestCase):
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         job_info = {"home": home,
-            "job": {"id": job_id,
-                    "spool": spool_dir
+                    "job": {"id": job_id,
+                            "spool": spool_dir
+                            }
                     }
-            }
         controller = batch.SGEController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_info)
         expected_cgroup = {
@@ -152,13 +152,19 @@ class TestSGEController(testtools.TestCase):
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
     def test_conf_environment_no_cgroup(self, m_cre, m_read):
         spool_dir = "/foo"
+        home = "/foo"
         job_id = uuid.uuid4().hex
         parent_id = uuid.uuid4().hex
         conf = {"cgroups_dir": "/foo",
                 "parent_cgroup": "/bdocker.test"}
         m_read.return_value = parent_id
+        job_info = {"home": home,
+            "job": {"id": job_id,
+                    "spool": spool_dir
+                    }
+            }
         controller = batch.SGEController(conf, self.acc_conf)
-        batch_info = controller.conf_environment(job_id, spool_dir)
+        batch_info = controller.conf_environment(job_info)
         self.assertIsNone(batch_info)
         self.assertIs(False, m_read.called)
         self.assertIs(False, m_cre.called)

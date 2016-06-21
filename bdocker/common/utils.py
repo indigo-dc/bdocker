@@ -50,6 +50,10 @@ def update_yaml_file(path, data):
         my_file.close()
 
 
+def delete_file(path):
+    os.remove(path)
+
+
 default_conf_file = ("/etc/configure_bdocker.cfg")
 
 

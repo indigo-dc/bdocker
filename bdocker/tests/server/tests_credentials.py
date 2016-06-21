@@ -86,43 +86,43 @@ class TestUserCredentials(testtools.TestCase):
         self.assertNotIn('cgroup', job_info)
         self.control.remove_token_from_cache(token)
 
-    @mock.patch('bdocker.common.utils.check_user_credentials')
-    def test_authenticate_with_job_accouting_info(self, m):
-        jobid = uuid.uuid4().hex
-        spool = uuid.uuid4().hex
-        user = uuid.uuid4().hex
-        qname = uuid.uuid4().hex
-        logname = uuid.uuid4().hex
-        hostname = uuid.uuid4().hex
-        job_name = uuid.uuid4().hex
-        account = uuid.uuid4().hex
-        t = self.control._get_token_from_cache(
-            "prolog")['token']
-        u = create_parameters()['user_credentials']
-        u.update({'job': {'id': jobid,
-                          'user_name': user,
-                          'spool': spool,
-                          'queue_name': qname,
-                          'host_name': hostname,
-                          'log_name': logname,
-                          'job_name': job_name,
-                          'account_name': account}
-                  }
-                 )
-        token = self.control.authenticate(admin_token=t,
-                                          session_data=u)
-        self.assertIsNotNone(token)
-        job_info = self.control.get_job_from_token(token)
-        self.assertEqual(jobid, job_info['id'])
-        self.assertEqual(spool, job_info['spool'])
-        self.assertEqual(user, job_info['user_name'])
-        self.assertEqual(qname, job_info['queue_name'])
-        self.assertEqual(hostname, job_info['host_name'])
-        self.assertEqual(job_name, job_info['job_name'])
-        self.assertEqual(logname, job_info['log_name'])
-        self.assertEqual(account, job_info['account_name'])
-        self.assertNotIn('cgroup', job_info)
-        self.control.remove_token_from_cache(token)
+    # @mock.patch('bdocker.common.utils.check_user_credentials')
+    # def test_authenticate_with_job_accouting_info(self, m):
+    #     jobid = uuid.uuid4().hex
+    #     spool = uuid.uuid4().hex
+    #     user = uuid.uuid4().hex
+    #     qname = uuid.uuid4().hex
+    #     logname = uuid.uuid4().hex
+    #     hostname = uuid.uuid4().hex
+    #     job_name = uuid.uuid4().hex
+    #     account = uuid.uuid4().hex
+    #     t = self.control._get_token_from_cache(
+    #         "prolog")['token']
+    #     u = create_parameters()['user_credentials']
+    #     u.update({'job': {'id': jobid,
+    #                       'user_name': user,
+    #                       'spool': spool,
+    #                       'queue_name': qname,
+    #                       'host_name': hostname,
+    #                       'log_name': logname,
+    #                       'job_name': job_name,
+    #                       'account_name': account}
+    #               }
+    #              )
+    #     token = self.control.authenticate(admin_token=t,
+    #                                       session_data=u)
+    #     self.assertIsNotNone(token)
+    #     job_info = self.control.get_job_from_token(token)
+    #     self.assertEqual(jobid, job_info['id'])
+    #     self.assertEqual(spool, job_info['spool'])
+    #     self.assertEqual(user, job_info['user_name'])
+    #     self.assertEqual(qname, job_info['queue_name'])
+    #     self.assertEqual(hostname, job_info['host_name'])
+    #     self.assertEqual(job_name, job_info['job_name'])
+    #     self.assertEqual(logname, job_info['log_name'])
+    #     self.assertEqual(account, job_info['account_name'])
+    #     self.assertNotIn('cgroup', job_info)
+    #     self.control.remove_token_from_cache(token)
 
 
     @mock.patch('bdocker.common.utils.check_user_credentials')
