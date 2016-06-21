@@ -59,20 +59,13 @@ class ServerController(object):
         utils_server.validate(data, required)
         admin_token = data['admin_token']
         session_data = data['user_credentials']
-        try:
-            job_id = session_data['job']['id']
-            job_spool = session_data['job']['spool']
-        except KeyError as e:
-            message = ("Job information error %s"
-                       % e.message)
-            raise exceptions.ParseException(message=message)
         user_token = self.credentials_module.authenticate(
             admin_token, session_data
         )
         LOG.info("Authentication. Token: %s" % user_token)
 
         batch_info = self.batch_module.conf_environment(
-            job_id, job_spool
+            session_data
         )
         self.credentials_module.set_token_batch_info(user_token, batch_info)
         LOG.info("Batch system configured")

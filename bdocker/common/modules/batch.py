@@ -73,6 +73,7 @@ class SGEAccountingController(BatchMasterController):
                                                 "--set_job_accounting()--")
 
 
+
 class BatchWNController(object):
 
     def __init__(self, conf, accounting_conf):
@@ -82,6 +83,7 @@ class BatchWNController(object):
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
+        self.default_acc_file = ".bdocker_accounting"
         try:
             # TODO(jorgesece): host should have http or https
             endpoint = 'http://%s:%s' % (
@@ -96,13 +98,20 @@ class BatchWNController(object):
                                                     " server configuration failed"
                                                     )
 
-    def get_job_info(self):
-        raise exceptions.NoImplementedException("Get job information"
-                                       "method")
-
-    def conf_environment(self, job_id, spool_dir):
+    def conf_environment(self, session_data, data=None):
         if self.enable_cgroups:
-            parent_pid = utils.read_file("%s/pid" % spool_dir)
+            try:
+                job_id = session_data['job']['id']
+                job_spool = session_data['job']['spool']
+                job_home = session_data['home']
+                path = "%s/%s_%s" % (job_home,
+                                     self.default_acc_file,
+                                     job_id)
+            except KeyError as e:
+                message = ("Job information error %s"
+                           % e.message)
+                raise exceptions.ParseException(message=message)
+            parent_pid = utils.read_file("%s/pid" % job_spool)
             cgroups_utils.create_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup,
@@ -111,11 +120,15 @@ class BatchWNController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
+            # TODO(jorgesece): write in file .bdocker_N_accounting
+            # save that file url in token file
+            # self._create_accounting_file(path, data)
+
             # print "father %s" % os.getpid()
-            # self._launch_job_control(os.getpid(), cgroup_job)
+            # self._launch_job_control(job_id, cgroupt)
             # print "father? %s" % os.getpid()
             # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
-            batch_info = {"cgroup": cgroup_job}
+            batch_info = {"cgroup": cgroup_job, "acc_file": path}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
                      % (self.parent_group, cgroup_job))
@@ -124,9 +137,7 @@ class BatchWNController(object):
             batch_info = None
         return batch_info
 
-    def _launch_job_control(self, job_id, cgroup, cuotas=None):
-        # todo(jorgesece): protect the file accounting for several access
-        retCode = job_id
+    def _launch_job_control(self, job_id, file_path, cuotas=None):
         try:
             pid = os.fork()
             if pid > 0:
@@ -137,16 +148,18 @@ class BatchWNController(object):
             os.exit(1)
         os.setsid()
         while(true):
-            time.sleep(10)
-            acc = cgroups_utils.get_accounting(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup)
-            # TODO(jorgesece): storage accounting
-
+            try:
+                time.sleep(10)
+                acc = cgroups_utils.get_accounting(
+                    job_id,
+                    self.parent_group,
+                    root_parent=self.root_cgroup)
+                self._update_accounting_file(file_path, acc)
+            except CgroupException as e:
+                return 0
         os._exit(0)
 
-    def clean_environment(self, job_id):
+    def clean_environment(self, job_id, file_path="/tmp"):
         if self.enable_cgroups:
             cgroups_utils.delete_tree_cgroups(job_id,
                                 self.parent_group,
@@ -163,19 +176,34 @@ class BatchWNController(object):
         raise exceptions.NoImplementedException(
             message="Still not supported")
 
+    def _read_accounting_file(self, path):
+        return utils.read_yaml_file(path)
+
+    def _update_accounting_file(self, path, accounting):
+        utils.update_yaml_file(path, accounting)
+
+    def _create_accounting_file(self, path, env_data):
+        if not env_data:
+            data = ""
+        utils.write_yaml_file(path, data)
+
+    def create_accounting(self, job):
+        raise exceptions.NoImplementedException(
+                message="Still not supported")
+
     def notify_accounting(self, admin_token, host_name, job_id):
         raise exceptions.NoImplementedException(
                 message="Still not supported")
+
+    def get_job_info(self):
+        raise exceptions.NoImplementedException("Get job information"
+                                       "method")
 
 
 class SGEController(BatchWNController):
 
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
-        self.bdocker_accounting = self.conf.get("bdokcer_accounting",
-                                                "/etc/bdocker_accounting")
-        self.sge_accounting = self.conf.get("sge_accounting",
-                                            "/opt/sge/default/common/accounting")
 
     def create_accounting(self, job):
 
@@ -212,6 +240,8 @@ class SGEController(BatchWNController):
 
     def notify_accounting(self, admin_token, job_info):
         if self.enable_cgroups:
+            # TODO(jorgesece): read .bdocker_N_accounting
+            # job_acc = self._read_accounting_file()
             acc = self.create_accounting(job_info)
             path = "/set_accounting"
             parameters = {'admin_token': admin_token,
@@ -219,6 +249,7 @@ class SGEController(BatchWNController):
             results = self.request_control.execute_post(
                 path=path, parameters=parameters
             )
+            # TODO(jorgesece): delete .bdocker_N_accounting
             return results
         else:
             raise exceptions.NoImplementedException(

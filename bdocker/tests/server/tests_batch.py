@@ -87,6 +87,7 @@ class TestSGEController(testtools.TestCase):
     def test_conf_environment(self, m_cre, m_read):
         job_id = uuid.uuid4().hex
         spool_dir = "/foo"
+        home = "/foo"
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {"cgroups_dir": "/foo",
@@ -94,8 +95,16 @@ class TestSGEController(testtools.TestCase):
                 "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         controller = batch.SGEController(conf, self.acc_conf)
-        batch_info = controller.conf_environment(job_id, spool_dir)
-        expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
+        job_info = {"home": home,
+                    "job": {"id": job_id,
+                            "spool": spool_dir
+                            }
+                    }
+        batch_info = controller.conf_environment(job_info)
+        expected_cgroup = {
+            "cgroup": "%s/%s" % (parent_dir, job_id),
+            "acc_file": "%s/.bdocker_accounting_%s" % (home, job_id)
+        }
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
@@ -110,6 +119,7 @@ class TestSGEController(testtools.TestCase):
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
     def test_conf_environment_no_root_dir(self, m_cre,  m_read):
         spool_dir = "/foo"
+        home = "/foo"
         job_id = uuid.uuid4().hex
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
@@ -117,9 +127,17 @@ class TestSGEController(testtools.TestCase):
             "enable_cgroups": True,
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
+        job_info = {"home": home,
+            "job": {"id": job_id,
+                    "spool": spool_dir
+                    }
+            }
         controller = batch.SGEController(conf, self.acc_conf)
-        batch_info = controller.conf_environment(job_id, spool_dir)
-        expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
+        batch_info = controller.conf_environment(job_info)
+        expected_cgroup = {
+            "cgroup": "%s/%s" % (parent_dir, job_id),
+            "acc_file": "%s/.bdocker_accounting_%s" % (home, job_id)
+        }
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
