@@ -34,11 +34,9 @@ utils_server.set_error_handler(app)
 
 @app.route('/set_accounting', methods=['POST'])
 def set_job_accounting():
-    """Configure bdocker user environment.
-      It creates the token and configure the batch
-      system.
+    """Register job accounting in the master
 
-    :return: user_token
+    :return: 201
     """
     data = request.get_json()
     try:

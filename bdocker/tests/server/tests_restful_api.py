@@ -31,31 +31,31 @@ class TestAccRESTAPI(testtools.TestCase):
 
 
     @mock.patch("bdocker.common.utils.load_configuration_from_file")
-    @mock.patch.object(controller.ServerController, "__init__")
+    @mock.patch.object(controller.AccountingServerController, "__init__")
     def setUp(self, m_conf, m_load):
         super(TestAccRESTAPI, self).setUp()
         m_conf.return_value = None
         from bdocker.server import accounting_rest_api
         self.app = accounting_rest_api.app
 
-    # @mock.patch.object(controller.ServerController, "master_account")
-    # def test_master_account(self, m):
-    #     pass
-        # m.return_value = 'tokenresult'
-        # parameters = {"admin_token": "tokennnnnn",
-        #               "user_credentials":
-        #                   {'uid': 'uuuuuuuuuuiiiidddddd',
-        #                    'gid': 'gggggggggguuuiiidd',
-        #                    'job': {'id':'gggggggggguuuiiidd',
-        #                            'spool':'/faa'}
-        #                    }
-        #               }
-        # body = make_body(parameters)
-        # result = webob.Request.blank("/credentials",
-        #                              method="POST",
-        #                              content_type="application/json",
-        #                              body=body).get_response(self.app)
-        # self.assertEqual(201, result.status_code)
+    @mock.patch.object(controller.AccountingServerController, "set_job_accounting")
+    def test_set_job(self, m):
+        pass
+        m.return_value = 'tokenresult'
+        parameters = {"admin_token": "tokennnnnn",
+                      "user_credentials":
+                          {'uid': 'uuuuuuuuuuiiiidddddd',
+                           'gid': 'gggggggggguuuiiidd',
+                           'job': {'id':'gggggggggguuuiiidd',
+                                   'spool':'/faa'}
+                           }
+                      }
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/set_accounting",
+                                     method="POST",
+                                     content_type="application/json",
+                                     body=body).get_response(self.app)
+        self.assertEqual(201, result.status_code)
 
 
 class TestWorkingNodeRESTAPI(testtools.TestCase):
