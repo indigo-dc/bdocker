@@ -25,10 +25,10 @@ class CommandController(object):
 
     def __init__(self, endpoint=None):
         conf = utils_common.load_configuration_from_file()
-        batch_module = modules.load_batch_module(conf)
+        self.batch_module = modules.load_batch_module(conf)
         try:
-            job_info = batch_module.get_job_info()
-            if not endpoint:
+            job_info = self.batch_module.get_job_info()
+            if not endpoint:  # TODO(jorgesece): host should have http or https
                 endpoint = 'http://%s:%s' % (
                     conf['server']['host'],
                     conf['server']['port']
@@ -38,14 +38,14 @@ class CommandController(object):
                 cred_info.get("token_client_file",
                               TOKEN_FILE_NAME)
             )
-            self.job_id = job_info["job_id"]
-            self.spool_dir = job_info["spool"]
+            self.job_info = job_info
+            self.job_id = job_info["id"]
             self.token_file = "%s/%s_%s" % (
-                job_info['home'],
+                job_info['home'],  # TODO(jorgesece): pop it
                 self.defaul_token_name,
                 self.job_id
             )
-            self.user_name = job_info['user']
+            self.user_name = job_info['user_name']
             self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except Exception as e:
@@ -66,8 +66,7 @@ class CommandController(object):
             )
         else:
             user_info = utils_cli.get_user_credentials(self.user_name)
-        user_info.update({'job': {'id': self.job_id,
-                          'spool': self.spool_dir}})
+        user_info.update({'job': self.job_info})
         parameters = {"admin_token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         utils_cli.write_user_credentials(token, self.token_file,
@@ -88,8 +87,7 @@ class CommandController(object):
             )
         else:
             user_info = utils_cli.get_user_credentials(self.user_name)
-        user_info.update({'job': {'id': self.job_id,
-                          'spool': self.spool_dir}})
+        user_info.update({'job': self.job_info})
         parameters = {"admin_token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         utils_cli.write_user_credentials(token, self.token_file,
@@ -176,7 +174,11 @@ class CommandController(object):
         path = "/notify_accounting"
         admin_token = utils_cli.get_admin_token(self.token_storage)
         token = utils_cli.token_parse(token, self.token_file)
-        parameters = {"admin_token": admin_token, 'token': token}
+        acc = self.batch_module.create_accounting(self.job_id)
+        parameters = {"admin_token": admin_token,
+                      'token': token,
+                      'accounting': acc
+                      }
         self.control.execute_put(path=path, parameters=parameters)
         return token
 

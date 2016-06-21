@@ -19,6 +19,7 @@ import time
 
 from bdocker.common import cgroups_utils
 from bdocker.common import exceptions
+from bdocker.common import request
 from bdocker.common import utils
 
 LOG = logging.getLogger(__name__)
@@ -49,29 +50,51 @@ class SGEAccountingController(BatchMasterController):
                           " Using %s by default. " %
                           self.bdocker_accounting)
 
-    def update_accounting(self, host_name, job_id, cpu, memory):
+    def _get_sge_job_accounting(self, queue_name, host_name, job_id):
+        any_word = "[^:]+"
+        job_string = "%s:%s:%s:%s:%s:%s:" % (
+            queue_name, host_name, any_word,
+            any_word, any_word,job_id
+        )
+        job = utils.find_line(self.sge_accounting, job_string)
+        return job.split(":")
+
+    def _update_sge_accounting(self, string_list):
+        job_string = ":".join(string_list)
+        utils.add_to_file(self.bdocker_accounting, job_string)
+
+    def set_job_accounting(self, accounting):
+        try:
+            utils.add_to_file(self.bdocker_accounting, accounting)
+            return []
+        except KeyError as e:
+            raise exceptions.BatchException(message=None, e=e)
         raise exceptions.NoImplementedException("Needs to be implemented"
-                                                "--update_accounting()--")
-        # # TODO(jorgesece): read char from job_id
-        # full_string = utils.read_file(self.sge_accounting)
-        # string_splitted = full_string.split(":")
-        # if cpu:   # position 37
-        #     string_splitted[36] = cpu
-        # if memory:   # position 38
-        #     string_splitted[37] = memory
-        #
-        # utils.add_to_file(self.bdocker_accounting, string_splitted)
-        # # todo(jorgesece): write the line in file
+                                                "--set_job_accounting()--")
 
 
 class BatchWNController(object):
 
-    def __init__(self, conf):
+    def __init__(self, conf, accounting_conf):
+        self.conf = conf
         self.enable_cgroups = conf.get("enable_cgroups",
                                        False)
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
+        try:
+            # TODO(jorgesece): host should have http or https
+            endpoint = 'http://%s:%s' % (
+                accounting_conf['host'],
+                accounting_conf['port']
+            )
+            self.request_control = request.RequestController(
+                endopoint=endpoint
+            )
+        except Exception as e:
+            raise exceptions.ConfigurationException("Accounting"
+                                                    " server configuration failed"
+                                                    )
 
     def get_job_info(self):
         raise exceptions.NoImplementedException("Get job information"
@@ -112,15 +135,15 @@ class BatchWNController(object):
         except OSError, e:
             raise exceptions.BatchException("fork failed: %d (%s)" % (e.errno, e.strerror))
             os.exit(1)
-
-        # Configure the child processes environment
-        #os.chdir("/")
         os.setsid()
-        #os.umask(0)
-        print "child %s" % os.getpid()
-        print "sleeping..."
-        time.sleep(10)
-        print "...waking up"
+        while(true):
+            time.sleep(10)
+            acc = cgroups_utils.get_accounting(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup)
+            # TODO(jorgesece): storage accounting
+
         os._exit(0)
 
     def clean_environment(self, job_id):
@@ -129,39 +152,77 @@ class BatchWNController(object):
                                 self.parent_group,
                                 root_parent=self.root_cgroup)
 
-    def write_accounting(self, job_id):
+    def get_accounting(self, job_id):
         if self.enable_cgroups:
             accounting = cgroups_utils.get_accounting(
                 job_id,
                 self.parent_group,
                 root_parent=self.root_cgroup
             )
-        # TODO(jorgesece): write in file
-
-    def check_accounting(self, job_id, job_batch_info):
+            return accounting
         raise exceptions.NoImplementedException(
             message="Still not supported")
 
-    def notify_accounting(self, job_id):
-        if self.enable_cgroups:
-            acc = cgroups_utils.get_accounting(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup)
-
-        else:
-            raise exceptions.NoImplementedException(
+    def notify_accounting(self, admin_token, host_name, job_id):
+        raise exceptions.NoImplementedException(
                 message="Still not supported")
 
 
 class SGEController(BatchWNController):
 
-    def __init__(self, conf):
-        super(SGEController, self).__init__(conf=conf)
-        self.bdocker_accounting = conf.get("bdokcer_accounting",
-                                            "/etc/bdocker_accounting")
-        self.sge_accounting = conf.get("sge_accounting",
+    def __init__(self, *args, **kwargs):
+        super(SGEController, self).__init__(*args, **kwargs)
+        self.bdocker_accounting = self.conf.get("bdokcer_accounting",
+                                                "/etc/bdocker_accounting")
+        self.sge_accounting = self.conf.get("sge_accounting",
                                             "/opt/sge/default/common/accounting")
+
+    def create_accounting(self, job):
+
+        # acc = self.get_accounting(job_id)
+        job_id = job['id']
+        qname = job['queue_name']
+        hostname = job['host_name']
+        logname = job['log_name_name']
+        job_name = job['job_name_name']
+        account = job['account_name']
+        cpu_usage = job.get('cpu_usage', None)  # position 37
+        memory_usage = job.get('memory_usage', None)  # position 38
+        io_usage = job.get('io_usage', "0")  # position 39
+        priority = '0'
+        group = "0"  # we do not need it for bdocker
+        submission_time = '0'  # position 9
+        start_time = "0"  # position 10
+        end_time = '0'  # position 11
+        failed = "0"  # position 12. Set 37 in case we kill it
+        status = "0"  # pos 13. 0 for ok, 137 time end
+        ru_wallclock = "0"  # end_time - start_time  # pos 14
+
+        full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
+                       ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+                       ":%s:%s:%s"
+                       ":0:0:0:0:0:0" %
+                       (qname, hostname, group, logname, job_name,
+                        job_id, account, priority,
+                        submission_time, start_time, end_time,
+                        failed, status,
+                        ru_wallclock, cpu_usage, memory_usage, io_usage))
+
+        return full_string
+
+    def notify_accounting(self, admin_token, job_info):
+        if self.enable_cgroups:
+            acc = self.create_accounting(job_info)
+            path = "/set_accounting"
+            parameters = {'admin_token': admin_token,
+                          'accounting': acc}
+            results = self.request_control.execute_post(
+                path=path, parameters=parameters
+            )
+            return results
+        else:
+            raise exceptions.NoImplementedException(
+                message="Still not supported")
 
     def get_job_info(self):
         job_id = os.getenv(
@@ -172,49 +233,24 @@ class SGEController(BatchWNController):
             'USER', None)
         spool_dir = os.getenv(
             "SGE_JOB_SPOOL_DIR", None)
+        qname = os.getenv(
+            'QUEUE', None)
+        hostname = os.getenv(
+            'HOSTNAME', None)  # only available in prolog
+        logname = os.getenv(
+            'SGE_O_LOGNAME', None)
+        job_name = os.getenv(
+            'JOB_NAME', None)
+        account = os.getenv(
+            'SGE_ACCOUNT', None)
         return {'home': home,
-                'job_id': job_id,
-                'user': user,
-                'spool': spool_dir
+                'id': job_id,
+                'user_name': user,
+                'spool': spool_dir,
+                'queue_name': qname,
+                'host_name': hostname,
+                'log_name': logname,
+                'job_name': job_name,
+                'account_name': account
                 }
 
-    def create_accounting_file(self):
-        # Create in prolog
-
-        # docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:
-        # 1465486332:1465486332:0:127:0:0.053201:0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:
-        # 72:0:0:0:242:55:NONE:sysusers:NONE:1:0:0.000000:0.000000:0.000000:-U sysusers:0.000000:
-        # NONE:0.000000:0:0
-        qname = os.getenv(
-            'QUEUE')
-        hostname = os.getenv(
-            'HOSTNAME')  # only available in prolog
-        group = "0"  # we do not need it for bdocker
-        logname = os.getenv(
-            'SGE_O_LOGNAME')
-        job_name = os.getenv(
-            'JOB_NAME')
-        job_id = os.getenv(
-            'JOB_ID')
-        account = os.getenv(
-            'SGE_ACCOUNT')
-        priority = '0'
-        submission_time = '0'  # position 9
-        start_time = int(time.time())  # position 10
-        end_time = 'get time end from epoch'  # position 11
-        failed = "0"  # position 12. Set 37 in case we kill it
-        status = "get status"  # pos 13. 0 for ok, 137 time end
-        ru_wallclock = end_time - start_time  # pos 14
-        cpu = "get from cgproups" # position 37
-        memory = "0" # position 38
-        io = "0" # position 39
-
-        full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
-                       ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-                       ":%s:%s:%s"
-                       ":0:0:0:0:0:0" %
-                       (qname, hostname, group, logname, job_name, job_id, account, priority,
-                        submission_time, start_time, end_time, failed, status,
-                        ru_wallclock, cpu, memory, io))
-
-        utils.add_to_file(self.accounting_file, full_string)

@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import io
 import mock
 import os
 import testtools
@@ -21,12 +22,17 @@ import uuid
 
 from bdocker.common.modules import batch
 from bdocker.common import exceptions
+from bdocker.common import request
 
 
 class TestSGEAccController(testtools.TestCase):
     """Test ACCOUNTING SGE Batch controller."""
     def setUp(self):
         super(TestSGEAccController, self).setUp()
+        conf = {"bdocker_accounting": "/foo",
+        "sge_accounting": "/baa",
+        }
+        self.controller = batch.SGEAccountingController(conf)
 
     def test_accounting_configuration(self):
         conf = {"bdocker_accounting": "/foo",
@@ -44,14 +50,28 @@ class TestSGEAccController(testtools.TestCase):
         self.assertEqual(bdocker_accounting, controller.bdocker_accounting)
         self.assertEqual(sge_accounting, controller.sge_accounting)
 
-    def test_update_accounting(self):
-        conf = {"bdocker_accounting": "/foo",
-                "sge_accounting": "/baa",
-                }
-        controller = batch.SGEAccountingController(conf)
-        self.assertRaises(exceptions.NoImplementedException,
-                          controller.update_accounting,
-                          None, None, None,None)
+    @mock.patch("__builtin__.open")
+    def test_get_sge_job_accounting(self, mock_open):
+        line = ("docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:"
+                "1465486332:1465486332:0:127:0:0.053201:0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:"
+                "72:0:0:0:242:55:NONE:sysusers:NONE:1:0:0.000000:0.000000:0.000000:-U sysusers:0.000000:"
+                "NONE:0.000000:0:0"
+                )
+        m_class = mock.MagicMock()
+        m_class.readline.return_value = line
+        mock_open.return_value = m_class
+        queue = "docker"
+        host_name= "ge-wn03.novalocal"
+        job_id = "81"
+        out = self.controller._get_sge_job_accounting(queue, host_name, job_id)
+        expected = line.split(":")
+        self.assertEqual(expected, out)
+
+    @mock.patch("bdocker.common.utils.add_to_file")
+    def test_update_accounting(self, m):
+        controller = batch.SGEAccountingController(mock.MagicMock())
+        out = controller.set_job_accounting(None)
+        self.assertEqual([], out)
 
 
 class TestSGEController(testtools.TestCase):
@@ -59,6 +79,8 @@ class TestSGEController(testtools.TestCase):
     def setUp(self):
         super(TestSGEController, self).setUp()
         self.parent_path = "/systemd/user/"
+        self.acc_conf = {"host": "/foo",
+                         "port": "11"}
 
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
@@ -71,7 +93,7 @@ class TestSGEController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
-        controller = batch.SGEController(conf)
+        controller = batch.SGEController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_id, spool_dir)
         expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
         self.assertEqual(expected_cgroup, batch_info)
@@ -95,7 +117,7 @@ class TestSGEController(testtools.TestCase):
             "enable_cgroups": True,
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
-        controller = batch.SGEController(conf)
+        controller = batch.SGEController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_id, spool_dir)
         expected_cgroup = {"cgroup": "%s/%s" % (parent_dir, job_id)}
         self.assertEqual(expected_cgroup, batch_info)
@@ -117,7 +139,7 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "parent_cgroup": "/bdocker.test"}
         m_read.return_value = parent_id
-        controller = batch.SGEController(conf)
+        controller = batch.SGEController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_id, spool_dir)
         self.assertIsNone(batch_info)
         self.assertIs(False, m_read.called)
@@ -129,7 +151,7 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.SGEController(conf)
+        controller = batch.SGEController(conf, self.acc_conf)
         controller.clean_environment(job_id,)
         self.assertIs(True, m_del.called)
         m_del.assert_called_with(
@@ -143,23 +165,115 @@ class TestSGEController(testtools.TestCase):
         job_id = uuid.uuid4().hex
         conf = {"cgroups_dir": "/foo",
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.SGEController(conf)
+        controller = batch.SGEController(conf, self.acc_conf)
         controller.clean_environment(job_id)
         self.assertIs(False, m_del.called)
 
-    def test_get_job_info(self):
+    @mock.patch("os.getenv")
+    def test_get_job_info(self, m):
         job_id = uuid.uuid4().hex
         user = uuid.uuid4().hex
+        home = "/home/rrr"
         spool_dir = "/foo"
-        os.environ["JOB_ID"] = job_id
-        home = os.getenv("HOME")
-        os.environ["USER"] = user
-        os.environ["SGE_JOB_SPOOL_DIR"] = spool_dir
+        queue_name = "docker"
+        host_name = "ge-wn03.novalocal"
+        log_name = "jorgesece"
+        job_name = "test.sh01"
+        account = "sge"
+        m.side_effect = [
+            job_id,
+            home,
+            user,
+            spool_dir,
+            queue_name,
+            host_name,
+            log_name,
+            job_name,
+            account
+        ]
         expected = {'home': home,
-                    'job_id': job_id,
-                    'user': user,
+                    'id': job_id,
+                    'queue_name': queue_name,
+                    'host_name': host_name,
+                    'log_name': log_name,
+                    'job_name': job_name,
+                    'account_name': account,
                     'spool': spool_dir,
+                    'user_name': user
                     }
-        out = batch.SGEController({}).get_job_info()
-        self.assertEqual(out, expected)
+        out = batch.SGEController({}, self.acc_conf).get_job_info()
+        self.assertEqual(expected, out)
 
+    @mock.patch.object(request.RequestController, "execute_post")
+    @mock.patch.object(batch.SGEController, "create_accounting")
+    def test_notify_accounting(self, m_acc, m_post):
+        job_id = uuid.uuid4().hex
+        admin_token = uuid.uuid4().hex
+        memory_usage = "1000"
+        accounting = "/foo"
+        m_acc.return_value = accounting
+        job = {"field1": memory_usage,
+               "id": job_id}
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test"}
+        controller = batch.SGEController(conf, self.acc_conf)
+        controller.notify_accounting(admin_token,
+                                     job)
+        self.assertIs(True, m_post.called)
+        m_post.assert_called_with(
+            path="/set_accounting",
+            parameters={"admin_token": admin_token,
+                        "accounting": accounting
+                        }
+        )
+
+    def test_notify_accounting_nocgroup(self):
+        conf = {
+                "enable_cgroups": False,
+                }
+        controller = batch.SGEController(conf, self.acc_conf)
+        self.assertRaises(exceptions.NoImplementedException,
+                          controller.notify_accounting,
+                          None,
+                          None)
+
+    @mock.patch("os.getenv")
+    def test_create_accounting(self, m):
+        queue_name = "docker"
+        host_name = "ge-wn03.novalocal"
+        log_name = "jorgesece"
+        job_id = "81"
+        job_name = "test.sh01"
+        account = "sge"
+        cpu_usage = "33"
+        memory_usage = "1000"
+        io_usage = "0.00"
+        expected = ("%s:%s:0:%s:%s:%s:%s:0:0:"
+                "0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+                "0:0:0:0:0:0:0:0:0:0:0:%s:%s:%s:0:0:"
+                "0:0:0:0"
+                % (queue_name, host_name, log_name, job_name, job_id, account,
+                   cpu_usage, memory_usage, io_usage)
+                )
+        controller = batch.SGEController({}, self.acc_conf)
+        m.side_effect = [queue_name,
+                         host_name,
+                         log_name,
+                         job_name,
+                         job_id,
+                         account
+                         ]
+        job = {'id': job_id,
+               'queue_name': queue_name,
+               'host_name': host_name,
+               'log_name_name': log_name,
+               'job_name_name': job_name,
+               'account_name': account,
+               'cpu_usage': cpu_usage,
+               'memory_usage': memory_usage,
+               'io_usage': io_usage
+               }
+        out = controller.create_accounting(job)
+
+        self.assertEqual(expected, out)

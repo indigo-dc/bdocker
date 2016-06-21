@@ -47,21 +47,15 @@ class TestAccountingServerController(testtools.TestCase):
         self.controller = controller.AccountingServerController(conf)
 
     @mock.patch.object(credentials.UserController, "authorize_admin")
-    @mock.patch.object(batch.SGEAccountingController, "update_accounting")
+    @mock.patch.object(batch.SGEAccountingController, "set_job_accounting")
     def test_set_job_accounting(self, m, m_au):
         token = uuid.uuid4().hex
-        hostname = "/foo"
-        job_id = uuid.uuid4().hex
-        cpu = uuid.uuid4().hex
-        mem = uuid.uuid4().hex
+        accounting = uuid.uuid4().hex
         m_au.return_value = token
         expected = uuid.uuid4().hex
         m.return_value = expected
         data = {'admin_token': token,
-                    'hostname': hostname,
-                    'job_id': job_id,
-                    'cpu_usage': cpu,
-                    'memory_usage': mem}
+                'accounting': accounting}
 
         result = self.controller.set_job_accounting(data)
 
@@ -454,8 +448,10 @@ class TestServerController(testtools.TestCase):
 
     @mock.patch.object(credentials.UserController, "get_job_from_token")
     @mock.patch.object(credentials.UserController, "authorize_admin")
+    @mock.patch.object(batch.SGEController, "get_accounting")
+    @mock.patch.object(credentials.UserController, "update_job")
     @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_notify_accounting(self, macc, mad, mjob):
+    def test_notify_accounting(self, m_not, m_up, m_acc, mad, mjob):
         c1 = uuid.uuid4().hex
         parameters = {"token": uuid.uuid4().hex,
                       'admin_token': uuid.uuid4().hex}

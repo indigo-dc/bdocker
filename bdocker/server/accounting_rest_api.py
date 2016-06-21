@@ -32,8 +32,8 @@ LOG = logging.getLogger(__name__)
 utils_server.set_error_handler(app)
 
 
-@app.route('/accounting', methods=['POST'])
-def accounting_flush():
+@app.route('/set_accounting', methods=['POST'])
+def set_job_accounting():
     """Configure bdocker user environment.
       It creates the token and configure the batch
       system.

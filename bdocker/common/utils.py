@@ -16,6 +16,7 @@
 import ConfigParser
 import os
 import pwd
+import re
 import yaml
 
 from bdocker.common import exceptions
@@ -136,7 +137,7 @@ def load_configuration_from_file(path=None):
         validate_config(conf)
     except exceptions.ParseException as e:
         raise exceptions.ConfigurationException(
-            '"%s" nor found'
+            '"%s" not found'
             % e.message)
     except BaseException as e:
         raise exceptions.ConfigurationException(
@@ -175,6 +176,23 @@ def read_file(file_path):
     token = input.read().rstrip('\n')
     input.close()
     return token
+
+
+def find_line(file_path, search_str):
+    found = None
+    input = open(file_path,'r')
+    line = input.readline()
+    # Loop until EOF
+    while line != '' :
+        # Search for string in line
+        index = re.findall(search_str, line)
+        if index > 0:
+            return line
+        # Read next line
+        line = input.readline()
+    # Close the files
+    input.close()
+    return found
 
 
 def add_to_file(file_path, data):

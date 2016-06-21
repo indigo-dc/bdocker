@@ -29,24 +29,16 @@ class AccountingServerController(object):
         self.batch_module = modules_common.load_batch_accounting_module(conf)
 
     def set_job_accounting(self, data):
-        """ Process the accounting file using the incoming data
-        :return: job
+        """ Update the accounting file using the incoming data
+        :return: empty
         """
         required = {'admin_token',
-                    'hostname',
-                    'job_id',
-                    'cpu_usage',
-                    'memory_usage'}
+                    "accounting"}
         utils_server.validate(data, required)
         admin_token = data['admin_token']
-        hostname = data['hostname']
-        job_id = data['job_id']
-        cpu_usage = data['cpu_usage']
-        memory_usage = data['memory_usage']
+        accounting = data["accounting"]
         self.credentials_module.authorize_admin(admin_token)
-        data = self.batch_module.update_accounting(
-            hostname, job_id, cpu_usage, memory_usage
-        )
+        data = self.batch_module.set_job_accounting(accounting)
         return data
 
 
@@ -66,16 +58,16 @@ class ServerController(object):
         required = {'admin_token', 'user_credentials'}
         utils_server.validate(data, required)
         admin_token = data['admin_token']
-        user = data['user_credentials']
+        session_data = data['user_credentials']
         try:
-            job_id = user["job"]['id']
-            job_spool = user['job']['spool']
+            job_id = session_data['job']['id']
+            job_spool = session_data['job']['spool']
         except KeyError as e:
             message = ("Job information error %s"
                        % e.message)
             raise exceptions.ParseException(message=message)
         user_token = self.credentials_module.authenticate(
-            admin_token, user
+            admin_token, session_data
         )
         LOG.info("Authentication. Token: %s" % user_token)
 
@@ -95,8 +87,8 @@ class ServerController(object):
         utils_server.validate(data, required)
         try:
             token = data['admin_token']
-            user = data['user_credentials']
-            user_token = self.credentials_module.authenticate(token, user)
+            session_data = data['user_credentials']
+            user_token = self.credentials_module.authenticate(token, session_data)
             LOG.info("Authentication. Token: %s" % user_token)
             return user_token
         except Exception as e:
@@ -310,7 +302,10 @@ class ServerController(object):
         self.credentials_module.authorize_admin(admin_token)
         token = data['token']
         job = self.credentials_module.get_job_from_token(token)
-        self.batch_module.notify_accounting(job['id'])
+        accounting = self.batch_module.get_accounting(job['id'])
+        job.update(accounting)
+        self.credentials_module.update_job(token, job)
+        self.batch_module.notify_accounting(admin_token, job)
 
 
     ########################

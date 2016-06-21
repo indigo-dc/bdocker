@@ -58,10 +58,8 @@ class UserController(object):
             'home_dir': user_info['home']
         }
         if 'job' in user_info:
-            token_content['job'] = {
-                    "id": user_info['job']['id'],
-                    "spool": user_info['job']['spool']
-                }
+            token_content['job'] = user_info['job']
+
         new_token = {token: token_content}
         self.token_store = utils_common.read_yaml_file(
             self.path
@@ -85,7 +83,7 @@ class UserController(object):
         self.token_store.update({token: current_token})
         self.save_token_file()
 
-    def authenticate(self, admin_token, user_data):
+    def authenticate(self, admin_token, session_data):
         """Authenticates a user in the system.
 
         Creates a token record. It could be invoked by the administrator
@@ -94,9 +92,9 @@ class UserController(object):
         :param user_data: array of element to be updated
         """
         self.authorize_admin(admin_token)
-        utils_common.check_user_credentials(user_data)
+        utils_common.check_user_credentials(session_data)
         try:
-            token = self._set_token(user_data)
+            token = self._set_token(session_data)
         except Exception as e:
             raise exceptions.UserCredentialsException(
                 "Invalid user information")
@@ -170,8 +168,6 @@ class UserController(object):
         else:
             current_token["containers"] = [container_id]
         self._update_token(token, current_token)
-        # todo: register in the file, it is needed in case
-        # the service goes down
 
     def remove_container(self, token, container_id):
         """Remove container to the token record.
@@ -264,6 +260,20 @@ class UserController(object):
             raise exceptions.UserCredentialsException(
                 "Job not found in token %s" % token)
         return token_info["job"]
+
+    def update_job(self, token, job):
+        """Update job of the token record.
+
+        :param token: token updated
+        """
+
+        current_token = self._get_token_from_cache(token)
+        if "job" not in current_token:
+            raise exceptions.UserCredentialsException(
+                "Job not found in token %s" % token)
+        current_token["job"] = job
+        self._update_token(token, current_token)
+        return current_token
 
     def set_token_batch_info(self, token, batch_info):
         """Set job information related to the batch enviroment.

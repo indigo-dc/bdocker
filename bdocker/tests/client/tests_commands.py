@@ -75,9 +75,9 @@ class TestCommands(testtools.TestCase):
         spool = "/faa"
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'job_id': job_id,
+                               'id': job_id,
                                'spool': spool,
-                               'user': user}
+                               'user_name': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
         controller = commands.CommandController()
@@ -99,9 +99,9 @@ class TestCommands(testtools.TestCase):
         job_id = 8934
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'job_id': job_id,
+                               'id': job_id,
                                 'spool': spool,
-                               'user': user}
+                               'user_name': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
@@ -240,9 +240,9 @@ class TestCommands(testtools.TestCase):
         job_id = 8934
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'job_id': job_id,
+                               'id': job_id,
                                 'spool': spool,
-                               'user': user}
+                               'user_name': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
@@ -263,14 +263,20 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.controller.utils.get_admin_token")
     @mock.patch("bdocker.client.controller.utils.token_parse")
-    def test_notify_accounting(self, m_t, m_ad, m_del):
+    @mock.patch.object(batch.SGEController, "create_accounting")
+    def test_notify_accounting(self, m_acc, m_t, m_ad, m_del):
         token = uuid.uuid4().hex
         admin_token = uuid.uuid4().hex
         m_t.return_value = token
         m_ad.return_value = admin_token
-        self.control.notify_accounting(None)
+        accounting = {"cpu": 1,
+                      "mem": 2}
+        m_acc.return_value = accounting
+        out = self.control.notify_accounting(None)
+        self.assertEqual(token, out)
         expected = {"admin_token": admin_token,
-                    "token": token}
+                    "token": token,
+                    "accounting": accounting}
         m_del.assert_called_with(path='/notify_accounting',
                                  parameters=expected)
     # def test_crendentials(self):
