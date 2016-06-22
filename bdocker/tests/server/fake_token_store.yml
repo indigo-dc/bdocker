@@ -22,6 +22,7 @@
   job: {id: 21dc94ff380e4e52a304dfa4665598ba, spool: 0d153a22e47b4105b8b4b553375c6f59}
   uid: uuuuuuuuuuiiiidddddd
 66cff009a1ca4fc8978a360eea2ed17c: {gid: gggggggggguuuiiidd, home_dir: /home, uid: uuuuuuuuuuiiiidddddd}
+7283475788c749e9b643a8981612d743: {gid: gggggggggguuuiiidd, home: /home, uid: uuuuuuuuuuiiiidddddd}
 a52f3516748a4e48a3daa8e41065fbe4:
   gid: gggggggggguuuiiidd
   home_dir: /home

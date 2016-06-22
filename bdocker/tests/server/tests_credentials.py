@@ -62,7 +62,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertIsNotNone(token)
         token_info = self.control._get_token_from_cache(token)
         self.assertEqual(u['uid'], token_info['uid'])
-        self.assertEqual(u['home'], token_info['home_dir'])
+        self.assertEqual(u['home'], token_info['home'])
         self.assertEqual(u['gid'], token_info['gid'])
         self.assertNotIn('job', token_info)
         self.control.remove_token_from_cache(token)

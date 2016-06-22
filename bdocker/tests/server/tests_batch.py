@@ -85,7 +85,8 @@ class TestSGEController(testtools.TestCase):
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEController,"_create_accounting_file")
-    def test_conf_environment(self, m_file, m_cre, m_read):
+    @mock.patch.object(batch.SGEController,"_launch_job_monitoring")
+    def test_conf_environment(self, m_lan, m_file, m_cre, m_read):
         job_id = uuid.uuid4().hex
         spool_dir = "/foo"
         home = "/foo"
@@ -119,7 +120,8 @@ class TestSGEController(testtools.TestCase):
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEController,"_create_accounting_file")
-    def test_conf_environment_no_root_dir(self, m_file, m_cre,  m_read):
+    @mock.patch.object(batch.SGEController,"_launch_job_monitoring")
+    def test_conf_environment_no_root_dir(self, m_lan, m_file, m_cre,  m_read):
         spool_dir = "/foo"
         home = "/foo"
         job_id = uuid.uuid4().hex

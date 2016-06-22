@@ -55,7 +55,7 @@ class UserController(object):
         token_content = {
             'uid': user_info['uid'],
             'gid': user_info['gid'],
-            'home_dir': user_info['home']
+            'home': user_info['home']
         }
         if 'job' in user_info:
             token_content['job'] = {

@@ -214,15 +214,16 @@ class SGEController(BatchWNController):
         out = super(SGEController, self).conf_environment(session_data)
         if out:
             try:
+                job_id = session_data['job']['id']
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
-                                     session_data['job']['id'])
+                                     job_id)
                 out.update({"acc_file": path})
                 # TODO(jorgesece): include here the creation of file
                 # save that file url in token file using acc_file
                 self._create_accounting_file(path, session_data)
                 # print "father %s" % os.getpid()
-                # self._launch_job_control(job_id, cgroupt)
+                self._launch_job_monitoring(job_id, path)
                 # print "father? %s" % os.getpid()
                 # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             except KeyError as e:
