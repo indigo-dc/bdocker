@@ -91,18 +91,6 @@ class TestServerController(testtools.TestCase):
 
         self.assertEqual(token, result)
 
-    @mock.patch.object(credentials.UserController, "authenticate")
-    def test_credentials(self, m):
-        token = uuid.uuid4().hex
-        m.return_value = token
-        data = {"admin_token": "tokennnnnn",
-                "user_credentials": "userr"
-                }
-        result = self.controller.credentials(data)
-
-        self.assertEqual(token, result)
-
-
     @mock.patch.object(docker_helper.DockerController, "pull_image")
     @mock.patch.object(credentials.UserController,
                    "authorize")

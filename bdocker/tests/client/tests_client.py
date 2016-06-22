@@ -56,21 +56,7 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "create_credentials")
-    def test_credentials(self, m_cre, m_ini):
-        m_ini.return_value = None
-        token = uuid.uuid4().hex
-        path = '/path'
-        m_cre.return_value = {"token": token, "path": path}
-        user_name = '--user=foo'
-        result = self.runner.invoke(
-            cli.bdocker, ['credentials', user_name]
-        )
-        self.assertEqual(result.exit_code, 0)
-        self.assertIsNone(result.exception)
-
-    @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "create_credentials")
+    @mock.patch.object(commands.CommandController, "configuration")
     def test_credentials_with_job(self, m_cre, m_ini):
         m_ini.return_value = None
         token = uuid.uuid4().hex
@@ -79,7 +65,7 @@ class TestCommandProject(TestCaseCommandLine):
         user_name = '--user=foo'
         job = '--jobid=9494'
         result = self.runner.invoke(
-            cli.bdocker, ['credentials', user_name, job]
+            cli.bdocker, ['configure', user_name, job]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
@@ -355,58 +341,26 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
+
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "batch_config")
-    def test_batch_config(self, m_cre, m_ini):
+    @mock.patch.object(commands.CommandController, "clean_environment")
+    def test_batch_clean(self, m_cre, m_ini):
         m_ini.return_value = None
         result = self.runner.invoke(
-            cli.bdocker, ['batch_config']
+            cli.bdocker, ['clean']
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "batch_config")
-    def test_batch_config_with_token(self, m_cre, m_ini):
+    @mock.patch.object(commands.CommandController, "clean_environment")
+    def test_clean_with_token(self, m_cre, m_ini):
         m_ini.return_value = None
         token = uuid.uuid4().hex
         m_cre.return_value = {"token": token}
         token_var = '--token=%s' % token
         result = self.runner.invoke(
-            cli.bdocker, ['batch_config', token_var]
-        )
-        self.assertEqual(result.exit_code, 0)
-        self.assertIsNone(result.exception)
-
-    @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "batch_config")
-    def test_batch_clean(self, m_cre, m_ini):
-        m_ini.return_value = None
-        result = self.runner.invoke(
-            cli.bdocker, ['batch_config']
-        )
-        self.assertEqual(result.exit_code, 0)
-        self.assertIsNone(result.exception)
-
-    @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "batch_clean")
-    def test_batch_clean(self, m_cre, m_ini):
-        m_ini.return_value = None
-        result = self.runner.invoke(
-            cli.bdocker, ['batch_clean']
-        )
-        self.assertEqual(result.exit_code, 0)
-        self.assertIsNone(result.exception)
-
-    @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "batch_clean")
-    def test_batch_clean_with_token(self, m_cre, m_ini):
-        m_ini.return_value = None
-        token = uuid.uuid4().hex
-        m_cre.return_value = {"token": token}
-        token_var = '--token=%s' % token
-        result = self.runner.invoke(
-            cli.bdocker, ['batch_clean', token_var]
+            cli.bdocker, ['clean', token_var]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)

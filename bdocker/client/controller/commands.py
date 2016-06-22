@@ -74,27 +74,6 @@ class CommandController(object):
                                          user_info['gid'])
         return {"token": token, "path": self.token_file}
 
-    def create_credentials(self, user_name=None, jobid=None):
-        path = "/credentials"
-        admin_token = utils_cli.get_admin_token(self.token_storage)
-        if user_name:
-            self.user_name = user_name
-            user_info = utils_cli.get_user_credentials(self.user_name)
-            self.token_file = "%s/%s_%s" % (
-                user_info.get("home"),
-                self.defaul_token_name,
-                self.job_id
-            )
-        else:
-            user_info = utils_cli.get_user_credentials(self.user_name)
-        user_info.update({'job': self.job_info})
-        parameters = {"admin_token": admin_token, "user_credentials": user_info}
-        token = self.control.execute_post(path=path, parameters=parameters)
-        utils_cli.write_user_credentials(token, self.token_file,
-                                         user_info['uid'],
-                                         user_info['gid'])
-        return {"token": token, "path": self.token_file}
-
     def clean_environment(self, token, force):
         path = "/clean"
         admin_token = utils_cli.get_admin_token(self.token_storage)
@@ -103,25 +82,6 @@ class CommandController(object):
                       "force": force}
         self.control.execute_delete(path=path, parameters=parameters)
         return token
-
-    def batch_config(self, token):
-        path = "/batchconf"
-        admin_token = utils_cli.get_admin_token(self.token_storage)
-        token = utils_cli.token_parse(token, self.token_file)
-        parameters = {"admin_token": admin_token,
-                      "token": token,
-                      }
-        out = self.control.execute_put(path=path, parameters=parameters)
-        return out
-
-    def batch_clean(self, token):
-        # TODO(jorgesece): include in clean environment
-        path = "/batchclean"
-        admin_token = utils_cli.get_admin_token(self.token_storage)
-        token = utils_cli.token_parse(token, self.token_file)
-        parameters = {"admin_token": admin_token,
-                      "token": token}
-        self.control.execute_delete(path=path, parameters=parameters)
 
     def container_pull(self, token, source):
         path = "/pull"
@@ -176,7 +136,6 @@ class CommandController(object):
         token = utils_cli.token_parse(token, self.token_file)
         acc = self.batch_module.create_accounting(self.job_id)
         parameters = {"admin_token": admin_token,
-                      'token': token,
                       'accounting': acc
                       }
         self.control.execute_put(path=path, parameters=parameters)

@@ -132,26 +132,6 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      ).get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-
-    @mock.patch.object(controller.ServerController, "credentials")
-    def test_credentials(self, m):
-        m.return_value = 'tokenresult'
-        parameters = {"admin_token": "tokennnnnn",
-                      "user_credentials":
-                          {'uid': 'uuuuuuuuuuiiiidddddd',
-                           'gid': 'gggggggggguuuiiidd',
-                           'job': {'id':'gggggggggguuuiiidd',
-                                   'spool':'/faa'}
-                           }
-                      }
-        body = request.make_body(parameters)
-        result = webob.Request.blank("/credentials",
-                                     method="POST",
-                                     content_type="application/json",
-                                     body=body).get_response(self.app)
-        self.assertEqual(201, result.status_code)
-
-
     @mock.patch.object(controller.ServerController, "pull")
     def test_pull(self, md):
         im_id = 'X'

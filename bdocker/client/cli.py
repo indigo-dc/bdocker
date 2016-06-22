@@ -48,25 +48,6 @@ def configure_environment(ctx, user, jobid):
         utils.print_error(e.message)
 
 
-@bdocker.command('credentials',
-                 help="Request for user token."
-                      " ROOT privileges needed."
-                      "[DEPRECATED. Now use configuration]")
-@user_option
-@job_option
-@click.pass_context
-def credentials_create(ctx, user, jobid):
-    # Command executed by the root in prolog
-    try:
-        out = ctx.obj.create_credentials(
-            user,
-            jobid
-        )
-        utils.print_message(out["path"])
-    except BaseException as e:
-        utils.print_error(e.message)
-
-
 @bdocker.command('clean',
                  help="Clean work environment including"
                       "the batch system."
@@ -78,34 +59,6 @@ def clean_environment(ctx, token, force):
     # Command executed by the root in epilog
     try:
         out = ctx.obj.clean_environment(token, force)
-        utils.print_message(out)
-    except BaseException as e:
-        utils.print_error(e.message)
-
-
-@bdocker.command('batch_config',
-                 help="Request batch system configuration"
-                      " to the server. ROOT privileges needed"
-                      "[DEPRECATED. Now use configuration]")
-@token_option
-@click.pass_context
-def batch_config(ctx, token):
-    try:
-        out = ctx.obj.batch_config(token)
-        utils.print_message(out)
-    except BaseException as e:
-        utils.print_error(e.message)
-
-
-@bdocker.command('batch_clean',
-                 help="Request clean the batch system environment"
-                      " to the server. ROOT privileges needed."
-                      "[DEPRECATED. Now use clean]")
-@token_option
-@click.pass_context
-def batch_clean(ctx, token):
-    try:
-        out = ctx.obj.batch_clean(token)
         utils.print_message(out)
     except BaseException as e:
         utils.print_error(e.message)

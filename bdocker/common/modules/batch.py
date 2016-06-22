@@ -26,6 +26,35 @@ from bdocker.common import utils
 LOG = logging.getLogger(__name__)
 
 
+class BatchNotificationController(object):
+    def __init__(self, accounting_conf):
+        try:
+            # TODO(jorgesece): host should have http or https
+            endpoint = 'http://%s:%s' % (
+                accounting_conf['host'],
+                accounting_conf['port']
+            )
+            self.request_control = request.RequestController(
+                endopoint=endpoint
+            )
+        except Exception as e:
+            raise exceptions.ConfigurationException(
+                "Accounting"
+                " server configuration failed"
+            )
+
+    def notify_accounting(self, admin_token, accounting_info):
+        path = "/notify_accounting"
+
+        parameters = {"admin_token": admin_token,
+                      'accounting': accounting_info
+                      }
+        out = self.request_control.execute_put(
+            path=path, parameters=parameters
+        )
+        return out
+
+
 class BatchMasterController(object):
     def __init__(self, conf):
         pass
@@ -85,19 +114,8 @@ class BatchWNController(object):
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
         self.default_acc_file = ".bdocker_accounting"
-        try:
-            # TODO(jorgesece): host should have http or https
-            endpoint = 'http://%s:%s' % (
-                accounting_conf['host'],
-                accounting_conf['port']
-            )
-            self.request_control = request.RequestController(
-                endopoint=endpoint
-            )
-        except Exception as e:
-            raise exceptions.ConfigurationException("Accounting"
-                                                    " server configuration failed"
-                                                    )
+
+        self.notification_controller = BatchNotificationController(accounting_conf)
 
     def conf_environment(self, session_data):
         if self.enable_cgroups:
@@ -183,7 +201,8 @@ class SGEController(BatchWNController):
     def _read_accounting_file(path):
         return utils.read_yaml_file(path)
 
-    def _launch_job_monitoring(self, job_id, file_path, cuotas=None):
+    def _launch_job_monitoring(self, job_id, file_path,
+                               admin_token, cuotas=None):
         LOG.exception("LAUNCH MONITORING")
         try:
             pid = os.fork()
@@ -223,7 +242,7 @@ class SGEController(BatchWNController):
         os.kill(child, signal.SIG_IGN)
         time.sleep(0.1)
 
-    def conf_environment(self, session_data):
+    def conf_environment(self, session_data, admin_token):
         out = super(SGEController, self).conf_environment(session_data)
         if out:
             try:
@@ -233,14 +252,14 @@ class SGEController(BatchWNController):
                                      job_id)
                 out.update({"acc_file": path})
                 self._create_accounting_file(path, session_data)
-                self._launch_job_monitoring(job_id, path)
+                self._launch_job_monitoring(job_id, path, admin_token)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
                 raise exceptions.ParseException(message=message)
         return out
 
-    def clean_environment(self, session_data):
+    def clean_environment(self, session_data, admin_token):
         out = super(SGEController, self).clean_environment(session_data)
         if out:
             try:
@@ -248,18 +267,14 @@ class SGEController(BatchWNController):
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
+                self.notify_accounting(admin_token, path)
                 utils.delete_file(path)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
                 raise exceptions.ParseException(message=message)
-        # TODO(jorgesece): include here the creation of file
-        # save that file url in token file using acc_file
-        # self._create_accounting_file(path, session_data)
 
     def create_accounting(self, job):
-
-        # acc = self.get_accounting(job_id)
         job_id = job['id']
         qname = job['queue_name']
         hostname = job['host_name']
@@ -290,18 +305,13 @@ class SGEController(BatchWNController):
 
         return full_string
 
-    def notify_accounting(self, admin_token, job_info):
+    def notify_accounting(self, admin_token, path):
         if self.enable_cgroups:
-            # TODO(jorgesece): read .bdocker_N_accounting
-            # job_acc = self._read_accounting_file()
-            acc = self.create_accounting(job_info)
-            path = "/set_accounting"
-            parameters = {'admin_token': admin_token,
-                          'accounting': acc}
-            results = self.request_control.execute_post(
-                path=path, parameters=parameters
-            )
-            # TODO(jorgesece): delete .bdocker_N_accounting
+            job_info = utils.read_yaml_file(path)
+            accounting = self.create_accounting(job_info)
+            results = self.notification_controller.notify_accounting(
+                    admin_token,
+                    accounting)
             return results
         else:
             raise exceptions.NoImplementedException(

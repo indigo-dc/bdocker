@@ -65,65 +65,13 @@ class ServerController(object):
         LOG.info("Authentication. Token: %s" % user_token)
 
         batch_info = self.batch_module.conf_environment(
-            session_data
+            session_data, admin_token
         )
-        self.credentials_module.set_token_batch_info(user_token, batch_info)
+        self.credentials_module.set_token_batch_info(
+            user_token, batch_info
+        )
         LOG.info("Batch system configured")
         return user_token
-
-    def credentials(self, data):
-        """ Create user token environment
-        DEPRECATED. Included in clean
-        :return:
-        """
-        required = {'admin_token', 'user_credentials'}
-        utils_server.validate(data, required)
-        try:
-            token = data['admin_token']
-            session_data = data['user_credentials']
-            user_token = self.credentials_module.authenticate(token, session_data)
-            LOG.info("Authentication. Token: %s" % user_token)
-            return user_token
-        except Exception as e:
-                return utils_server.manage_exceptions(e)
-
-    def batch_configuration(self, data):
-        """ Config batch system environment
-        DEPRECATED. Included in clean
-        :return:
-        """
-        required = {'admin_token', 'token'}
-        utils_server.validate(data, required)
-        admin_token = data['admin_token']
-        token = data['token']
-        self.credentials_module.authorize_admin(admin_token)
-        job = self.credentials_module.get_job_from_token(token)
-        try:
-            job_id = job['id']
-            job_spool = job['spool']
-        except KeyError as e:
-            message = ("Job information error %s"
-                       % e.message)
-            raise exceptions.ParseException(message=message)
-        batch_info = self.batch_module.conf_environment(
-            job_id, job_spool
-        )
-        self.credentials_module.set_token_batch_info(token, batch_info)
-        LOG.info("Batch system configured")
-
-    def batch_clean(self, data):
-        """ Clean batch system environment
-        DEPRECATED. Included in clean
-        :return:
-        """
-        required = {'admin_token', 'token'}
-        utils_server.validate(data, required)
-        admin_token = data['admin_token']
-        token = data['token']
-        self.credentials_module.authorize_admin(admin_token)
-        job = self.credentials_module.get_job_from_token(token)
-        self.batch_module.clean_environment(job['id'])
-        return []
 
     def clean(self, data):
         """Clean bdocker user environment.
@@ -146,7 +94,7 @@ class ServerController(object):
             LOG.info("Delete containers")
 
         token_info = self.credentials_module.get_token(token)
-        self.batch_module.clean_environment(token_info)
+        self.batch_module.clean_environment(token_info, admin_token)
         LOG.info("Batch system cleaned")
         self.credentials_module.remove_token_from_cache(token)
         LOG.info("Delete token: %s" % token)
