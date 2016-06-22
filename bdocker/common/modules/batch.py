@@ -44,7 +44,7 @@ class BatchNotificationController(object):
             )
 
     def notify_accounting(self, admin_token, accounting_info):
-        path = "/notify_accounting"
+        path = "/set_accounting"
 
         parameters = {"admin_token": admin_token,
                       'accounting': accounting_info

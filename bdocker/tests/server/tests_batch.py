@@ -45,7 +45,7 @@ class TestBacthNotificationController(testtools.TestCase):
         controller.notify_accounting(admin_token, accounting_info)
         self.assertIs(True, m_post.called)
         m_post.assert_called_with(
-            path="/notify_accounting",
+            path="/set_accounting",
             parameters={"admin_token": admin_token,
                         "accounting": accounting_info
                         }
