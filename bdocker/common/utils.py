@@ -40,13 +40,17 @@ def write_yaml_file(path, data):
 
 
 def update_yaml_file(path, data):
-    with open(path, 'w+') as my_file:
+    with open(path, 'r+') as my_file:
         current_data = my_file.read()
         plain_data = yaml.load(current_data)
         plain_data.update(data)
-        data_yaml = yaml.safe_dump(plain_data, None, encoding='utf-8', allow_unicode=True)
+        data_yaml = yaml.safe_dump(plain_data, None,
+                                   encoding='utf-8',
+                                   allow_unicode=True
+                                   )
+        my_file.seek(0)
         my_file.write(data_yaml)
-        my_file.flush()
+        my_file.truncate()
         my_file.close()
 
 

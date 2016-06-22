@@ -16,7 +16,6 @@
 import cgroupspy
 import exceptions
 import mock
-import os
 import testtools
 import uuid
 

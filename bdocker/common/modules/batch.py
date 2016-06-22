@@ -15,6 +15,7 @@
 # under the License.
 import logging
 import os
+import signal
 import time
 
 from bdocker.common import cgroups_utils
@@ -182,33 +183,45 @@ class SGEController(BatchWNController):
     def _read_accounting_file(path):
         return utils.read_yaml_file(path)
 
-    @staticmethod
-    def _update_accounting_file(path, accounting):
-        utils.update_yaml_file(path, accounting)
-
     def _launch_job_monitoring(self, job_id, file_path, cuotas=None):
+        LOG.exception("LAUNCH MONITORING")
         try:
             pid = os.fork()
             if pid > 0:
                 # Exit parent process
+                LOG.exception("EXIT PARENT")
                 return 0
+            os.setsid()
         except OSError, e:
             raise exceptions.BatchException("fork failed: %d (%s)" % (
                 e.errno, e.strerror))
+            LOG.exception("ERROR FORK")
             os.exit(1)
-        os.setsid()
-        while(true):
+
+        LOG.exception("MONITORING")
+        while True:
             try:
+                LOG.exception("SLEEP")
                 time.sleep(10)
                 acc = cgroups_utils.get_accounting(
-                    job_id,
-                    self.parent_group,
-                    root_parent=self.root_cgroup)
-                self._update_accounting_file(file_path, acc)
-            except CgroupException as e:
+                     job_id,
+                     self.parent_group,
+                     root_parent=self.root_cgroup)
+                #acc = {"update": "testing"}
+                utils.update_yaml_file(file_path, acc)
+                LOG.exception("WORKING")
+            except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
-                return 0
-        os._exit(0)
+                break
+            except BaseException as e:
+                LOG.exception("ERROR IN: %s. %s." % (file_path, e.message))
+                break
+            except:
+                LOG.exception("ERROR IN MONITORING")
+        child = os.getpid()
+        LOG.exception("EXIT FROM MONITORING. FORK: %s" % child)
+        os.kill(child, signal.SIG_IGN)
+        time.sleep(0.1)
 
     def conf_environment(self, session_data):
         out = super(SGEController, self).conf_environment(session_data)
@@ -219,13 +232,8 @@ class SGEController(BatchWNController):
                                      self.default_acc_file,
                                      job_id)
                 out.update({"acc_file": path})
-                # TODO(jorgesece): include here the creation of file
-                # save that file url in token file using acc_file
                 self._create_accounting_file(path, session_data)
-                # print "father %s" % os.getpid()
                 self._launch_job_monitoring(job_id, path)
-                # print "father? %s" % os.getpid()
-                # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
