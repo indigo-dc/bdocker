@@ -116,48 +116,26 @@ class BatchWNController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
-
-            # print "father %s" % os.getpid()
-            # self._launch_job_control(job_id, cgroupt)
-            # print "father? %s" % os.getpid()
-            # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
                      % (self.parent_group, cgroup_job))
         else:
-            LOG.debug("CGROUP CONTROL NOT ACTIVATED")
+            LOG.exception("CGROUP CONTROL NOT ACTIVATED")
             batch_info = None
         return batch_info
 
-    def _launch_job_control(self, job_id, file_path, cuotas=None):
-        try:
-            pid = os.fork()
-            if pid > 0:
-                # Exit parent process
-                return 0
-        except OSError, e:
-            raise exceptions.BatchException("fork failed: %d (%s)" % (e.errno, e.strerror))
-            os.exit(1)
-        os.setsid()
-        while(true):
-            try:
-                time.sleep(10)
-                acc = cgroups_utils.get_accounting(
-                    job_id,
-                    self.parent_group,
-                    root_parent=self.root_cgroup)
-                self._update_accounting_file(file_path, acc)
-            except CgroupException as e:
-                return 0
-        os._exit(0)
-
-    def clean_environment(self, job_id):
+    def clean_environment(self, session_data):
         if self.enable_cgroups:
+            flag = True
+            job_id = session_data["job"]["id"]
             cgroups_utils.delete_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup)
-
+        else:
+            LOG.exception("CGROUP CONTROL NOT ACTIVATED")
+            flag = False
+        return flag
 
     def get_accounting(self, job_id):
         if self.enable_cgroups:
@@ -167,16 +145,6 @@ class BatchWNController(object):
                 root_parent=self.root_cgroup
             )
             return accounting
-        raise exceptions.NoImplementedException(
-            message="Still not supported")
-
-    def _read_accounting_file(self, path):
-        return utils.read_yaml_file(path)
-
-    def _update_accounting_file(self, path, accounting):
-        utils.update_yaml_file(path, accounting)
-
-    def _create_accounting_file(self, path, session_data):
         raise exceptions.NoImplementedException(
             message="Still not supported")
 
@@ -198,41 +166,8 @@ class SGEController(BatchWNController):
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
 
-    def conf_environment(self, session_data):
-        out = super(SGEController, self).conf_environment(session_data)
-        if out:
-            try:
-                path = "%s/%s_%s" % (session_data['home'],
-                                     self.default_acc_file,
-                                     session_data['job']['id'])
-                out.update({"acc_file": path})
-            except KeyError as e:
-                message = ("Job information error %s"
-                           % e.message)
-                raise exceptions.ParseException(message=message)
-            # TODO(jorgesece): include here the creation of file
-            # save that file url in token file using acc_file
-            # self._create_accounting_file(path, session_data)
-        return out
-
-    # def clean_environment(self, session_data):
-    #
-    #     try:
-    #         job_id = session_data["job"]["id"]
-    #         path = "%s/%s_%s" % (session_data['home'],
-    #                              self.default_acc_file,
-    #                              job_id)
-    #         super(SGEController, self).clean_environment()
-    #         utils.delete_file(path)
-    #     except KeyError as e:
-    #         message = ("Job information error %s"
-    #                    % e.message)
-    #         raise exceptions.ParseException(message=message)
-    #     # TODO(jorgesece): include here the creation of file
-    #     # save that file url in token file using acc_file
-    #     # self._create_accounting_file(path, session_data)
-
-    def _create_accounting_file(self, path, session_data):
+    @staticmethod
+    def _create_accounting_file(path, session_data):
         data = {
             "user_name": session_data["job"]['user_name'],
             "queue_name": session_data["job"]['queue_name'],
@@ -242,6 +177,76 @@ class SGEController(BatchWNController):
             "account_name": session_data["job"]['account_name']
         }
         utils.write_yaml_file(path, data)
+
+    @staticmethod
+    def _read_accounting_file(path):
+        return utils.read_yaml_file(path)
+
+    @staticmethod
+    def _update_accounting_file(path, accounting):
+        utils.update_yaml_file(path, accounting)
+
+    def _launch_job_monitoring(self, job_id, file_path, cuotas=None):
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # Exit parent process
+                return 0
+        except OSError, e:
+            raise exceptions.BatchException("fork failed: %d (%s)" % (
+                e.errno, e.strerror))
+            os.exit(1)
+        os.setsid()
+        while(true):
+            try:
+                time.sleep(10)
+                acc = cgroups_utils.get_accounting(
+                    job_id,
+                    self.parent_group,
+                    root_parent=self.root_cgroup)
+                self._update_accounting_file(file_path, acc)
+            except CgroupException as e:
+                LOG.exception("MONITORING FINISHED")
+                return 0
+        os._exit(0)
+
+    def conf_environment(self, session_data):
+        out = super(SGEController, self).conf_environment(session_data)
+        if out:
+            try:
+                path = "%s/%s_%s" % (session_data['home'],
+                                     self.default_acc_file,
+                                     session_data['job']['id'])
+                out.update({"acc_file": path})
+                # TODO(jorgesece): include here the creation of file
+                # save that file url in token file using acc_file
+                self._create_accounting_file(path, session_data)
+                # print "father %s" % os.getpid()
+                # self._launch_job_control(job_id, cgroupt)
+                # print "father? %s" % os.getpid()
+                # open("/home/jorge/Daemon_Parent.log", "w").write("AQUI" + "\n")
+            except KeyError as e:
+                message = ("Job information error %s"
+                           % e.message)
+                raise exceptions.ParseException(message=message)
+        return out
+
+    def clean_environment(self, session_data):
+        out = super(SGEController, self).clean_environment(session_data)
+        if out:
+            try:
+                job_id = session_data["job"]["id"]
+                path = "%s/%s_%s" % (session_data['home'],
+                                     self.default_acc_file,
+                                     job_id)
+                utils.delete_file(path)
+            except KeyError as e:
+                message = ("Job information error %s"
+                           % e.message)
+                raise exceptions.ParseException(message=message)
+        # TODO(jorgesece): include here the creation of file
+        # save that file url in token file using acc_file
+        # self._create_accounting_file(path, session_data)
 
     def create_accounting(self, job):
 

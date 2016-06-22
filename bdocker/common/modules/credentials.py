@@ -85,6 +85,9 @@ class UserController(object):
         self.token_store.update({token: current_token})
         self.save_token_file()
 
+    def get_token(self, token):
+        return self._get_token_from_cache(token)
+
     def authenticate(self, admin_token, session_data):
         """Authenticates a user in the system.
 

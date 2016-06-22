@@ -145,8 +145,8 @@ class ServerController(object):
             self.docker_module.clean_containers(containers, force)
             LOG.info("Delete containers")
 
-        job = self.credentials_module.get_job_from_token(token)
-        self.batch_module.clean_environment(job['id'])
+        token_info = self.credentials_module.get_token(token)
+        self.batch_module.clean_environment(token_info)
         LOG.info("Batch system cleaned")
         self.credentials_module.remove_token_from_cache(token)
         LOG.info("Delete token: %s" % token)

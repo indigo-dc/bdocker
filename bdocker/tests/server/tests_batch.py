@@ -84,7 +84,8 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
-    def test_conf_environment(self, m_cre, m_read):
+    @mock.patch.object(batch.SGEController,"_create_accounting_file")
+    def test_conf_environment(self, m_file, m_cre, m_read):
         job_id = uuid.uuid4().hex
         spool_dir = "/foo"
         home = "/foo"
@@ -117,7 +118,8 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.common.utils.read_file")
     @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
-    def test_conf_environment_no_root_dir(self, m_cre,  m_read):
+    @mock.patch.object(batch.SGEController,"_create_accounting_file")
+    def test_conf_environment_no_root_dir(self, m_file, m_cre,  m_read):
         spool_dir = "/foo"
         home = "/foo"
         job_id = uuid.uuid4().hex
@@ -170,28 +172,45 @@ class TestSGEController(testtools.TestCase):
         self.assertIs(False, m_cre.called)
 
     @mock.patch("bdocker.common.cgroups_utils.delete_tree_cgroups")
-    def test_clean_environment(self, m_del):
+    @mock.patch("bdocker.common.utils.delete_file")
+    def test_clean_environment(self, m_del_file, m_del_tree):
         job_id = uuid.uuid4().hex
+        home = "/foo"
+        spool_dir = "/foo"
+        job_info = {"home": home,
+            "job": {"id": job_id,
+                    "spool": spool_dir
+                    }
+            }
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
         controller = batch.SGEController(conf, self.acc_conf)
-        controller.clean_environment(job_id,)
-        self.assertIs(True, m_del.called)
-        m_del.assert_called_with(
+        controller.clean_environment(job_info)
+        self.assertIs(True, m_del_file.called)
+        self.assertIs(True, m_del_tree.called)
+        m_del_tree.assert_called_with(
             job_id,
             conf["parent_cgroup"],
             root_parent=conf["cgroups_dir"]
         )
 
     @mock.patch("bdocker.common.cgroups_utils.delete_tree_cgroups")
-    def test_clean_environment_no_cgroup(self, m_del):
+    @mock.patch("bdocker.common.utils.delete_file")
+    def test_clean_environment_no_cgroup(self, m_del_file, m_del_tree):
         job_id = uuid.uuid4().hex
+        home = "/foo"
+        spool_dir = "/foo"
+        job_info = {"home": home,
+            "job": {"id": job_id,
+                    "spool": spool_dir
+                    }
+            }
         conf = {"cgroups_dir": "/foo",
                 "parent_cgroup": "/bdocker.test"}
         controller = batch.SGEController(conf, self.acc_conf)
-        controller.clean_environment(job_id)
-        self.assertIs(False, m_del.called)
+        controller.clean_environment(job_info)
+        self.assertIs(False, m_del_tree.called)
 
     @mock.patch("os.getenv")
     def test_get_job_info(self, m):
