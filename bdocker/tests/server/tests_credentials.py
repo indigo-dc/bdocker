@@ -288,11 +288,42 @@ class TestUserCredentials(testtools.TestCase):
     def test_list_containers_err(self):
         pass
 
-    def test_authorize_directory(self):
-        pass
+    @mock.patch.object(credentials.UserController,"_get_token_from_cache")
+    @mock.patch("bdocker.common.utils.validate_directory")
+    def test_authorize_directory(self, m_val, m_token):
+        token = uuid.uuid4().hex
+        jobid = uuid.uuid4().hex
+        spool = uuid.uuid4().hex
+        cgroup = uuid.uuid4().hex
+        home = uuid.uuid4().hex
+        token_info = { "home": home,
+                       "job": {
+                           "id": jobid,
+                           "cgroup": cgroup,
+                           "spool": spool}
+                       }
+        m_token.return_value = token_info
+        self.control.authorize_directory(token, None)
 
-    def test_authorize_directory_err(self):
-        pass
+    @mock.patch.object(credentials.UserController,"_get_token_from_cache")
+    @mock.patch("bdocker.common.utils.validate_directory")
+    def test_authorize_directory_err(self, m_val, m_token):
+        token = uuid.uuid4().hex
+        jobid = uuid.uuid4().hex
+        spool = uuid.uuid4().hex
+        cgroup = uuid.uuid4().hex
+        home = uuid.uuid4().hex
+        token_info = { "home": home,
+                       "job": {
+                           "id": jobid,
+                           "cgroup": cgroup,
+                           "spool": spool}
+                       }
+        m_token.return_value = token_info
+        m_val.side_effect = exceptions.UserCredentialsException("")
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.authorize_directory,
+                          token, None)
 
     def test_update_token(self):
         pass

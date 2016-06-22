@@ -245,7 +245,7 @@ class UserController(object):
         """
         # todo: add unittest
         token_info = self._get_token_from_cache(token)
-        utils_common.validate_directory(dir_path, token_info['home_dir'])
+        utils_common.validate_directory(dir_path, token_info['home'])
 
     def authorize(self, token):
         """Check token authorization.
