@@ -80,7 +80,7 @@ class SGEAccountingController(BatchMasterController):
             self.sge_accounting = "/opt/sge/default/common/accounting"
             LOG.exception("sge_accounting parameter is not defined."
                           " Using %s by default. " %
-                          self.bdocker_accounting)
+                          self.sge_accounting)
 
     def _get_sge_job_accounting(self, queue_name, host_name, job_id):
         any_word = "[^:]+"
@@ -98,8 +98,7 @@ class SGEAccountingController(BatchMasterController):
     def set_job_accounting(self, accounting):
         try:
             LOG.exception("WRITING in %s" % self.bdocker_accounting)
-            # the space at the end of the line will be converted to \n
-            accounting_end_line = "%s " % accounting
+            accounting_end_line = "%s\n" % accounting
             utils.add_to_file(self.bdocker_accounting, accounting_end_line)
             return []
         except BaseException as e:
