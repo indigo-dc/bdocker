@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 utils_server.set_error_handler(app)
 
 
-@app.route('/set_accounting', methods=['POST'])
+@app.route('/set_accounting', methods=['PUT'])
 def set_job_accounting():
     """Register job accounting in the master
 

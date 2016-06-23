@@ -40,7 +40,8 @@ class BatchNotificationController(object):
         except Exception as e:
             raise exceptions.ConfigurationException(
                 "Accounting"
-                " server configuration failed"
+                " server configuration failed %s. "
+                % e.message
             )
 
     def notify_accounting(self, admin_token, accounting_info):
@@ -52,6 +53,7 @@ class BatchNotificationController(object):
         out = self.request_control.execute_put(
             path=path, parameters=parameters
         )
+        LOG.exception("return from rq")
         return out
 
 
@@ -95,10 +97,15 @@ class SGEAccountingController(BatchMasterController):
 
     def set_job_accounting(self, accounting):
         try:
-            utils.add_to_file(self.bdocker_accounting, accounting)
+            LOG.exception("WRITING in %s" % self.bdocker_accounting)
+            # the space at the end of the line will be converted to \n
+            accounting_end_line = "%s " % accounting
+            utils.add_to_file(self.bdocker_accounting, accounting_end_line)
             return []
-        except KeyError as e:
-            raise exceptions.BatchException(message=None, e=e)
+        except BaseException as e:
+            message = "ERROR UPDATING ACCOUNTING: %s. " % e.message
+            LOG.exception(message)
+            raise exceptions.BatchException(message=message)
         raise exceptions.NoImplementedException("Needs to be implemented"
                                                 "--set_job_accounting()--")
 
@@ -188,6 +195,7 @@ class SGEController(BatchWNController):
     @staticmethod
     def _create_accounting_file(path, session_data):
         data = {
+            "job_id": session_data["job"]['user_name'],
             "user_name": session_data["job"]['user_name'],
             "queue_name": session_data["job"]['queue_name'],
             "host_name": session_data["job"]['host_name'],
@@ -208,13 +216,12 @@ class SGEController(BatchWNController):
             pid = os.fork()
             if pid > 0:
                 # Exit parent process
-                LOG.exception("EXIT PARENT")
                 return 0
             os.setsid()
         except OSError, e:
             raise exceptions.BatchException("fork failed: %d (%s)" % (
                 e.errno, e.strerror))
-            LOG.exception("ERROR FORK")
+            LOG.exception("CREATING JOB MONITOR PROCESS")
             os.exit(1)
 
         LOG.exception("MONITORING")
@@ -273,45 +280,56 @@ class SGEController(BatchWNController):
                 message = ("Job information error %s"
                            % e.message)
                 raise exceptions.ParseException(message=message)
+            except BaseException as e:
+                message = ("ACCOUNTING NOTIFICATION ERROR %s"
+                           % e.message)
+                raise exceptions.BatchException(message=message)
 
     def create_accounting(self, job):
-        job_id = job['id']
-        qname = job['queue_name']
-        hostname = job['host_name']
-        logname = job['log_name_name']
-        job_name = job['job_name_name']
-        account = job['account_name']
-        cpu_usage = job.get('cpu_usage', None)  # position 37
-        memory_usage = job.get('memory_usage', None)  # position 38
-        io_usage = job.get('io_usage', "0")  # position 39
-        priority = '0'
-        group = "0"  # we do not need it for bdocker
-        submission_time = '0'  # position 9
-        start_time = "0"  # position 10
-        end_time = '0'  # position 11
-        failed = "0"  # position 12. Set 37 in case we kill it
-        status = "0"  # pos 13. 0 for ok, 137 time end
-        ru_wallclock = "0"  # end_time - start_time  # pos 14
+        try:
+            job_id = job['job_id']
+            qname = job['queue_name']
+            hostname = job['host_name']
+            logname = job['log_name']
+            job_name = job['job_name']
+            account = job['account_name']
+            cpu_usage = job.get('cpu_usage', None)  # position 37
+            memory_usage = job.get('memory_usage', None)  # position 38
+            io_usage = job.get('io_usage', "0")  # position 39
+            priority = '0'
+            group = "0"  # we do not need it for bdocker
+            submission_time = '0'  # position 9
+            start_time = "0"  # position 10
+            end_time = '0'  # position 11
+            failed = "0"  # position 12. Set 37 in case we kill it
+            status = "0"  # pos 13. 0 for ok, 137 time end
+            ru_wallclock = "0"  # end_time - start_time  # pos 14
 
-        full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
-                       ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
-                       ":%s:%s:%s"
-                       ":0:0:0:0:0:0" %
-                       (qname, hostname, group, logname, job_name,
-                        job_id, account, priority,
-                        submission_time, start_time, end_time,
-                        failed, status,
-                        ru_wallclock, cpu_usage, memory_usage, io_usage))
+            full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
+                           ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
+                           ":%s:%s:%s"
+                           ":0:0:0:0:0:0" %
+                           (qname, hostname, group, logname, job_name,
+                            job_id, account, priority,
+                            submission_time, start_time, end_time,
+                            failed, status,
+                            ru_wallclock, cpu_usage, memory_usage, io_usage))
 
-        return full_string
+            return full_string
+        except KeyError as e:
+            raise exceptions.ParseException(
+                "Job accountig file malformed: %s. " % e.message
+            )
 
     def notify_accounting(self, admin_token, path):
         if self.enable_cgroups:
             job_info = utils.read_yaml_file(path)
             accounting = self.create_accounting(job_info)
+            LOG.exception("CREATE ACCOUNTING STRING: %s" % accounting)
             results = self.notification_controller.notify_accounting(
                     admin_token,
                     accounting)
+            LOG.exception("NOTIFIED")
             return results
         else:
             raise exceptions.NoImplementedException(
