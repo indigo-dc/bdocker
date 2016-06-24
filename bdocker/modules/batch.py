@@ -263,7 +263,7 @@ class SGEController(BatchWNController):
                                      job_id)
                 out.update({"acc_file": path})
                 self._create_accounting_file(path, job_info)
-                #self._launch_job_monitoring(job_id, path, admin_token)
+                self._launch_job_monitoring(job_id, path, admin_token)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
