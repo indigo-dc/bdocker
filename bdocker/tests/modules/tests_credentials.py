@@ -75,14 +75,14 @@ class TestUserCredentials(testtools.TestCase):
         t = self.control._get_token_from_cache(
             "prolog")['token']
         u = create_parameters()['user_credentials']
-        u.update({'job': {'id': jobid,
+        u.update({'job': {'job_id': jobid,
                          'spool': spool}
                   })
         token = self.control.authenticate(admin_token=t,
                                           session_data=u)
         self.assertIsNotNone(token)
         job_info = self.control.get_job_from_token(token)
-        self.assertEqual(jobid, job_info['id'])
+        self.assertEqual(jobid, job_info['job_id'])
         self.assertEqual(spool, job_info['spool'])
         self.assertNotIn('cgroup', job_info)
         self.control.remove_token_from_cache(token)
@@ -142,7 +142,7 @@ class TestUserCredentials(testtools.TestCase):
                                           session_data=u)
         self.control.set_token_batch_info(token, batch_info)
         job_info = self.control.get_job_from_token(token)
-        self.assertEqual(jobid, job_info['id'])
+        self.assertEqual(jobid, job_info['job_id'])
         self.assertEqual(spool, job_info['spool'])
         self.assertEqual(cgroup, job_info['cgroup'])
         self.control.remove_token_from_cache(token)
@@ -342,13 +342,13 @@ class TestUserCredentials(testtools.TestCase):
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
         token_info = {"job": {
-            "id": jobid,
+            "job_id": jobid,
             "cgroup": cgroup,
             "spool": spool}
         }
         m_gt.return_value = token_info
         result = self.control.get_job_from_token(uid)
-        self.assertEqual(jobid, result['id'])
+        self.assertEqual(jobid, result['job_id'])
         self.assertEqual(cgroup, result['cgroup'])
         self.assertEqual(spool, result['spool'])
 
