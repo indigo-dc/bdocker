@@ -354,7 +354,7 @@ class SGEController(BatchWNController):
         account = os.getenv(
             'SGE_ACCOUNT', None)
         return {'home': home,
-                'id': job_id,
+                'job_id': job_id,
                 'user_name': user,
                 'spool': spool_dir,
                 'queue_name': qname,

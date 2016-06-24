@@ -299,7 +299,7 @@ class TestSGEController(testtools.TestCase):
             account
         ]
         expected = {'home': home,
-                    'id': job_id,
+                    'job_id': job_id,
                     'queue_name': queue_name,
                     'host_name': host_name,
                     'log_name': log_name,

@@ -137,7 +137,7 @@ class CommandController(object):
                               TOKEN_FILE_NAME)
             )
             self.job_info = job_info
-            self.job_id = job_info["id"]
+            self.job_id = job_info["job_id"]
             self.token_file = "%s/%s_%s" % (
                 job_info['home'],  # TODO(jorgesece): pop it
                 self.defaul_token_name,

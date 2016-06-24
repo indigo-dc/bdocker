@@ -83,7 +83,7 @@ class TestCommands(testtools.TestCase):
         spool = "/faa"
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'id': job_id,
+                               'job_id': job_id,
                                'spool': spool,
                                'user_name': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
@@ -107,7 +107,7 @@ class TestCommands(testtools.TestCase):
         job_id = 8934
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'id': job_id,
+                               'job_id': job_id,
                                 'spool': spool,
                                'user_name': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
@@ -220,8 +220,8 @@ class TestCommands(testtools.TestCase):
         job_id = 8934
         user = 'peter'
         m_conf.return_value = {'home': home_dir,
-                               'id': job_id,
-                                'spool': spool,
+                               'job_id': job_id,
+                               'spool': spool,
                                'user_name': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
