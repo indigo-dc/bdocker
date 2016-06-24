@@ -134,7 +134,6 @@ class ServerController(object):
         #     token,
         #     image_id
         # )
-        LOG.exception("Error token? %s" % token)
         if host_dir:
             self.credentials_module.authorize_directory(token, host_dir)
         job_info = self.credentials_module.get_job_from_token(token)

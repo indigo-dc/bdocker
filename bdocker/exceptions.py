@@ -76,7 +76,7 @@ class BDockerException(Exception):
         details = get_exception_details(exc, message, code)
         self.message = details['message']
         self.code = details['code']
-        # LOG.exception(message)
+        LOG.exception(message)
 
     def __str__(self):
         return repr(self.message)
@@ -106,6 +106,7 @@ class UserCredentialsException(BDockerException):
         )
         self.message = ("User Credentials Exception: %s "
                         % self.message)
+
 
 
 class ConfigurationException(BDockerException):

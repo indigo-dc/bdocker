@@ -40,6 +40,7 @@ class UserController(object):
 
         :param token: token looked for
         """
+        # TODO(jorgesece): should we update from file?
         # self.token_store = utils.read_yaml_file(self.path)
         if token not in self.token_store:
             raise exceptions.UserCredentialsException(
