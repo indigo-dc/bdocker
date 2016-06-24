@@ -247,9 +247,10 @@ class SGEController(BatchWNController):
                                                  e.message)
                 LOG.exception(message)
                 raise exceptions.CgroupException(message)
-        child = os.getpid()
-        os.kill(child, signal.SIG_IGN)
-        time.sleep(0.1)
+            finally:
+                child = os.getpid()
+                os.kill(child, signal.SIG_IGN)
+                time.sleep(0.1)
 
     def conf_environment(self, session_data, admin_token):
         out = super(SGEController, self).conf_environment(session_data)
