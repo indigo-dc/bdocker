@@ -345,7 +345,7 @@ class TestSGEController(testtools.TestCase):
         queue_name = "docker"
         host_name = "ge-wn03.novalocal"
         log_name = "jorgesece"
-        job_id = "81"
+        job_id = uuid.uuid4().hex
         job_name = "test.sh01"
         account = "sge"
         cpu_usage = "33"
@@ -377,5 +377,38 @@ class TestSGEController(testtools.TestCase):
                'io_usage': io_usage
                }
         out = controller.create_accounting(job)
-
         self.assertEqual(expected, out)
+
+    @mock.patch("os.fork")
+    @mock.patch("os.setsid")
+    @mock.patch("time.sleep")
+    @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch("bdocker.utils.update_yaml_file")
+    @mock.patch("os.getpid")
+    @mock.patch("os.kill")
+    def test_launch_job_monitoring(self, m_kill,
+                                   m_getpid, m_update,
+                                   m_acc, m_sleep,
+                                   m_setsid, m_fork):
+        job_id = uuid.uuid4().hex
+        path = "/foo"
+        admin_token = uuid.uuid4().hex
+        memory_usage = 99
+        cpu_usage = 111
+        interval = 33
+        acc = {"memory_usage": memory_usage,
+               "cpu_usage": cpu_usage}
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test",
+                "monitoring_interval": interval}
+        m_fork.return_value = 0
+        m_acc.return_value = acc
+        controller = batch.SGEController(conf, mock.MagicMock())
+        m_update.side_effect = exceptions.CgroupException("Finished")
+        controller._launch_job_monitoring(job_id,
+                                               path,
+                                               admin_token)
+        m_sleep.side_effect = [interval, 0.1]
+        m_update.assert_called_with(
+            path, acc)

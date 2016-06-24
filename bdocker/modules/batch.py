@@ -52,7 +52,7 @@ class BatchNotificationController(object):
         out = self.request_control.execute_put(
             path=path, parameters=parameters
         )
-        LOG.exception("return from rq")
+        LOG.exception("ACCOUNTING DONE")
         return out
 
 
@@ -108,7 +108,6 @@ class SGEAccountingController(BatchMasterController):
                                                 "--set_job_accounting()--")
 
 
-
 class BatchWNController(object):
 
     def __init__(self, conf, accounting_conf):
@@ -118,6 +117,7 @@ class BatchWNController(object):
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
+        self.monitoring_interval = conf.get("monitoring_interval", 10)
         self.default_acc_file = ".bdocker_accounting"
 
         self.notification_controller = BatchNotificationController(accounting_conf)
@@ -189,6 +189,7 @@ class SGEController(BatchWNController):
 
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
+        self.monitoring_interval = 10
 
     @staticmethod
     def _create_accounting_file(path, job_info):
@@ -217,33 +218,32 @@ class SGEController(BatchWNController):
                 return 0
             os.setsid()
         except OSError, e:
-            raise exceptions.BatchException("fork failed: %d (%s)" % (
-                e.errno, e.strerror))
-            LOG.exception("CREATING JOB MONITOR PROCESS")
+            message = "fork failed: %d (%s)" % (
+                e.errno, e.strerror)
+            LOG.exception(message)
+            raise exceptions.BatchException(
+                message
+            )
             os.exit(1)
 
-        LOG.exception("MONITORING")
+        LOG.exception("MONITORING JOB %s." % job_id)
         while True:
             try:
-                LOG.exception("SLEEP")
-                time.sleep(10)
+                time.sleep(self.monitoring_interval)
                 acc = cgroups_utils.get_accounting(
                      job_id,
                      self.parent_group,
                      root_parent=self.root_cgroup)
-                #acc = {"update": "testing"}
                 utils.update_yaml_file(file_path, acc)
-                LOG.exception("WORKING")
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
                 break
             except BaseException as e:
-                LOG.exception("ERROR IN: %s. %s." % (file_path, e.message))
-                break
-            except:
-                LOG.exception("ERROR IN MONITORING")
+                message = "ERROR IN: %s. %s." % (file_path,
+                                                 e.message)
+                LOG.exception(message)
+                raise exceptions.CgroupException(message)
         child = os.getpid()
-        LOG.exception("EXIT FROM MONITORING. FORK: %s" % child)
         os.kill(child, signal.SIG_IGN)
         time.sleep(0.1)
 

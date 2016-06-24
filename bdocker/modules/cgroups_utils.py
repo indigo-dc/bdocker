@@ -154,9 +154,9 @@ def get_accounting(group_name, parent_group,
     try:
         memory_usage = utils.read_file(memory_file)
         cpu_usage = utils.read_file(cpu_file)
-    except BaseException as e:
-        LOG.exception("CGROUP get accouting problem. %s"
-                      % e.message)
-        raise exceptions.CgroupException(e)
+    except IOError as e:
+        raise exceptions.CgroupException("%s/%s Not found"
+                                         % parent_group,
+                                         group_name)
     return {"memory_usage": memory_usage,
             "cpu_usage": cpu_usage}
