@@ -109,6 +109,33 @@ class TestSGEController(testtools.TestCase):
         self.acc_conf = {"host": "/foo",
                          "port": "11"}
 
+    @mock.patch("bdocker.utils.write_yaml_file")
+    def test_create_accounting_file(self, m):
+        controller = batch.SGEController(mock.MagicMock(),
+                                         mock.MagicMock())
+        job_id = uuid.uuid4().hex
+        username = "username"
+        queue_name = "queue_name"
+        host_name = "host_name"
+        job_name = "job_name"
+        log_name = "log_name"
+        account_name = "account_name"
+        job = {"job_id": job_id,
+               "user_name": username,
+               "queue_name": queue_name,
+               "host_name": host_name,
+               "job_name": job_name,
+               "log_name": log_name,
+               "account_name": account_name
+               }
+
+        controller._create_accounting_file(None, job)
+        m.assert_called_with(
+            None,
+            job
+        )
+
+
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEController,"_create_accounting_file")

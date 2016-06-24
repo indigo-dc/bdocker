@@ -191,15 +191,15 @@ class SGEController(BatchWNController):
         super(SGEController, self).__init__(*args, **kwargs)
 
     @staticmethod
-    def _create_accounting_file(path, session_data):
+    def _create_accounting_file(path, job_info):
         data = {
-            "job_id": session_data["job"]['user_name'],
-            "user_name": session_data["job"]['user_name'],
-            "queue_name": session_data["job"]['queue_name'],
-            "host_name": session_data["job"]['host_name'],
-            "job_name": session_data["job"]['job_name'],
-            "log_name": session_data["job"]['log_name'],
-            "account_name": session_data["job"]['account_name']
+            "job_id": job_info['job_id'],
+            "user_name": job_info['user_name'],
+            "queue_name": job_info['queue_name'],
+            "host_name": job_info['host_name'],
+            "job_name": job_info['job_name'],
+            "log_name": job_info['log_name'],
+            "account_name": job_info['account_name']
         }
         utils.write_yaml_file(path, data)
 
@@ -251,12 +251,13 @@ class SGEController(BatchWNController):
         out = super(SGEController, self).conf_environment(session_data)
         if out:
             try:
-                job_id = session_data['job']['id']
+                job_info = session_data['job']
+                job_id = job_info['id']
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
                 out.update({"acc_file": path})
-                self._create_accounting_file(path, session_data)
+                self._create_accounting_file(path, job_info)
                 self._launch_job_monitoring(job_id, path, admin_token)
             except KeyError as e:
                 message = ("Job information error %s"
