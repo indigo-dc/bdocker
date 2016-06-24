@@ -154,7 +154,7 @@ class TestSGEController(testtools.TestCase):
         m_read.return_value = parent_id
         controller = batch.SGEController(conf, self.acc_conf)
         job_info = {"home": home,
-                    "job": {"id": job_id,
+                    "job": {"job_id": job_id,
                             "spool": spool_dir
                             }
                     }
@@ -190,7 +190,7 @@ class TestSGEController(testtools.TestCase):
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         job_info = {"home": home,
-                    "job": {"id": job_id,
+                    "job": {"job_id": job_id,
                             "spool": spool_dir
                             }
                     }
@@ -222,7 +222,7 @@ class TestSGEController(testtools.TestCase):
                 "parent_cgroup": "/bdocker.test"}
         m_read.return_value = parent_id
         job_info = {"home": home,
-            "job": {"id": job_id,
+            "job": {"job_id": job_id,
                     "spool": spool_dir
                     }
             }
@@ -241,7 +241,7 @@ class TestSGEController(testtools.TestCase):
         home = "/foo"
         spool_dir = "/foo"
         job_info = {"home": home,
-            "job": {"id": job_id,
+            "job": {"job_id": job_id,
                     "spool": spool_dir
                     }
             }

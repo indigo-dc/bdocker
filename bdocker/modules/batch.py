@@ -125,7 +125,7 @@ class BatchWNController(object):
     def conf_environment(self, session_data):
         if self.enable_cgroups:
             try:
-                job_id = session_data['job']['id']
+                job_id = session_data['job']['job_id']
                 job_spool = session_data['job']['spool']
             except KeyError as e:
                 message = ("Job information error %s"
@@ -152,7 +152,7 @@ class BatchWNController(object):
     def clean_environment(self, session_data):
         if self.enable_cgroups:
             flag = True
-            job_id = session_data["job"]["id"]
+            job_id = session_data["job"]["job_id"]
             cgroups_utils.delete_tree_cgroups(job_id,
                                 self.parent_group,
                                 root_parent=self.root_cgroup)
@@ -252,7 +252,7 @@ class SGEController(BatchWNController):
         if out:
             try:
                 job_info = session_data['job']
-                job_id = job_info['id']
+                job_id = job_info['job_id']
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
@@ -269,7 +269,7 @@ class SGEController(BatchWNController):
         out = super(SGEController, self).clean_environment(session_data)
         if out:
             try:
-                job_id = session_data["job"]["id"]
+                job_id = session_data["job"]["job_id"]
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
