@@ -36,11 +36,11 @@ class UserController(object):
         utils.write_yaml_file(self.path, self.token_store)
 
     def _get_token_from_cache(self, token):
-        # TODO(jorgesece): refresh from file?
         """Get token from token store
 
         :param token: token looked for
         """
+        # self.token_store = utils.read_yaml_file(self.path)
         if token not in self.token_store:
             raise exceptions.UserCredentialsException(
                 "User token not found")

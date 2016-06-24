@@ -235,6 +235,10 @@ class SGEController(BatchWNController):
                      self.parent_group,
                      root_parent=self.root_cgroup)
                 utils.update_yaml_file(file_path, acc)
+                # if coutas:
+                #     if (coutas["cpu"] >= acc["cpu_usage"] or
+                #                 coutas["memory"] >= acc["memory_usage"]):
+                #         pass
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
                 break
