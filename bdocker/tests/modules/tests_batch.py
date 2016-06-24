@@ -37,7 +37,7 @@ class TestBacthNotificationController(testtools.TestCase):
         admin_token = uuid.uuid4().hex
         memory_usage = "1000"
         accounting_info = {"field1": memory_usage,
-               "id": job_id}
+               "job_id": job_id}
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
@@ -266,7 +266,7 @@ class TestSGEController(testtools.TestCase):
         home = "/foo"
         spool_dir = "/foo"
         job_info = {"home": home,
-            "job": {"id": job_id,
+            "job": {"job_id": job_id,
                     "spool": spool_dir
                     }
             }
@@ -321,7 +321,7 @@ class TestSGEController(testtools.TestCase):
         accounting = "/foo"
         m_acc.return_value = accounting
         job = {"field1": memory_usage,
-               "id": job_id}
+               "job_id": job_id}
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}

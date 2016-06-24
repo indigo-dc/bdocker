@@ -59,7 +59,7 @@ class UserController(object):
         }
         if 'job' in user_info:
             token_content['job'] = {
-                    "id": user_info['job']['id'],
+                    "job_id": user_info['job']['job_id'],
                     "spool": user_info['job']['spool']
                 }
         new_token = {token: token_content}

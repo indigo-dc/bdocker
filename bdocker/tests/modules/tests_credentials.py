@@ -135,7 +135,7 @@ class TestUserCredentials(testtools.TestCase):
         t = self.control._get_token_from_cache(
             "prolog")['token']
         u = create_parameters()['user_credentials']
-        u.update({'job': {'id': jobid,
+        u.update({'job': {'job_id': jobid,
                          'spool': spool}
                   })
         token = self.control.authenticate(admin_token=t,
