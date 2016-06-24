@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,7 @@ import pwd
 import re
 import yaml
 
-from bdocker.common import exceptions
+from bdocker import exceptions
 
 
 WORKING_NODE='working'

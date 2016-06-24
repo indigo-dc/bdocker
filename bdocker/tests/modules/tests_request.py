@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -20,7 +20,7 @@ import testtools
 import webob
 
 
-from bdocker.common import request
+from bdocker.modules import request
 
 
 def create_fake_json_resp(data, status=200):

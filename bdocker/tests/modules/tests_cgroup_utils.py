@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -13,14 +13,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import cgroupspy
 import exceptions
-import mock
-import testtools
 import uuid
 
-from bdocker.common import cgroups_utils
-from bdocker.common import exceptions as bdocker_exceptions
+import cgroupspy
+import mock
+import testtools
+
+from bdocker import exceptions as bdocker_exceptions
+from bdocker.modules import cgroups_utils
 
 
 class TestCgroups(testtools.TestCase):
@@ -32,7 +33,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.cgroups_utils.task_to_cgroup")
+    @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     def test_create_tree_cgroup(self, m_add, m_cre, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node]
@@ -53,7 +54,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.cgroups_utils.task_to_cgroup")
+    @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     def test_create_tree_cgroup_several(self, m_add, m_cre, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node,
@@ -74,7 +75,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.cgroups_utils.task_to_cgroup")
+    @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     def test_create_tree_cgroup_exception(self, m_add, m_cre, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node]
@@ -91,8 +92,8 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
-    @mock.patch("bdocker.common.cgroups_utils.task_to_cgroup")
-    @mock.patch("bdocker.common.utils.read_file")
+    @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
+    @mock.patch("bdocker.utils.read_file")
     def test_delete_tree_cgroup(self, m_rad, m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
@@ -116,8 +117,8 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
-    @mock.patch("bdocker.common.cgroups_utils.task_to_cgroup")
-    @mock.patch("bdocker.common.utils.read_file")
+    @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
+    @mock.patch("bdocker.utils.read_file")
     def test_delete_tree_cgroup_several_nodes(self, m_rad, m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
@@ -143,7 +144,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.utils.add_to_file")
+    @mock.patch("bdocker.utils.add_to_file")
     def test_create_cgroup(self, m_add, m_cre, m_path):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               ]
@@ -162,7 +163,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.utils.add_to_file")
+    @mock.patch("bdocker.utils.add_to_file")
     def test_create_cgroup_several_parents(self, m_add, m_cre, m_path):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               cgroupspy.nodes.Node,
@@ -203,7 +204,7 @@ class TestCgroups(testtools.TestCase):
 
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
-    @mock.patch("bdocker.common.utils.add_to_file")
+    @mock.patch("bdocker.utils.add_to_file")
     def test_create_cgroup_no_pid(self, m_add, m_cre, m_path):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               cgroupspy.nodes.Node,

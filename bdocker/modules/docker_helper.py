@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,8 +15,8 @@
 # under the License.
 import docker as docker_py
 
-from bdocker.common import exceptions
-from bdocker.common import parsers
+from bdocker import exceptions
+from bdocker import parsers
 
 # sys.tracebacklimit = 0
 

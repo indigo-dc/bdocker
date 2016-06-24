@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,15 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import io
-import mock
-import os
-import testtools
 import uuid
 
-from bdocker.common.modules import batch
-from bdocker.common import exceptions
-from bdocker.common import request
+import mock
+import testtools
+
+from bdocker import exceptions
+from bdocker.modules import request
+from bdocker.modules import batch
+
 
 class TestBacthNotificationController(testtools.TestCase):
 
@@ -94,7 +94,7 @@ class TestSGEAccController(testtools.TestCase):
         expected = line.split(":")
         self.assertEqual(expected, out)
 
-    @mock.patch("bdocker.common.utils.add_to_file")
+    @mock.patch("bdocker.utils.add_to_file")
     def test_update_accounting(self, m):
         controller = batch.SGEAccountingController(mock.MagicMock())
         out = controller.set_job_accounting(None)
@@ -109,8 +109,8 @@ class TestSGEController(testtools.TestCase):
         self.acc_conf = {"host": "/foo",
                          "port": "11"}
 
-    @mock.patch("bdocker.common.utils.read_file")
-    @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
+    @mock.patch("bdocker.utils.read_file")
+    @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEController,"_create_accounting_file")
     @mock.patch.object(batch.SGEController,"_launch_job_monitoring")
     @mock.patch.object(batch.SGEController, "notify_accounting")
@@ -146,8 +146,8 @@ class TestSGEController(testtools.TestCase):
             pid=parent_id
         )
 
-    @mock.patch("bdocker.common.utils.read_file")
-    @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
+    @mock.patch("bdocker.utils.read_file")
+    @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEController,"_create_accounting_file")
     @mock.patch.object(batch.SGEController,"_launch_job_monitoring")
     @mock.patch.object(batch.SGEController, "notify_accounting")
@@ -183,8 +183,8 @@ class TestSGEController(testtools.TestCase):
             pid=parent_id
         )
 
-    @mock.patch("bdocker.common.utils.read_file")
-    @mock.patch("bdocker.common.cgroups_utils.create_tree_cgroups")
+    @mock.patch("bdocker.utils.read_file")
+    @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     def test_conf_environment_no_cgroup(self, m_cre, m_read):
         spool_dir = "/foo"
         home = "/foo"
@@ -205,8 +205,8 @@ class TestSGEController(testtools.TestCase):
         self.assertIs(False, m_read.called)
         self.assertIs(False, m_cre.called)
 
-    @mock.patch("bdocker.common.cgroups_utils.delete_tree_cgroups")
-    @mock.patch("bdocker.common.utils.delete_file")
+    @mock.patch("bdocker.modules.cgroups_utils.delete_tree_cgroups")
+    @mock.patch("bdocker.utils.delete_file")
     @mock.patch.object(batch.SGEController, "notify_accounting")
     def test_clean_environment(self, m_not, m_del_file, m_del_tree):
         admin_token = uuid.uuid4().hex
@@ -231,8 +231,8 @@ class TestSGEController(testtools.TestCase):
             root_parent=conf["cgroups_dir"]
         )
 
-    @mock.patch("bdocker.common.cgroups_utils.delete_tree_cgroups")
-    @mock.patch("bdocker.common.utils.delete_file")
+    @mock.patch("bdocker.modules.cgroups_utils.delete_tree_cgroups")
+    @mock.patch("bdocker.utils.delete_file")
     def test_clean_environment_no_cgroup(self, m_del_file, m_del_tree):
         admin_token = uuid.uuid4().hex
         job_id = uuid.uuid4().hex
@@ -285,7 +285,7 @@ class TestSGEController(testtools.TestCase):
         self.assertEqual(expected, out)
 
     @mock.patch.object(batch.SGEController, "create_accounting")
-    @mock.patch("bdocker.common.utils.read_yaml_file")
+    @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch.object(batch.BatchNotificationController, "notify_accounting")
     def test_notify_accounting(self, m_ba_not, m_not, m_acc):
         job_id = uuid.uuid4().hex
@@ -339,11 +339,11 @@ class TestSGEController(testtools.TestCase):
                          job_id,
                          account
                          ]
-        job = {'id': job_id,
+        job = {'job_id': job_id,
                'queue_name': queue_name,
                'host_name': host_name,
-               'log_name_name': log_name,
-               'job_name_name': job_name,
+               'log_name': log_name,
+               'job_name': job_name,
                'account_name': account,
                'cpu_usage': cpu_usage,
                'memory_usage': memory_usage,

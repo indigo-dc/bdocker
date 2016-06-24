@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -13,14 +13,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import testtools
 import uuid
 
-from click.testing import CliRunner
 import mock
+import testtools
+from click.testing import CliRunner
 
 from bdocker.client import cli
-from bdocker.client.controller import commands
+from bdocker.client import decorators
+from bdocker.client import commands
 
 
 class TestCaseCommandLine(testtools.TestCase):
@@ -40,6 +41,19 @@ class TestCommandProject(TestCaseCommandLine):
 
     def setUp(self):
         super(TestCommandProject, self).setUp()
+
+    def test_parse_vol(self):
+        h_dir = "/root/docker_test/"
+        d_dir = "/tmp"
+        volume_path = "%s:%s" % (h_dir, d_dir)
+        vol = decorators.parse_volume(None, None, volume_path)
+        self.assertEqual(h_dir, vol['host_dir'])
+        self.assertEqual(d_dir, vol['docker_dir'])
+
+    def test_parse_vol_empty(self):
+        volume_path = None
+        vol = decorators.parse_volume(None, None, volume_path)
+        self.assertIsNone(vol)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "configuration")

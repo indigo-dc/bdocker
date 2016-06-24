@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,12 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
-import testtools
 import uuid
 
-from bdocker.common.modules import credentials
-from bdocker.common import exceptions
+import mock
+import testtools
+
+from bdocker import exceptions
+from bdocker.modules import credentials
 
 
 def create_parameters():
@@ -39,7 +40,7 @@ class TestUserCredentials(testtools.TestCase):
     def setUp(self):
         super(TestUserCredentials, self).setUp()
         self.path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
-                    "bdocker/bdocker/tests/server/fake_token_store.yml"
+                    "bdocker/bdocker/tests/modules/fake_token_store.yml"
         self.control = credentials.UserController(self.path)
 
     def test_token_store(self):
@@ -52,7 +53,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual("token_prolog", user_info['token'])
 
 
-    @mock.patch('bdocker.common.utils.check_user_credentials')
+    @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate(self, m):
         t = self.control._get_token_from_cache(
             "prolog")['token']
@@ -67,7 +68,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertNotIn('job', token_info)
         self.control.remove_token_from_cache(token)
 
-    @mock.patch('bdocker.common.utils.check_user_credentials')
+    @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate_with_job(self, m):
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
@@ -86,7 +87,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertNotIn('cgroup', job_info)
         self.control.remove_token_from_cache(token)
 
-    # @mock.patch('bdocker.common.utils.check_user_credentials')
+    # @mock.patch('bdocker.utils.check_user_credentials')
     # def test_authenticate_with_job_accouting_info(self, m):
     #     jobid = uuid.uuid4().hex
     #     spool = uuid.uuid4().hex
@@ -125,7 +126,7 @@ class TestUserCredentials(testtools.TestCase):
     #     self.control.remove_token_from_cache(token)
 
 
-    @mock.patch('bdocker.common.utils.check_user_credentials')
+    @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate_with_job_batch_info(self, m):
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
@@ -147,7 +148,7 @@ class TestUserCredentials(testtools.TestCase):
         self.control.remove_token_from_cache(token)
         self.assertIsNotNone(token)
 
-    @mock.patch('bdocker.common.utils.check_user_credentials')
+    @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate_save_file(self, m):
         t = self.control._get_token_from_cache("prolog")['token']
         u = create_parameters()['user_credentials']
@@ -176,7 +177,7 @@ class TestUserCredentials(testtools.TestCase):
     def test_authorize_err(self):
         t = 'token'
         self.assertRaises(exceptions.UserCredentialsException,
-            self.control.authorize, t)
+                          self.control.authorize, t)
 
     def test_authorize_containers(self):
         t = 'token2'
@@ -190,7 +191,7 @@ class TestUserCredentials(testtools.TestCase):
         t = 'token'
         c = '84848'
         self.assertRaises(exceptions.UserCredentialsException,
-            self.control.authorize_container, t, c)
+                          self.control.authorize_container, t, c)
 
     def test_add_container(self):
         token = "token2"
@@ -236,7 +237,7 @@ class TestUserCredentials(testtools.TestCase):
         t = 'token'
         c = '84848'
         self.assertRaises(exceptions.UserCredentialsException,
-            self.control.authorize_image, t, c)
+                          self.control.authorize_image, t, c)
 
     def test_add_image(self):
         token = "token2"
@@ -289,7 +290,7 @@ class TestUserCredentials(testtools.TestCase):
         pass
 
     @mock.patch.object(credentials.UserController,"_get_token_from_cache")
-    @mock.patch("bdocker.common.utils.validate_directory")
+    @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory(self, m_val, m_token):
         token = uuid.uuid4().hex
         jobid = uuid.uuid4().hex
@@ -306,7 +307,7 @@ class TestUserCredentials(testtools.TestCase):
         self.control.authorize_directory(token, None)
 
     @mock.patch.object(credentials.UserController,"_get_token_from_cache")
-    @mock.patch("bdocker.common.utils.validate_directory")
+    @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory_err(self, m_val, m_token):
         token = uuid.uuid4().hex
         jobid = uuid.uuid4().hex

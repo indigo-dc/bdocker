@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,15 +15,15 @@
 # under the License.
 
 import uuid
-import testtools
 
 import mock
+import testtools
 
-from bdocker.common.modules import credentials
-from bdocker.common.modules import docker_helper
-from bdocker.common.modules import batch
-from bdocker.common import utils
-from bdocker.common import exceptions
+from bdocker import exceptions
+from bdocker import utils
+from bdocker.modules import batch
+from bdocker.modules import credentials
+from bdocker.modules import docker_helper
 from bdocker.server import controller
 
 FAKE_CONF = {
@@ -40,7 +40,7 @@ class TestAccountingServerController(testtools.TestCase):
     def setUp(self):
         super(TestAccountingServerController, self).setUp()
         path = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
-                "bdocker/bdocker/common/"
+                "bdocker/bdocker/tests/"
                 "configure_bdocker_accounting.cfg")
         # TODO(jorgesece): create a fake conf without need a file
         conf = utils.load_configuration_from_file(path)
@@ -69,7 +69,7 @@ class TestServerController(testtools.TestCase):
     def setUp(self):
         super(TestServerController, self).setUp()
         path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
-                                          "bdocker/bdocker/common/" \
+                                          "bdocker/bdocker/tests/" \
                                           "configure_bdocker.cfg"
         # TODO(jorgesece): create a fake conf without need a file
         conf = utils.load_configuration_from_file(path)

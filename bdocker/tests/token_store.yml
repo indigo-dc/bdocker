@@ -1,3 +1,8 @@
+26431bbb8eb94b01b0838689741271f6:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
 3cbd0e57d42143f3883118e7bf489fbe:
   gid: 1000
   home: /home/jorge
@@ -14,6 +19,26 @@
   gid: 1000
   home: /home/jorge
   job: {id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+82cf93e215bb44b48f809881d69c37c2:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+83e6c694368a44668b6bbd2cb758ccb3:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+98bc472fe6b14a8c9c0a7e2692f354aa:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+a196380163f34c0eb84b0af2ed733df6:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
   uid: 1000
 a77cdcf07e01441f8305daa169583ad9:
   gid: 1000

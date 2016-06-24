@@ -16,17 +16,16 @@
 
 import logging
 
-from bdocker.common import exceptions
-from bdocker.common import modules as modules_common
-from bdocker.server import utils as utils_server
+from bdocker import modules
+from bdocker import server
 
 LOG = logging.getLogger(__name__)
 
 
 class AccountingServerController(object):
     def __init__(self, conf):
-        self.credentials_module = modules_common.load_credentials_module(conf)
-        self.batch_module = modules_common.load_batch_accounting_module(conf)
+        self.credentials_module = modules.load_credentials_module(conf)
+        self.batch_module = modules.load_batch_accounting_module(conf)
 
     def set_job_accounting(self, data):
         """ Update the accounting file using the incoming data
@@ -34,7 +33,7 @@ class AccountingServerController(object):
         """
         required = {'admin_token',
                     "accounting"}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         admin_token = data['admin_token']
         accounting = data["accounting"]
         self.credentials_module.authorize_admin(admin_token)
@@ -44,9 +43,9 @@ class AccountingServerController(object):
 
 class ServerController(object):
     def __init__(self, conf):
-        self.credentials_module = modules_common.load_credentials_module(conf)
-        self.batch_module = modules_common.load_batch_module(conf)
-        self.docker_module = modules_common.load_docker_module(conf)
+        self.credentials_module = modules.load_credentials_module(conf)
+        self.batch_module = modules.load_batch_module(conf)
+        self.docker_module = modules.load_docker_module(conf)
 
     def configuration(self, data):
         """Configure bdocker user environment.
@@ -56,7 +55,7 @@ class ServerController(object):
         :return: user_token
         """
         required = {'admin_token', 'user_credentials'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         admin_token = data['admin_token']
         session_data = data['user_credentials']
         user_token = self.credentials_module.authenticate(
@@ -81,9 +80,9 @@ class ServerController(object):
         :return: user_token
         """
         required = {'admin_token', 'token'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         admin_token = data['admin_token']
-        force = utils_server.eval_bool(
+        force = server.eval_bool(
             data.get('force', False)
         )
         self.credentials_module.authorize_admin(admin_token)
@@ -107,7 +106,7 @@ class ServerController(object):
         :return: output
         """
         required = {'token', 'source'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         repo = data['source']
         self.credentials_module.authorize(token)
@@ -121,7 +120,7 @@ class ServerController(object):
         :return: Request 201 with results
         """
         required = {'token','image_id', 'script'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         image_id = data['image_id']
         script = data['script']
@@ -162,9 +161,9 @@ class ServerController(object):
         :return: Request 200 with results
         """
         required = {'token'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
-        all_list = utils_server.eval_bool(data.get('all', False))
+        all_list = server.eval_bool(data.get('all', False))
         containers = self.credentials_module.list_containers(token)
         results = []
         if containers:
@@ -178,7 +177,7 @@ class ServerController(object):
         :return: Request 200 with results
         """
         required = {'token', 'container_id'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         c_id = self.credentials_module.authorize_container(
@@ -193,7 +192,7 @@ class ServerController(object):
         :return: Request 200 with results
         """
         required = {'token', 'container_id'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,
@@ -207,10 +206,10 @@ class ServerController(object):
         :return: Request 200 with results
         """
         required = {'token', 'container_id'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         container_ids = data['container_id']
-        force = utils_server.eval_bool(
+        force = server.eval_bool(
             data.get('force', False)
         )
         docker_out = []
@@ -238,7 +237,7 @@ class ServerController(object):
         :return: output
         """
         required = {'admin_token', 'token'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         admin_token = data['admin_token']
         self.credentials_module.authorize_admin(admin_token)
         token = data['token']
@@ -255,7 +254,7 @@ class ServerController(object):
 
     def stop_container(self, data):
         required = {'token', 'container_id'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,
@@ -266,7 +265,7 @@ class ServerController(object):
 
     def accounting(self, data):
         required = {'token'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         # todo: study the implementation
         token_info = self.credentials_module.authorize_container(token)
@@ -275,7 +274,7 @@ class ServerController(object):
 
     def output(self, data):
         required = {'token', 'container_id'}
-        utils_server.validate(data, required)
+        server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
         self.credentials_module.authorize_container(token,

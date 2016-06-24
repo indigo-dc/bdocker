@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -20,9 +20,9 @@ import docker
 import mock
 import testtools
 
-from bdocker.common import exceptions
-from bdocker.common.modules import docker_helper
-from bdocker.tests.server import fake_docker_outputs
+from bdocker import exceptions
+from bdocker.modules import docker_helper
+from bdocker.tests.modules import fake_docker_outputs
 
 container1 = {'Command': '/bin/sleep 30',
               'Created': 1412574844,
@@ -210,7 +210,7 @@ class TestDocker(testtools.TestCase):
         self.assertEqual(out_put, fake_docker_outputs.fake_log)
 
     @mock.patch.object(docker.Client, 'inspect_container')
-    @mock.patch("bdocker.common.parsers.parse_inspect_container")
+    @mock.patch("bdocker.parsers.parse_inspect_container")
     def test_containers_details(self, m_parse, m_ins):
         details = fake_docker_outputs.fake_container_details
         m_parse.return_value = json.dumps(details)
@@ -222,7 +222,7 @@ class TestDocker(testtools.TestCase):
         self.assertIn("State", json_data)
 
     @mock.patch.object(docker.Client, 'inspect_container')
-    @mock.patch("bdocker.common.parsers.parse_inspect_container")
+    @mock.patch("bdocker.parsers.parse_inspect_container")
     def test_containers_details_err(self, m_parse, m_ins):
         container_id = uuid.uuid4().hex
         m_ins.side_effect = exceptions.DockerException(
@@ -234,7 +234,7 @@ class TestDocker(testtools.TestCase):
                   container_id)
 
     @mock.patch.object(docker.Client, 'logs')
-    @mock.patch("bdocker.common.parsers.parse_docker_log")
+    @mock.patch("bdocker.parsers.parse_docker_log")
     def test_logs(self, m_parse, m_log):
         logs = fake_docker_outputs.fake_log
         m_parse.return_value = logs
@@ -245,7 +245,7 @@ class TestDocker(testtools.TestCase):
         self.assertEqual(logs, out)
 
     @mock.patch.object(docker.Client, 'logs')
-    @mock.patch("bdocker.common.parsers.parse_docker_log")
+    @mock.patch("bdocker.parsers.parse_docker_log")
     def test_logs_err(self, m_parse, m_log):
         container_id = uuid.uuid4().hex
         m_log.side_effect = exceptions.DockerException(

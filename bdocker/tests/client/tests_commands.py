@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -20,30 +20,38 @@ import uuid
 import mock
 import testtools
 
-from bdocker.client.controller import commands
-from bdocker.common import exceptions
-from bdocker.common.modules import batch
-from bdocker.common import request
+from bdocker import exceptions
+from bdocker.client import commands
+from bdocker.modules import request
+from bdocker.modules import batch
 
+# TODO(jorgesece): this should be fake
 os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/" \
-                                  "common/configure_bdocker.cfg"
+                                  "tests/configure_bdocker.cfg"
 
 class TestCommands(testtools.TestCase):
     """Test User Credential controller."""
 
-    @mock.patch('bdocker.client.controller.utils.load_configuration')
+    @mock.patch('bdocker.utils.load_configuration_from_file')
     def setUp(self, m):
         super(TestCommands, self).setUp()
         self.job_id = uuid.uuid4().hex
-        m.return_value = {'token_store':'/foo',
-                          'endpoint': 'http://foo',
-                          'token_file': '.bdocker_token',
-                          'job_id': self.job_id
-                          }
+
+        m.return_value = {'batch': {
+            'system': "SGE"
+        },
+            'accounting_server': {'host': 'host',
+                                  'port': 'port'},
+
+            'server': {'host': 'host',
+                       'port': 'port',
+                       'environ': 'debug'},
+            'credentials': {'token_store': 'kk'}
+        }
         self.control = commands.CommandController()
 
 
-    @mock.patch('bdocker.common.utils.load_configuration_from_file')
+    @mock.patch('bdocker.utils.load_configuration_from_file')
     def test_create_configuration_error(self, m):
         conf = {"token_file"}
         m.return_value = conf
@@ -52,9 +60,9 @@ class TestCommands(testtools.TestCase):
                           )
 
     @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.commands.get_user_credentials")
+    @mock.patch("bdocker.client.commands.write_user_credentials")
+    @mock.patch("bdocker.client.commands.get_admin_token")
     def test_configuration_token_error(self, m_ad, m_write, m_u, m_post):
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
@@ -64,9 +72,9 @@ class TestCommands(testtools.TestCase):
                           1)
 
     @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.commands.get_user_credentials")
+    @mock.patch("bdocker.client.commands.write_user_credentials")
+    @mock.patch("bdocker.client.commands.get_admin_token")
     @mock.patch.object(batch.SGEController, "get_job_info")
     def test_configuration(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
@@ -87,9 +95,9 @@ class TestCommands(testtools.TestCase):
         self.assertIn(home_dir, u['path'])
 
     @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.commands.get_user_credentials")
+    @mock.patch("bdocker.client.commands.write_user_credentials")
+    @mock.patch("bdocker.client.commands.get_admin_token")
     @mock.patch.object(batch.SGEController, "get_job_info")
     def test_configuration_with_job(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
@@ -120,7 +128,7 @@ class TestCommands(testtools.TestCase):
                                  parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_container_pull(self, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
@@ -130,7 +138,7 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(image_id, results)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_container_run(self, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
@@ -141,7 +149,7 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(container_id, results)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_container_run_2(self, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
@@ -152,7 +160,7 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(out, results)
 
     @mock.patch.object(request.RequestController, "execute_get")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_container_list(self, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         containers = ["container_1", "container_2"]
@@ -162,8 +170,8 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(containers[1], results[1])
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_clean(self, m_t, m_ad, m_del):
         force = True
         token = uuid.uuid4().hex
@@ -180,8 +188,8 @@ class TestCommands(testtools.TestCase):
                                  parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_clean_admin_err(self, m_t, m_ad, m_del):
         m_ad.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
@@ -190,8 +198,8 @@ class TestCommands(testtools.TestCase):
                           None)
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch("bdocker.client.commands.token_parse")
     def test_clean_token_err(self, m_t, m_ad, m_del):
         m_t.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
@@ -200,9 +208,9 @@ class TestCommands(testtools.TestCase):
                           None)
 
     @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.controller.utils.get_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.write_user_credentials")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
+    @mock.patch("bdocker.client.commands.get_user_credentials")
+    @mock.patch("bdocker.client.commands.write_user_credentials")
+    @mock.patch("bdocker.client.commands.get_admin_token")
     @mock.patch.object(batch.SGEController, "get_job_info")
     def test_full_configuration(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
@@ -233,8 +241,8 @@ class TestCommands(testtools.TestCase):
                                  parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    @mock.patch("bdocker.client.controller.utils.get_admin_token")
-    @mock.patch("bdocker.client.controller.utils.token_parse")
+    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch("bdocker.client.commands.token_parse")
     @mock.patch.object(batch.SGEController, "create_accounting")
     def test_notify_accounting(self, m_acc, m_t, m_ad, m_del):
         token = uuid.uuid4().hex

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,15 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
-import testtools
 import uuid
-import webob
 
 import mock
+import testtools
+import webob
 
-from bdocker.common import exceptions
-from bdocker.common import request
+from bdocker import exceptions
+from bdocker.modules import request
 from bdocker.server import controller
 
 
@@ -30,7 +29,7 @@ class TestAccRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
 
-    @mock.patch("bdocker.common.utils.load_configuration_from_file")
+    @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch.object(controller.AccountingServerController, "__init__")
     def setUp(self, m_conf, m_load):
         super(TestAccRESTAPI, self).setUp()
@@ -52,7 +51,7 @@ class TestAccRESTAPI(testtools.TestCase):
                       }
         body = request.make_body(parameters)
         result = webob.Request.blank("/set_accounting",
-                                     method="POST",
+                                     method="PUT",
                                      content_type="application/json",
                                      body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
@@ -62,7 +61,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
 
-    @mock.patch("bdocker.common.utils.load_configuration_from_file")
+    @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch.object(controller.ServerController, "__init__")
     def setUp(self, m_conf, m_load):
         super(TestWorkingNodeRESTAPI, self).setUp()

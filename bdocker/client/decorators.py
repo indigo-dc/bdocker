@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,8 +16,49 @@
 
 import click
 
-from bdocker.client.controller import utils
+from bdocker import exceptions
 
+# Callbacks
+
+def parse_volume(ctx, param, value):
+    """Command Client Callback. Parse volume
+
+    :param ctx: contex
+    :param param: parameters
+    :param value: input value
+    """
+    result = None
+    if value:
+        try:
+            # /root/docker_test/:/tmp
+            volume_info = value.split(":")
+            h_dir = volume_info[0]
+            docker_dir = volume_info[1]
+            result = {"host_dir": h_dir,"docker_dir": docker_dir}
+        except Exception:
+            raise exceptions.ParseException(
+                "%s is not an absolute path" % value
+            )
+    return result
+
+
+def parse_bool(ctx, param, value):
+    """Command Client Callback. Parse bool
+
+    :param ctx: contex
+    :param param: parameters
+    :param value: input value
+    """
+
+    if value:
+        if value == 'True' or value == 'true':
+            return True
+        elif value == 'False' or value == 'false':
+            return False
+        else:
+            raise exceptions.ParseException(
+                'Value error: %s' % value
+            )
 
 def endpoint_argument(f):
     return click.option(
@@ -124,7 +165,7 @@ def force_option(f):
 def volume_option(f):
     return click.option(
         '--volume', '-v', default=None, type=click.STRING
-        , callback=utils.parse_volume
+        , callback=parse_volume
         , help='Bind mount a volume'
     )(f)
 

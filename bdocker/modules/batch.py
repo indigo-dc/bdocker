@@ -18,10 +18,9 @@ import os
 import signal
 import time
 
-from bdocker.common import cgroups_utils
-from bdocker.common import exceptions
-from bdocker.common import request
-from bdocker.common import utils
+from bdocker import utils, exceptions
+from bdocker.modules import cgroups_utils
+from bdocker.modules import request
 
 LOG = logging.getLogger(__name__)
 

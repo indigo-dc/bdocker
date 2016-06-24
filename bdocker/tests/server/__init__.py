@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,8 +16,8 @@
 
 import testtools
 
-from bdocker.common import utils
-from bdocker.common import exceptions
+from bdocker import utils
+from bdocker import exceptions
 
 
 class TestConfigurationWorkingNode(testtools.TestCase):
@@ -29,7 +29,7 @@ class TestConfigurationWorkingNode(testtools.TestCase):
     def test_load_config_file(self):
         conf = utils.load_configuration_from_file(
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
-            'bdocker/bdocker/tests/server/'
+            'bdocker/bdocker/tests/modules/'
             'fake_configure_file.cfg')
         self.assertIsNotNone(conf)
         self.assertEqual(6, conf.items().__len__())
@@ -38,7 +38,7 @@ class TestConfigurationWorkingNode(testtools.TestCase):
         self.assertRaises(exceptions.ConfigurationException,
                           utils.load_configuration_from_file,
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
-            'bdocker/bdocker/tests/server/'
+            'bdocker/bdocker/tests/modules/'
             'fake_configure_file_error.cfg')
 
 
@@ -51,7 +51,7 @@ class TestConfigurationMaster(testtools.TestCase):
     def test_load_config_file(self):
         conf = utils.load_configuration_from_file(
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
-            'bdocker/bdocker/tests/server/'
+            'bdocker/bdocker/tests/modules/'
             'fake_configure_file_accounting.cfg')
         self.assertIsNotNone(conf)
         self.assertEqual(4, conf.items().__len__())
@@ -60,5 +60,5 @@ class TestConfigurationMaster(testtools.TestCase):
         self.assertRaises(exceptions.ConfigurationException,
                           utils.load_configuration_from_file,
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
-            'bdocker/bdocker/tests/server/'
+            'bdocker/bdocker/tests/modules/'
             'fake_configure_file_error.cfg')

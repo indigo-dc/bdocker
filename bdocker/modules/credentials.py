@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 LIP - Lisbon
+# Copyright 2015 LIP - INDIGO-DataCloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,8 +16,8 @@
 import sys
 import uuid
 
-from bdocker.common import exceptions
-from bdocker.common import utils as utils_common
+from bdocker import exceptions
+from bdocker import utils
 
 sys.tracebacklimit = 0
 
@@ -27,13 +27,13 @@ class UserController(object):
     def __init__(self, path):
         # TODO(jorgesece): control refresh token
         self.path = path
-        self.token_store = utils_common.read_yaml_file(path)
+        self.token_store = utils.read_yaml_file(path)
 
     def save_token_file(self):
         """Save token store in the file
 
         """
-        utils_common.write_yaml_file(self.path, self.token_store)
+        utils.write_yaml_file(self.path, self.token_store)
 
     def _get_token_from_cache(self, token):
         # TODO(jorgesece): refresh from file?
@@ -63,7 +63,7 @@ class UserController(object):
                     "spool": user_info['job']['spool']
                 }
         new_token = {token: token_content}
-        self.token_store = utils_common.read_yaml_file(
+        self.token_store = utils.read_yaml_file(
             self.path
         )
         self.token_store.update(new_token)
@@ -79,7 +79,7 @@ class UserController(object):
         current_token = self._get_token_from_cache(token)
         for key, value in fields.items():
             current_token[key] = value
-        self.token_store = utils_common.read_yaml_file(
+        self.token_store = utils.read_yaml_file(
             self.path
         )
         self.token_store.update({token: current_token})
@@ -97,7 +97,7 @@ class UserController(object):
         :param user_data: array of element to be updated
         """
         self.authorize_admin(admin_token)
-        utils_common.check_user_credentials(session_data)
+        utils.check_user_credentials(session_data)
         try:
             token = self._set_token(session_data)
         except Exception as e:
@@ -117,7 +117,7 @@ class UserController(object):
 
     def get_token_from_file(self, path, file_name, jobid):
         path = "%s/%s_%s" % (path, file_name, jobid)
-        token = utils_common.read_user_credentials(path)
+        token = utils.read_user_credentials(path)
         return self._get_token_from_cache(token)
 
     def remove_token_from_cache(self, token):
@@ -128,7 +128,7 @@ class UserController(object):
         if token not in self.token_store:
             raise exceptions.UserCredentialsException(
                 "Token not found")
-        self.token_store = utils_common.read_yaml_file(
+        self.token_store = utils.read_yaml_file(
             self.path
         )
         del self.token_store[token]
@@ -245,7 +245,7 @@ class UserController(object):
         """
         # todo: add unittest
         token_info = self._get_token_from_cache(token)
-        utils_common.validate_directory(dir_path, token_info['home'])
+        utils.validate_directory(dir_path, token_info['home'])
 
     def authorize(self, token):
         """Check token authorization.
