@@ -227,15 +227,23 @@ class SGEController(BatchWNController):
             try:
                 time.sleep(self.flush_time)
                 acc = cgroups_utils.get_accounting(
-                     job_id,
-                     self.parent_group,
-                     root_parent=self.root_cgroup)
+                    job_id,
+                    self.parent_group,
+                    root_parent=self.root_cgroup)
                 utils.update_yaml_file(file_path, acc)
                 if cpu_max:
                     if acc["cpu_usage"] >= cpu_max:
+                        LOG.exception("KILL JOB by CPU%s. Acc: %s. Max: %s" %
+                                      (job_id, acc["cpu_usage"],
+                                       cpu_max
+                                       ))
                         self._kill_job(spool)
                 if mem_max:
                     if acc["memory_usage"] >= mem_max:
+                        LOG.exception("KILL JOB by MEM%s. Acc: %s. Max: %s" %
+                                      (job_id, acc["memory_usage"],
+                                       mem_max
+                                       ))
                         self._kill_job(spool)
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
@@ -392,7 +400,7 @@ class SGEController(BatchWNController):
         }
 
     @staticmethod
-    def _kill_job(self, spool):
+    def _kill_job(spool):
         try:
             job_pid_path = "%s/job_pid" % spool
             job_pid = utils.read_file(job_pid_path)
