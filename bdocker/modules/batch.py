@@ -369,7 +369,7 @@ class SGEController(BatchWNController):
         hostname = conf['host']
         logname = conf['job_owner']
         job_name = conf['job_name']
-        account = conf['account_name']
+        account = conf['account']
         max_cpu = conf['h_cpu']
         if max_cpu == "INFINITY":
             max_cpu = None

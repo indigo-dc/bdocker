@@ -604,7 +604,7 @@ class TestSGEController(testtools.TestCase):
                           "host": host,
                           "job_owner": job_owner,
                           "job_name": job_name,
-                          "account_name": account,
+                          "account": account,
                           "h_cpu": max_cpu,
                           "h_data": max_mem
                           }
