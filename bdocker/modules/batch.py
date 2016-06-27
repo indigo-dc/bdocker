@@ -18,7 +18,7 @@ import os
 import signal
 import time
 
-from bdocker import utils, exceptions
+from bdocker import utils, exceptions, parsers
 from bdocker.modules import cgroups_utils
 from bdocker.modules import request
 
@@ -365,14 +365,22 @@ class SGEController(BatchWNController):
     def _get_job_configuration(spool):
         path = "%s/config" % spool
         conf = utils.load_sge_job_configuration(path)
-        job_id = conf['job_id']
         qname = conf['queue']
         hostname = conf['host']
         logname = conf['job_owner']
         job_name = conf['job_name']
         account = conf['account_name']
         max_cpu = conf['h_cpu']
+        if max_cpu == "INFINITY":
+            max_cpu = None
+        else:
+            max_cpu = parsers.parse_time_to_nanoseconds(
+                max_cpu
+            )
         max_memory = conf['h_data']
+        if max_memory == "INFINITY":
+            max_memory = None
+
         return {
             'queue_name': qname,
             'host_name': hostname,

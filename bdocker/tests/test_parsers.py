@@ -69,3 +69,18 @@ class TestParsers(testtools.TestCase):
         details = fake_docker_outputs.fake_container_details
         out = parsers.parse_inspect_container(details)
         self.assertIsNotNone(out)
+
+    def test_parse_hours(self):
+        hour = 55
+        minute = 0
+        second = 1
+        fact = 1000000000
+        nanosenconds = (hour*60*60 + minute*60 + second) * fact
+        time_str = "%s:%s:%s" % (hour, minute, second)
+        out = parsers.parse_time_to_nanoseconds(time_str)
+        self.assertIsNotNone(out)
+        self.assertEqual(nanosenconds, out)
+
+    def test_parse_hours_None(self):
+        out = parsers.parse_time_to_nanoseconds(None)
+        self.assertIsNone(out)

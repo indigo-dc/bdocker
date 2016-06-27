@@ -239,4 +239,3 @@ def add_to_file(file_path, data):
         file_obj.write(data)
     file_obj.close()
     return True
-

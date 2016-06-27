@@ -14,6 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from datetime import datetime
+from datetime import timedelta
+import math
 import json
 import re
 
@@ -172,3 +174,15 @@ def parse_list_container(data):
 def parse_inspect_container(data):
     json_data = json.dumps([data], indent=2)
     return json_data
+
+
+def parse_time_to_nanoseconds(time_str):
+    try:
+        parsed = time_str.split(":")
+        time_struc = timedelta(hours=int(parsed[0]),
+                               minutes=int(parsed[1]),
+                               seconds=int(parsed[2]))
+        nanoseg = time_struc.total_seconds() * 1000000000
+        return nanoseg
+    except BaseException as e:
+        return None

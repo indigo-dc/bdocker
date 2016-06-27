@@ -564,10 +564,10 @@ class TestSGEController(testtools.TestCase):
         path = "/foo"
         admin_token = uuid.uuid4().hex
         memory_usage = 99
-        cpu_usage = 111
+        cpu_usage = 2  # nanoseconds
         interval = 33
         spool = "/baa"
-        cpu_max = 1111
+        cpu_max = "0:0:40"
         mem_max = 9
         acc = {"memory_usage": memory_usage,
                "cpu_usage": cpu_usage}
@@ -589,3 +589,34 @@ class TestSGEController(testtools.TestCase):
             path, acc)
         self.assertEquals(True, m_kill_job.called)
         self.assertEquals(1, m_kill_job.call_count)
+
+    @mock.patch("bdocker.parsers.parse_time_to_nanoseconds")
+    @mock.patch("bdocker.utils.load_sge_job_configuration")
+    def test_get_job_configuration(self, m_load, m_parse):
+        queue = "ff"
+        host = "ooo.nova"
+        job_owner = "uyo"
+        account = "accseg"
+        max_cpu = "00:40:00"
+        max_mem = 11
+        job_name = "rrrr"
+        m_load.return_value = {"queue": queue,
+                          "host": host,
+                          "job_owner": job_owner,
+                          "job_name": job_name,
+                          "account_name": account,
+                          "h_cpu": max_cpu,
+                          "h_data": max_mem
+                          }
+        cpu_parsed = 100
+        m_parse.return_value = cpu_parsed
+        controller = batch.SGEController(mock.MagicMock(),
+                                         mock.MagicMock())
+        info = controller._get_job_configuration(None)
+        self.assertEqual(queue, info["queue_name"])
+        self.assertEqual(host, info["host_name"])
+        self.assertEqual(job_owner, info["log_name"])
+        self.assertEqual(job_name, info["job_name"])
+        self.assertEqual(account, info["account_name"])
+        self.assertEqual(cpu_parsed, info["max_cpu"])
+        self.assertEqual(max_mem, info["max_memory"])
