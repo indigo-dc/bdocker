@@ -17,6 +17,7 @@ import ConfigParser
 import os
 import pwd
 import re
+import StringIO
 import yaml
 
 from bdocker import exceptions
@@ -162,6 +163,25 @@ def load_configuration_from_file(path=None):
         raise exceptions.ConfigurationException(
             message=None, exc=e)
     return conf
+
+
+def load_sge_job_configuration(path):
+    config = ConfigParser.SafeConfigParser()
+    try:
+        with open(path, 'r') as f:
+            string = '[root]\n' + f.read()
+            ini_fp = StringIO.StringIO(string)
+            config.readfp(ini_fp)
+    except IOError as e:
+        raise exceptions.UserCredentialsException(
+            "Error reading job configuration file: %s"
+            % path
+        )
+    finally:
+        if f:
+            f.close()
+    config_dict = dict(config.items("root"))
+    return config_dict
 
 
 def check_user_credentials(user_info):

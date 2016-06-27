@@ -155,7 +155,9 @@ class TestSGEController(testtools.TestCase):
         controller = batch.SGEController(conf, self.acc_conf)
         job_info = {"home": home,
                     "job": {"job_id": job_id,
-                            "spool": spool_dir
+                            "spool": spool_dir,
+                            "max_cpu": 99,
+                            "max_memory": 99,
                             }
                     }
         batch_info = controller.conf_environment(job_info, admin_token)
@@ -191,7 +193,9 @@ class TestSGEController(testtools.TestCase):
         m_read.return_value = parent_id
         job_info = {"home": home,
                     "job": {"job_id": job_id,
-                            "spool": spool_dir
+                            "spool": spool_dir,
+                            "max_cpu": 99,
+                            "max_memory": 99,
                             }
                     }
         controller = batch.SGEController(conf, self.acc_conf)
@@ -277,7 +281,8 @@ class TestSGEController(testtools.TestCase):
         self.assertIs(False, m_del_tree.called)
 
     @mock.patch("os.getenv")
-    def test_get_job_info(self, m):
+    @mock.patch.object(batch.SGEController, "_get_job_configuration")
+    def test_get_job_info(self, m_conf, m_env):
         job_id = uuid.uuid4().hex
         user = uuid.uuid4().hex
         home = "/home/rrr"
@@ -287,17 +292,23 @@ class TestSGEController(testtools.TestCase):
         log_name = "jorgesece"
         job_name = "test.sh01"
         account = "sge"
-        m.side_effect = [
+        max_cpu = 22
+        max_memory = 33
+        m_env.side_effect = [
             job_id,
             home,
             user,
-            spool_dir,
-            queue_name,
-            host_name,
-            log_name,
-            job_name,
-            account
+            spool_dir
         ]
+        m_conf.return_value = {
+            'queue_name': queue_name,
+            'host_name': host_name,
+            'log_name': log_name,
+            'job_name': job_name,
+            'account_name': account,
+            'max_cpu': max_cpu,
+            'max_memory': max_memory
+        }
         expected = {'home': home,
                     'job_id': job_id,
                     'queue_name': queue_name,
@@ -306,7 +317,9 @@ class TestSGEController(testtools.TestCase):
                     'job_name': job_name,
                     'account_name': account,
                     'spool': spool_dir,
-                    'user_name': user
+                    'user_name': user,
+                    'max_cpu': max_cpu,
+                    'max_memory': max_memory
                     }
         out = batch.SGEController({}, self.acc_conf).get_job_info()
         self.assertEqual(expected, out)
@@ -401,14 +414,15 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
-                "monitoring_interval": interval}
+                "flush_time": interval}
         m_fork.return_value = 0
         m_acc.return_value = acc
         controller = batch.SGEController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller._launch_job_monitoring(job_id,
                                                path,
-                                               admin_token)
+                                               admin_token,
+                                          None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
@@ -435,14 +449,143 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
-                "monitoring_interval": interval}
+                "flush_time": interval}
         m_fork.return_value = 0
         m_acc.return_value = acc
         controller = batch.SGEController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller._launch_job_monitoring(job_id,
                                                path,
-                                               admin_token)
+                                               admin_token,
+                                          None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
+
+    @mock.patch("os.fork")
+    @mock.patch("os.setsid")
+    @mock.patch("time.sleep")
+    @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch("bdocker.utils.update_yaml_file")
+    @mock.patch("os.getpid")
+    @mock.patch("os.kill")
+    @mock.patch.object(batch.SGEController, "_kill_job")
+    def test_launch_job_monitoring_cuotas(self, m_kill_job,
+                                          m_kill,
+                                          m_getpid, m_update,
+                                          m_acc, m_sleep,
+                                          m_setsid, m_fork):
+        job_id = uuid.uuid4().hex
+        path = "/foo"
+        admin_token = uuid.uuid4().hex
+        memory_usage = 99
+        cpu_usage = 111
+        interval = 33
+        spool = "/baa"
+        cpu_max = 1111
+        mem_max = 999
+        acc = {"memory_usage": memory_usage,
+               "cpu_usage": cpu_usage}
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test",
+                "flush_time": interval}
+        m_fork.return_value = 0
+        m_acc.side_effect = [acc,
+                             exceptions.CgroupException("Finished")]
+        controller = batch.SGEController(conf, mock.MagicMock())
+        controller._launch_job_monitoring(job_id,
+                                          path,
+                                          admin_token,
+                                          spool, cpu_max, mem_max)
+        m_sleep.side_effect = [interval, 0.1]
+        m_update.assert_called_with(
+            path, acc)
+        self.assertEquals(False, m_kill_job.called)
+        self.assertEquals(0, m_kill_job.call_count)
+
+    @mock.patch("os.fork")
+    @mock.patch("os.setsid")
+    @mock.patch("time.sleep")
+    @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch("bdocker.utils.update_yaml_file")
+    @mock.patch("os.getpid")
+    @mock.patch("os.kill")
+    @mock.patch.object(batch.SGEController, "_kill_job")
+    def test_launch_job_monitoring_cuotas_killed_cpu(self, m_kill_job,
+                                          m_kill,
+                                          m_getpid, m_update,
+                                          m_acc, m_sleep,
+                                          m_setsid, m_fork):
+        job_id = uuid.uuid4().hex
+        path = "/foo"
+        admin_token = uuid.uuid4().hex
+        memory_usage = 99
+        cpu_usage = 111
+        interval = 33
+        spool = "/baa"
+        cpu_max = 11
+        mem_max = 999
+        acc = {"memory_usage": memory_usage,
+               "cpu_usage": cpu_usage}
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test",
+                "flush_time": interval}
+        m_fork.return_value = 0
+        m_acc.side_effect = [acc,
+                              exceptions.CgroupException("Finished")]
+        controller = batch.SGEController(conf, mock.MagicMock())
+
+        controller._launch_job_monitoring(job_id,
+                                          path,
+                                          admin_token,
+                                          spool, cpu_max, mem_max)
+        m_sleep.side_effect = [interval, 0.1]
+        m_update.assert_called_with(
+            path, acc)
+        self.assertEquals(True, m_kill_job.called)
+        self.assertEquals(1, m_kill_job.call_count)
+
+    @mock.patch("os.fork")
+    @mock.patch("os.setsid")
+    @mock.patch("time.sleep")
+    @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch("bdocker.utils.update_yaml_file")
+    @mock.patch("os.getpid")
+    @mock.patch("os.kill")
+    @mock.patch.object(batch.SGEController, "_kill_job")
+    def test_launch_job_monitoring_cuotas_killed_mem(self, m_kill_job,
+                                          m_kill,
+                                          m_getpid, m_update,
+                                          m_acc, m_sleep,
+                                          m_setsid, m_fork):
+        job_id = uuid.uuid4().hex
+        path = "/foo"
+        admin_token = uuid.uuid4().hex
+        memory_usage = 99
+        cpu_usage = 111
+        interval = 33
+        spool = "/baa"
+        cpu_max = 1111
+        mem_max = 9
+        acc = {"memory_usage": memory_usage,
+               "cpu_usage": cpu_usage}
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test",
+                "flush_time": interval}
+        m_fork.return_value = 0
+        m_acc.side_effect = [acc,
+                              exceptions.CgroupException("Finished")]
+        controller = batch.SGEController(conf, mock.MagicMock())
+
+        controller._launch_job_monitoring(job_id,
+                                          path,
+                                          admin_token,
+                                          spool, cpu_max, mem_max)
+        m_sleep.side_effect = [interval, 0.1]
+        m_update.assert_called_with(
+            path, acc)
+        self.assertEquals(True, m_kill_job.called)
+        self.assertEquals(1, m_kill_job.call_count)

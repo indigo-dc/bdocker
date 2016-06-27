@@ -33,11 +33,16 @@ class TestCommands(testtools.TestCase):
     """Test User Credential controller."""
 
     @mock.patch('bdocker.utils.load_configuration_from_file')
-    def setUp(self, m):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def setUp(self, m_job, m_conf):
         super(TestCommands, self).setUp()
         self.job_id = uuid.uuid4().hex
+        home_dir = "/foo"
+        job_id = '88'
+        spool = "/faa"
+        user = 'peter'
 
-        m.return_value = {'batch': {
+        m_conf.return_value = {'batch': {
             'system': "SGE"
         },
             'accounting_server': {'host': 'host',
@@ -48,6 +53,10 @@ class TestCommands(testtools.TestCase):
                        'environ': 'debug'},
             'credentials': {'token_store': 'kk'}
         }
+        m_job.return_value = {'home': home_dir,
+                              'job_id': job_id,
+                              'spool': spool,
+                              'user_name': user}
         self.control = commands.CommandController()
 
 
@@ -172,7 +181,8 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_delete")
     @mock.patch("bdocker.client.commands.get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_clean(self, m_t, m_ad, m_del):
+    @mock.patch("os.remove")
+    def test_clean(self, m_rm, m_t, m_ad, m_del):
         force = True
         token = uuid.uuid4().hex
         admin_token = uuid.uuid4().hex

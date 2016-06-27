@@ -15,6 +15,8 @@
 # under the License.
 
 import testtools
+import ConfigParser
+import StringIO
 
 from bdocker import utils
 from bdocker import exceptions
@@ -62,3 +64,10 @@ class TestConfigurationMaster(testtools.TestCase):
             '/home/jorge/Dropbox/INDIGO_DOCKER/'
             'bdocker/bdocker/tests/modules/'
             'fake_configure_file_error.cfg')
+
+    def test_load_config_file2(self):
+        path = (
+            '/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/'
+            'bdocker/tests/spool_config')
+        config_dict = utils.load_sge_job_configuration(path)
+        self.assertIsNotNone(config_dict)

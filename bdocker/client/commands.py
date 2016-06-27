@@ -36,21 +36,12 @@ def token_parse(value, path):
     """
     try:
         if not value:
-            value = read_user_credentials(path)
+            value = utils.read_file(path)
         return value
     except BaseException as e:
         raise exceptions.UserCredentialsException(
             "Token can not be found in %s " % path
         )
-
-
-def set_environ(key, value):
-    """Set variable in environment
-
-    :param key: name of variable
-    :param key: value of variable
-    """
-    os.environ[key] = value
 
 
 def get_user_credentials(name):
@@ -105,18 +96,6 @@ def write_user_credentials(token, file_path,
     out.close()
     if uid:
         os.chown(file_path, uid, gid)
-
-
-def read_user_credentials(file_path):
-    """Read token file in YAML format
-
-    :param token: token of the registry
-    :param fields: array of element to be updated
-    """
-    input = open(file_path,'r')
-    token = input.read().rstrip('\n')
-    input.close()
-    return token
 
 
 class CommandController(object):
@@ -179,6 +158,7 @@ class CommandController(object):
         parameters = {"admin_token": admin_token, 'token': token,
                       "force": force}
         self.control.execute_delete(path=path, parameters=parameters)
+        os.remove(self.token_file)
         return token
 
     def container_pull(self, token, source):

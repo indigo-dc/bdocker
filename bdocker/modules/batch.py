@@ -117,7 +117,7 @@ class BatchWNController(object):
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
-        self.monitoring_interval = conf.get("monitoring_interval", 10)
+        self.flush_time = conf.get("flush_time", 10)
         self.default_acc_file = ".bdocker_accounting"
 
         self.notification_controller = BatchNotificationController(accounting_conf)
@@ -189,7 +189,6 @@ class SGEController(BatchWNController):
 
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
-        self.monitoring_interval = 10
 
     @staticmethod
     def _create_accounting_file(path, job_info):
@@ -204,12 +203,10 @@ class SGEController(BatchWNController):
         }
         utils.write_yaml_file(path, data)
 
-    @staticmethod
-    def _read_accounting_file(path):
-        return utils.read_yaml_file(path)
-
     def _launch_job_monitoring(self, job_id, file_path,
-                               admin_token, cuotas=None):
+                               admin_token, spool,
+                               cpu_max=None,
+                               mem_max=None):
         LOG.exception("LAUNCH MONITORING")
         try:
             pid = os.fork()
@@ -225,20 +222,21 @@ class SGEController(BatchWNController):
                 message
             )
             os.exit(1)
-
         LOG.exception("MONITORING JOB %s." % job_id)
         while True:
             try:
-                time.sleep(self.monitoring_interval)
+                time.sleep(self.flush_time)
                 acc = cgroups_utils.get_accounting(
                      job_id,
                      self.parent_group,
                      root_parent=self.root_cgroup)
                 utils.update_yaml_file(file_path, acc)
-                # if coutas:
-                #     if (coutas["cpu"] >= acc["cpu_usage"] or
-                #                 coutas["memory"] >= acc["memory_usage"]):
-                #         pass
+                if cpu_max:
+                    if acc["cpu_usage"] >= cpu_max:
+                        self._kill_job(spool)
+                if mem_max:
+                    if acc["memory_usage"] >= mem_max:
+                        self._kill_job(spool)
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
                 break
@@ -246,11 +244,11 @@ class SGEController(BatchWNController):
                 message = "ERROR IN: %s. %s." % (file_path,
                                                  e.message)
                 LOG.exception(message)
-                raise exceptions.CgroupException(message)
-            finally:
-                child = os.getpid()
-                os.kill(child, signal.SIG_IGN)
-                time.sleep(0.1)
+                #raise exceptions.CgroupException(message)
+
+        child = os.getpid()
+        os.kill(child, signal.SIG_IGN)
+        time.sleep(0.1)
 
     def conf_environment(self, session_data, admin_token):
         out = super(SGEController, self).conf_environment(session_data)
@@ -258,12 +256,19 @@ class SGEController(BatchWNController):
             try:
                 job_info = session_data['job']
                 job_id = job_info['job_id']
+                job_spool = job_info['spool']
+                job_cpu_max = job_info['max_cpu']
+                job_mem_max = job_info['max_memory']
                 path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
                 out.update({"acc_file": path})
                 self._create_accounting_file(path, job_info)
-                self._launch_job_monitoring(job_id, path, admin_token)
+                self._launch_job_monitoring(job_id, path,
+                                            admin_token,
+                                            spool=job_spool,
+                                            cpu_max=job_cpu_max,
+                                            mem_max=job_mem_max)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
@@ -348,24 +353,43 @@ class SGEController(BatchWNController):
             'USER', None)
         spool_dir = os.getenv(
             "SGE_JOB_SPOOL_DIR", None)
-        qname = os.getenv(
-            'QUEUE', None)
-        hostname = os.getenv(
-            'HOSTNAME', None)  # only available in prolog
-        logname = os.getenv(
-            'SGE_O_LOGNAME', None)
-        job_name = os.getenv(
-            'JOB_NAME', None)
-        account = os.getenv(
-            'SGE_ACCOUNT', None)
-        return {'home': home,
-                'job_id': job_id,
-                'user_name': user,
-                'spool': spool_dir,
-                'queue_name': qname,
-                'host_name': hostname,
-                'log_name': logname,
-                'job_name': job_name,
-                'account_name': account
-                }
+        job_info = {'home': home,
+                    'job_id': job_id,
+                    'user_name': user,
+                    'spool': spool_dir,
+                    }
+        job_info.update(self._get_job_configuration(spool_dir))
+        return job_info
 
+    @staticmethod
+    def _get_job_configuration(spool):
+        path = "%s/config" % spool
+        conf = utils.load_sge_job_configuration(path)
+        job_id = conf['job_id']
+        qname = conf['queue']
+        hostname = conf['host']
+        logname = conf['job_owner']
+        job_name = conf['job_name']
+        account = conf['account_name']
+        max_cpu = conf['h_cpu']
+        max_memory = conf['h_data']
+        return {
+            'queue_name': qname,
+            'host_name': hostname,
+            'log_name': logname,
+            'job_name': job_name,
+            'account_name': account,
+            'max_cpu': max_cpu,
+            'max_memory': max_memory
+        }
+
+    @staticmethod
+    def _kill_job(self, spool):
+        try:
+            job_pid_path = "%s/job_pid" % spool
+            job_pid = utils.read_file(job_pid_path)
+            if job_pid:
+                os.kill(job_pid, signal.SIGKILL)
+            return job_pid
+        except BaseException as e:
+            return None
