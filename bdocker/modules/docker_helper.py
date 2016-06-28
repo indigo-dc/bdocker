@@ -142,6 +142,15 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return container_id
 
+    def copy_from_container(self, container_id, path):
+        try:
+            docker_out, stat = self.control.get_archive(
+                container=container_id, path=path)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return docker_out
+
+
 # NO IMPLEMENTED
 
     def stop_container(self, container_id):
@@ -151,10 +160,4 @@ class DockerController(object):
     def accounting_container(self, container_id):
         raise exceptions.DockerException()
 
-    def output_task(self, container_id, path):
-        try:
-            docker_out, stat = self.control.get_archive(
-                container=container_id, path=path)
-        except BaseException as e:
-            raise exceptions.DockerException(e)
-        return docker_out
+

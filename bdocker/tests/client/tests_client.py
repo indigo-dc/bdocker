@@ -406,9 +406,58 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "copy_from_container")
+    def test_docker_copy(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        path = "/foo"
+        result = self.runner.invoke(
+            cli.bdocker, ['cp', token, container_id, path]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "copy_from_container")
+    def test_docker_copy_no_token(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        contanier_id = uuid.uuid4().hex
+        path = "/foo"
+        result = self.runner.invoke(
+            cli.bdocker, ['cp', contanier_id, path]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "copy_from_container")
+    def test_docker_copy_no_id(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['cp', token]
+        )
+        self.assertEqual(result.exit_code, 2)
+        self.assertIsNotNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "copy_from_container")
+    def test_docker_copy_no_path(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        contanier_id = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['cp', contanier_id]
+        )
+        self.assertEqual(0, result.exit_code)
+        self.assertIsNone(result.exception)
 
     # TODO(jorgesece): include teste for
     # clean
-    # detele with force
     # notify_accounting
     # more....

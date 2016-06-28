@@ -182,3 +182,9 @@ def workdir_option(f):
         '--workdir', '-w', default=None, type=click.STRING
         , help='Working directory inside the container'
     )(f)
+
+
+def path_argument(f):
+    return click.argument("path"
+                          , type=click.STRING
+                          )(f)

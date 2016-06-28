@@ -459,31 +459,34 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "output")
+    @mock.patch.object(controller.ServerController, "copy")
     def test_output(self, md):
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
+                      "container_id": 'containerrrrr',
+                      "path": "/foo"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/output?%s" % query,
+        result = webob.Request.blank("/copy?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "output")
+    @mock.patch.object(controller.ServerController, "copy")
     def test_output_405(self, m):
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
+                      "container_id": 'containerrrrr',
+                      "path": "/foo"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/output?%s" % query,
+        result = webob.Request.blank("/copy?%s" % query,
                                      method="POST").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "output")
+    @mock.patch.object(controller.ServerController, "copy")
     def test_output_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
+                      "container_id": 'containerrrrr',
+                      "path": "/foo"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/output?%s" % query,
+        result = webob.Request.blank("/copy?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(401, result.status_code)
 

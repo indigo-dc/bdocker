@@ -245,6 +245,22 @@ class ServerController(object):
         self.credentials_module.update_job(token, job)
         self.batch_module.notify_accounting(admin_token, job)
 
+    def copy(self, data):
+        """Copy file or folder from docker filesystem.
+
+        :return: output
+        """
+        required = {'token', 'container_id', "path"}
+        server.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        path = data['path']
+        self.credentials_module.authorize_container(token,
+                                           container_id)
+        results = self.docker_module.copy_from_container(container_id,
+                                                         path)
+        return results
+
 
     ########################
     ### UN IMPLEMENTED ####
@@ -270,12 +286,3 @@ class ServerController(object):
         results = self.docker_module.accounting_container(token_info)
         return results
 
-    def output(self, data):
-        required = {'token', 'container_id'}
-        server.validate(data, required)
-        token = data['token']
-        container_id = data['container_id']
-        self.credentials_module.authorize_container(token,
-                                           container_id)
-        results = self.docker_module.output_task(container_id)
-        return results

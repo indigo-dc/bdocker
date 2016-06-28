@@ -517,7 +517,7 @@ class TestServerController(testtools.TestCase):
                           self.controller.accounting,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "output_task")
+    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     def test_output(self, mu, ml):
         c1 = uuid.uuid4().hex
@@ -525,11 +525,12 @@ class TestServerController(testtools.TestCase):
         mu.return_value = c1
         ml.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1}
-        results = self.controller.output(parameters)
+                      "container_id": c1,
+                      "path": "/foo"}
+        results = self.controller.copy(parameters)
         self.assertEqual(info_containers, results)
 
-    @mock.patch.object(docker_helper.DockerController, "output_task")
+    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     def test_output_unauthorized(self, mu, ml):
         c1 = uuid.uuid4().hex
@@ -537,7 +538,8 @@ class TestServerController(testtools.TestCase):
         mu.side_effect = exceptions.UserCredentialsException("")
         ml.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1}
+                      "container_id": c1,
+                      "path": "/foo"}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.output,
+                          self.controller.copy,
                           parameters)
