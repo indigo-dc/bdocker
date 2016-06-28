@@ -567,7 +567,7 @@ class TestSGEController(testtools.TestCase):
         cpu_usage = 2  # nanoseconds
         interval = 33
         spool = "/baa"
-        cpu_max = "0:0:40"
+        cpu_max = 40
         mem_max = 9
         acc = {"memory_usage": memory_usage,
                "cpu_usage": cpu_usage}

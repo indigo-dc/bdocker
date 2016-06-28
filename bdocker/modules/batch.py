@@ -232,14 +232,14 @@ class SGEController(BatchWNController):
                     root_parent=self.root_cgroup)
                 utils.update_yaml_file(file_path, acc)
                 if cpu_max:
-                    if acc["cpu_usage"] >= cpu_max:
+                    if int(acc["cpu_usage"]) >= int(cpu_max):
                         LOG.exception("KILL JOB by CPU%s. Acc: %s. Max: %s" %
                                       (job_id, acc["cpu_usage"],
                                        cpu_max
                                        ))
                         self._kill_job(spool)
                 if mem_max:
-                    if acc["memory_usage"] >= mem_max:
+                    if int(acc["memory_usage"]) >= int(mem_max):
                         LOG.exception("KILL JOB by MEM%s. Acc: %s. Max: %s" %
                                       (job_id, acc["memory_usage"],
                                        mem_max
@@ -404,6 +404,7 @@ class SGEController(BatchWNController):
         try:
             job_pid_path = "%s/job_pid" % spool
             job_pid = utils.read_file(job_pid_path)
+            LOG.exception("KILL JOB with PID: %s " % job_pid)
             if job_pid:
                 os.kill(job_pid, signal.SIGKILL)
             return job_pid
