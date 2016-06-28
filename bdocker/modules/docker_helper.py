@@ -56,12 +56,12 @@ class DockerController(object):
     def clean_containers(self, containers, force=True):
         docker_out = []
         if containers:
-            try:
-                for c_id in containers:
+            for c_id in containers:
+                try:
                     self.delete_container(c_id, force=force)
                     docker_out.append(c_id)
-            except exceptions.DockerException as e:
-                docker_out.append(e.message)
+                except exceptions.DockerException as e:
+                    docker_out.append(e.message)
         return docker_out
 
     def list_containers_details(self, containers):
