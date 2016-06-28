@@ -151,12 +151,12 @@ class CommandController(object):
                                          user_info['gid'])
         return {"token": token, "path": self.token_file}
 
-    def clean_environment(self, token, force):
+    def clean_environment(self, token):
         path = "/clean"
         admin_token = get_admin_token(self.token_storage)
-        token =  token_parse(token, self.token_file)
-        parameters = {"admin_token": admin_token, 'token': token,
-                      "force": force}
+        token = token_parse(token, self.token_file)
+        parameters = {"admin_token": admin_token, 'token': token
+                      }
         self.control.execute_delete(path=path, parameters=parameters)
         os.remove(self.token_file)
         return token

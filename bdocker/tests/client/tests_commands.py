@@ -192,8 +192,7 @@ class TestCommands(testtools.TestCase):
         m_del.return_value = containers
         self.control.clean_environment(None, force)
         expected = {"admin_token": admin_token,
-                    "token": token,
-                    "force": force}
+                    "token": token}
         m_del.assert_called_with(path='/clean',
                                  parameters=expected)
 

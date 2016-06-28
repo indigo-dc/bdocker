@@ -92,15 +92,14 @@ def configure_environment(ctx, user, jobid):
 
 @bdocker.command('clean',
                  help="Clean work environment including"
-                      "the batch system."
+                      "the batch system. Force remove all the"
                       " ROOT privileges needed")
 @token_option
-@force_option_clean
 @click.pass_context
-def clean_environment(ctx, token, force):
+def clean_environment(ctx, token):
     # Command executed by the root in epilog
     try:
-        out = ctx.obj.clean_environment(token, force)
+        out = ctx.obj.clean_environment(token)
         print_message(out)
     except BaseException as e:
         print_error(e.message)
