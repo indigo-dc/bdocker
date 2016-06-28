@@ -53,7 +53,7 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
 
-    def clean_containers(self, containers, force=False):
+    def clean_containers(self, containers, force=True):
         docker_out = []
         if containers:
             try:

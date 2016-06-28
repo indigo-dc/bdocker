@@ -83,7 +83,7 @@ class ServerController(object):
         server.validate(data, required)
         admin_token = data['admin_token']
         force = server.eval_bool(
-            data.get('force', False)
+            data.get('force', True)
         )
         self.credentials_module.authorize_admin(admin_token)
         token = data['token']

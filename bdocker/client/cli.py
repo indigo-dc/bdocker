@@ -13,6 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import tabulate
 
 from bdocker.client import commands
 from bdocker.client.decorators import *
@@ -41,6 +42,23 @@ def print_error(message):
     :param message: message list
     """
     print_message(message)
+
+
+def print_table(headers, rows):
+    """Print table from list of messages
+    :param headers: table headers
+    :param rows: row of messages
+    """
+    try:
+        if headers:
+            print
+            print tabulate(
+                rows, headers=headers,
+                tablefmt="plain", numalign="left"
+            )
+            print
+    except Exception as e:
+        print e.message
 
 
 @click.group()
@@ -77,7 +95,7 @@ def configure_environment(ctx, user, jobid):
                       "the batch system."
                       " ROOT privileges needed")
 @token_option
-@force_option
+@force_option_clean
 @click.pass_context
 def clean_environment(ctx, token, force):
     # Command executed by the root in epilog
