@@ -215,6 +215,22 @@ class TestServerController(testtools.TestCase):
                        "authorize_container")
     @mock.patch.object(credentials.UserController,
                        "remove_container")
+    def test_delete_force(self, mr, mu, md):
+        c1 = uuid.uuid4().hex
+        mu.side_effect = [c1]
+        force = True
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": c1,
+                      "force": force}
+        results = self.controller.delete_container(parameters)
+        self.assertEqual([c1], results)
+        md.assert_called_with(c1, force)
+
+    @mock.patch.object(docker_helper.DockerController, "delete_container")
+    @mock.patch.object(credentials.UserController,
+                       "authorize_container")
+    @mock.patch.object(credentials.UserController,
+                       "remove_container")
     def test_delete_several(self, mr, mu, md):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex

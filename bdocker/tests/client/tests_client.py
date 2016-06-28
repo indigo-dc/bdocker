@@ -97,6 +97,19 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "container_list")
+    def test_docker_list_all(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        all_containers = "--all"
+        result = self.runner.invoke(
+            cli.bdocker, ['ps', all_containers]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+        m_l.assert_called_with(None, True)
+
+    @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_pull")
     def test_docker_pull(self, m_l, m_ini):
         m_ini.return_value = None
@@ -257,6 +270,20 @@ class TestCommandProject(TestCaseCommandLine):
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "container_delete")
+    def test_docker_delete_force(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        container_id = uuid.uuid4().hex
+        force = "--force"
+        result = self.runner.invoke(
+            cli.bdocker, ['rm', container_id, force]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+        m_l.assert_called_with(None, mock.ANY, True)
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_run")

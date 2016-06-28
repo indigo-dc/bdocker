@@ -21,7 +21,7 @@ from bdocker import exceptions
 
 def eval_bool(s):
     if s:
-        if s == 'True':
+        if s == 'True' or str(s) == "True":
             return True
         else:
             return False

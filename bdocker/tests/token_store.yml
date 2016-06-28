@@ -1,3 +1,10 @@
+0bd2468981104b88944af5cd2648e280:
+  containers: [5a59b20813f7472a4bceda20d87fda7bdeaff8d72592ae11bd6ea86126657a75]
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_1, cgroup: /user/1, job_id: '1',
+    spool: /home/jorge/FAKE_JOB}
+  uid: 1000
 26431bbb8eb94b01b0838689741271f6:
   gid: 1000
   home: /home/jorge

@@ -181,9 +181,12 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_delete_several(self, md):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        force = False
         md.return_value = [c1, c2]
-        parameters = {"token":"tokennnnnn",
-                      "container_id": [c1, c2]}
+        parameters = {"token": token,
+                      "container_id": [c1, c2],
+                      "force": force}
         body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
                                      content_type="application/json",
@@ -192,6 +195,26 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         self.assertEqual(201, result.status_code)
         self.assertEqual(c1, result.json_body["results"][0])
         self.assertEqual(c2, result.json_body["results"][1])
+        self.assertEqual(token, md.call_args_list[0][0][0]["token"])
+        self.assertEqual(force, md.call_args_list[0][0][0]["force"])
+
+    @mock.patch.object(controller.ServerController, "delete_container")
+    def test_delete_force(self, md):
+        c1 = uuid.uuid4().hex
+        c2 = uuid.uuid4().hex
+        token = uuid.uuid4().hex
+        force = True
+        md.return_value = [c1, c2]
+        parameters = {"token": token,
+                      "container_id": [c1],
+                      "force": force}
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/rm",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)
+        self.assertEqual(force, md.call_args_list[0][0][0]["force"])
 
     @mock.patch.object(controller.ServerController, "delete_container")
     def test_delete_405(self, m):
@@ -220,9 +243,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def test_ps(self, ml):
         token = "3333"
         all = True
-        result = webob.Request.blank("/ps?token=%s&%s" % (token ,all),
+        result = webob.Request.blank("/ps?token=%s&all=%s" % (token, all),
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
+        self.assertEqual(token, ml.call_args_list[0][0][0]["token"])
+        self.assertEqual(str(all), ml.call_args_list[0][0][0]["all"])
 
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps_401(self, m):

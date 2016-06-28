@@ -190,7 +190,7 @@ class TestCommands(testtools.TestCase):
         m_ad.return_value = admin_token
         containers = ["container_1", "container_2"]
         m_del.return_value = containers
-        self.control.clean_environment(None, force)
+        self.control.clean_environment(None)
         expected = {"admin_token": admin_token,
                     "token": token}
         m_del.assert_called_with(path='/clean',
@@ -203,8 +203,8 @@ class TestCommands(testtools.TestCase):
         m_ad.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.clean_environment,
-                          None,
-                          None)
+                          None
+                          )
 
     @mock.patch.object(request.RequestController, "execute_delete")
     @mock.patch("bdocker.client.commands.get_admin_token")
@@ -213,7 +213,6 @@ class TestCommands(testtools.TestCase):
         m_t.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.clean_environment,
-                          None,
                           None)
 
     @mock.patch.object(request.RequestController, "execute_post")
