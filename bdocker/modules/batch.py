@@ -233,18 +233,23 @@ class SGEController(BatchWNController):
                 utils.update_yaml_file(file_path, acc)
                 if cpu_max:
                     if int(acc["cpu_usage"]) >= int(cpu_max):
-                        LOG.exception("KILL JOB by CPU%s. Acc: %s. Max: %s" %
+                        LOG.exception("KILL JOB by CPU %s. Acc: %s. Max: %s" %
                                       (job_id, acc["cpu_usage"],
                                        cpu_max
                                        ))
                         self._kill_job(spool)
                 if mem_max:
                     if int(acc["memory_usage"]) >= int(mem_max):
-                        LOG.exception("KILL JOB by MEM%s. Acc: %s. Max: %s" %
+                        LOG.exception("KILL JOB by MEM %s. Acc: %s. Max: %s" %
                                       (job_id, acc["memory_usage"],
                                        mem_max
                                        ))
                         self._kill_job(spool)
+
+                LOG.exception("JOB CPU %s. Acc: %s. Max: %s" %
+                                      (job_id, acc["cpu_usage"],
+                                       cpu_max
+                                       ))
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
                 break
@@ -252,6 +257,7 @@ class SGEController(BatchWNController):
                 message = "ERROR IN: %s. %s." % (file_path,
                                                  e.message)
                 LOG.exception(message)
+                break
                 #raise exceptions.CgroupException(message)
 
         child = os.getpid()
