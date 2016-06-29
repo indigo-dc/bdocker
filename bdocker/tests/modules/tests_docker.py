@@ -274,7 +274,7 @@ class TestDocker(testtools.TestCase):
                   self.control.start_container,
                   container_id)
 
-    @mock.patch.object(docker.Client, 'get_archive')
+    @mock.patch.object(docker.Client, 'copy')
     def test_copy_from_container(self, m):
         docker_out = "algo"
         m.return_value = docker_out, True

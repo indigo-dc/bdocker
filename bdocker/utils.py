@@ -25,6 +25,7 @@ from bdocker import exceptions
 
 WORKING_NODE='working'
 
+
 def read_yaml_file(path):
     f = open(path, 'r')
     data = f.read()
@@ -239,3 +240,8 @@ def add_to_file(file_path, data):
         file_obj.write(data)
     file_obj.close()
     return True
+
+
+def uncompress_file_in_path(path_file, path_dest, uid, gid):
+    pass
+    #os.chown(path_dest, uid, gid)

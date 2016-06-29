@@ -145,8 +145,8 @@ class DockerController(object):
     def copy_from_container(self, container_id, container_path,
                             host_path):
         try:
-            docker_out, stat = self.control.get_archive(
-                container=container_id, path=container_path)
+            docker_out, stat = self.control.copy(
+                container=container_id, resource=container_path)
         except BaseException as e:
             raise exceptions.DockerException(e)
         return docker_out

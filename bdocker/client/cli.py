@@ -230,7 +230,7 @@ def accounting(ctx, token, container_id):
 
 
 @bdocker.command('cp',
-                 help="Copy files/folders between "
+                 help="[BETA VERSION] Copy files/folders between "
                       "a container and the local filesystem:\n"
                       "1) <containerId>:/file/path/within/container /host/path/target\n"
                       "2) /host/path/target <containerId>:/file/path/within/container")
