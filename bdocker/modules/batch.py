@@ -238,6 +238,7 @@ class SGEController(BatchWNController):
                                        cpu_max
                                        ))
                         self._kill_job(spool)
+                        break
                 if mem_max:
                     if int(acc["memory_usage"]) >= int(mem_max):
                         LOG.exception("KILL JOB by MEM %s. Acc: %s. Max: %s" %
@@ -245,6 +246,7 @@ class SGEController(BatchWNController):
                                        mem_max
                                        ))
                         self._kill_job(spool)
+                        break
 
                 LOG.exception("JOB CPU %s. Acc: %s. Max: %s" %
                                       (job_id, acc["cpu_usage"],

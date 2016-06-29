@@ -243,11 +243,10 @@ def copy(ctx, token, path):
         container_path = path["container_path"]
         host_path = path["host_path"]
         host_to_container = path["host_to_container"]
-        out = ctx.obj.copy_to_from_container(token,
-                                          container_id,
-                                          container_path,
-                                          host_path,
-                                          host_to_container)
+        out = ctx.obj.copy_to_from_container(token,                                             container_id,
+                                             container_path,
+                                             host_path,
+                                             host_to_container)
         print_message(out)
     except BaseException as e:
         print_error(e.message)

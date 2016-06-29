@@ -223,7 +223,7 @@ def copy():
 
     :return: Request 201 with results
     """
-    data = request.args
+    data = json.loads(request.data)
     try:
         results = server_controller.copy(data)
     except Exception as e:
