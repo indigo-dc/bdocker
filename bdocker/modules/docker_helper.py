@@ -142,13 +142,28 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return container_id
 
-    def copy_from_container(self, container_id, path):
+    def copy_from_container(self, container_id, container_path,
+                          host_path):
         try:
             docker_out, stat = self.control.get_archive(
-                container=container_id, path=path)
+                container=container_id, path=container_path)
+            # TODO(jorgesece): copy it to the host_path,
+            # uncompress and
+            # give user owner to user
         except BaseException as e:
             raise exceptions.DockerException(e)
         return docker_out
+
+    def copy_to_container(self, container_id, container_path,
+                          host_path):
+        try:
+            # TODO(jorgesece): compress to tar before send
+            stat = self.control.put_archive(
+                container=container_id, path=container_path,
+                data=host_path)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return stat
 
 
 # NO IMPLEMENTED

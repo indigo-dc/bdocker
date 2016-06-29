@@ -407,55 +407,74 @@ class TestCommandProject(TestCaseCommandLine):
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "copy_from_container")
+    @mock.patch.object(commands.CommandController, "copy_to_from_container")
     def test_docker_copy(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
         token = "--token=%s" % uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         path = "/foo"
+        path2 = "%s:/foo" % container_id
         result = self.runner.invoke(
-            cli.bdocker, ['cp', token, container_id, path]
+            cli.bdocker, ['cp', token, path, path2]
         )
         self.assertEqual(result.exit_code,0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "copy_from_container")
+    @mock.patch.object(commands.CommandController, "copy_to_from_container")
+    def test_docker_copy_to_container(self, m_l, m_ini):
+        m_ini.return_value = None
+        m_l.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        path = "%s:/foo" % container_id
+        path2 = "/foo"
+        result = self.runner.invoke(
+            cli.bdocker, ['cp', token, path, path2]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+
+    @mock.patch.object(commands.CommandController, "__init__")
+    @mock.patch.object(commands.CommandController, "copy_to_from_container")
     def test_docker_copy_no_token(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        contanier_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
         path = "/foo"
+        path2 = "%s:/foo" % container_id
         result = self.runner.invoke(
-            cli.bdocker, ['cp', contanier_id, path]
+            cli.bdocker, ['cp', path, path2]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "copy_from_container")
+    @mock.patch.object(commands.CommandController, "copy_to_from_container")
     def test_docker_copy_no_id(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        token = "--token=%s" % uuid.uuid4().hex
+        path = "/foo"
+        path2 = "/foo2"
         result = self.runner.invoke(
-            cli.bdocker, ['cp', token]
+            cli.bdocker, ['cp', path, path2]
         )
         self.assertEqual(result.exit_code, 2)
         self.assertIsNotNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
-    @mock.patch.object(commands.CommandController, "copy_from_container")
-    def test_docker_copy_no_path(self, m_l, m_ini):
+    @mock.patch.object(commands.CommandController, "copy_to_from_container")
+    def test_docker_copy_miss_path(self, m_l, m_ini):
         m_ini.return_value = None
         m_l.return_value = {}
-        contanier_id = uuid.uuid4().hex
+        path = "/path"
         result = self.runner.invoke(
-            cli.bdocker, ['cp', contanier_id]
+            cli.bdocker, ['cp', path]
         )
-        self.assertEqual(0, result.exit_code)
-        self.assertIsNone(result.exception)
+        self.assertEqual(2, result.exit_code)
+        self.assertIsNotNone(result.exception)
 
     # TODO(jorgesece): include teste for
     # clean

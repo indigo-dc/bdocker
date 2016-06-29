@@ -18,7 +18,45 @@ import click
 
 from bdocker import exceptions
 
+
 # Callbacks
+def parse_cp_path(ctx, param, value):
+    result = None
+    container_path = None
+    host_path = None
+    container_id = None
+    host_to_container = None
+    if value:
+        try:
+            for param in value:
+                path_info = param.split(":")
+                if path_info.__len__() == 1:
+                    host_path = param
+                    if not container_id:
+                        host_to_container = True
+                    else:
+                        host_to_container = False
+                elif path_info.__len__() == 2:
+                    container_id = path_info[0]
+                    container_path = path_info[1]
+                else:
+                    raise Exception("Wrong parameter: %s"
+                                    % param)
+            if not (container_path and
+                        container_id and
+                        host_path):
+                raise Exception("Missed parameters")
+        except BaseException as e:
+            raise click.BadParameter(
+                message=e.message
+            )
+    result = {"container_id": container_id,
+              "container_path": container_path,
+              "host_path": host_path,
+              "host_to_container": host_to_container
+              }
+    return result
+
 
 def parse_volume(ctx, param, value):
     """Command Client Callback. Parse volume
@@ -184,7 +222,22 @@ def workdir_option(f):
     )(f)
 
 
+def path_argument_source(f):
+    return click.argument("path_source",
+                          type=click.STRING,
+                          callback=parse_cp_path
+                          )(f)
+
+
+def path_argument_dest(f):
+    return click.argument("path_dest",
+                          type=click.STRING,
+                          callback=parse_cp_path
+                          )(f)
+
+
 def path_argument(f):
-    return click.argument("path"
-                          , type=click.STRING
+    return click.argument("path", nargs=2,
+                          type=click.STRING,
+                          callback=parse_cp_path
                           )(f)

@@ -464,10 +464,12 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
-        query = request.get_query_string(parameters)
-        result = webob.Request.blank("/copy?%s" % query,
-                                     method="GET").get_response(self.app)
-        self.assertEqual(200, result.status_code)
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/copy",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "copy")
     def test_output_405(self, m):
@@ -485,13 +487,14 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token":"tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
-        query = request.get_query_string(parameters)
-        result = webob.Request.blank("/copy?%s" % query,
-                                     method="GET").get_response(self.app)
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/copy",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
 
 
     # TODO(jorgesece): delete deprectated
     # credentials
-    # batch config

@@ -233,13 +233,18 @@ class CommandController(object):
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
-    def copy_from_container(self, token, container_id, path):
+    def copy_to_from_container(self, token, container_id,
+                               container_path,
+                               host_path,
+                               host_to_container):
         path = "/copy"
         token = token_parse(token, self.token_file)
         parameters = {"token": token,
                       "container_id": container_id,
-                      "path": path}
-        results = self.control.execute_get(path=path, parameters=parameters)
+                      "container_path": container_path,
+                      "host_path": host_path,
+                      "host_to_container": host_to_container}
+        results = self.control.execute_put(path=path, parameters=parameters)
         return results
 
     # def container_start(self, token, container_id):

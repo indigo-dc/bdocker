@@ -274,6 +274,29 @@ class TestDocker(testtools.TestCase):
                   self.control.start_container,
                   container_id)
 
+    @mock.patch.object(docker.Client, 'get_archive')
+    def test_copy_from_container(self, m):
+        docker_out = "algo"
+        m.return_value = docker_out, True
+        container_id = uuid.uuid4().hex
+        container_path = "/baa"
+        host_path = "/foo"
+        out = self.control.copy_from_container(container_id,
+                                             container_path,
+                                             host_path)
+        self.assertEqual(docker_out, out)
+
+    @mock.patch.object(docker.Client, 'put_archive')
+    def test_copy_to_container(self, m):
+        m.return_value = True
+        container_id = uuid.uuid4().hex
+        container_path = "/baa"
+        host_path = "/foo"
+        out = self.control.copy_to_container(container_id,
+                                             container_path,
+                                             host_path)
+        self.assertEqual(True, out)
+
 # TODO(jorgesece): implement and test it
 
     def test_accouning_error(self):

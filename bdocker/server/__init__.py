@@ -32,7 +32,7 @@ def validate(fields, mandatory_keys):
         for key in mandatory_keys:
             if key not in fields:
                 raise webob.exc.HTTPBadRequest(
-                    "The %s field is mandatory."
+                    "The '%s' field is mandatory."
                     "" % key)
     except Exception as e:
         raise exceptions.ParseException("Validation of required values")

@@ -517,29 +517,88 @@ class TestServerController(testtools.TestCase):
                           self.controller.accounting,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
+    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_output(self, mu, ml):
+    @mock.patch.object(credentials.UserController,
+                   "authorize_directory")
+    def test_copy_to_container(self, m_au, mu, ml):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
         mu.return_value = c1
         ml.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
-                      "path": "/foo"}
+                      "container_path": "/foo",
+                      "host_path": "/foo",
+                      "host_to_container": True}
         results = self.controller.copy(parameters)
         self.assertEqual(info_containers, results)
 
     @mock.patch.object(docker_helper.DockerController, "copy_from_container")
+    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_output_unauthorized(self, mu, ml):
+    @mock.patch.object(credentials.UserController,
+                   "authorize_directory")
+    def test_copy_check_direction_to(self, m_au, mu, m_to, m_from):
+        c1 = uuid.uuid4().hex
+        mu.return_value = c1
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": c1,
+                      "container_path": "/foo",
+                      "host_path": "/foo",
+                      "host_to_container": True}
+        results = self.controller.copy(parameters)
+        self.assertEqual(True, m_to.called)
+        self.assertEqual(False, m_from.called)
+
+    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
+    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
+    @mock.patch.object(credentials.UserController, "authorize_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_directory")
+    def test_copy_check_direction_from(self, m_au, mu, m_to, m_from):
+        c1 = uuid.uuid4().hex
+        mu.return_value = c1
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": c1,
+                      "container_path": "/foo",
+                      "host_path": "/foo",
+                      "host_to_container": False}
+        results = self.controller.copy(parameters)
+        self.assertEqual(False, m_to.called)
+        self.assertEqual(True, m_from.called)
+
+    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
+    @mock.patch.object(credentials.UserController, "authorize_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_directory")
+    def test_copy_from_container(self, m_au, mu, ml):
+        c1 = uuid.uuid4().hex
+        info_containers = {"info"}
+        mu.return_value = c1
+        ml.return_value = info_containers
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": c1,
+                      "container_path": "/foo",
+                      "host_path": "/foo",
+                      "host_to_container": False}
+        results = self.controller.copy(parameters)
+        self.assertEqual(info_containers, results)
+
+    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
+    @mock.patch.object(credentials.UserController, "authorize_container")
+    @mock.patch.object(credentials.UserController,
+                   "authorize_directory")
+    def test_copy_unauthorized(self, m_au, mu, ml):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
         mu.side_effect = exceptions.UserCredentialsException("")
         ml.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
-                      "path": "/foo"}
+                      "container_path": "/foo",
+                      "host_path": "/foo",
+                      "host_to_container": True}
         self.assertRaises(exceptions.UserCredentialsException,
                           self.controller.copy,
                           parameters)

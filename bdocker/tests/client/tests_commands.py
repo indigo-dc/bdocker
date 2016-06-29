@@ -266,6 +266,29 @@ class TestCommands(testtools.TestCase):
                     "accounting": accounting}
         m_del.assert_called_with(path='/notify_accounting',
                                  parameters=expected)
+
+    @mock.patch.object(request.RequestController, "execute_put")
+    @mock.patch("bdocker.client.commands.token_parse")
+    def test_copy_to_container(self, m_token, m_put):
+        token = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        container_path = uuid.uuid4().hex
+        host_path = uuid.uuid4().hex
+        host_to_container = True
+        m_token.return_value = token
+        self.control.copy_to_from_container(token, container_id,
+                                            container_path,
+                                            host_path,
+                                            host_to_container
+                                            )
+        expected = {"token": token,
+                    "container_id": container_id,
+                    "container_path": container_path,
+                    "host_path": host_path,
+                    "host_to_container": host_to_container}
+        m_put.assert_called_with(path='/copy',
+                                 parameters=expected)
+
     # def test_crendentials(self):
     #     results = self.control.create_credentials(1000)
     #     self.assertIsNotNone(results)

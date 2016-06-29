@@ -231,15 +231,23 @@ def accounting(ctx, token, container_id):
 
 @bdocker.command('cp',
                  help="Copy files/folders between "
-                      "a container and the local filesystem.")
+                      "a container and the local filesystem:\n"
+                      "1) <containerId>:/file/path/within/container /host/path/target\n"
+                      "2) /host/path/target <containerId>:/file/path/within/container")
 @token_option
-@container_id_argument
 @path_argument
 @click.pass_context
-def copy(ctx, token, container_id, path):
+def copy(ctx, token, path):
     try:
-        out = ctx.obj.copy_from_container(token,
-                                          container_id, path)
+        container_id = path["container_id"]
+        container_path = path["container_path"]
+        host_path = path["host_path"]
+        host_to_container = path["host_to_container"]
+        out = ctx.obj.copy_to_from_container(token,
+                                          container_id,
+                                          container_path,
+                                          host_path,
+                                          host_to_container)
         print_message(out)
     except BaseException as e:
         print_error(e.message)

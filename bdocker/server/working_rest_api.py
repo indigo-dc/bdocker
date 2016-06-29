@@ -215,6 +215,22 @@ def notify_accounting():
         return server.manage_exceptions(e)
     return server.make_json_response(201, results)
 
+
+@app.route('/copy', methods=['PUT'])
+def copy():
+    """Copy file or folder to or from the docker
+     filesystem.
+
+    :return: Request 201 with results
+    """
+    data = request.args
+    try:
+        results = server_controller.copy(data)
+    except Exception as e:
+        return server.manage_exceptions(e)
+    return server.make_json_response(201, results)
+
+
 ########################
 ### UN IMPLEMENTED ####
 ######################
@@ -235,16 +251,6 @@ def accounting():
     data = request.args
     try:
         results = server_controller.accounting(data)
-    except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(200, results)
-
-
-@app.route('/copy', methods=['GET'])
-def copy():
-    data = request.args
-    try:
-        results = server_controller.copy(data)
     except Exception as e:
         return server.manage_exceptions(e)
     return server.make_json_response(200, results)

@@ -29,6 +29,8 @@ class AccountingServerController(object):
 
     def set_job_accounting(self, data):
         """ Update the accounting file using the incoming data
+
+        :param data: dict parameter with attributes
         :return: empty
         """
         required = {'admin_token',
@@ -49,9 +51,11 @@ class ServerController(object):
 
     def configuration(self, data):
         """Configure bdocker user environment.
+
           It creates the token and configure the batch
           system.
 
+        :param data: dict parameter with attributes
         :return: user_token
         """
         required = {'admin_token', 'user_credentials'}
@@ -77,6 +81,7 @@ class ServerController(object):
           Delete the remaining containers and the token.
           In addition, it cleans the batch environment.
 
+        :param data: dict parameter with attributes
         :return: user_token
         """
         required = {'admin_token', 'token'}
@@ -101,6 +106,7 @@ class ServerController(object):
         """Pull request.
         Download a docker image from a repository
 
+        :param data: dict parameter with attributes
         :return: output
         """
         required = {'token', 'source'}
@@ -115,7 +121,8 @@ class ServerController(object):
     def run(self, data):
         """Execute command in container.
 
-        :return: Request 201 with results
+        :param data: dict parameter with attributes
+        :return: output
         """
         required = {'token','image_id', 'script'}
         server.validate(data, required)
@@ -156,7 +163,8 @@ class ServerController(object):
     def list_containers(self, data):
         """List containers.
 
-        :return: Request 200 with results
+        :param data: dict parameter with attributes
+        :return: list of containers
         """
         required = {'token'}
         server.validate(data, required)
@@ -172,7 +180,8 @@ class ServerController(object):
     def show(self, data):
         """Show container information.
 
-        :return: Request 200 with results
+        :param data: dict parameter with attributes
+        :return: container details
         """
         required = {'token', 'container_id'}
         server.validate(data, required)
@@ -187,7 +196,8 @@ class ServerController(object):
     def logs(self, data):
         """Log from a contaniner.
 
-        :return: Request 200 with results
+        :param data: dict parameter with attributes
+        :return: log details
         """
         required = {'token', 'container_id'}
         server.validate(data, required)
@@ -201,7 +211,8 @@ class ServerController(object):
     def delete_container(self, data):
         """Delete a container.
 
-        :return: Request 200 with results
+        :param data: dict parameter with attributes
+        :return: container id
         """
         required = {'token', 'container_id'}
         server.validate(data, required)
@@ -232,6 +243,7 @@ class ServerController(object):
         Send the accounting information to the accounting
         server. [DEPRECATED]
 
+        :param data: dict parameter with attributes
         :return: output
         """
         required = {'admin_token', 'token'}
@@ -246,19 +258,35 @@ class ServerController(object):
         self.batch_module.notify_accounting(admin_token, job)
 
     def copy(self, data):
-        """Copy file or folder from docker filesystem.
+        """Copy file or folder to or from the docker filesystem.
 
+        The attribute host_to_container indicates
+        the direction of the copy. It it is True the copy will be
+        from the host to the docker filesystem.
+
+        :param data: dict parameter with attributes
         :return: output
         """
-        required = {'token', 'container_id', "path"}
+        required = {'token', 'container_id',
+                    "container_path", "host_path",
+                    "host_to_container"}
         server.validate(data, required)
         token = data['token']
         container_id = data['container_id']
-        path = data['path']
+        container_path = data["container_path"]
+        host_path = data["host_path"]
+        host_to_container = data["host_to_container"]
         self.credentials_module.authorize_container(token,
                                            container_id)
-        results = self.docker_module.copy_from_container(container_id,
-                                                         path)
+        self.credentials_module.authorize_directory(token, host_path)
+        if host_to_container:
+            results = self.docker_module.copy_to_container(container_id,
+                                                         container_path,
+                                                           host_path)
+        else:
+            results = self.docker_module.copy_from_container(container_id,
+                                                             container_path,
+                                                             host_path)
         return results
 
 
