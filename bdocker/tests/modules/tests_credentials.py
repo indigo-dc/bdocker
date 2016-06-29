@@ -293,18 +293,24 @@ class TestUserCredentials(testtools.TestCase):
     @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory(self, m_val, m_token):
         token = uuid.uuid4().hex
+        uid = uuid.uuid4().hex
+        gid = uuid.uuid4().hex
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
         home = uuid.uuid4().hex
         token_info = { "home": home,
+                       "uid": uid,
+                       "gid": gid,
                        "job": {
                            "id": jobid,
                            "cgroup": cgroup,
                            "spool": spool}
                        }
         m_token.return_value = token_info
-        self.control.authorize_directory(token, None)
+        out = self.control.authorize_directory(token, None)
+        self.assertEqual(uid, out["uid"])
+        self.assertEqual(gid, out["gid"])
 
     @mock.patch.object(credentials.UserController,"_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")

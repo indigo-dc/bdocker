@@ -247,6 +247,8 @@ class UserController(object):
         # todo: add unittest
         token_info = self._get_token_from_cache(token)
         utils.validate_directory(dir_path, token_info['home'])
+        return {"uid": token_info["uid"],
+                "gid": token_info["gid"]}
 
     def authorize(self, token):
         """Check token authorization.

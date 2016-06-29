@@ -6,5 +6,5 @@ click
 Flask
 six
 pyyaml
-docker-py
+docker-py > 1.8
 cgroupspy

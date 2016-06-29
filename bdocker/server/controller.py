@@ -278,19 +278,25 @@ class ServerController(object):
         host_to_container = data["host_to_container"]
         self.credentials_module.authorize_container(token,
                                                     container_id)
-        self.credentials_module.authorize_directory(token, host_path)
+        user_info = self.credentials_module.authorize_directory(
+            token, host_path
+        )
+        uid = user_info["uid"]
+        gid = user_info["gid"]
         if host_to_container:
             # TODO(jorgesece): compress to tar before send
             results = self.docker_module.copy_to_container(container_id,
                                                            container_path,
-                                                           host_path)
+                                                           host_path,
+                                                           )
         else:
-            # TODO(jorgesece): copy it to the host_path,
-            # uncompress and
-            # give user owner to user
+            # TODO(jorgesece): uncompress
             results = self.docker_module.copy_from_container(container_id,
                                                              container_path,
-                                                             host_path)
+                                                             host_path,
+                                                             uid,
+                                                             gid
+                                                             )
         return results
 
 

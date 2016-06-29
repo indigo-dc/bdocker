@@ -14,10 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import ConfigParser
+import io
 import os
 import pwd
 import re
 import StringIO
+import tarfile
+import uuid
 import yaml
 
 from bdocker import exceptions
@@ -242,6 +245,19 @@ def add_to_file(file_path, data):
     return True
 
 
-def uncompress_file_in_path(path_file, path_dest, uid, gid):
-    pass
-    #os.chown(path_dest, uid, gid)
+def write_tar_raw_data_stream(path, stream, uid, gid):
+    file_path = "%s/%s.tar.gz" % (path,
+                                  uuid.uuid4().hex)
+    my_file = io.FileIO(file_path, 'w')
+    my_file.write(stream)
+    my_file.close()
+    tar_info = tarfile.TarInfo()
+    tar_info.uid = uid
+    tar_info.gid = gid
+    my_tar = tarfile.TarFile(file_path, tarinfo=tar_info)
+    my_tar.extractall(path=path)
+
+
+def read_tar_raw_data_stream(path):
+    my_file = io.FileIO(path, 'r')
+    return my_file

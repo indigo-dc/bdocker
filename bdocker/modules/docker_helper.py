@@ -17,6 +17,7 @@ import docker as docker_py
 
 from bdocker import exceptions
 from bdocker import parsers
+from bdocker import utils
 
 # sys.tracebacklimit = 0
 
@@ -26,7 +27,7 @@ class DockerController(object):
         # tls_config = docker.tls.TLSConfig(
         #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
         # )
-        self.control = docker_py.Client(base_url=url, version='1.19')
+        self.control = docker_py.Client(base_url=url, version='1.20')
 
     def pull_image(self, repo, tag='latest'):
         try:
@@ -143,20 +144,24 @@ class DockerController(object):
         return container_id
 
     def copy_from_container(self, container_id, container_path,
-                            host_path):
+                            host_path, uid=None, gid=None):
         try:
-            docker_out, stat = self.control.copy(
-                container=container_id, resource=container_path)
+            docker_out, stat = self.control.get_archive(
+                container=container_id, path=container_path)
+            utils.write_tar_raw_data_stream(host_path,
+                                            docker_out.data,
+                                            uid, gid)
         except BaseException as e:
             raise exceptions.DockerException(e)
-        return docker_out
+        return stat
 
     def copy_to_container(self, container_id, container_path,
                           host_path):
         try:
+            data = utils.read_tar_raw_data_stream(host_path)
             stat = self.control.put_archive(
                 container=container_id, path=container_path,
-                data=host_path)
+                data=data)
         except BaseException as e:
             raise exceptions.DockerException(e)
         return stat
