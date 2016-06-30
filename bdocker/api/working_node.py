@@ -19,9 +19,9 @@ import logging
 from flask import Flask
 from flask import json, request
 
-from bdocker import server
+from bdocker import api
 from bdocker import utils
-from bdocker.server import controller
+from bdocker.api import controller
 
 conf = utils.load_configuration_from_file()
 server_controller = controller.ServerController(conf)
@@ -30,7 +30,7 @@ app = Flask(__name__)
 
 LOG = logging.getLogger(__name__)
 
-server.set_error_handler(app)
+api.set_error_handler(app)
 
 
 @app.route('/credentials', methods=['POST'])
@@ -43,8 +43,8 @@ def credentials():
     try:
         user_token = server_controller.credentials(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(
+        return api.manage_exceptions(e)
+    return api.make_json_response(
         201, user_token
     )
 
@@ -59,8 +59,8 @@ def batch_conf():
     try:
         server_controller.batch_configuration(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(
+        return api.manage_exceptions(e)
+    return api.make_json_response(
         201, ["Batch system configured"]
     )
 
@@ -74,8 +74,8 @@ def batch_clean():
     try:
         server_controller.batch_clean(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(204, [])
+        return api.manage_exceptions(e)
+    return api.make_json_response(204, [])
 
 
 @app.route('/configuration', methods=['POST'])
@@ -90,8 +90,8 @@ def configuration():
     try:
         user_token = server_controller.configuration(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(
+        return api.manage_exceptions(e)
+    return api.make_json_response(
         201, user_token
     )
 
@@ -108,8 +108,8 @@ def clean():
     try:
         result = server_controller.clean(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(204, [result])
+        return api.manage_exceptions(e)
+    return api.make_json_response(204, [result])
 
 
 @app.route('/pull', methods=['POST'])
@@ -123,8 +123,8 @@ def pull():
     try:
         result = server_controller.pull(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(201, result)
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, result)
 
 
 @app.route('/run', methods=['PUT'])
@@ -137,8 +137,8 @@ def run():
     try:
         results = server_controller.run(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(201, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, results)
 
 
 @app.route('/ps', methods=['GET'])
@@ -151,8 +151,8 @@ def list_containers():
     try:
         results = server_controller.list_containers(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(200, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(200, results)
 
 
 @app.route('/inspect', methods=['GET'])
@@ -165,8 +165,8 @@ def show():
     try:
         results = server_controller.show(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(200, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(200, results)
 
 
 @app.route('/logs', methods=['GET'])
@@ -179,9 +179,9 @@ def logs():
     try:
         results = server_controller.logs(data)
     except Exception as e:
-        return server.manage_exceptions(e)
+        return api.manage_exceptions(e)
 
-    return server.make_json_response(200, results)
+    return api.make_json_response(200, results)
 
 
 @app.route('/rm', methods=['PUT'])
@@ -194,8 +194,8 @@ def delete():
     try:
         docker_out = server_controller.delete_container(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(201, docker_out)
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, docker_out)
 
 
 @app.route('/notify_accounting', methods=['PUT'])
@@ -212,8 +212,8 @@ def notify_accounting():
     try:
         results = server_controller.notify_accounting(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(201, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, results)
 
 
 @app.route('/copy', methods=['PUT'])
@@ -227,8 +227,8 @@ def copy():
     try:
         results = server_controller.copy(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(201, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, results)
 
 
 ########################
@@ -242,8 +242,8 @@ def stop():
     try:
         results = server_controller.stop_container(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(200, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(200, results)
 
 
 @app.route('/accounting', methods=['GET'])
@@ -252,8 +252,8 @@ def accounting():
     try:
         results = server_controller.accounting(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(200, results)
+        return api.manage_exceptions(e)
+    return api.make_json_response(200, results)
 
 #####  UNIMPLEMETED  ######
 ###########################

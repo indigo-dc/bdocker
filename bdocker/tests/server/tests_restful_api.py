@@ -22,7 +22,7 @@ import webob
 
 from bdocker import exceptions
 from bdocker.modules import request
-from bdocker.server import controller
+from bdocker.api import controller
 
 
 class TestAccRESTAPI(testtools.TestCase):
@@ -34,8 +34,8 @@ class TestAccRESTAPI(testtools.TestCase):
     def setUp(self, m_conf, m_load):
         super(TestAccRESTAPI, self).setUp()
         m_conf.return_value = None
-        from bdocker.server import accounting_rest_api
-        self.app = accounting_rest_api.app
+        from bdocker.api import accounting
+        self.app = accounting.app
 
     @mock.patch.object(controller.AccountingServerController, "set_job_accounting")
     def test_set_job(self, m):
@@ -66,8 +66,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     def setUp(self, m_conf, m_load):
         super(TestWorkingNodeRESTAPI, self).setUp()
         m_conf.return_value = None
-        from bdocker.server import working_rest_api
-        self.app = working_rest_api.app
+        from bdocker.api import working_node
+        self.app = working_node.app
 
     @mock.patch.object(controller.ServerController, "configuration")
     def test_configuration(self, m):

@@ -24,7 +24,7 @@ from bdocker import utils
 from bdocker.modules import batch
 from bdocker.modules import credentials
 from bdocker.modules import docker_helper
-from bdocker.server import controller
+from bdocker.api import controller
 
 FAKE_CONF = {
     'server': mock.MagicMock(),

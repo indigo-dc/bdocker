@@ -19,9 +19,9 @@ import logging
 from flask import Flask
 from flask import request
 
-from bdocker import server
+from bdocker import api
 from bdocker import utils
-from bdocker.server import controller
+from bdocker.api import controller
 
 conf = utils.load_configuration_from_file()
 server_controller = controller.AccountingServerController(conf)
@@ -30,7 +30,7 @@ app = Flask(__name__)
 
 LOG = logging.getLogger(__name__)
 
-server.set_error_handler(app)
+api.set_error_handler(app)
 
 
 @app.route('/set_accounting', methods=['PUT'])
@@ -43,8 +43,8 @@ def set_job_accounting():
     try:
         data = server_controller.set_job_accounting(data)
     except Exception as e:
-        return server.manage_exceptions(e)
-    return server.make_json_response(
+        return api.manage_exceptions(e)
+    return api.make_json_response(
         201, data
     )
 
