@@ -1,5 +1,5 @@
-BDOCKER
-=======
+BDOCKER (Batch system docker management)
+=======================================
 
 This software manages the execution of docker containers in  batch systems.
 
