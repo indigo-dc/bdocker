@@ -1,5 +1,4 @@
-INTRODUCTION
-============
+#INTRODUCTION
 
 This sofware manages the execution of docker containers in  batch systems.
 It provide two REST Full APIs that are designed for executing as daemons:

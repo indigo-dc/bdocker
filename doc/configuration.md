@@ -1,16 +1,14 @@
-Configuration
-=============
+#Configuration
 
-Daemon configuration
-********************
+##Daemon configuration
 
 Bdocker provides two daemons one for the working node and another one for the accounting node. They are implemented as
 in RESTFUL APIs. The daemons are configured by using a configuration file, the administrator has to configure this
 file in the environment variable ``BDOCKER_CONF_FILE``. If it is not configured the system looks for the file in
 ``/etc/configure_bdocker.cfg``. In the following, we can a example of configuration of both daemons.
 
-Working Node
-------------
+###Working Node
+
 
 Every working node configures the following fields::
 
@@ -41,8 +39,8 @@ Every working node configures the following fields::
     [dockerAPI]
     base_url = unix://var/run/docker.sock
 
-Accounting
-----------
+###Accounting
+
 The accounting node configures the following fields::
 
     [resource]
@@ -62,8 +60,8 @@ The accounting node configures the following fields::
     [credentials]
     token_store = /etc/token_store.yml
 
-Configuration content
----------------------
+###Configuration content
+
 
 | Group             |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
@@ -94,14 +92,13 @@ Configuration content
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
 
-Client configuration
-********************
+##Client configuration
 
  The client is configures by using the WN configuration file described above. It uses just the
  following fields:
 
-User configuration
-------------------
+###User configuration
+
     
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
@@ -114,10 +111,10 @@ User configuration
 |                |                     |   execute configuration and cleaning tasks.
 
 
-Bacth environment configuration
-*******************************
+##Bacth environment configuration
 
-Epilog::
+
+###Epilog::
 
     ################
     ### BDOCKER ####
@@ -127,7 +124,7 @@ Epilog::
     export BDOCKER_CONF_FILE="/home/jorge/conf.cfg
     bdocker configure
 
-Prolog::
+###Prolog::
 
     ################
     ### BDOCKER ####
