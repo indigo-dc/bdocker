@@ -103,7 +103,7 @@ Parameters:
 Optional parameters:
 * --token=XX or -t: Execute the action over another user token.
 * --detach or -d: Run container in background and print container ID.
-* --working=XX or -w: Working directory inside the container.
+* --workdir=XX or -w: Working directory inside the container.
 * --volume=XX or -v : Bind mount a volume (/container_path/:/host_path)
 
     bdocker run [OPTIONS] <image_id> <command>

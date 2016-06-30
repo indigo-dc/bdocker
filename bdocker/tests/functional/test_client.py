@@ -36,10 +36,10 @@ class TestCaseCommandLine(testtools.TestCase):
         self.assertIsNone(result.exception)
 
 
-class TestCommandProject(TestCaseCommandLine):
+class TestFunctionalClient(TestCaseCommandLine):
 
     def setUp(self):
-        super(TestCommandProject, self).setUp()
+        super(TestFunctionalClient, self).setUp()
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -119,3 +119,154 @@ class TestCommandProject(TestCaseCommandLine):
         )
         self.assertEqual(result.exit_code,0)
         self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_docker_list_all(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        all = "--all"
+        result = self.runner.invoke(
+            cli.bdocker, ['ps', all]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_docker_inspect(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['inspect', token, container_id]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_docker_inspect_no_container(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        result = self.runner.invoke(
+            cli.bdocker, ['inspect']
+        )
+        self.assertEqual(2, result.exit_code)
+        self.assertIsNotNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_docker_logs(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['logs', token, container_id]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_get")
+    def test_docker_logs_no_container(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        result = self.runner.invoke(
+            cli.bdocker, ['logs']
+        )
+        self.assertEqual(2, result.exit_code)
+        self.assertIsNotNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_docker_delete(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['rm', token, container_id]
+        )
+        self.assertEqual(result.exit_code,0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_docker_delete_no_container(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        result = self.runner.invoke(
+            cli.bdocker, ['rm']
+        )
+        self.assertEqual(2, result.exit_code)
+        self.assertIsNotNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_docker_delete_several(self, m_get, m_batch, m_load):
+        m_get.return_value = {}
+        token = "--token=%s" % uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        container_id2 = uuid.uuid4().hex
+        result = self.runner.invoke(
+            cli.bdocker, ['rm', token, container_id, container_id2]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_docker_run(self, m_rq, m_batch, m_load):
+        m_rq.return_value = {}
+        token_id = uuid.uuid4().hex
+        token = "--token=%s" % token_id
+        image_id = uuid.uuid4().hex
+        command = 'ls'
+        result = self.runner.invoke(
+            cli.bdocker, ['run', token, image_id, command]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+        expected = {
+                    "token": token_id,
+                    "image_id": image_id,
+                    "script": command,
+                    "detach": None
+                    }
+        m_rq.assert_called_with(path="/run", parameters=expected)
+
+    @mock.patch("bdocker.utils.load_configuration_from_file")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch.object(request.RequestController, "execute_put")
+    def test_docker_run_volume(self, m_rq, m_batch, m_load):
+        m_rq.return_value = {}
+        token_id = uuid.uuid4().hex
+        token = "--token=%s" % token_id
+        image_id = uuid.uuid4().hex
+        command = 'ls'
+        host_path= "/foo"
+        doc_path= "/baa"
+        w_path = "/work"
+        work_dir = "--workdir=%s" % w_path
+        volume = '--volume=%s:%s' % (host_path, doc_path)
+        result = self.runner.invoke(
+            cli.bdocker, ['run', token,
+                          image_id, work_dir,
+                          command, volume]
+        )
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNone(result.exception)
+        expected = {"host_dir": host_path,
+                    "docker_dir": doc_path,
+                    "token": token_id,
+                    "image_id": image_id,
+                    "script": command,
+                    "working_dir": w_path,
+                    "detach": None
+                    }
+        m_rq.assert_called_with(path="/run", parameters=expected)

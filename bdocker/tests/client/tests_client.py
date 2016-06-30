@@ -307,15 +307,16 @@ class TestCommandProject(TestCaseCommandLine):
         token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
-        volume = '--volume=fake'
+        host_path= "/foo"
+        doc_path= "/baa"
+        volume = '--volume=%s:%s' % (host_path, doc_path)
         result = self.runner.invoke(
             cli.bdocker, ['run', token,
                           image_id,
-                          command]
+                          command, volume]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
-
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "container_run")
@@ -329,7 +330,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['run', token,
                           image_id,
-                          command]
+                          command, detach]
         )
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
