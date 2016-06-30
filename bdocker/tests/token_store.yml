@@ -56,7 +56,8 @@ c2dbe5ea172a4457bd8ea2868791e506:
   job: {cgroup: /user/4, id: '4', spool: /home/jorge/FAKE_JOB}
   uid: 1000
 d0906983f865429ebe6deadf9c263b2b:
-  containers: [fc43f485d64b8d574bdc95454a291e377b47b8f3d3103566fd468147d723c352, ec1dacd765197f2b63230875e388906e4ed6958c6ac71e57de8345c5f7560d54]
+  containers: [fc43f485d64b8d574bdc95454a291e377b47b8f3d3103566fd468147d723c352, ec1dacd765197f2b63230875e388906e4ed6958c6ac71e57de8345c5f7560d54,
+    fe9a09960dc3d2751af1a785857ecf5a7bdcbfd487685f5b250b1cd70258b730]
   gid: 1000
   home: /home/jorge
   job: {acc_file: /home/jorge/.bdocker_accounting_1, cgroup: /user/1, job_id: '1',

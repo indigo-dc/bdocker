@@ -62,42 +62,37 @@ The accounting node configures the following fields::
     [credentials]
     token_store = /etc/token_store.yml
 
-.. table:: Configuration content
+Configuration content
+---------------------
 
-    ================ ======================= =================================================
-    Group             Field                   Description
-    ================ ======================= =================================================
-    ``server``                                RESTFUL API access configuration
-                      ``host``                Host in which the service will be provided
-                      ``port``                Port in which the service will be provided
-                      ``environ``             Run mode. It could be: debug, public, private.
-                                              In case of public, the service will listen from
-                                              all the local IPs, it will use 0.0.0.0 IP.
+| Group             |Field               |Description                                |
+| ----------------- |:------------------:|:------------------------------------------------|
+|``server``         |                    |RESTFUL API access configuration                  
+|                   |``host``            |Host in which the service will be provided        
+|                   |``port``            |Port in which the service will be provided        
+|                   |``environ``         |Run mode. It could be: debug, public, private.    
+|                   |                     |In case of public, the service will listen from  
+|                  |                      |all the local IPs, it will use 0.0.0.0 IP.          
+|``accounting_server``|                  |Configures in the WN the location of the          
+|                   |                     |accounting service.                               
+|                     |``host``          |Host in which the service is located              
+|                     |``port``          |Port in which the service is located              
+|``batch``        |                      |Batch system configuration                        
+|                 |``system``            |Specify the type of resource manager              
+|                 |``enable_cgroups``    |Enable cgroup accounting management.              
+|                 |``cgroups_dir``       |CGroup root directory. By default:                
+|                 |                      |"/sys/fs/cgroup"                                    
+|                 |``parent_cgroup``     |Cgroup parent group: By default: "/"
+|                 |``bdocker_accounting``|Accountig file for bdocker jobs.
+|``credentials``  |                      |Credential module configuration
+|                 |``token_store``       |File in which the tokens are store (root rights)
+|                 |``token_client_file`` |Token file name. In configuration process, the user
+|                 |                      |token is stored in the user home directory by using
+|                 |                      |the name: $HOME/``token_client_file``_$JOB_ID.
+|``dockerAPI``    |                      |
+|                 | ``base_url``          |Docker server url. It could be a http link
+|                 |                      |or a socket link (unix://var/run/docker.sock)
 
-    ``accounting_server``                     Configures in the WN the location of the
-                                              accounting service.
-                      ``host``                Host in which the service is located
-                      ``port``                Port in which the service is located
-
-    ``batch``                                 Batch system configuration
-                      ``system``              Specify the type of resource manager
-                      ``enable_cgroups``      Enable cgroup accounting management.
-                      ``cgroups_dir``         CGroup root directory. By default: /sys/fs/cgroup
-                      ``parent_cgroup``       Cgroup parent group: By default: /
-                      ``bdocker_accounting``  Accountig file for bdocker jobs.
-
-
-
-    ``credentials``                           Credential module configuration
-                      ``token_store``         File in which the tokens are store (root rights)
-                      ``token_client_file``   Token file name. In configuration process, the user
-                                              token is stored in the user home directory by using
-                                              the name: $HOME/``token_client_file``_$JOB_ID.
-
-    ``dockerAPI``
-                      ``base_url``          Docker server url. It could be a http link
-                                            or a socket link (unix://var/run/docker.sock)
-    ================ ================== ====================================================
 
 Client configuration
 ********************
@@ -105,17 +100,18 @@ Client configuration
  The client is configures by using the WN configuration file described above. It uses just the
  following fields:
 
-.. table:: User configuration
-    ================ ======================= =================================================
-    Group             Field                   Description
-    ================ ======================= =================================================
-    ``server``                                RESTFUL API access configuration
-                      ``host``                Host in which the service is located
-                      ``port``                Port in which the service is located
-    ``credentials``                           Credential module configuration
-                      ``token_store``         File in which the tokens are store (root rights).
-                                              The client will use the administation token to
-                                              execute configuration and cleaning tasks.
+User configuration
+------------------
+    
+|Group           |Field                |Description
+| -------------- |:-------------------:|:------------------------------------------------|
+|``server``      |                     |RESTFUL API access configuration
+|                |``host``             |Host in which the service is located
+|                |``port``             |Port in which the service is located
+|``credentials`` |                     |Credential module configuration
+|                |``token_store``      |File in which the tokens are store (root rights).
+|                |                     |The client will use the administation token to
+|                |                     |   execute configuration and cleaning tasks.
 
 
 Bacth environment configuration

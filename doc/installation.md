@@ -1,8 +1,9 @@
 Installation
 =============
 
-Daemon configuration
+Instalation from pip
 ********************
+At the moment the only way to install Bdocker is by using pip as local reporitory::
 
-Bdocker provides two daemons one for the working node and another one for the accounting node. They are implemented as
-in RESTFUL APIs. 
+    $pip install .
+    
