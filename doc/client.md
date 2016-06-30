@@ -17,9 +17,11 @@ Configure the user credentials and the batch environment::
 ###Clean
 
 Clean the user credentials and the batch environment::
-Optional parameter to execute the action over another user token.
 
     bdocker [--token=XX] clean
+    
+Optional parameters:
+* --token=XX or -t XX: Execute the action over another user token.
 
 ##User commands
 
@@ -31,81 +33,89 @@ $HOME/bdocker_token_$JOB_ID.
 
 ###Pull
 
-Pull a image (like ``docker pull``):
+Pull a image (like ``docker pull``)::
+
+    bdocker pull [--token=XX] <repository>
+    
 Parameters:
 * image repository
 Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
-
-    bdocker pull [--token=XX] <repository>
+* --token=XX or -t XX: Execute the action over another user token.
  
 ###List
 
-List all containers of the user (like ``docker ps``).
+List all containers of the user (like ``docker ps``)::
+
+    bdocker ps [--token=XX] [--all]
+    
 Optional parameters:
 * --token=XX or -t: Execute the action over another user token.
 * --all or -a: Show also the non-running containers
 
-    bdocker ps [--token=XX] [--all]
-
 ###Logs
 
-Show the logs of a container (like ``docker logs``).
-Parameters:
-* Container id
-Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
+Show the logs of a container (like ``docker logs``)::
 
     bdocker logs [--token=XX] <container_id>
 
-###Inspect
-
-Show the information about a container (like ``docker inspect``).
 Parameters:
 * Container id
 Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
+* --token=XX or -t XX: Execute the action over another user token.
+
+###Inspect
+
+Show the information about a container (like ``docker inspect``)::
 
     bdocker inspect [--token=XX] <container_id>
 
-###Delete
-
-Delete one or serveral containers from a user (like ``docker rm``).
 Parameters:
 * Container id
 Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
+* --token=XX or -t XX: Execute the action over another user token.
+
+###Delete
+
+Delete one or serveral containers from a user (like ``docker rm``)::
 
     bdocker rm [--token=XX] <container_id, container_id,...>
+    
+Parameters:
+* Container id
+Optional parameters:
+* --token=XX or -t XX: Execute the action over another user token.
 
 ###Copy
 
 Copy files/folders between a container and the local filesystem
-(like ``docker cp``).
+(like ``docker cp``)::
+
+    bdocker cp [--token=XX] <container_id:/path> </host/path>
+    bdocker cp [--token=XX] </host/path> <container_id:/path>
+    
 Parameters:
 * Container identification with the container path (id:/path)
 * Host path (/path)
 Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
-
-    bdocker cp [--token=XX] <container_id:/path> </host/path>
-    bdocker cp [--token=XX] </host/path> <container_id:/path>
+* --token=XX or -t XX: Execute the action over another user token.
 
 ###Run
 
 Creates a writeable container layer over the specified image,
-and executes the command (like ``docker run``).
+and executes the command (like ``docker run``)::
+
+    bdocker run [OPTIONS] <image_id> <command>
+
 Parameters:
 * Image identification
 * Command
 
 Optional parameters:
-* --token=XX or -t: Execute the action over another user token.
+* --token=XX or -t XX: Execute the action over another user token.
 * --detach or -d: Run container in background and print container ID.
-* --workdir=XX or -w: Working directory inside the container.
-* --volume=XX or -v : Bind mount a volume (/container_path/:/host_path)
+* --workdir=XX or -w XX: Working directory inside the container.
+* --volume=XX or -v XX: Bind mount a volume (/container_path/:/host_path)
 
-    bdocker run [OPTIONS] <image_id> <command>
     
 ##Examples
 
