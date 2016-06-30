@@ -246,18 +246,25 @@ def add_to_file(file_path, data):
 
 
 def write_tar_raw_data_stream(path, stream, uid, gid):
-    file_path = "%s/%s.tar.gz" % (path,
-                                  uuid.uuid4().hex)
-    my_file = io.FileIO(file_path, 'w')
-    my_file.write(stream)
-    my_file.close()
-    tar_info = tarfile.TarInfo()
-    tar_info.uid = uid
-    tar_info.gid = gid
-    my_tar = tarfile.TarFile(file_path, tarinfo=tar_info)
+    strema_io = StringIO.StringIO(stream)
+    my_tar = tarfile.TarFile(fileobj=strema_io)
     my_tar.extractall(path=path)
+    change_owner_dir(path, uid, gid)
 
 
 def read_tar_raw_data_stream(path):
-    my_file = io.FileIO(path, 'r')
-    return my_file
+    file_name = "/tmp/%s.tar" % uuid.uuid4().hex
+    tar_stream = tarfile.TarFile(file_name, mode="w")
+    arcname = os.path.basename(path)
+    tar_stream.add(path, arcname=arcname)
+    tar_stream.close()
+    io_stream = io.FileIO(file_name, 'r')
+    return io_stream
+
+
+def change_owner_dir(path, uid, gid):
+    for root, dirs, files in os.walk(path):
+      for momo in dirs:
+        os.chown(os.path.join(root, momo), uid, gid)
+      for momo in files:
+        os.chown(os.path.join(root, momo), uid, gid)

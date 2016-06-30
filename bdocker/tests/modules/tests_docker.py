@@ -295,7 +295,9 @@ class TestDocker(testtools.TestCase):
 
     @mock.patch.object(docker.Client, 'put_archive')
     @mock.patch("io.FileIO")
-    def test_copy_to_container(self, m_file, mput):
+    @mock.patch("tarfile.TarFile")
+    @mock.patch("os.path")
+    def test_copy_to_container(self, m_os, m_tar, m_file, mput):
         mput.return_value = True
         container_id = uuid.uuid4().hex
         container_path = "/baa"

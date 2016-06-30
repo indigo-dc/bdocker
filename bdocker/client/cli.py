@@ -233,7 +233,7 @@ def accounting(ctx, token, container_id):
                  help="Copy files/folders between "
                       "a container and the local filesystem:\n"
                       "1) <containerId>:/file/path/within/container /host/path/target\n"
-                      "2) /host/path/target.tar <containerId>:/file/path/within/container")
+                      "2) /host/path/target <containerId>:/file/path/within/container")
 @token_option
 @path_argument
 @click.pass_context

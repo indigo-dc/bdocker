@@ -162,6 +162,8 @@ def get_exception_details(ex=None, custom_message=None,
         else:
             if hasattr(ex, 'explanation'):
                 message = str(ex.explanation)
+            elif hasattr(ex, 'strerror'):
+                message = str(ex.strerror)
             elif hasattr(ex, 'message'):
                 message = str(ex.message)
             if hasattr(ex, 'code'):
