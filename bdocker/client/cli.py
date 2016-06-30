@@ -106,8 +106,7 @@ def clean_environment(ctx, token):
 
 
 @bdocker.command('pull',
-                 help="Pull a container and"
-                      " its intermediate layers.")
+                 help="Pull a image.")
 @token_option
 @source_argument
 @click.pass_context
@@ -204,7 +203,8 @@ def container_delete(ctx, token, container_ids, force):
 
 
 @bdocker.command('notify_accounting',
-                 help="Send accounting to the server.")
+                 help="[BETA] Send accounting to the server."
+                      "ROOT privileges needed")
 @token_option
 @click.pass_context
 def notify_accounting(ctx, token, force):
@@ -217,7 +217,8 @@ def notify_accounting(ctx, token, force):
 
 
 @bdocker.command('accounting',
-                 help="Retrieve the job accounting.")
+                 help="[BETA] Retrieve the job accounting."
+                      "ROOT privileges needed")
 @token_option
 @container_id_argument
 @click.pass_context
