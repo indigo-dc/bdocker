@@ -117,4 +117,17 @@ Run
 Run over binding directory from the host::
 
     bdocker run -d 2fa927b5cdd3 -v /home/jorge/FAKE_JOB/:/tmp -w /tmp './script.sh'
-    
+
+Copy
+----
+
+Copy from host to container::
+
+    bdocker cp /home/jorge/folder ec1dacd765197f2b63230875e388906e4ed6958c6ac71e57de8345c5f7560d54:/tmp/to_container
+
+Copy from container to host::
+
+    bdocker cp ec1dacd765197f2b63230875e388906e4ed6958c6ac71e57de8345c5f7560d54:/tmp/folder /home/jorge/
+
+  
+
