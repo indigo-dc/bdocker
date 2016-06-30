@@ -39,6 +39,7 @@ Pull a image (like ``docker pull``)::
     
 Parameters:
 * image repository
+
 Optional parameters:
 * --token=XX or -t XX: Execute the action over another user token.
  
@@ -60,6 +61,7 @@ Show the logs of a container (like ``docker logs``)::
 
 Parameters:
 * Container id
+
 Optional parameters:
 * --token=XX or -t XX: Execute the action over another user token.
 
@@ -71,6 +73,7 @@ Show the information about a container (like ``docker inspect``)::
 
 Parameters:
 * Container id
+
 Optional parameters:
 * --token=XX or -t XX: Execute the action over another user token.
 
@@ -82,6 +85,7 @@ Delete one or serveral containers from a user (like ``docker rm``)::
     
 Parameters:
 * Container id
+
 Optional parameters:
 * --token=XX or -t XX: Execute the action over another user token.
 
@@ -96,6 +100,7 @@ Copy files/folders between a container and the local filesystem
 Parameters:
 * Container identification with the container path (id:/path)
 * Host path (/path)
+
 Optional parameters:
 * --token=XX or -t XX: Execute the action over another user token.
 
