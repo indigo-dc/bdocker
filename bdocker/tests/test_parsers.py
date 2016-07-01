@@ -34,15 +34,6 @@ class TestParsers(testtools.TestCase):
         self.assertIsNotNone(result)
 
 
-    # def test_print_table(self):
-    #     out = []
-    #     out.append(["HEADER1", "HEADER2", "HEADER3"])
-    #     out.append([1, 1, 1])
-    #     out.append([2, 2, 2])
-    #     utils.print_table(out.pop(0), out)
-
-
-
     def test_validate_dir(self):
         home_path = '/home/jorge'
         req_path = '%s/nuevo/script_dir' % home_path

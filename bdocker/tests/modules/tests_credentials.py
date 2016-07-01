@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 import uuid
 
 import mock
@@ -39,8 +40,8 @@ class TestUserCredentials(testtools.TestCase):
 
     def setUp(self):
         super(TestUserCredentials, self).setUp()
-        self.path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
-                    "bdocker/bdocker/tests/modules/fake_token_store.yml"
+        self.path = os.path.join(os.path.dirname(__file__),
+                                             'fake_token_store.yml')
         self.control = credentials.UserController(self.path)
 
     def test_token_store(self):
