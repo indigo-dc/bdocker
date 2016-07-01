@@ -1,0 +1,6 @@
+prolog: {token: token_prolog}
+token_test:
+  gid: gggggggggguuuiiidd
+  home_dir: /foo
+  job: {id: 8741d841a9c4425e99175736e0e3fa54, spool: 858dccf8d2d547fb81350ef2e38342cd}
+  uid: uuuuuuuuuuiiiidddddd
