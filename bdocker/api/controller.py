@@ -158,7 +158,7 @@ class ServerController(object):
             results = self.docker_module.logs_container(container_id)
         else:
             results = container_id
-        return  results
+        return results
 
     def list_containers(self, data):
         """List containers.
