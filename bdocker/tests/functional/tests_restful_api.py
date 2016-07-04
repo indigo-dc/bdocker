@@ -214,6 +214,7 @@ class TestIntegrationWN(testtools.TestCase):
         self.assertEqual(201, result.status_code)
         self.assertEqual(self.user_token_conf,
                          result.json_body["results"])
+        self.assertIn(self.user_token_conf, self.token_store)
 
     @mock.patch.object(nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.utils.read_file")
@@ -237,6 +238,8 @@ class TestIntegrationWN(testtools.TestCase):
                                      content_type="application/json"
                                      ).get_response(self.app)
         self.assertEqual(204, result.status_code)
+        self.assertNotIn(self.user_token_delete,
+                         self.token_store)
 
     @mock.patch.object(docker_py.Client, "pull")
     def test_pull(self, m_pull):
@@ -285,6 +288,7 @@ class TestIntegrationWN(testtools.TestCase):
         self.assertEqual(200, result.status_code)
         self.assertEqual(self.c1, result.json_body["results"][0])
         self.assertEqual(self.c2, result.json_body["results"][1])
+        self.assertNotIn("containers", self.token_store[self.user_token_delete])
 
     @mock.patch.object(docker_py.Client, "containers")
     def test_ps(self, ml):

@@ -175,7 +175,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        self.assertEqual(200, result.status_code)
 
     @mock.patch.object(controller.ServerController, "delete_container")
     def test_delete_several(self, md):
@@ -192,7 +192,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        self.assertEqual(200, result.status_code)
         self.assertEqual(c1, result.json_body["results"][0])
         self.assertEqual(c2, result.json_body["results"][1])
         self.assertEqual(token, md.call_args_list[0][0][0]["token"])
@@ -213,7 +213,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        self.assertEqual(200, result.status_code)
         self.assertEqual(force, md.call_args_list[0][0][0]["force"])
 
     @mock.patch.object(controller.ServerController, "delete_container")
