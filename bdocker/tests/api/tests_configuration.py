@@ -20,6 +20,7 @@ import testtools
 from bdocker import utils
 from bdocker import exceptions
 
+
 class TestConfigurationWorkingNode(testtools.TestCase):
     """Test Configuration on Loading."""
 
@@ -62,8 +63,8 @@ class TestConfigurationMaster(testtools.TestCase):
                           utils.load_configuration_from_file,
                           file_name)
 
-    def test_load_config_file2(self):
+    def test_load_sge_job_config(self):
         file_name = os.path.join(os.path.dirname(__file__),
-                                 'spool_config')
+                                 'sge_spool_config')
         config_dict = utils.load_sge_job_configuration(file_name)
         self.assertIsNotNone(config_dict)

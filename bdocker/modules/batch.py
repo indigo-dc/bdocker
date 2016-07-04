@@ -95,6 +95,11 @@ class SGEAccountingController(BatchMasterController):
         utils.add_to_file(self.bdocker_accounting, job_string)
 
     def set_job_accounting(self, accounting):
+        """ Add accounting line to the bdocker accounting file
+
+        :param accounting: string with sge accounting format
+        :return:
+        """
         try:
             LOG.exception("WRITING in %s" % self.bdocker_accounting)
             accounting_end_line = "%s\n" % accounting
@@ -120,7 +125,9 @@ class BatchWNController(object):
         self.flush_time = conf.get("flush_time", 10)
         self.default_acc_file = ".bdocker_accounting"
 
-        self.notification_controller = BatchNotificationController(accounting_conf)
+        self.notification_controller = BatchNotificationController(
+            accounting_conf
+        )
 
     def conf_environment(self, session_data):
         if self.enable_cgroups:

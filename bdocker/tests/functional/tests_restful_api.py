@@ -80,14 +80,44 @@ class TestAccRESTAPI(testtools.TestCase):
                                      body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
 
-fake = {"admin_token": uuid.uuid4().hex,
-        "user_token": uuid.uuid4().hex,
-        "user_uid": uuid.uuid4().hex,
-        "user_gid": uuid.uuid4().hex,
-        "job_id": uuid.uuid4().hex,
-        "c1": uuid.uuid4().hex,
-        "c2": uuid.uuid4().hex,
-        }
+fake = [
+    {"admin_token": uuid.uuid4().hex,
+     "user_token": uuid.uuid4().hex,
+     "user_uid": uuid.uuid4().hex,
+     "user_gid": uuid.uuid4().hex,
+     "job_id": uuid.uuid4().hex,
+     "c1": uuid.uuid4().hex,
+     "c2": uuid.uuid4().hex,
+     "home": "/faa"
+     },
+    {"admin_token": uuid.uuid4().hex,
+     "user_token": uuid.uuid4().hex,
+     "user_uid": uuid.uuid4().hex,
+     "user_gid": uuid.uuid4().hex,
+     "job_id": uuid.uuid4().hex,
+     "c1": uuid.uuid4().hex,
+     "c2": uuid.uuid4().hex,
+     "home": "/boo"
+     },
+    {"admin_token": uuid.uuid4().hex,
+     "user_token": uuid.uuid4().hex,
+     "user_uid": uuid.uuid4().hex,
+     "user_gid": uuid.uuid4().hex,
+     "job_id": uuid.uuid4().hex,
+     "c1": uuid.uuid4().hex,
+     "c2": uuid.uuid4().hex,
+     "home": "/eggg"
+     },
+     {"admin_token": uuid.uuid4().hex,
+     "user_token": uuid.uuid4().hex,
+     "user_uid": uuid.uuid4().hex,
+     "user_gid": uuid.uuid4().hex,
+     "job_id": uuid.uuid4().hex,
+     "c1": uuid.uuid4().hex,
+     "c2": uuid.uuid4().hex,
+     "home": "/eggg"
+     }
+]
 
 class TestIntegrationWN(testtools.TestCase):
     """Test REST request mapping."""
@@ -97,35 +127,43 @@ class TestIntegrationWN(testtools.TestCase):
         super(TestIntegrationWN, self).setUp()
         file_name = os.path.join(os.path.dirname(__file__),
                                  'sge_wn_configure.cfg')
-        self.admin_token = fake["admin_token"]
-        self.user_token = fake["user_token"]
-        self.user_uid = fake["user_uid"]
-        self.user_gid = fake["user_gid"]
-        self.user_home = "/foo"
-        self.job_id = fake["job_id"]
-        self.c1 = fake["c1"]
-        self.c2 = fake["c2"]
-        self.job_info =  {
-                    "job_id": self.job_id,
-                    "spool": "/baa",
-                    "max_cpu": 0,
-                    "max_memory": 0,
-                    "user_name": "",
-                    "queue_name": "",
-                    "host_name": "",
-                    "job_name": "",
-                    "account_name": "",
-                    "log_name": ""}
-        # TODO(jorgesece): in parallel
-        # it delete tokens and it giveus error
+        self.admin_token = fake[0]["admin_token"]
+        self.user_token_permanent = fake[0]["user_token"]
+        self.user_uid = fake[0]["user_uid"]
+        self.user_gid = fake[0]["user_gid"]
+        self.user_home = fake[0]["home"]
+        self.job_id = fake[0]["job_id"]
+        self.c1 = fake[0]["c1"]
+        self.c2 = fake[0]["c2"]
+        self.job_info = {
+            "job_id": self.job_id,
+            "spool": "/baa",
+            "max_cpu": 0,
+            "max_memory": 0,
+            "user_name": "",
+            "queue_name": "",
+            "host_name": "",
+            "job_name": "",
+            "account_name": "",
+            "log_name": ""
+        }
+        self.user_token_conf = fake[1]["user_token"]
+        self.user_token_delete = fake[2]["user_token"]
+        self.user_token_clean = fake[2]["user_token"]
         self.token_store = {
             "prolog": {"token": self.admin_token},
-            self.user_token: {
+            self.user_token_permanent: {
                 "uid": self.user_uid,
                 "gid": self.user_gid,
                 "home": self.user_home,
                 "job": self.job_info,
-                "containers":[self.c1, self.c2]}
+                "containers": [self.c1, self.c2]},
+            self.user_token_delete: {
+                "uid": self.user_uid,
+                "gid": self.user_gid,
+                "home": self.user_home,
+                "job": self.job_info,
+                "containers": [self.c1, self.c2]}
         }
         m_file.return_value = self.token_store
         os.environ['BDOCKER_CONF_FILE'] = file_name
@@ -162,7 +200,7 @@ class TestIntegrationWN(testtools.TestCase):
                       }
         m_ry.return_value = self.token_store
         mock_uid = mock.MagicMock()
-        mock_uid.hex = self.user_token
+        mock_uid.hex = self.user_token_conf
         m_uuid.return_value = mock_uid
         m_class = mock.MagicMock()
         m_class.pw_gid = self.user_gid
@@ -174,7 +212,7 @@ class TestIntegrationWN(testtools.TestCase):
                                      content_type="application/json",
                                      body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
-        self.assertEqual(self.user_token,
+        self.assertEqual(self.user_token_conf,
                          result.json_body["results"])
 
     @mock.patch.object(nodes.Node, "delete_cgroup")
@@ -192,7 +230,7 @@ class TestIntegrationWN(testtools.TestCase):
         m_r.return_value = "2222\n3333"
         m_ry.side_effect = [self.job_info, self.token_store]
         parameters = {"admin_token": self.admin_token,
-                      "token": self.user_token,}
+                      "token": self.user_token_clean,}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/clean?%s" % query,
                                      method="DELETE",
@@ -201,8 +239,25 @@ class TestIntegrationWN(testtools.TestCase):
         self.assertEqual(204, result.status_code)
 
     @mock.patch.object(docker_py.Client, "pull")
-    def test_pull(self, md):
-        parameters = {"token": self.user_token,
+    def test_pull(self, m_pull):
+        image_id_1 = uuid.uuid4().hex
+        image_id_2 = uuid.uuid4().hex
+        logs = [{
+            "status": "Pulling image (latest) from busybox",
+            "progressDetail": {},
+            "id": image_id_1
+        },
+            {
+                "status": "Pulling image (latest) from busybox",
+                "progressDetail": {},
+                "id": image_id_2
+            }]
+
+        def create_log():
+            for l in logs:
+                yield(json.dumps(l))
+        m_pull.return_value = create_log()
+        parameters = {"token": self.user_token_permanent,
                       "source": 'repoooo'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/pull",
@@ -210,25 +265,16 @@ class TestIntegrationWN(testtools.TestCase):
                                      body=body,
                                      method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
-
-    @mock.patch.object(docker_py.Client, "remove_container")
-    def test_delete(self, md):
-        parameters = {"token": self.user_token,
-                      "container_id": 'repoooo'}
-        body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        self.assertIn(image_id_1, result.json_body["results"][0])
+        self.assertIn(image_id_2, result.json_body["results"][1])
 
     @mock.patch.object(docker_py.Client, "remove_container")
     @mock.patch("bdocker.utils.write_yaml_file")
     @mock.patch("bdocker.utils.read_yaml_file")
-    def test_delete_several(self, m_r, m_w, md):
+    def test_delete(self, m_r, m_w, md):
         m_r.return_value = self.token_store
         force = False
-        parameters = {"token": self.user_token,
+        parameters = {"token": self.user_token_delete,
                       "container_id": [self.c1, self.c2],
                       "force": force}
         body = request.make_body(parameters)
@@ -236,7 +282,7 @@ class TestIntegrationWN(testtools.TestCase):
                                      content_type="application/json",
                                      body=body,
                                      method="PUT").get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        self.assertEqual(200, result.status_code)
         self.assertEqual(self.c1, result.json_body["results"][0])
         self.assertEqual(self.c2, result.json_body["results"][1])
 
@@ -257,7 +303,7 @@ class TestIntegrationWN(testtools.TestCase):
              "Image": "image_name",
              "Command": "ls",
              "Status": "status"}]
-        token = self.user_token
+        token = self.user_token_permanent
         all = True
         result = webob.Request.blank("/ps?token=%s&all=%s" % (token, all),
                                      method="GET").get_response(self.app)
@@ -267,26 +313,40 @@ class TestIntegrationWN(testtools.TestCase):
 
     @mock.patch.object(docker_py.Client, "inspect_container")
     def test_show(self, md):
-        md.return_value = {}
-        parameters = {"token": self.user_token,
+        parameters = {"token": self.user_token_permanent,
                       "container_id": self.c1}
+        md.return_value = fake_out = {
+            "containerId": self.c1,
+            "command": "ls"
+        }
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/inspect?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
+        self.assertIsNotNone(json.loads(result.json_body["results"])[0])
+        out = json.loads(result.json_body["results"])[0]
+        self.assertEqual(fake_out["containerId"], out["containerId"])
+        self.assertEqual(fake_out["command"], out["command"])
 
     @mock.patch.object(docker_py.Client, "logs")
-    def test_logs(self, md):
-        parameters = {"token": self.user_token,
+    def test_logs(self, m_logs):
+        logs = [uuid.uuid4().hex, uuid.uuid4().hex]
+
+        def create_log():
+            for l in logs:
+                yield(l)
+        m_logs.return_value = create_log()
+        parameters = {"token": self.user_token_permanent,
                       "container_id": self.c1}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
                                      method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
+        self.assertEqual(logs, result.json_body["results"])
 
     @mock.patch.object(docker_py.Client, "stop")
     def test_stop(self, md):
-        parameters = {"token": self.user_token,
+        parameters = {"token": self.user_token_permanent,
                       "container_id": self.c1}
         body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
@@ -295,35 +355,14 @@ class TestIntegrationWN(testtools.TestCase):
                                      method="POST").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    # @mock.patch.object(docker_py.Client, "stop")
-    # def test_run(self, md):
-    #     token = uuid.uuid4().hex
-    #     image_id = uuid.uuid4().hex
-    #     container_id = uuid.uuid4().hex
-    #     script = 'ls'
-    #     detach = False
-    #     md.return_value = {'Id': container_id}
-    #     parameters = {"token": token,
-    #                   "image_id": image_id,
-    #                   "script": script,
-    #                   "detach": detach
-    #                   }
-    #     body = request.make_body(parameters)
-    #     result = webob.Request.blank("/run",
-    #                                  content_type="application/json",
-    #                                  body=body,
-    #                                  method="PUT").get_response(self.app)
-    #     self.assertEqual(201, result.status_code)
-    #     # todo: parse to get id
-
-
     @mock.patch.object(docker_py.Client, "put_archive")
     @mock.patch("bdocker.utils.read_tar_raw_data_stream")
-    def test_cp_to_container(self, m_str, _md):
-        parameters = {"token": self.user_token,
+    def test_cp_to_container(self, m_str, m_put):
+        m_put.return_value = True
+        parameters = {"token": self.user_token_permanent,
                       "container_id": self.c1,
-                      "container_path": "/foo",
-                      "host_path": "/foo",
+                      "container_path": "/coo",
+                      "host_path": self.user_home,
                       "host_to_container": True}
         body = request.make_body(parameters)
         result = webob.Request.blank("/copy",
@@ -331,18 +370,24 @@ class TestIntegrationWN(testtools.TestCase):
                                      body=body,
                                      method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
+        self.assertEqual(True, result.json_body["results"])
 
     @mock.patch.object(docker_py.Client, "get_archive")
     @mock.patch("bdocker.utils.write_tar_raw_data_stream")
     def test_cp_from_container(self, m_str, m_g):
         out = mock.MagicMock()
         out.data = None
-        stat = "OK"
+        stat = {'linkTarget': '',
+                'mode': 493,
+                'mtime': '2015-09-16T12:34:23-07:00',
+                'name': 'sh',
+                'size': 962860
+                }
         m_g.return_value = out, stat
-        parameters = {"token": self.user_token,
+        parameters = {"token": self.user_token_permanent,
                       "container_id": self.c1,
-                      "container_path": "/foo",
-                      "host_path": "/foo",
+                      "container_path": "/coo",
+                      "host_path": self.user_home,
                       "host_to_container": False}
         body = request.make_body(parameters)
         result = webob.Request.blank("/copy",
@@ -351,3 +396,76 @@ class TestIntegrationWN(testtools.TestCase):
                                      method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(stat, result.json_body["results"])
+
+    @mock.patch.object(docker_py.Client, "create_container")
+    @mock.patch.object(docker_py.Client, "start")
+    @mock.patch.object(docker_py.Client, "logs")
+    @mock.patch("bdocker.utils.write_yaml_file")
+    @mock.patch("bdocker.utils.read_yaml_file")
+    def test_run(self, m_r, m_w, m_log, m_start, m_cre):
+        logs = [uuid.uuid4().hex, uuid.uuid4().hex]
+
+        def create_log():
+            for l in logs:
+                yield(l)
+        m_log.return_value = create_log()
+
+        m_r.return_value = self.token_store
+        token = self.user_token_permanent
+        image_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        script = 'ls'
+        detach = False
+        m_cre.return_value = {'Id': container_id}
+        parameters = {"token": token,
+                      "image_id": image_id,
+                      "script": script,
+                      "detach": detach,
+                      "host_dir": self.user_home,
+                      "docker_dir": "/doo",
+                      "working_dir": "/doo",
+                      }
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/run",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)
+        self.assertEqual(True, m_log.called)
+        self.assertEqual(True, m_start.called)
+        self.assertEqual(True, m_cre.called)
+        self.assertIn(container_id, self.token_store[token]["containers"])
+        self.assertEqual(logs, result.json_body["results"])
+
+    @mock.patch.object(docker_py.Client, "create_container")
+    @mock.patch.object(docker_py.Client, "start")
+    @mock.patch.object(docker_py.Client, "logs")
+    @mock.patch("bdocker.utils.write_yaml_file")
+    @mock.patch("bdocker.utils.read_yaml_file")
+    def test_run_detach(self, m_r, m_w, m_log, m_start, m_cre):
+        m_r.return_value = self.token_store
+        token = self.user_token_permanent
+        image_id = uuid.uuid4().hex
+        container_id = uuid.uuid4().hex
+        script = 'ls'
+        detach = True
+        m_cre.return_value = {'Id': container_id}
+        parameters = {"token": token,
+                      "image_id": image_id,
+                      "script": script,
+                      "detach": detach,
+                      "host_dir": self.user_home,
+                      "docker_dir": "/doo",
+                      "working_dir": "/doo",
+                      }
+        body = request.make_body(parameters)
+        result = webob.Request.blank("/run",
+                                     content_type="application/json",
+                                     body=body,
+                                     method="PUT").get_response(self.app)
+        self.assertEqual(201, result.status_code)
+        self.assertEqual(False, m_log.called)
+        self.assertEqual(True, m_start.called)
+        self.assertEqual(True, m_cre.called)
+        self.assertIn(container_id, self.token_store[token]["containers"])
+        self.assertEqual(container_id, result.json_body["results"])

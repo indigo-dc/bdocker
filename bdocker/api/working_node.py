@@ -195,7 +195,7 @@ def delete():
         docker_out = server_controller.delete_container(data)
     except Exception as e:
         return api.manage_exceptions(e)
-    return api.make_json_response(201, docker_out)
+    return api.make_json_response(200, docker_out)
 
 
 @app.route('/notify_accounting', methods=['PUT'])
