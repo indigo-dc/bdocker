@@ -64,7 +64,7 @@ def parse_docker_generator1(gen_data, key='Status'):
             raise exceptions.ParseException('Pull output error',
                                             406)
         results = json.loads("{\"%s\"}"
-                                 % info.replace(":", "\":\"", 1))
+                             % info.replace(":", "\":\"", 1))
     except BaseException as e:
         raise exceptions.ParseException('Pull output error',
                                         code=406)

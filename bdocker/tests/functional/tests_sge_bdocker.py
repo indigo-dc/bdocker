@@ -37,17 +37,19 @@ class TestBdockerSgeWn(testtools.TestCase):
     def setUp(self):
         super(TestBdockerSgeWn, self).setUp()
         self.file_name = os.path.join(os.path.dirname(__file__),
-                                 'sge_wn_configure.cfg')
+                                      'sge_wn_configure.cfg')
         self.app = fakes.create_working_node_app(self.file_name)
         self.token_store = copy.deepcopy(fakes.token_store)
         self.admin_token = self.token_store["prolog"]["token"]
         self.runner = CliRunner()
 
+    @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "containers")
     @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_docker_list(self, m_inf, m_list):
+    def test_docker_list(self, m_inf, m_list, m_env):
         token = fakes.user_token
         containers = self.token_store[token]["containers"]
+        m_env.return_value = self.file_name
         m_list.return_value = [
             {"Id": containers[0],
              "Created": 666.777,
@@ -65,6 +67,7 @@ class TestBdockerSgeWn(testtools.TestCase):
              "Status": "status"}]
         orig = webob.Request.get_response
         app = self.app
+
         def mocked_some_method(self, bar=None):
             if bar:
                 return orig(self, bar)
@@ -84,9 +87,11 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIn(containers[0][:12], result.output)
         self.assertIn(containers[1][:12], result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "inspect_container")
     @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_docker_inspect(self, m_inf, m_ins):
+    def test_docker_inspect(self, m_inf, m_ins, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token
         containers = self.token_store[token]["containers"]
         container_id = containers[0]
@@ -116,9 +121,11 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIsNone(result.exception)
         self.assertIn(container_id, result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "logs")
     @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_docker_logs(self, m_get, m_logs):
+    def test_docker_logs(self, m_get, m_logs, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token
         container_id = self.token_store[token]["containers"][0]
         logs = [uuid.uuid4().hex, uuid.uuid4().hex]
@@ -147,11 +154,13 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIsNone(result.exception)
         self.assertEquals("\n".join(logs) + "\n", result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "remove_container")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch("bdocker.utils.write_yaml_file")
     @mock.patch("bdocker.utils.read_yaml_file")
-    def test_docker_delete(self, m_r, m_w, m_inf, m_rm):
+    def test_docker_delete(self, m_r, m_w, m_inf, m_rm, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token_delete
         containers = copy.copy(
             self.token_store[token]["containers"]
@@ -183,13 +192,16 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertNotIn("containers",
                          self.token_store[token])
 
+    @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch.object(docker_py.Client, "create_container")
     @mock.patch.object(docker_py.Client, "start")
     @mock.patch.object(docker_py.Client, "logs")
     @mock.patch("bdocker.utils.write_yaml_file")
     @mock.patch("bdocker.utils.read_yaml_file")
-    def test_docker_run_detach(self, m_r, m_w, m_log, m_start, m_cre, m_inf):
+    def test_docker_run_detach(self, m_r, m_w, m_log,
+                               m_start, m_cre, m_inf, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token
         user_home = self.token_store[token]["home"]
         m_r.return_value = self.token_store
@@ -225,13 +237,16 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIsNone(result.exception)
         self.assertEquals("%s\n" % container_id, result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch.object(docker_py.Client, "create_container")
     @mock.patch.object(docker_py.Client, "start")
     @mock.patch.object(docker_py.Client, "logs")
     @mock.patch("bdocker.utils.write_yaml_file")
     @mock.patch("bdocker.utils.read_yaml_file")
-    def test_docker_run_logs(self, m_r, m_w, m_log, m_start, m_cre, m_inf):
+    def test_docker_run_logs(self, m_r, m_w, m_log,
+                             m_start, m_cre, m_inf, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token
         user_home = self.token_store[token]["home"]
         m_r.return_value = self.token_store
@@ -273,11 +288,14 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIsNone(result.exception)
         self.assertEquals("\n".join(logs) + "\n", result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch.object(docker_py.Client, "put_archive")
     @mock.patch("bdocker.utils.read_tar_raw_data_stream")
     @mock.patch("bdocker.utils.read_file")
-    def test_cp_to_container(self, m_re, m_str, m_put, m_inf):
+    def test_cp_to_container(self, m_re, m_str,
+                             m_put, m_inf, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token
         containers_id = self.token_store[token]["containers"][0]
         path_host = self.token_store[token]["home"]
@@ -306,11 +324,14 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertIsNone(result.exception)
         self.assertEquals("%s\n" % True, result.output)
 
+    @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch.object(docker_py.Client, "get_archive")
     @mock.patch("bdocker.utils.write_tar_raw_data_stream")
     @mock.patch("bdocker.utils.read_file")
-    def test_cp_from_container(self, m_re, m_str, m_get, m_inf):
+    def test_cp_from_container(self, m_re, m_str,
+                               m_get, m_inf, m_env):
+        m_env.return_value = self.file_name
         out = mock.MagicMock()
         out.data = None
         stat = {'linkTarget': '',
@@ -451,6 +472,7 @@ class TestBdockerSgeWn(testtools.TestCase):
             user_home, job_id), result.output
                          )
 
+    @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
     @mock.patch("os.remove")
     @mock.patch.object(nodes.Node, "delete_cgroup")
@@ -463,7 +485,8 @@ class TestBdockerSgeWn(testtools.TestCase):
     def test_batch_clean(self, m_dock, m_w, m_ry,
                          m_del, m_add, m_r,
                          m_delgroup, m_osre,
-                         m_getjob):
+                         m_getjob, m_env):
+        m_env.return_value = self.file_name
         token = fakes.user_token_clean
         m_ry.side_effect = [self.token_store,
                             fakes.job_info,
@@ -482,9 +505,7 @@ class TestBdockerSgeWn(testtools.TestCase):
                 if 'clean' in self.path:
                     return orig(self, app)
                 else:
-                    acc_app = fakes.create_accounting_app(
-                        admin_token,
-                        user_token)
+                    acc_app = fakes.create_accounting_app()
                     return orig(self, acc_app)
         with mock.patch("webob.Request.get_response",
                                side_effect=mocked_some_method,

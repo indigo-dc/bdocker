@@ -28,14 +28,14 @@ from bdocker.api import controller
 class TestAccRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
-
-    @mock.patch("bdocker.utils.load_configuration_from_file")
-    @mock.patch.object(controller.AccountingServerController, "__init__")
-    def setUp(self, m_conf, m_load):
+    def setUp(self):
         super(TestAccRESTAPI, self).setUp()
-        m_conf.return_value = None
-        from bdocker.api import accounting
-        self.app = accounting.app
+        with mock.patch.object(controller.AccountingServerController,
+                               "__init__",
+                               return_value=None):
+            with mock.patch("bdocker.utils.load_configuration_from_file"):
+                from bdocker.api import accounting
+                self.app = accounting.app
 
     @mock.patch.object(controller.AccountingServerController, "set_job_accounting")
     def test_set_job(self, m):
@@ -45,8 +45,8 @@ class TestAccRESTAPI(testtools.TestCase):
                       "user_credentials":
                           {'uid': 'uuuuuuuuuuiiiidddddd',
                            'gid': 'gggggggggguuuiiidd',
-                           'job': {'id':'gggggggggguuuiiidd',
-                                   'spool':'/faa'}
+                           'job': {'id': 'gggggggggguuuiiidd',
+                                   'spool': '/faa'}
                            }
                       }
         body = request.make_body(parameters)
@@ -60,14 +60,14 @@ class TestAccRESTAPI(testtools.TestCase):
 class TestWorkingNodeRESTAPI(testtools.TestCase):
     """Test REST request mapping."""
 
-
-    @mock.patch("bdocker.utils.load_configuration_from_file")
-    @mock.patch.object(controller.ServerController, "__init__")
-    def setUp(self, m_conf, m_load):
+    def setUp(self):
         super(TestWorkingNodeRESTAPI, self).setUp()
-        m_conf.return_value = None
-        from bdocker.api import working_node
-        self.app = working_node.app
+        with mock.patch.object(controller.ServerController,
+                               "__init__",
+                               return_value=None):
+            with mock.patch("bdocker.utils.load_configuration_from_file"):
+                from bdocker.api import working_node
+                self.app = working_node.app
 
     @mock.patch.object(controller.ServerController, "configuration")
     def test_configuration(self, m):

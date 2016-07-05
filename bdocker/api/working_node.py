@@ -64,6 +64,7 @@ def batch_conf():
         201, ["Batch system configured"]
     )
 
+
 @app.route('/batchclean', methods=['DELETE'])
 def batch_clean():
     """ Clean batch system environment

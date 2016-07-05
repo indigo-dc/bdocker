@@ -56,9 +56,7 @@ def exception_from_response(response):
     """
     try:
         code = response.status_int
-        #if 'results' in response.json_body:
         title = response.json_body['results']
-        #title = response.json_body.popitem()[1].get("title")
     except Exception:
         code = 500
         message = "Unknown error happenened processing response %s" % response
@@ -68,7 +66,7 @@ def exception_from_response(response):
 
 def manage_http_exception(code, message):
     exc = default_exceptions.get(code, webob.exc.HTTPInternalServerError)
-    return exc(message=("%s") %(message))
+    return exc(message=("%s") % (message))
 
 
 class BDockerException(Exception):

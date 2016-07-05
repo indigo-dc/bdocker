@@ -46,7 +46,7 @@ class TestRequest(testtools.TestCase):
         fake_response.status_int = 201
         fake_response.body = '{"results": "%s", "status_code": 201}' % t
         m.return_value = fake_response
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "user_credentials": {
                           'uid': 'uuuuuuuuuuiiiidddddd',
                           'gid': 'gggggggggguuuiiidd'}
@@ -61,7 +61,7 @@ class TestRequest(testtools.TestCase):
         fake_response = create_fake_json_resp({'results': r
                                                }, 200)
         m.return_value = fake_response
-        parameters = {"token":"tokennnnnn"}
+        parameters = {"token": "tokennnnnn"}
         path = "/ps?token"
         result = self.control.execute_get(path=path, parameters=parameters)
         self.assertEqual(r, result)

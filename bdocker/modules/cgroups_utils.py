@@ -36,7 +36,7 @@ def task_to_cgroup(cgroup_dir, pid):
         utils.add_to_file(tasks, pid)
     except IOError as e:
         LOG.exception("Error when assign %s to %s. %s"
-                      %(pid, tasks, e.message))
+                      % (pid, tasks, e.message))
 
 
 def remove_tasks(cgroup_name, cgroup_parent):
@@ -48,7 +48,7 @@ def remove_tasks(cgroup_name, cgroup_parent):
         task_to_cgroup(cgroup_parent, pid)
 
 
-def  parse_cgroup_name(name):
+def parse_cgroup_name(name):
     """
     Clean name. It is needed because cgroupspy clean them
     :param name:

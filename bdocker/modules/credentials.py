@@ -95,7 +95,7 @@ class UserController(object):
         Creates a token record. It could be invoked by the administrator
 
         :param admin_token: administration token
-        :param user_data: array of element to be updated
+        :param session_data: array of element to be updated
         """
         self.authorize_admin(admin_token)
         utils.check_user_credentials(session_data)
@@ -273,6 +273,7 @@ class UserController(object):
         """Update job of the token record.
 
         :param token: token updated
+        :param job: job information
         """
 
         current_token = self._get_token_from_cache(token)

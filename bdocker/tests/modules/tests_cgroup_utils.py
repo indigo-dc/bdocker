@@ -37,14 +37,12 @@ class TestCgroups(testtools.TestCase):
     def test_create_tree_cgroup(self, m_add, m_cre, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node]
-        m_path.side_effect = [gnodes,
-                              ]
-        #m_cre.side_effect = exceptions.OSError(13, "err", "file")
-
-        out = cgroups_utils.create_tree_cgroups("66",
-                                   self.parent_path,
-                                   pid='19858'
-                                   )
+        m_path.side_effect = [gnodes]
+        out = cgroups_utils.create_tree_cgroups(
+            "66",
+            self.parent_path,
+            pid='19858'
+        )
         self.assertIsNone(out)
         self.assertEqual(
             self.parent_path,
@@ -62,10 +60,11 @@ class TestCgroups(testtools.TestCase):
                         ]
         m_path.side_effect = [gnodes]
 
-        out = cgroups_utils.create_tree_cgroups("66",
-                                   self.parent_path,
-                                   pid='19858'
-                                   )
+        out = cgroups_utils.create_tree_cgroups(
+            "66",
+            self.parent_path,
+            pid='19858'
+        )
         self.assertIsNone(out)
         self.assertEqual(
             self.parent_path,

@@ -19,7 +19,6 @@ from bdocker import exceptions
 from bdocker import parsers
 from bdocker import utils
 
-# sys.tracebacklimit = 0
 
 class DockerController(object):
 
@@ -50,7 +49,7 @@ class DockerController(object):
             self.control.remove_container(
                 container_id, force=force
             )
-            return  container_id
+            return container_id
         except BaseException as e:
             raise exceptions.DockerException(e)
 

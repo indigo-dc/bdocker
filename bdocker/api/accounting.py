@@ -59,5 +59,5 @@ if __name__ == '__main__':
     elif environ == 'debug':
         debug = True
     app.run(host=host,
-                port=port,
-                debug=debug)
+            port=port,
+            debug=debug)

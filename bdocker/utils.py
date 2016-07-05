@@ -26,7 +26,7 @@ import yaml
 from bdocker import exceptions
 
 
-WORKING_NODE='working'
+WORKING_NODE = 'working'
 
 
 def read_yaml_file(path):

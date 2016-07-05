@@ -41,47 +41,23 @@ container2 = {'Command': 'whoami',
               'Status': 'Up 1 seconds'}
 
 container_real = [{'Status': 'Exited (0) 6 minutes ago',
-               'Created': 1458231723,
-               'Image': 'ubuntu', 'Labels': {},
-               'Ports': [], 'Command': 'sleep 30',
-               'Names': ['/nostalgic_noyce'],
-               'Id': 'f20b77988e436da8645cde68208'
-                     '00dc9ee3aabe1bd9d2dd5b061a3c853ad688b'},
-              {'Status': 'Exited (0) 7 minutes ago',
-               'Created': 1458231670, 'Image': 'ubuntu',
-               'Labels': {}, 'Ports': [], 'Command': 'whoami',
-               'Names': ['/tender_nobel'],
-               'Id': '144a7e26743ed487217ae1494cac01197'
-                     '245ef8e64669c666addd6a770639264'}]
+                   'Created': 1458231723,
+                   'Image': 'ubuntu', 'Labels': {},
+                   'Ports': [], 'Command': 'sleep 30',
+                   'Names': ['/nostalgic_noyce'],
+                   'Id': 'f20b77988e436da8645cde68208'
+                         '00dc9ee3aabe1bd9d2dd5b061a3c853ad688b'},
+                  {'Status': 'Exited (0) 7 minutes ago',
+                   'Created': 1458231670, 'Image': 'ubuntu',
+                   'Labels': {}, 'Ports': [], 'Command': 'whoami',
+                   'Names': ['/tender_nobel'],
+                   'Id': '144a7e26743ed487217ae1494cac01197'
+                         '245ef8e64669c666addd6a770639264'}]
 
 
 def create_generator(json_data):
     for line in json_data:
         yield line
-
-
-class FakeDocker(docker_helper.DockerController):
-    def __init__(self):
-        super(FakeDocker,self).__init__()
-
-    def pull_image(self, repo):
-        return {
-            "status": "Pulling image (latest) from busybox, endpoint: ...",
-            "progressDetail": {},
-            "id": "e72ac664f4f0"
-        }
-
-    def delete_container(self, container_id):
-        return ""
-
-    def list_containers(self, containers):
-        return [container1, container2]
-
-    def logs_container(self, container_id):
-        return "generator or str (test command)"
-
-    def logs_container(self, container_id):
-        return "generator or str (test command)"
 
 
 class TestDocker(testtools.TestCase):

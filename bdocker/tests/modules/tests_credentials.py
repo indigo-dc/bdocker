@@ -25,14 +25,15 @@ from bdocker.modules import credentials
 
 
 def create_parameters():
-        parameters = {"token":"tokennnnnn"
-                        ,"user_credentials":
-                        {'uid': 'uuuuuuuuuuiiiidddddd',
-                         'gid': 'gggggggggguuuiiidd',
-                         'home': '/home',
-                         }
-                    }
-        return parameters
+    parameters = {
+        "token": "tokennnnnn",
+        "user_credentials":
+            {'uid': 'uuuuuuuuuuiiiidddddd',
+             'gid': 'gggggggggguuuiiidd',
+             'home': '/home',
+             }
+    }
+    return parameters
 
 
 class TestUserCredentials(testtools.TestCase):
@@ -40,8 +41,9 @@ class TestUserCredentials(testtools.TestCase):
 
     def setUp(self):
         super(TestUserCredentials, self).setUp()
-        self.path = os.path.join(os.path.dirname(__file__),
-                                             'fake_token_store.yml')
+        self.path = os.path.join(
+            os.path.dirname(__file__),
+            'fake_token_store.yml')
         self.control = credentials.UserController(self.path)
 
     def test_token_store(self):
@@ -52,7 +54,6 @@ class TestUserCredentials(testtools.TestCase):
         user_info = self.control._get_token_from_cache("prolog")
         self.assertEqual(1, user_info.__len__())
         self.assertEqual("token_prolog", user_info['token'])
-
 
     @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate(self, m):

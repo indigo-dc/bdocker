@@ -31,8 +31,8 @@ def token_parse(value, path):
     If value is null, it read the token from the
     $HOME/.bdocker_token_$JOBID file
 
-    :param param: parameters
-    :param value: input value
+    :param value: token value
+    :param path: path from with read the token
     """
     try:
         if not value:

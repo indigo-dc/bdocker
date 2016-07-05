@@ -37,12 +37,14 @@ class TestBacthNotificationController(testtools.TestCase):
         admin_token = uuid.uuid4().hex
         memory_usage = "1000"
         accounting_info = {"field1": memory_usage,
-               "job_id": job_id}
+                           "job_id": job_id}
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.BatchNotificationController(self.acc_conf)
-        controller.notify_accounting(admin_token, accounting_info)
+        controller = batch.BatchNotificationController(
+            self.acc_conf)
+        controller.notify_accounting(
+            admin_token, accounting_info)
         self.assertIs(True, m_post.called)
         m_post.assert_called_with(
             path="/set_accounting",
@@ -57,8 +59,8 @@ class TestSGEAccController(testtools.TestCase):
     def setUp(self):
         super(TestSGEAccController, self).setUp()
         conf = {"bdocker_accounting": "/foo",
-        "sge_accounting": "/baa",
-        }
+                "sge_accounting": "/baa",
+                }
         self.controller = batch.SGEAccountingController(conf)
 
     def test_accounting_configuration(self):

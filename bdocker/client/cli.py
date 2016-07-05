@@ -27,8 +27,8 @@ def print_message(message):
     """
     if isinstance(message, dict):
         m = []
-        for k,v in message.items():
-            m.append("%s: %s" % (k,v))
+        for k, v in message.items():
+            m.append("%s: %s" % (k, v))
         message = m
     if not isinstance(message, list):
         message = [message]
@@ -66,7 +66,12 @@ def print_table(headers, rows):
 @endpoint_argument
 @click.pass_context
 def bdocker(ctx, host):
-    """Manages docker execution on batch systems."""
+    """Manages docker execution on batch systems.
+
+    :param ctx: context
+    :param host: host name
+    :return: None
+    """
     ctx.obj = commands.CommandController(endpoint=host)
 
 
@@ -79,7 +84,18 @@ def bdocker(ctx, host):
 @job_option
 @click.pass_context
 def configure_environment(ctx, user, jobid):
-    # Command executed by the root in prolog
+    """Configure credentials and batch environment.
+
+    It creates a token credential for the user, and
+    configure the batch environment to run dockers
+    and control de accounting.
+    Command executed by the root in prolog
+
+    :param ctx: context
+    :param user: user uid, optional
+    :param jobid: jobid, optional
+    :return:
+    """
     try:
         out = ctx.obj.configuration(
             user,
@@ -97,7 +113,19 @@ def configure_environment(ctx, user, jobid):
 @token_option
 @click.pass_context
 def clean_environment(ctx, token):
-    # Command executed by the root in epilog
+    """Clean credentials and batch environment.
+
+    It cleans a token credential for the user, and
+    the batch environment, in addition to delete all
+    dockers. Also,
+    Command executed by the root in prolog
+
+    :param ctx: context
+    :param user: user uid, optional
+    :param jobid: jobid, optional
+    :return:
+    """
+
     try:
         out = ctx.obj.clean_environment(token)
         print_message(out)

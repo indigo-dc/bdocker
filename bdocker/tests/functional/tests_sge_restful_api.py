@@ -41,8 +41,7 @@ def create_fake_json_resp(data, status=200):
 class TestSgeRestApiAccounting(testtools.TestCase):
     """Tests the all workflow of REST API methods
     for Accounting."""
-    @mock.patch("bdocker.utils.read_yaml_file")
-    def setUp(self, m_file):
+    def setUp(self):
         super(TestSgeRestApiAccounting, self).setUp()
         self.admin_token = fakes.admin_token
         self.user_token = fakes.user_token
@@ -50,10 +49,15 @@ class TestSgeRestApiAccounting(testtools.TestCase):
 
     @mock.patch("__builtin__.open")
     def test_set_job(self, m_file):
-        line = ("docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:"
-        "1465486332:1465486332:0:127:0:0.053201:0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:"
-        "72:0:0:0:242:55:NONE:sysusers:NONE:1:0:0.000000:0.000000:0.000000:-U sysusers:0.000000:"
-        "NONE:0.000000:0:0"
+        line = (
+            "docker:ge-wn03.novalocal:hpc:"
+            "jorgesece:bdocker_job.sh.o80:81:sge:15:"
+            "1465486337:1465486332:1465486332:0:127:"
+            "0:0.053201:0.100611:5632.000000:0:0:0:"
+            "0:25024:0:0:0.000000:72:0:0:0:242:55:"
+            "NONE:sysusers:NONE:1:0:0.000000:0.000000:"
+            "0.000000:-U sysusers:0.000000:"
+            "NONE:0.000000:0:0"
         )
         m_class = mock.MagicMock()
         m_class.readline.return_value = line

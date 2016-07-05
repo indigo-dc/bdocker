@@ -25,40 +25,45 @@ from bdocker.client import commands
 from bdocker.modules import request
 from bdocker.modules import batch
 
-# TODO(jorgesece): this should be fake
-os.environ['BDOCKER_CONF_FILE'] = "/home/jorge/Dropbox/INDIGO_DOCKER/bdocker/bdocker/" \
-                                  "tests/configure_bdocker.cfg"
+
+conf_sge = {
+    'batch': {
+        'system': "SGE"
+    },
+    'accounting_server':
+        {'host': 'host',
+         'port': 'port'},
+
+    'server':
+        {'host': 'host',
+         'port': 'port',
+         'environ': 'debug'},
+    'credentials':
+        {'token_store': 'kk'}
+}
+
 
 class TestCommands(testtools.TestCase):
     """Test User Credential controller."""
 
-    @mock.patch('bdocker.utils.load_configuration_from_file')
-    @mock.patch.object(batch.SGEController, "get_job_info")
-    def setUp(self, m_job, m_conf):
+    def setUp(self):
         super(TestCommands, self).setUp()
         self.job_id = uuid.uuid4().hex
         home_dir = "/foo"
         job_id = '88'
         spool = "/faa"
         user = 'peter'
-
-        m_conf.return_value = {'batch': {
-            'system': "SGE"
-        },
-            'accounting_server': {'host': 'host',
-                                  'port': 'port'},
-
-            'server': {'host': 'host',
-                       'port': 'port',
-                       'environ': 'debug'},
-            'credentials': {'token_store': 'kk'}
-        }
-        m_job.return_value = {'home': home_dir,
-                              'job_id': job_id,
-                              'spool': spool,
-                              'user_name': user}
-        self.control = commands.CommandController()
-
+        job_value = {'home': home_dir,
+                     'job_id': job_id,
+                     'spool': spool,
+                     'user_name': user}
+        with mock.patch(
+                'bdocker.utils.load_configuration_from_file',
+                return_value=conf_sge):
+            with mock.patch.object(
+                    batch.SGEController, "get_job_info",
+                    return_value=job_value):
+                self.control = commands.CommandController()
 
     @mock.patch('bdocker.utils.load_configuration_from_file')
     def test_create_configuration_error(self, m):
@@ -91,13 +96,17 @@ class TestCommands(testtools.TestCase):
         job_id = '88'
         spool = "/faa"
         user = 'peter'
-        m_conf.return_value = {'home': home_dir,
+        job_value = {'home': home_dir,
                                'job_id': job_id,
                                'spool': spool,
                                'user_name': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
-        controller = commands.CommandController()
+        with mock.patch('bdocker.utils.load_configuration_from_file',
+                        return_value=conf_sge):
+            with mock.patch.object(batch.SGEController, "get_job_info",
+                                   return_value=job_value):
+                controller = commands.CommandController()
         u = controller.configuration()
         self.assertIsNotNone(u)
         self.assertEqual(admin_token, u['token'])
@@ -115,15 +124,19 @@ class TestCommands(testtools.TestCase):
         spool = "/faa"
         job_id = 8934
         user = 'peter'
-        m_conf.return_value = {'home': home_dir,
-                               'job_id': job_id,
-                                'spool': spool,
-                               'user_name': user}
+        job_value = {'home': home_dir,
+                     'job_id': job_id,
+                     'spool': spool,
+                     'user_name': user}
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
         m_ad.return_value = admin_token
-        controller = commands.CommandController()
+        with mock.patch('bdocker.utils.load_configuration_from_file',
+                        return_value=conf_sge):
+            with mock.patch.object(batch.SGEController, "get_job_info",
+                                   return_value=job_value):
+                controller = commands.CommandController()
         u = controller.configuration(1000, job_id)
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
@@ -134,7 +147,7 @@ class TestCommands(testtools.TestCase):
         expected = {"admin_token": admin_token,
                     "user_credentials": user_credentials}
         m_post.assert_called_with(path='/configuration',
-                                 parameters=expected)
+                                  parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.commands.token_parse")
@@ -215,38 +228,6 @@ class TestCommands(testtools.TestCase):
                           self.control.clean_environment,
                           None)
 
-    @mock.patch.object(request.RequestController, "execute_post")
-    @mock.patch("bdocker.client.commands.get_user_credentials")
-    @mock.patch("bdocker.client.commands.write_user_credentials")
-    @mock.patch("bdocker.client.commands.get_admin_token")
-    @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_full_configuration(self, m_conf, m_ad, m_write, m_u, m_post):
-        admin_token = uuid.uuid4().hex
-        token = uuid.uuid4().hex
-        home_dir = "/foo"
-        spool = "/faa"
-        job_id = 8934
-        user = 'peter'
-        m_conf.return_value = {'home': home_dir,
-                               'job_id': job_id,
-                               'spool': spool,
-                               'user_name': user}
-        user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
-        m_u.return_value = user_credentials
-        m_post.return_value = token
-        m_ad.return_value = admin_token
-        controller = commands.CommandController()
-        u = controller.configuration(1000, job_id)
-        self.assertIsNotNone(u)
-        self.assertEqual(token, u['token'])
-        self.assertIn(home_dir, u['path'])
-        token_file = "%s/.bdocker_token_%s" % (home_dir, job_id)
-        self.assertIn(token_file, u['path'])
-        self.assertIn('job', user_credentials)
-        expected = {"admin_token": admin_token,
-                    "user_credentials": user_credentials}
-        m_post.assert_called_with(path='/configuration',
-                                 parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.commands.get_admin_token")

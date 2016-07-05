@@ -129,7 +129,7 @@ class BatchWNController(object):
             accounting_conf
         )
 
-    def conf_environment(self, session_data):
+    def conf_environment(self, session_data, admin_token=None):
         if self.enable_cgroups:
             try:
                 job_id = session_data['job']['job_id']
@@ -156,7 +156,7 @@ class BatchWNController(object):
             batch_info = None
         return batch_info
 
-    def clean_environment(self, session_data):
+    def clean_environment(self, session_data, admin_token=None):
         if self.enable_cgroups:
             flag = True
             job_id = session_data["job"]["job_id"]
@@ -183,7 +183,7 @@ class BatchWNController(object):
         raise exceptions.NoImplementedException(
                 message="Still not supported")
 
-    def notify_accounting(self, admin_token, host_name, job_id):
+    def notify_accounting(self, admin_token, path):
         raise exceptions.NoImplementedException(
                 message="Still not supported")
 

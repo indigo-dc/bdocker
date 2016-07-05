@@ -27,6 +27,7 @@ def utf8(value):
 
     Code is modified from the utf8 function in
     http://github.com/facebook/tornado/blob/master/tornado/escape.py
+    :param value: string
 
     """
     if isinstance(value, six.text_type):
@@ -38,7 +39,7 @@ def utf8(value):
 def get_query_string(parameters):
     """Get request query string from parameters
 
-    :param name: name of the user
+    :param parameters: parameters to include
     """
     if parameters is None:
         query_string = None

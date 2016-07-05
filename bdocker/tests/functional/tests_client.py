@@ -56,7 +56,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['cp', token, path_host, path_container]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         expected = {"token": token_id,
                     "container_id": container_id,

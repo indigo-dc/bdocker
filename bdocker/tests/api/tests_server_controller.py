@@ -33,22 +33,37 @@ FAKE_CONF = {
     'dockerAPI': mock.MagicMock(),
 }
 
+conf_sge = {
+    'batch': {
+        'system': "SGE"
+    },
+    'accounting_server':
+        {'host': 'host',
+         'port': 'port'},
+
+    'server':
+        {'host': 'host',
+         'port': 'port',
+         'environ': 'debug'},
+    'credentials':
+        {'token_store': 'kk'},
+    'dockerAPI':
+        {'base_url': '/kk'}
+}
+
+
 
 class TestAccountingServerController(testtools.TestCase):
     """Test Server Controller class."""
 
     def setUp(self):
         super(TestAccountingServerController, self).setUp()
-        path = ("/home/jorge/Dropbox/INDIGO_DOCKER/"
-                "bdocker/bdocker/tests/"
-                "configure_bdocker_accounting.cfg")
-        # TODO(jorgesece): create a fake conf without need a file
-        conf = utils.load_configuration_from_file(path)
-        self.controller = controller.AccountingServerController(conf)
 
     @mock.patch.object(credentials.UserController, "authorize_admin")
     @mock.patch.object(batch.SGEAccountingController, "set_job_accounting")
-    def test_set_job_accounting(self, m, m_au):
+    @mock.patch("bdocker.utils.read_yaml_file")
+    def test_set_job_accounting(self, m_r, m, m_au):
+        contr = controller.AccountingServerController(conf_sge)
         token = uuid.uuid4().hex
         accounting = uuid.uuid4().hex
         m_au.return_value = token
@@ -57,10 +72,9 @@ class TestAccountingServerController(testtools.TestCase):
         data = {'admin_token': token,
                 'accounting': accounting}
 
-        result = self.controller.set_job_accounting(data)
+        result = contr.set_job_accounting(data)
 
         self.assertEqual(expected, result)
-
 
 
 class TestServerController(testtools.TestCase):
@@ -68,12 +82,12 @@ class TestServerController(testtools.TestCase):
 
     def setUp(self):
         super(TestServerController, self).setUp()
-        path = "/home/jorge/Dropbox/INDIGO_DOCKER/" \
-                                          "bdocker/bdocker/tests/" \
-                                          "configure_bdocker.cfg"
-        # TODO(jorgesece): create a fake conf without need a file
-        conf = utils.load_configuration_from_file(path)
-        self.controller = controller.ServerController(conf)
+        with mock.patch("bdocker.utils.read_yaml_file"):
+            with mock.patch.object(
+                    docker_helper.DockerController,
+                    "__init__",
+                    return_value=None):
+                self.controller = controller.ServerController(conf_sge)
 
     @mock.patch.object(credentials.UserController, "authenticate")
     @mock.patch.object(credentials.UserController, "set_token_batch_info")
