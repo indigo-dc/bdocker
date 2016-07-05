@@ -74,7 +74,7 @@ class TestFunctionalClient(TestCaseCommandLine):
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.modules.load_batch_module")
     @mock.patch.object(request.RequestController, "execute_delete")
-    def test_batch_clean(self, m_del, m_batch, m_load, m_yaml, m_read, m_delete):
+    def test_clean(self, m_del, m_batch, m_load, m_yaml, m_read, m_delete):
         result = self.runner.invoke(
             cli.bdocker, ['clean']
         )
@@ -93,7 +93,7 @@ class TestFunctionalClient(TestCaseCommandLine):
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.modules.load_batch_module")
     @mock.patch.object(request.RequestController, "execute_post")
-    def test_batch_configure(self, m_post, m_batch, m_load, m_yaml,
+    def test_configure(self, m_post, m_batch, m_load, m_yaml,
                              m_cre, m_open, m_chown):
         result = self.runner.invoke(
             cli.bdocker, ['configure']
