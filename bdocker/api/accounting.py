@@ -16,17 +16,16 @@
 
 import logging
 
-from flask import Flask
-from flask import request
+import flask
 
 from bdocker import api
-from bdocker import utils
 from bdocker.api import controller
+from bdocker import utils
 
 conf = utils.load_configuration_from_file()
 server_controller = controller.AccountingServerController(conf)
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -35,11 +34,11 @@ api.set_error_handler(app)
 
 @app.route('/set_accounting', methods=['PUT'])
 def set_job_accounting():
-    """Register job accounting in the master
+    """Register job accounting in the master.
 
     :return: 201
     """
-    data = request.get_json()
+    data = flask.request.get_json()
     try:
         data = server_controller.set_job_accounting(data)
     except Exception as e:

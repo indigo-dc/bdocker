@@ -16,17 +16,16 @@
 
 import logging
 
-from flask import Flask
-from flask import json, request
+import flask
 
 from bdocker import api
-from bdocker import utils
 from bdocker.api import controller
+from bdocker import utils
 
 conf = utils.load_configuration_from_file()
 server_controller = controller.ServerController(conf)
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 LOG = logging.getLogger(__name__)
 
@@ -36,12 +35,13 @@ api.set_error_handler(app)
 @app.route('/configuration', methods=['POST'])
 def configuration():
     """Configure bdocker user environment.
+
       It creates the token and configure the batch
       system.
 
     :return: user_token
     """
-    data = request.get_json()
+    data = flask.request.get_json()
     try:
         user_token = server_controller.configuration(data)
     except Exception as e:
@@ -54,12 +54,13 @@ def configuration():
 @app.route('/clean', methods=['DELETE'])
 def clean():
     """Clean bdocker user environment.
+
       Delete the remaining containers and the token.
       In addition, it cleans the batch environment.
 
     :return: Request 204 with user_token
     """
-    data = request.args
+    data = flask.request.args
     try:
         result = server_controller.clean(data)
     except Exception as e:
@@ -70,11 +71,12 @@ def clean():
 @app.route('/pull', methods=['POST'])
 def pull():
     """Pull request.
+
     Download a docker image from a repository
 
     :return: Request 201 with output
     """
-    data = request.get_json()
+    data = flask.request.get_json()
     try:
         result = server_controller.pull(data)
     except Exception as e:
@@ -88,7 +90,7 @@ def run():
 
     :return: Request 201 with results
     """
-    data = json.loads(request.data)
+    data = flask.json.loads(flask.request.data)
     try:
         results = server_controller.run(data)
     except Exception as e:
@@ -102,7 +104,7 @@ def list_containers():
 
     :return: Request 200 with results
     """
-    data = request.args
+    data = flask.request.args
     try:
         results = server_controller.list_containers(data)
     except Exception as e:
@@ -116,7 +118,7 @@ def show():
 
     :return: Request 200 with results
     """
-    data = request.args
+    data = flask.request.args
     try:
         results = server_controller.show(data)
     except Exception as e:
@@ -126,11 +128,11 @@ def show():
 
 @app.route('/logs', methods=['GET'])
 def logs():
-    """Log from a contaniner.
+    """Log from a container.
 
     :return: Request 200 with results
     """
-    data = request.args
+    data = flask.request.args
     try:
         results = server_controller.logs(data)
     except Exception as e:
@@ -145,7 +147,7 @@ def delete():
 
     :return: Request 201 with results
     """
-    data = json.loads(request.data)
+    data = flask.json.loads(flask.request.data)
     try:
         docker_out = server_controller.delete_container(data)
     except Exception as e:
@@ -156,6 +158,7 @@ def delete():
 @app.route('/notify_accounting', methods=['PUT'])
 def notify_accounting():
     """Notify accounting.
+
      Send the accounting information to the
      accounting server.
      [DEPRECATED. It is included in the batch daemon]
@@ -163,7 +166,7 @@ def notify_accounting():
     :return: Request 201 with results
     """
 
-    data = json.loads(request.data)
+    data = flask.json.loads(flask.request.data)
     try:
         results = server_controller.notify_accounting(data)
     except Exception as e:
@@ -173,12 +176,11 @@ def notify_accounting():
 
 @app.route('/copy', methods=['PUT'])
 def copy():
-    """Copy file or folder to or from the docker
-     filesystem.
+    """Copy file or folder to or from the docker filesystem.
 
     :return: Request 201 with results
     """
-    data = json.loads(request.data)
+    data = flask.json.loads(flask.request.data)
     try:
         results = server_controller.copy(data)
     except Exception as e:
@@ -193,7 +195,7 @@ def copy():
 
 @app.route('/stop', methods=['POST'])
 def stop():
-    data = json.loads(request.data)
+    data = flask.json.loads(flask.request.data)
     try:
         results = server_controller.stop_container(data)
     except Exception as e:

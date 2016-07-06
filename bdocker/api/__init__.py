@@ -13,8 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import flask
 import webob
-from flask import jsonify
 
 from bdocker import exceptions
 
@@ -34,13 +35,13 @@ def validate(fields, mandatory_keys):
                 raise webob.exc.HTTPBadRequest(
                     "The '%s' field is mandatory."
                     "" % key)
-    except Exception as e:
+    except Exception:
         raise exceptions.ParseException("Validation of required values")
     return True
 
 
 def make_json_response(status_code, description):
-    return jsonify({
+    return flask.jsonify({
         'status_code': status_code,
         'results': description
     }), status_code

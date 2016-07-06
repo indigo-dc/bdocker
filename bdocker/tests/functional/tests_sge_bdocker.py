@@ -15,20 +15,19 @@
 # under the License.
 
 import copy
-import docker as docker_py
 import os
 import uuid
 
 from cgroupspy import nodes
-from click.testing import CliRunner
+from click import testing
+import docker as docker_py
 import mock
 import testtools
 import webob
 
-
-from bdocker.modules import batch
 from bdocker.client import cli
-from bdocker.tests.functional import fakes
+from bdocker.modules import batch
+import bdocker.tests.functional.fakes as fakes
 
 
 class TestBdockerSgeWn(testtools.TestCase):
@@ -41,7 +40,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.app = fakes.create_working_node_app(self.file_name)
         self.token_store = copy.deepcopy(fakes.token_store)
         self.admin_token = self.token_store["prolog"]["token"]
-        self.runner = CliRunner()
+        self.runner = testing.CliRunner()
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "containers")
@@ -95,7 +94,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         token = fakes.user_token
         containers = self.token_store[token]["containers"]
         container_id = containers[0]
-        m_ins.return_value = fake_out = {
+        m_ins.return_value = {
             "containerId": container_id,
             "command": "ls"
         }
@@ -153,7 +152,7 @@ class TestBdockerSgeWn(testtools.TestCase):
 
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-        self.assertEquals("\n".join(logs) + "\n", result.output)
+        self.assertEqual("\n".join(logs) + "\n", result.output)
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "remove_container")
@@ -236,7 +235,7 @@ class TestBdockerSgeWn(testtools.TestCase):
             assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-        self.assertEquals("%s\n" % container_id, result.output)
+        self.assertEqual("%s\n" % container_id, result.output)
 
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
@@ -287,7 +286,7 @@ class TestBdockerSgeWn(testtools.TestCase):
             assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-        self.assertEquals("\n".join(logs) + "\n", result.output)
+        self.assertEqual("\n".join(logs) + "\n", result.output)
 
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
@@ -323,7 +322,7 @@ class TestBdockerSgeWn(testtools.TestCase):
             assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-        self.assertEquals("%s\n" % True, result.output)
+        self.assertEqual("%s\n" % True, result.output)
 
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
@@ -370,8 +369,8 @@ class TestBdockerSgeWn(testtools.TestCase):
         expected = []
         for k, v in stat.items():
             expected.append("%s: %s" % (k, v))
-        self.assertEquals("\n".join(expected) + "\n",
-                          result.output)
+        self.assertEqual("\n".join(expected) + "\n",
+                         result.output)
 
     @mock.patch("pwd.getpwuid")
     @mock.patch("os.path.realpath")
@@ -397,8 +396,7 @@ class TestBdockerSgeWn(testtools.TestCase):
                        m_setsid, m_up, m_fork,
                        m_uuid, m_cre, m_r, m_ry, m_w,
                        m_path, m_getpi):
-        """
-        Test configuration command
+        """Test configuration command.
 
         :param m_wfile:
         :param m_jinfo:
@@ -469,8 +467,9 @@ class TestBdockerSgeWn(testtools.TestCase):
 
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
-        self.assertEqual("%s/.bdocker_token_%s\n" % (
-            user_home, job_id), result.output
+        self.assertEqual("%s/.bdocker_token_%s\n"
+                         % (user_home, job_id),
+                         result.output
                          )
 
     @mock.patch("os.getenv")

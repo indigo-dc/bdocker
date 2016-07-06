@@ -13,8 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from datetime import datetime
-from datetime import timedelta
+import datetime
 import json
 import re
 
@@ -35,16 +34,16 @@ def parse_docker_generator(gen_data):
             json_row = json.loads(row)
             if 'id' in json_row:
                 message = "%s: %s" % (
-                        json_row['id'],
-                        json_row['status']
-                    )
+                    json_row['id'],
+                    json_row['status']
+                )
             elif 'status' in json_row:
                 message = json_row['status']
             else:
                 message = json_row['error']
             out_data.append(message)
         return out_data
-    except KeyError as e:
+    except KeyError:
         raise exceptions.ParseException('Pull output error',
                                         code=406)
 
@@ -54,7 +53,7 @@ def parse_docker_generator1(gen_data, key='Status'):
     for line in gen_data:
         dict_data.append(line.strip())
     try:
-        out = json.loads(dict_data[dict_data.__len__()-1])
+        out = json.loads(dict_data[dict_data.__len__() - 1])
         if 'status' in out:
             info = out['status']
         elif 'errorDetail' in out:
@@ -64,7 +63,7 @@ def parse_docker_generator1(gen_data, key='Status'):
                                             406)
         results = json.loads("{\"%s\"}"
                              % info.replace(":", "\":\"", 1))
-    except BaseException as e:
+    except BaseException:
         raise exceptions.ParseException('Pull output error',
                                         code=406)
     if key in results:
@@ -162,7 +161,7 @@ def parse_list_container(data):
             ports,
             names
         ]
-    except BaseException as e:
+    except BaseException:
         raise exceptions.ParseException(
             'Container information error',
             code=406
@@ -178,9 +177,10 @@ def parse_inspect_container(data):
 def parse_time_to_nanoseconds(time_str):
     try:
         parsed = time_str.split(":")
-        time_struc = timedelta(hours=int(parsed[0]),
-                               minutes=int(parsed[1]),
-                               seconds=int(parsed[2]))
+        time_struc = datetime.timedelta(
+            hours=int(parsed[0]),
+            minutes=int(parsed[1]),
+            seconds=int(parsed[2]))
         nanoseg = time_struc.total_seconds() * 1000000000
         return nanoseg
     except BaseException:

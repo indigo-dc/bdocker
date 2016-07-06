@@ -13,10 +13,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from tabulate import tabulate
+
+import click
+import tabulate
 
 from bdocker.client import commands
-from bdocker.client.decorators import *
+from bdocker.client import decorators
 from bdocker import exceptions
 
 
@@ -33,7 +35,7 @@ def print_message(message):
     if not isinstance(message, list):
         message = [message]
     for m in message:
-        print m
+        print(m)
 
 
 def print_error(message):
@@ -45,25 +47,26 @@ def print_error(message):
 
 
 def print_table(headers, rows):
-    """Print table from list of messages
+    """Print table from list of messages.
+
     :param headers: table headers
     :param rows: row of messages
     """
     try:
         if headers:
-            print
-            print tabulate(
+            print('\n')
+            print(tabulate.tabulate(
                 rows, headers=headers,
                 tablefmt="plain", numalign="left"
-            )
-            print
+            ))
+            print('\n')
     except Exception as e:
-        print e.message
+        print(e.message)
 
 
 @click.group()
 @click.version_option()
-@endpoint_argument
+@decorators.endpoint_argument
 @click.pass_context
 def bdocker(ctx, host):
     """Manages docker execution on batch systems.
@@ -80,8 +83,8 @@ def bdocker(ctx, host):
                       "It request for user token and"
                       "prepare the batch environment."
                       " ROOT privileges needed")
-@user_option
-@job_option
+@decorators.user_option
+@decorators.job_option
 @click.pass_context
 def configure_environment(ctx, user, jobid):
     """Configure credentials and batch environment.
@@ -110,7 +113,7 @@ def configure_environment(ctx, user, jobid):
                  help="Clean work environment including"
                       "the batch system. Force remove all the"
                       " ROOT privileges needed")
-@token_option
+@decorators.token_option
 @click.pass_context
 def clean_environment(ctx, token):
     """Clean credentials and batch environment.
@@ -134,8 +137,8 @@ def clean_environment(ctx, token):
 
 @bdocker.command('pull',
                  help="Pull a image.")
-@token_option
-@source_argument
+@decorators.token_option
+@decorators.source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
     try:
@@ -148,12 +151,12 @@ def container_pull(ctx, token, source):
 @bdocker.command('run', help="Creates a writeable container "
                              "layer over the specified image,"
                              " and executes the command.")
-@token_option
-@image_id_argument
-@command_argument
-@d_option
-@workdir_option
-@volume_option
+@decorators.token_option
+@decorators.image_id_argument
+@decorators.command_argument
+@decorators.d_option
+@decorators.workdir_option
+@decorators.volume_option
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
@@ -171,8 +174,8 @@ def container_run(ctx, token, image_id,
 
 
 @bdocker.command('ps', help="Show all containers running.")
-@token_option
-@all_option
+@decorators.token_option
+@decorators.all_option
 @click.pass_context
 def container_list(ctx, token, all):
     try:
@@ -186,8 +189,8 @@ def container_list(ctx, token, all):
 
 @bdocker.command('logs', help="Retrieves logs present at"
                               " the time of execution.")
-@token_option
-@container_id_argument
+@decorators.token_option
+@decorators.container_id_argument
 @click.pass_context
 def container_logs(ctx, token, container_id):
     try:
@@ -202,23 +205,23 @@ def container_logs(ctx, token, container_id):
 @bdocker.command('inspect', help="Return low-level"
                                  " information "
                                  "on a container or image")
-@token_option
-@container_id_argument
+@decorators.token_option
+@decorators.container_id_argument
 @click.pass_context
 def container_inspect(ctx, token, container_id):
     try:
         out = ctx.obj.container_inspect(token, container_id)
         print_message(out)
-    except BaseException as e:
+    except BaseException:
         m = ("Error: No such container: %s" %
              container_id)
         print_error(m)
 
 
 @bdocker.command('rm', help="Delete a container.")
-@token_option
-@container_ids_argument
-@force_option
+@decorators.token_option
+@decorators.container_ids_argument
+@decorators.force_option
 @click.pass_context
 def container_delete(ctx, token, container_ids, force):
     try:
@@ -232,7 +235,7 @@ def container_delete(ctx, token, container_ids, force):
 @bdocker.command('notify_accounting',
                  help="[BETA] Send accounting to the server."
                       "ROOT privileges needed")
-@token_option
+@decorators.token_option
 @click.pass_context
 def notify_accounting(ctx, token, force):
     # Command executed by the root in epilog
@@ -246,8 +249,8 @@ def notify_accounting(ctx, token, force):
 @bdocker.command('accounting',
                  help="[BETA] Retrieve the job accounting."
                       "ROOT privileges needed")
-@token_option
-@container_id_argument
+@decorators.token_option
+@decorators.container_id_argument
 @click.pass_context
 def accounting(ctx, token, container_id):
     try:
@@ -260,10 +263,12 @@ def accounting(ctx, token, container_id):
 @bdocker.command('cp',
                  help="Copy files/folders between "
                       "a container and the local filesystem:\n"
-                      "1) <containerId>:/file/path/within/container /host/path/target\n"
-                      "2) /host/path/target <containerId>:/file/path/within/container")
-@token_option
-@path_argument
+                      "1) <containerId>:/file/path/within/container"
+                      " /host/path/target\n"
+                      "2) /host/path/target <containerId>:"
+                      "/file/path/within/container")
+@decorators.token_option
+@decorators.path_argument
 @click.pass_context
 def copy(ctx, token, path):
     try:
@@ -271,7 +276,8 @@ def copy(ctx, token, path):
         container_path = path["container_path"]
         host_path = path["host_path"]
         host_to_container = path["host_to_container"]
-        out = ctx.obj.copy_to_from_container(token,                                             container_id,
+        out = ctx.obj.copy_to_from_container(token,
+                                             container_id,
                                              container_path,
                                              host_path,
                                              host_to_container)

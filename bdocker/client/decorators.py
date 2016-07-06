@@ -108,10 +108,8 @@ def endpoint_argument(f):
 
 
 def token_argument(f):
-    return click.argument('token'
-                          , type=click.STRING
-                          # callback=client_utils.get_id_from_name
-                          # fixme(jorgesece): control token
+    return click.argument('token',
+                          type=click.STRING
                           )(f)
 
 
@@ -150,8 +148,8 @@ def container_ids_argument(f):
 
 
 def image_id_argument(f):
-    return click.argument("image_id"
-                          , type=click.STRING
+    return click.argument("image_id",
+                          type=click.STRING
                           )(f)
 
 

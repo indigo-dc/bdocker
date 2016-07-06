@@ -13,7 +13,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import logging
+
 import webob.exc
 
 FORMAT = '%(asctime)-15s %(message)s'
@@ -41,19 +43,19 @@ default_exceptions = {
 
 
 def exception_from_response(response):
-    """
-    # Copyright 2014 CSIC
-    Convert an OpenStack V2 Fault into a webob exception.
+    """Manage exceptions from HTTP response.
 
+    # Copyright 2014 CSIC Convert an OpenStack V2 Fault into a webob exception.
+    # Copyright 2015 LIP Convert an OpenStack V2 Fault into a webob exception.
     Since we are calling the OpenStack API we should process the Faults
     produced by them. Extract the Fault information according to [1] and
     convert it back to a webob exception.
-
     [1] http://docs.openstack.org/developer/nova/v2/faults.html
 
     :param response: a webob.Response containing an exception
     :returns: a webob.exc.exception object
     """
+
     try:
         code = response.status_int
         title = response.json_body['results']
@@ -171,4 +173,3 @@ def get_exception_details(ex=None, custom_message=None,
         code = custom_code
     details = {"message": message, "code": code}
     return details
-

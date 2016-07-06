@@ -38,7 +38,7 @@ def token_parse(value, path):
         if not value:
             value = utils.read_file(path)
         return value
-    except BaseException as e:
+    except BaseException:
         raise exceptions.UserCredentialsException(
             "Token can not be found in %s " % path
         )
@@ -125,10 +125,11 @@ class CommandController(object):
             self.user_name = job_info['user_name']
             self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
-        except Exception as e:
-            raise exceptions.ConfigurationException("Configuring server %s"
-                                                    % endpoint
-                                                    )
+        except Exception:
+            raise exceptions.ConfigurationException(
+                "Configuring server %s"
+                % endpoint
+            )
 
     def configuration(self, user_name=None, jobid=None):
         path = "/configuration"
@@ -144,7 +145,8 @@ class CommandController(object):
         else:
             user_info = get_user_credentials(self.user_name)
         user_info.update({'job': self.job_info})
-        parameters = {"admin_token": admin_token, "user_credentials": user_info}
+        parameters = {"admin_token": admin_token,
+                      "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         write_user_credentials(token, self.token_file,
                                user_info['uid'],
@@ -246,18 +248,3 @@ class CommandController(object):
                       "host_to_container": host_to_container}
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
-
-        # def container_start(self, token, container_id):
-        #     path = "/start"
-        #     parameters = {"token": token, "container_id": container_id}
-        #     results = self.control.execute_post(path=path, parameters=parameters)
-        #     # todo(jorgesece): implement message output
-        #     return results
-        #
-        #
-        # def container_stop(self, token, container_id):
-        #     path = "/stop"
-        #     parameters = {"token": token, "container_id": container_id}
-        #     results = self.control.execute_post(path=path, parameters=parameters)
-        #     # todo(jorgesece): implement message output
-        #     return results

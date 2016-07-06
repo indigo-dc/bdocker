@@ -16,8 +16,8 @@
 
 import logging
 
-from bdocker import modules
 from bdocker import api
+from bdocker import modules
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class AccountingServerController(object):
         self.batch_module = modules.load_batch_accounting_module(conf)
 
     def set_job_accounting(self, data):
-        """ Update the accounting file using the incoming data
+        """Update the accounting file using the incoming data
 
         :param data: dict parameter with attributes
         :return: empty
@@ -77,7 +77,8 @@ class ServerController(object):
         return user_token
 
     def clean(self, data):
-        """Clean bdocker user environment.
+        """Clean bdocker user credentials and environment.
+
           Delete the remaining containers and the token.
           In addition, it cleans the batch environment.
 
@@ -103,7 +104,8 @@ class ServerController(object):
         return token
 
     def pull(self, data):
-        """Pull request.
+        """Pull image request.
+
         Download a docker image from a repository
 
         :param data: dict parameter with attributes

@@ -18,12 +18,12 @@ import testtools
 
 from bdocker import exceptions
 from bdocker import parsers
-from bdocker import utils
 from bdocker.tests.modules import fake_docker_outputs
+from bdocker import utils
 
 
 class TestParsers(testtools.TestCase):
-    """Test User Parsers."""
+    """Test Parsers."""
 
     def setUp(self):
         super(TestParsers, self).setUp()
@@ -65,7 +65,7 @@ class TestParsers(testtools.TestCase):
         minute = 0
         second = 1
         fact = 1000000000
-        nanosenconds = (hour*60*60 + minute*60 + second) * fact
+        nanosenconds = (hour * 60 * 60 + minute * 60 + second) * fact
         time_str = "%s:%s:%s" % (hour, minute, second)
         out = parsers.parse_time_to_nanoseconds(time_str)
         self.assertIsNotNone(out)

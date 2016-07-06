@@ -26,7 +26,7 @@ import testtools
 import webob
 
 from bdocker.modules import request
-from bdocker.tests.functional import fakes
+import bdocker.tests.functional.fakes as fakes
 
 
 def create_fake_json_resp(data, status=200):

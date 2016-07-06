@@ -13,6 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import ConfigParser
 import io
 import os
@@ -21,6 +22,7 @@ import re
 import StringIO
 import tarfile
 import uuid
+
 import yaml
 
 from bdocker import exceptions
@@ -38,7 +40,9 @@ def read_yaml_file(path):
 
 def write_yaml_file(path, data):
     with open(path, 'w') as my_file:
-        data_yaml = yaml.safe_dump(data, None, encoding='utf-8', allow_unicode=True)
+        data_yaml = yaml.safe_dump(data, None,
+                                   encoding='utf-8',
+                                   allow_unicode=True)
         my_file.write(data_yaml)
         my_file.flush()
         my_file.close()
@@ -178,7 +182,7 @@ def load_sge_job_configuration(path):
             string = '[root]\n' + f.read()
             ini_fp = StringIO.StringIO(string)
             config.readfp(ini_fp)
-    except IOError as e:
+    except IOError:
         raise exceptions.UserCredentialsException(
             "Error reading job configuration file: %s"
             % path
