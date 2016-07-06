@@ -15,13 +15,13 @@
 # under the License.
 import uuid
 
+from click import testing
 import mock
 import testtools
-from click.testing import CliRunner
 
 from bdocker.client import cli
-from bdocker.client import decorators
 from bdocker.client import commands
+from bdocker.client import decorators
 
 
 class TestCaseCommandLine(testtools.TestCase):
@@ -29,7 +29,7 @@ class TestCaseCommandLine(testtools.TestCase):
 
     def setUp(self):
         super(TestCaseCommandLine, self).setUp()
-        self.runner = CliRunner()
+        self.runner = testing.CliRunner()
 
     def test_openstack(self):
         result = self.runner.invoke(cli.bdocker)

@@ -163,7 +163,8 @@ class TestCgroups(testtools.TestCase):
             m_path.call_args_list[0][0][0]
         )
         self.assertEqual(parent_groups.__len__(), m_add.call_count)
-        # I have problems controlling how many times the create method is exected
+        # I have problems controlling how many
+        # times the create method is exected
 
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
@@ -291,5 +292,3 @@ class TestCgroups(testtools.TestCase):
             "/%s/" % parent_groups[1],
             m_path.call_args_list[1][0][0]
         )
-
-

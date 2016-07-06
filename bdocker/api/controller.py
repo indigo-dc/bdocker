@@ -256,7 +256,8 @@ class ServerController(object):
         accounting = self.batch_module.get_accounting(job['id'])
         job.update(accounting)
         self.credentials_module.update_job(token, job)
-        self.batch_module.notify_accounting(admin_token, job)
+        result = self.batch_module.notify_accounting(admin_token, job)
+        return result
 
     def copy(self, data):
         """Copy file or folder to or from the docker filesystem.

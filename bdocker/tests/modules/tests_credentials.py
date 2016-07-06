@@ -284,9 +284,6 @@ class TestUserCredentials(testtools.TestCase):
     def remove_container_err(self):
         pass
 
-    def test_list_containers(self):
-        pass
-
     @mock.patch.object(credentials.UserController,
                        "_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")

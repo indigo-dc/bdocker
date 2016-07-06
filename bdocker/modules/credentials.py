@@ -60,9 +60,9 @@ class UserController(object):
         }
         if 'job' in user_info:
             token_content['job'] = {
-                    "job_id": user_info['job']['job_id'],
-                    "spool": user_info['job']['spool']
-                }
+                "job_id": user_info['job']['job_id'],
+                "spool": user_info['job']['spool']
+            }
         new_token = {token: token_content}
         self.token_store = utils.read_yaml_file(
             self.path
@@ -101,7 +101,7 @@ class UserController(object):
         utils.check_user_credentials(session_data)
         try:
             token = self._set_token(session_data)
-        except Exception as e:
+        except Exception:
             raise exceptions.UserCredentialsException(
                 "Invalid user information")
         return token
@@ -216,7 +216,7 @@ class UserController(object):
                     return c
             raise exceptions.DockerException(
                 message="No such container:"
-                " %s " % container_id,
+                        " %s " % container_id,
                 code=404)
         return container_id
 
@@ -234,7 +234,7 @@ class UserController(object):
         if image_id not in token_info['images']:
             raise exceptions.DockerException(
                 message="No such image:"
-                " %s " % image_id,
+                        " %s " % image_id,
                 code=404)
         return True
 

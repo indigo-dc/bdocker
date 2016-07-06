@@ -15,8 +15,9 @@
 # under the License.
 
 from bdocker import exceptions
-from bdocker.modules import batch, credentials, docker_helper
-from bdocker.modules import credentials, docker_helper
+from bdocker.modules import batch
+from bdocker.modules import credentials
+from bdocker.modules import docker_helper
 
 
 def load_credentials_module(conf):

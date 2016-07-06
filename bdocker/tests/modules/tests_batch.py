@@ -20,8 +20,8 @@ import mock
 import testtools
 
 from bdocker import exceptions
-from bdocker.modules import request
 from bdocker.modules import batch
+from bdocker.modules import request
 
 
 class TestBacthNotificationController(testtools.TestCase):
@@ -38,9 +38,6 @@ class TestBacthNotificationController(testtools.TestCase):
         memory_usage = "1000"
         accounting_info = {"field1": memory_usage,
                            "job_id": job_id}
-        conf = {"cgroups_dir": "/foo",
-                "enable_cgroups": True,
-                "parent_cgroup": "/bdocker.test"}
         controller = batch.BatchNotificationController(
             self.acc_conf)
         controller.notify_accounting(
@@ -68,22 +65,28 @@ class TestSGEAccController(testtools.TestCase):
                 "sge_accounting": "/baa",
                 }
         controller = batch.SGEAccountingController(conf)
-        self.assertEqual(conf["bdocker_accounting"], controller.bdocker_accounting)
-        self.assertEqual(conf["sge_accounting"], controller.sge_accounting)
+        self.assertEqual(conf["bdocker_accounting"],
+                         controller.bdocker_accounting)
+        self.assertEqual(conf["sge_accounting"],
+                         controller.sge_accounting)
 
     def test_default_accounting_configuration(self):
         bdocker_accounting = "/etc/bdocker_accounting"
         sge_accounting = "/opt/sge/default/common/accounting"
 
         controller = batch.SGEAccountingController({})
-        self.assertEqual(bdocker_accounting, controller.bdocker_accounting)
+        self.assertEqual(bdocker_accounting,
+                         controller.bdocker_accounting)
         self.assertEqual(sge_accounting, controller.sge_accounting)
 
     @mock.patch("__builtin__.open")
     def test_get_sge_job_accounting(self, mock_open):
-        line = ("docker:ge-wn03.novalocal:hpc:jorgesece:bdocker_job.sh.o80:81:sge:15:1465486337:"
-                "1465486332:1465486332:0:127:0:0.053201:0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:"
-                "72:0:0:0:242:55:NONE:sysusers:NONE:1:0:0.000000:0.000000:0.000000:-U sysusers:0.000000:"
+        line = ("docker:ge-wn03.novalocal:hpc:jorgesece:"
+                "bdocker_job.sh.o80:81:sge:15:1465486337:"
+                "1465486332:1465486332:0:127:0:0.053201:"
+                "0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:"
+                "72:0:0:0:242:55:NONE:sysusers:NONE:1:0:"
+                "0.000000:0.000000:0.000000:-U sysusers:0.000000:"
                 "NONE:0.000000:0:0"
                 )
         m_class = mock.MagicMock()
@@ -181,7 +184,8 @@ class TestSGEController(testtools.TestCase):
     @mock.patch.object(batch.SGEController, "_create_accounting_file")
     @mock.patch.object(batch.SGEController, "_launch_job_monitoring")
     @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_conf_environment_no_root_dir(self, m_not, m_lan, m_file, m_cre,  m_read):
+    def test_conf_environment_no_root_dir(self, m_not, m_lan,
+                                          m_file, m_cre, m_read):
         spool_dir = "/foo"
         home = "/foo"
         admin_token = uuid.uuid4().hex
@@ -368,7 +372,8 @@ class TestSGEController(testtools.TestCase):
                     "0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
                     "0:0:0:0:0:0:0:0:0:0:0:%s:%s:%s:0:0:"
                     "0:0:0:0"
-                    % (queue_name, host_name, log_name, job_name, job_id, account,
+                    % (queue_name, host_name, log_name,
+                       job_name, job_id, account,
                        cpu_usage, memory_usage, io_usage)
                     )
         controller = batch.SGEController({}, self.acc_conf)
@@ -501,8 +506,8 @@ class TestSGEController(testtools.TestCase):
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
-        self.assertEquals(False, m_kill_job.called)
-        self.assertEquals(0, m_kill_job.call_count)
+        self.assertEqual(False, m_kill_job.called)
+        self.assertEqual(0, m_kill_job.call_count)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
@@ -544,8 +549,8 @@ class TestSGEController(testtools.TestCase):
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
-        self.assertEquals(True, m_kill_job.called)
-        self.assertEquals(1, m_kill_job.call_count)
+        self.assertEqual(True, m_kill_job.called)
+        self.assertEqual(1, m_kill_job.call_count)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
@@ -587,8 +592,8 @@ class TestSGEController(testtools.TestCase):
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
-        self.assertEquals(True, m_kill_job.called)
-        self.assertEquals(1, m_kill_job.call_count)
+        self.assertEqual(True, m_kill_job.called)
+        self.assertEqual(1, m_kill_job.call_count)
 
     @mock.patch("bdocker.parsers.parse_time_to_nanoseconds")
     @mock.patch("bdocker.utils.load_sge_job_configuration")

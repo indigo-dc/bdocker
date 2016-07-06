@@ -24,36 +24,6 @@ from bdocker import exceptions
 from bdocker.modules import docker_helper
 from bdocker.tests.modules import fake_docker_outputs
 
-container1 = {'Command': '/bin/sleep 30',
-              'Created': 1412574844,
-              'Id': '6e276c9e6e5759e12a6a9214efec6439f80b4f37618e1a6547f28a3da34db07a',
-              'Image': 'busybox:buildroot-2014.02',
-              'Names': ['/grave_mayer'],
-              'Ports': [],
-              'Status': 'Up 1 seconds'}
-
-container2 = {'Command': 'whoami',
-              'Created': 1412574844,
-              'Id': '89034890sdfdjlksdf93k2390kldfjlsdf09w80349ijfalfjf0393iu4pofjl33',
-              'Image': 'busybox:buildroot-2014.02',
-              'Names': ['/grave_mayer'],
-              'Ports': [],
-              'Status': 'Up 1 seconds'}
-
-container_real = [{'Status': 'Exited (0) 6 minutes ago',
-                   'Created': 1458231723,
-                   'Image': 'ubuntu', 'Labels': {},
-                   'Ports': [], 'Command': 'sleep 30',
-                   'Names': ['/nostalgic_noyce'],
-                   'Id': 'f20b77988e436da8645cde68208'
-                         '00dc9ee3aabe1bd9d2dd5b061a3c853ad688b'},
-                  {'Status': 'Exited (0) 7 minutes ago',
-                   'Created': 1458231670, 'Image': 'ubuntu',
-                   'Labels': {}, 'Ports': [], 'Command': 'whoami',
-                   'Names': ['/tender_nobel'],
-                   'Id': '144a7e26743ed487217ae1494cac01197'
-                         '245ef8e64669c666addd6a770639264'}]
-
 
 def create_generator(json_data):
     for line in json_data:
@@ -85,8 +55,11 @@ class TestDocker(testtools.TestCase):
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_error(self, m):
         image = 'imageError'
-        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
-        self.assertRaises(exceptions.DockerException, self.control.pull_image, image)
+        m.return_value = create_generator(
+            fake_docker_outputs.fake_pull[image]
+        )
+        self.assertRaises(exceptions.DockerException,
+                          self.control.pull_image, image)
 
     @mock.patch.object(docker.Client, 'remove_image')
     def test_delete_image(self, m):
@@ -103,14 +76,15 @@ class TestDocker(testtools.TestCase):
         self.assertEqual(container_id, out)
 
     @mock.patch.object(docker.Client, 'remove_container')
-    def test_clean_containers(self, m):
+    def test_clean_containers_not_found(self, m):
         m.side_effect = exceptions.DockerException(
             code=204,
             message="Not Found"
         )
         c_1 = uuid.uuid4().hex
-        out = self.control.delete_container(c_1)
-        self.assertEqual([], out)
+        self.assertRaises(exceptions.DockerException,
+                          self.control.list_containers_details,
+                          c_1)
 
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_several_containers(self, m):
@@ -177,10 +151,12 @@ class TestDocker(testtools.TestCase):
         ml.return_value = fake_docker_outputs.fake_log
         image_id = uuid.uuid4()
         detach = False
-        container_id = self.control.run_container(image_id=image_id, detach=detach, command='')
+        container_id = self.control.run_container(
+            image_id=image_id, detach=detach, command='')
         self.control.start_container(container_id)
         out_put = self.control.logs_container(container_id)
-        self.assertEqual(fake_docker_outputs.fake_create['Id'], container_id)
+        self.assertEqual(fake_docker_outputs.fake_create['Id'],
+                         container_id)
         self.assertIsNotNone(out_put)
         self.assertEqual(out_put, fake_docker_outputs.fake_log)
 
@@ -263,9 +239,6 @@ class TestDocker(testtools.TestCase):
         out = self.control.copy_from_container(container_id,
                                                container_path,
                                                host_path)
-        expected = {"path": "%s/%s.tar.gz" % (
-            host_path, container_id)
-                    }
         self.assertEqual(stat, out)
 
     @mock.patch.object(docker.Client, 'put_archive')

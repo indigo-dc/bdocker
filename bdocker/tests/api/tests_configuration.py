@@ -15,10 +15,11 @@
 # under the License.
 
 import os
+
 import testtools
 
-from bdocker import utils
 from bdocker import exceptions
+from bdocker import utils
 
 
 class TestConfigurationWorkingNode(testtools.TestCase):

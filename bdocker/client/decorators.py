@@ -61,7 +61,7 @@ def parse_cp_path(ctx, param, value):
 def parse_volume(ctx, param, value):
     """Command Client Callback. Parse volume
 
-    :param ctx: contex
+    :param ctx: context
     :param param: parameters
     :param value: input value
     """
@@ -83,7 +83,7 @@ def parse_volume(ctx, param, value):
 def parse_bool(ctx, param, value):
     """Command Client Callback. Parse bool
 
-    :param ctx: contex
+    :param ctx: context
     :param param: parameters
     :param value: input value
     """
@@ -101,9 +101,9 @@ def parse_bool(ctx, param, value):
 
 def endpoint_argument(f):
     return click.option(
-        '--host', '-H', default=False
-        , type=click.STRING
-        , help='BDocker server endpoint'
+        '--host', '-H', default=False,
+        type=click.STRING,
+        help='BDocker server endpoint'
     )(f)
 
 
@@ -117,37 +117,35 @@ def token_argument(f):
 
 def token_option(f):
     return click.option(
-        '--token', '-t', default=None
-        , type=click.STRING
-        , help='The token ID'
+        '--token', '-t', default=None,
+        type=click.STRING, help='The token ID'
     )(f)
 
 
 def job_option(f):
     return click.option(
-        '--jobid', '-j', default=None
-        , type=click.INT
-        , help='The job ID'
+        '--jobid', '-j', default=None,
+        type=click.INT, help='The job ID'
     )(f)
 
 
 def source_argument(f):
-    return click.argument('source'
-                          , type=click.STRING
+    return click.argument('source',
+                          type=click.STRING
                           )(f)
 
 
 def container_id_argument(f):
-    return click.argument("container_id"
-                          , type=click.STRING
+    return click.argument("container_id",
+                          type=click.STRING
                           )(f)
 
 
 def container_ids_argument(f):
-    return click.argument("container_ids"
-                          , type=click.STRING
-                          , nargs=-1
-                          , required=True
+    return click.argument("container_ids",
+                          type=click.STRING,
+                          nargs=-1,
+                          required=True
                           )(f)
 
 
@@ -158,70 +156,68 @@ def image_id_argument(f):
 
 
 def command_argument(f):
-    return click.argument("script"
-                          , type=click.STRING
+    return click.argument("script",
+                          type=click.STRING
                           )(f)
 
 
 def user_credentials(f):
-    out = click.argument("uid"
-                         , type=click.INT
+    out = click.argument("uid", type=click.INT
                          )(f)
     return out
 
 
 def user_option(f):
     return click.option(
-        '--user', '-u', default=None
-        , type=click.STRING
-        , help='User name'
+        '--user', '-u', default=None,
+        type=click.STRING, help='User name'
     )(f)
 
 
 def d_option(f):
     return click.option(
-        '--detach', '-d', default=False
-        , type=click.BOOL, is_flag=True
-        , help='Run container in background and print container ID'
+        '--detach', '-d', default=False,
+        type=click.BOOL, is_flag=True,
+        help='Run container in background and print container ID'
     )(f)
 
 
 def all_option(f):
     return click.option(
-        '--all', '-a', default=False
-        , type=click.BOOL, is_flag=True
-        , help='Show all containers (default shows just running)'
+        '--all', '-a', default=False,
+        type=click.BOOL, is_flag=True,
+        help='Show all containers (default shows just running)'
     )(f)
 
 
 def force_option(f):
     return click.option(
-        '--force', '-f', default=False
-        , type=click.BOOL, is_flag=True
-        , help='Force the removal of a running container (uses SIGKILL)'
+        '--force', '-f', default=False,
+        type=click.BOOL, is_flag=True,
+        help='Force the removal of a running container (uses SIGKILL)'
     )(f)
 
 
 def force_option_clean(f):
     return click.option(
-        '--force', '-f', default=True
-        , type=click.BOOL, is_flag=True
-        , help='Force the removal of a running container (uses SIGKILL)'
+        '--force', '-f', default=True,
+        type=click.BOOL, is_flag=True,
+        help='Force the removal of a running container (uses SIGKILL)'
     )(f)
 
 
 def volume_option(f):
     return click.option(
-        '--volume', '-v', default=None, type=click.STRING
-        , callback=parse_volume
-        , help='Bind mount a volume'
+        '--volume', '-v', default=None,
+        type=click.STRING, callback=parse_volume,
+        help='Bind mount a volume'
     )(f)
 
 
 def workdir_option(f):
     return click.option(
-        '--workdir', '-w', default=None, type=click.STRING
-        , help='Working directory inside the container'
+        '--workdir', '-w', default=None, type=click.STRING,
+        help='Working directory inside the container'
     )(f)
 
 

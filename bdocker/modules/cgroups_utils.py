@@ -50,8 +50,10 @@ def remove_tasks(cgroup_name, cgroup_parent):
 
 
 def parse_cgroup_name(name):
-    """
-    Clean name. It is needed because cgroupspy clean them
+    """Clean cgroup name.
+
+    It is needed because cgroupspy clean them.
+
     :param name:
     :return: name without extensions
     """
@@ -155,7 +157,7 @@ def get_accounting(group_name, parent_group,
     try:
         memory_usage = utils.read_file(memory_file)
         cpu_usage = utils.read_file(cpu_file)
-    except IOError as e:
+    except IOError:
         raise exceptions.CgroupException("%s/%s Not found"
                                          % parent_group,
                                          group_name)

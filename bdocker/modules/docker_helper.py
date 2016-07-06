@@ -24,7 +24,8 @@ class DockerController(object):
 
     def __init__(self, url, cgroup=None):
         # tls_config = docker.tls.TLSConfig(
-        #     client_cert=('/path/to/client-cert.pem', '/path/to/client-key.pem')
+        #     client_cert=('/path/to/client-cert.pem',
+        # '/path/to/client-key.pem')
         # )
         self.control = docker_py.Client(base_url=url, version='1.20')
 
@@ -69,7 +70,8 @@ class DockerController(object):
         try:
             for container_id in containers:
                 docker_out = self.control.inspect_container(container_id)
-                container_row = parsers.parse_list_container_details(docker_out)
+                container_row = parsers.parse_list_container_details(
+                    docker_out)
                 result.append(container_row)
         except BaseException as e:
             raise exceptions.DockerException(e)
@@ -173,5 +175,3 @@ class DockerController(object):
     def stop_container(self, container_id):
         self.control.stop(container=container_id)
         return "stop container"
-
-

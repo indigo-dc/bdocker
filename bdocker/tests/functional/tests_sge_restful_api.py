@@ -15,12 +15,12 @@
 # under the License.
 
 import copy
-import docker as docker_py
 import json
 import os
 import uuid
 
 from cgroupspy import nodes
+import docker as docker_py
 import mock
 import testtools
 import webob
@@ -39,8 +39,7 @@ def create_fake_json_resp(data, status=200):
 
 
 class TestSgeRestApiAccounting(testtools.TestCase):
-    """Tests the all workflow of REST API methods
-    for Accounting."""
+    """Tests the all workflow of REST API methods for Accounting."""
     def setUp(self):
         super(TestSgeRestApiAccounting, self).setUp()
         self.admin_token = fakes.admin_token
@@ -74,8 +73,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
 
 
 class TestSgeRestApiWn(testtools.TestCase):
-    """Tests the all workflow of REST API methods
-     for WN."""
+    """Tests the all workflow of REST API methods for WN."""
 
     def setUp(self):
         super(TestSgeRestApiWn, self).setUp()

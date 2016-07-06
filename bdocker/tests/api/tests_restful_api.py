@@ -20,9 +20,9 @@ import mock
 import testtools
 import webob
 
+from bdocker.api import controller
 from bdocker import exceptions
 from bdocker.modules import request
-from bdocker.api import controller
 
 
 class TestAccRESTAPI(testtools.TestCase):
@@ -37,7 +37,8 @@ class TestAccRESTAPI(testtools.TestCase):
                 from bdocker.api import accounting
                 self.app = accounting.app
 
-    @mock.patch.object(controller.AccountingServerController, "set_job_accounting")
+    @mock.patch.object(controller.AccountingServerController,
+                       "set_job_accounting")
     def test_set_job(self, m):
         pass
         m.return_value = 'tokenresult'
@@ -88,7 +89,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "configuration")
-    def test_configuration(self, m):
+    def test_configuration_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"admin_token": "tokennnnnn",
                       "user_credentials":
@@ -250,9 +251,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
             method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(token, ml.call_args_list[0][0][0]["token"])
-        self.assertEqual(str(all_containers), ml.call_args_list[0][0][0]["all"])
+        self.assertEqual(str(all_containers),
+                         ml.call_args_list[0][0][0]["all"])
 
-    @mock.patch.object(controller.ServerController, "list_containers")
+    @mock.patch.object(controller.ServerController,
+                       "list_containers")
     def test_ps_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
         result = webob.Request.blank("/ps?token=333333",
@@ -468,4 +471,3 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      body=body,
                                      method="PUT").get_response(self.app)
         self.assertEqual(401, result.status_code)
-

@@ -14,16 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
 import uuid
 
 import mock
 import testtools
 
-from bdocker import exceptions
 from bdocker.client import commands
-from bdocker.modules import request
+from bdocker import exceptions
 from bdocker.modules import batch
+from bdocker.modules import request
 
 
 conf_sge = {
@@ -165,7 +164,6 @@ class TestCommands(testtools.TestCase):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
-        err = None
         m.return_value = container_id
         results = self.control.container_run(None, image_id, False, 'ls')
         self.assertEqual(container_id, results)
@@ -175,7 +173,6 @@ class TestCommands(testtools.TestCase):
     def test_container_run_2(self, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
-        container_id = uuid.uuid4().hex
         out = ['bin', 'etc', 'lib']
         m.return_value = ['bin', 'etc', 'lib']
         results = self.control.container_run(None, image_id, False, 'ls')
@@ -196,7 +193,6 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.commands.token_parse")
     @mock.patch("os.remove")
     def test_clean(self, m_rm, m_t, m_ad, m_del):
-        force = True
         token = uuid.uuid4().hex
         admin_token = uuid.uuid4().hex
         m_t.return_value = token
@@ -268,9 +264,3 @@ class TestCommands(testtools.TestCase):
                     "host_to_container": host_to_container}
         m_put.assert_called_with(path='/copy',
                                  parameters=expected)
-
-        # def test_crendentials(self):
-        #     results = self.control.create_credentials(1000)
-        #     self.assertIsNotNone(results)
-
-        # CREATE CONTAINER {'Id': '8a61192da2b3bb2d922875585e29b74ec0dc4e0117fcbf84c962204e97564cd7', 'Warnings': None}

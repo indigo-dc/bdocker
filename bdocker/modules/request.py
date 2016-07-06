@@ -15,6 +15,7 @@
 # under the License.
 
 import json
+
 import six
 import six.moves.urllib.parse as urlparse
 import webob
@@ -116,6 +117,7 @@ class RequestController(object):
 
     def execute_get(self, path, parameters):
         """Execute GET request.
+
         This method execute a POST request on the endpoint.
 
         :param path: path of the request
@@ -133,6 +135,7 @@ class RequestController(object):
 
     def execute_post(self, path, parameters):
         """Execute POST request.
+
         This method execute a POST request on the endpoint.
 
         :param path: path of the request
@@ -150,6 +153,7 @@ class RequestController(object):
 
     def execute_delete(self, path, parameters):
         """Execute DELETE request.
+
         This method execute a DELETE request on the endpoint.
 
         :param path: path of the request
@@ -167,6 +171,7 @@ class RequestController(object):
 
     def execute_put(self, path, parameters):
         """Execute PUT request.
+
         This method execute a PUT request on the endpoint.
 
         :param path: path of the request

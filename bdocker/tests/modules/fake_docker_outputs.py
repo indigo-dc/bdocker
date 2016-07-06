@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2015 LIP - INDIGO-DataCloud
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import uuid
 
 pull_out = [
@@ -84,6 +100,36 @@ fake_container_details = {
     'NetworkSettings':
         {"Ports": 2}
 }
+
+container1 = {'Command': '/bin/sleep 30',
+              'Created': 1412574844,
+              'Id': '6e276c9e6e5759e12a6a9214efec6439f',
+              'Image': 'busybox:buildroot-2014.02',
+              'Names': ['/grave_mayer'],
+              'Ports': [],
+              'Status': 'Up 1 seconds'}
+
+container2 = {'Command': 'whoami',
+              'Created': 1412574844,
+              'Id': '89034890sdfdjlksdf93k2390kldf',
+              'Image': 'busybox:buildroot-2014.02',
+              'Names': ['/grave_mayer'],
+              'Ports': [],
+              'Status': 'Up 1 seconds'}
+
+container_real = [{'Status': 'Exited (0) 6 minutes ago',
+                   'Created': 1458231723,
+                   'Image': 'ubuntu', 'Labels': {},
+                   'Ports': [], 'Command': 'sleep 30',
+                   'Names': ['/nostalgic_noyce'],
+                   'Id': 'f20b77988e436da8645cde68208'
+                         '00dc9ee3aabe1bd9d2dd5b061a3c853ad688b'},
+                  {'Status': 'Exited (0) 7 minutes ago',
+                   'Created': 1458231670, 'Image': 'ubuntu',
+                   'Labels': {}, 'Ports': [], 'Command': 'whoami',
+                   'Names': ['/tender_nobel'],
+                   'Id': '144a7e26743ed487217ae1494cac01197'
+                         '245ef8e64669c666addd6a770639264'}]
 
 fake_create = {'Id': uuid.uuid4(),
                'Warnings': None

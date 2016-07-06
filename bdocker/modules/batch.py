@@ -13,14 +13,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 import logging
 import os
 import signal
 import time
 
-from bdocker import utils, exceptions, parsers
+from bdocker import exceptions
 from bdocker.modules import cgroups_utils
 from bdocker.modules import request
+from bdocker import parsers
+from bdocker import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -95,7 +98,7 @@ class SGEAccountingController(BatchMasterController):
         utils.add_to_file(self.bdocker_accounting, job_string)
 
     def set_job_accounting(self, accounting):
-        """ Add accounting line to the bdocker accounting file
+        """Add accounting line to the bdocker accounting file
 
         :param accounting: string with sge accounting format
         :return:
@@ -222,7 +225,7 @@ class SGEController(BatchWNController):
                 # Exit parent process
                 return 0
             os.setsid()
-        except OSError, e:
+        except OSError as e:
             message = "fork failed: %d (%s)" % (
                 e.errno, e.strerror)
             LOG.exception(message)

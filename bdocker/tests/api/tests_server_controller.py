@@ -19,12 +19,11 @@ import uuid
 import mock
 import testtools
 
+from bdocker.api import controller
 from bdocker import exceptions
-from bdocker import utils
 from bdocker.modules import batch
 from bdocker.modules import credentials
 from bdocker.modules import docker_helper
-from bdocker.api import controller
 
 FAKE_CONF = {
     'server': mock.MagicMock(),
@@ -473,10 +472,12 @@ class TestServerController(testtools.TestCase):
     @mock.patch.object(credentials.UserController, "update_job")
     @mock.patch.object(batch.SGEController, "notify_accounting")
     def test_notify_accounting(self, m_not, m_up, m_acc, mad, mjob):
-        c1 = uuid.uuid4().hex
+        info = uuid.uuid4().hex
+        m_not.return_value = info
         parameters = {"token": uuid.uuid4().hex,
                       'admin_token': uuid.uuid4().hex}
         results = self.controller.notify_accounting(parameters)
+        self.assertEqual(info, results)
 
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(batch.SGEController, "notify_accounting")
@@ -538,6 +539,8 @@ class TestServerController(testtools.TestCase):
     def test_copy_check_direction_to(self, m_au, mu, m_to, m_from):
         c1 = uuid.uuid4().hex
         mu.return_value = c1
+        info_containers = "info"
+        m_to.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "container_path": "/foo",
@@ -546,6 +549,7 @@ class TestServerController(testtools.TestCase):
         results = self.controller.copy(parameters)
         self.assertEqual(True, m_to.called)
         self.assertEqual(False, m_from.called)
+        self.assertEqual(info_containers, results)
 
     @mock.patch.object(docker_helper.DockerController, "copy_from_container")
     @mock.patch.object(docker_helper.DockerController, "copy_to_container")
@@ -554,7 +558,9 @@ class TestServerController(testtools.TestCase):
                        "authorize_directory")
     def test_copy_check_direction_from(self, m_au, mu, m_to, m_from):
         c1 = uuid.uuid4().hex
+        info_containers = "info"
         mu.return_value = c1
+        m_from.return_value = info_containers
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "container_path": "/foo",
@@ -563,6 +569,7 @@ class TestServerController(testtools.TestCase):
         results = self.controller.copy(parameters)
         self.assertEqual(False, m_to.called)
         self.assertEqual(True, m_from.called)
+        self.assertEqual(info_containers, results)
 
     @mock.patch.object(docker_helper.DockerController, "copy_from_container")
     @mock.patch.object(credentials.UserController, "authorize_container")

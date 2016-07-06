@@ -497,7 +497,6 @@ class TestBdockerSgeWn(testtools.TestCase):
         token = "--token=%s" % user_token
         orig = webob.Request.get_response
         app = self.app
-        admin_token = fakes.admin_token
 
         def mocked_some_method(self, bar=None):
             if bar:
