@@ -77,10 +77,10 @@ def parse_docker_generator1(gen_data, key='Status'):
 
 def get_date_diff(date_end, date_format=None):
     if date_format:
-        date_ini = datetime.strptime(date_end, date_format)
+        date_ini = datetime.datetime.strptime(date_end, date_format)
     else:
-        date_ini = datetime.fromtimestamp(date_end)
-    date_end = datetime.utcnow()
+        date_ini = datetime.datetime.fromtimestamp(date_end)
+    date_end = datetime.datetime.utcnow()
     diferencia = date_end - date_ini
     days = diferencia.days
     seconds = diferencia.seconds
