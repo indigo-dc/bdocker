@@ -127,7 +127,7 @@ class RequestController(object):
                                 method="GET")
             response = req.get_response()
         except Exception as e:
-             response = webob.Response(status=500, body=str(e))
+            response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
         return json_response
 
@@ -144,7 +144,7 @@ class RequestController(object):
                                 body=body, method="POST")
             response = req.get_response()
         except Exception as e:
-             response = webob.Response(status=500, body=str(e))
+            response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
         return json_response
 
@@ -161,7 +161,7 @@ class RequestController(object):
                                 query_string=query_string)
             response = req.get_response(None)
         except Exception as e:
-             response = webob.Response(status=500, body=str(e))
+            response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
         return json_response
 
@@ -178,6 +178,6 @@ class RequestController(object):
                                 body=body, method="PUT")
             response = req.get_response()
         except Exception as e:
-             response = webob.Response(status=500, body=str(e))
+            response = webob.Response(status=500, body=str(e))
         json_response = self._get_from_response(response)
         return json_response

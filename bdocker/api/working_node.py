@@ -33,52 +33,6 @@ LOG = logging.getLogger(__name__)
 api.set_error_handler(app)
 
 
-@app.route('/credentials', methods=['POST'])
-def credentials():
-    """ Create user token environment
-    [DEPRECATED]. Included in clean
-    :return:
-        """
-    data = request.get_json()
-    try:
-        user_token = server_controller.credentials(data)
-    except Exception as e:
-        return api.manage_exceptions(e)
-    return api.make_json_response(
-        201, user_token
-    )
-
-
-@app.route('/batchconf', methods=['PUT'])
-def batch_conf():
-    """ Config batch system environment
-    [DEPRECATED]. Included in clean
-    :return:
-    """
-    data = request.get_json()
-    try:
-        server_controller.batch_configuration(data)
-    except Exception as e:
-        return api.manage_exceptions(e)
-    return api.make_json_response(
-        201, ["Batch system configured"]
-    )
-
-
-@app.route('/batchclean', methods=['DELETE'])
-def batch_clean():
-    """ Clean batch system environment
-    [DEPRECATED]. Included in clean
-    :return:
-    """
-    data = request.args
-    try:
-        server_controller.batch_clean(data)
-    except Exception as e:
-        return api.manage_exceptions(e)
-    return api.make_json_response(204, [])
-
-
 @app.route('/configuration', methods=['POST'])
 def configuration():
     """Configure bdocker user environment.
@@ -232,9 +186,9 @@ def copy():
     return api.make_json_response(201, results)
 
 
-########################
-### UN IMPLEMENTED ####
 ######################
+# UN IMPLEMENTED ####
+####################
 
 
 @app.route('/stop', methods=['POST'])
@@ -246,18 +200,9 @@ def stop():
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
 
-
-@app.route('/accounting', methods=['GET'])
-def accounting():
-    data = request.args
-    try:
-        results = server_controller.accounting(data)
-    except Exception as e:
-        return api.manage_exceptions(e)
-    return api.make_json_response(200, results)
-
-#####  UNIMPLEMETED  ######
-###########################
+########################
+#  UNIMPLEMETED  ######
+######################
 
 if __name__ == '__main__':
     environ = conf['server']['environ']
@@ -269,5 +214,5 @@ if __name__ == '__main__':
     elif environ == 'debug':
         debug = True
     app.run(host=host,
-                port=port,
-                debug=debug)
+            port=port,
+            debug=debug)

@@ -76,8 +76,8 @@ class TestBdockerSgeWn(testtools.TestCase):
 
         token = "--token=%s" % token
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['ps', token]
             )
@@ -110,14 +110,14 @@ class TestBdockerSgeWn(testtools.TestCase):
 
         token = "--token=%s" % token
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['inspect', token, container_id]
             )
             assert mock_method.called
 
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertIn(container_id, result.output)
 
@@ -136,6 +136,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         m_logs.return_value = create_log()
         orig = webob.Request.get_response
         app = self.app
+
         def mocked_some_method(self, bar=None):
             if bar:
                 return orig(self, bar)
@@ -143,14 +144,14 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, app)
         token = "--token=%s" % token
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['logs', token, container_id]
             )
             assert mock_method.called
 
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEquals("\n".join(logs) + "\n", result.output)
 
@@ -177,15 +178,15 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['rm', token_param,
                               containers[0],
                               containers[1]]
             )
             assert mock_method.called
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertIn(containers[0], result.output)
         self.assertIn(containers[1], result.output)
@@ -225,8 +226,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['run', token_param, detach,
                               image_id, work_dir,
@@ -276,8 +277,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['run', token,
                               image_id, work_dir,
@@ -313,14 +314,14 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['cp', token_param,
                               path_host, path_container]
             )
             assert mock_method.called
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEquals("%s\n" % True, result.output)
 
@@ -335,11 +336,11 @@ class TestBdockerSgeWn(testtools.TestCase):
         out = mock.MagicMock()
         out.data = None
         stat = {'linkTarget': '',
-        'mode': 493,
-        'mtime': '2015-09-16T12:34:23-07:00',
-        'name': 'sh',
-        'size': 962860
-        }
+                'mode': 493,
+                'mtime': '2015-09-16T12:34:23-07:00',
+                'name': 'sh',
+                'size': 962860
+                }
         m_get.return_value = out, stat
         token = fakes.user_token
         containers_id = self.token_store[token]["containers"][0]
@@ -357,8 +358,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['cp', token_param, path_container,
                               path_host]
@@ -367,7 +368,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         expected = []
-        for k,v in stat.items():
+        for k, v in stat.items():
             expected.append("%s: %s" % (k, v))
         self.assertEquals("\n".join(expected) + "\n",
                           result.output)
@@ -390,12 +391,12 @@ class TestBdockerSgeWn(testtools.TestCase):
     @mock.patch.object(batch.SGEController, "_get_job_configuration")
     @mock.patch("bdocker.client.commands.write_user_credentials")
     def test_configure(self, m_wfile,
-                             m_jinfo, m_env,
-                             m_get_cre, m_chown,
-                             m_time, m_kill,
-                             m_setsid, m_up, m_fork,
-                             m_uuid, m_cre, m_r, m_ry, m_w,
-                             m_path, m_getpi):
+                       m_jinfo, m_env,
+                       m_get_cre, m_chown,
+                       m_time, m_kill,
+                       m_setsid, m_up, m_fork,
+                       m_uuid, m_cre, m_r, m_ry, m_w,
+                       m_path, m_getpi):
         """
         Test configuration command
 
@@ -426,10 +427,10 @@ class TestBdockerSgeWn(testtools.TestCase):
         user_uid = 33
         user_gid = 33
         m_env.side_effect = [self.file_name,
-                              job_id,
-                              user_home,
-                              user_name,
-                              spool]
+                             job_id,
+                             user_home,
+                             user_name,
+                             spool]
         m_jinfo.return_value = fakes.job_info
         mock_pwd = mock.MagicMock()
         mock_pwd.pw_uid = user_uid
@@ -459,8 +460,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['configure']
             )
@@ -508,8 +509,8 @@ class TestBdockerSgeWn(testtools.TestCase):
                     acc_app = fakes.create_accounting_app()
                     return orig(self, acc_app)
         with mock.patch("webob.Request.get_response",
-                               side_effect=mocked_some_method,
-                               autospec=True) as mock_method:
+                        side_effect=mocked_some_method,
+                        autospec=True) as mock_method:
             result = self.runner.invoke(
                 cli.bdocker, ['clean', token]
             )

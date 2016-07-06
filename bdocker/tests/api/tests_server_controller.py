@@ -52,7 +52,6 @@ conf_sge = {
 }
 
 
-
 class TestAccountingServerController(testtools.TestCase):
     """Test Server Controller class."""
 
@@ -96,7 +95,7 @@ class TestServerController(testtools.TestCase):
         token = uuid.uuid4().hex
         m_au.return_value = token
         data = {"admin_token": "tokennnnnn",
-                "user_credentials": {"job":{
+                "user_credentials": {"job": {
                     "id": uuid.uuid4().hex,
                     "spool": "/foo"
                 }}
@@ -105,26 +104,28 @@ class TestServerController(testtools.TestCase):
 
         self.assertEqual(token, result)
 
-    @mock.patch.object(docker_helper.DockerController, "pull_image")
+    @mock.patch.object(docker_helper.DockerController,
+                       "pull_image")
     @mock.patch.object(credentials.UserController,
-                   "authorize")
+                       "authorize")
     def test_pull(self, mu, md):
         im_id = 'X'
         mu.return_value = True
         md.return_value = im_id
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         result = self.controller.pull(parameters)
         self.assertEqual(im_id, result)
 
-    @mock.patch.object(docker_helper.DockerController, "pull_image")
+    @mock.patch.object(docker_helper.DockerController,
+                       "pull_image")
     @mock.patch.object(credentials.UserController,
-                   "authorize")
+                       "authorize")
     def test_pull_unauthorized(self, mu, md):
         im_id = 'X'
         mu.side_effect = exceptions.UserCredentialsException("")
         md.return_value = im_id
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         self.assertRaises(exceptions.UserCredentialsException,
                           self.controller.pull,
@@ -251,7 +252,7 @@ class TestServerController(testtools.TestCase):
         mr.return_value = True
         mu.side_effect = [c1, c2]
         parameters = {"token": uuid.uuid4().hex,
-                      "container_id": [c1,c2]}
+                      "container_id": [c1, c2]}
         results = self.controller.delete_container(parameters)
         self.assertEqual([c1, c2], results)
 
@@ -289,10 +290,10 @@ class TestServerController(testtools.TestCase):
         self.assertEqual(c2, results[1])
         self.assertEqual(c3, results[2])
 
-
-    @mock.patch.object(docker_helper.DockerController, "run_container")
+    @mock.patch.object(docker_helper.DockerController,
+                       "run_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     @mock.patch.object(credentials.UserController,
                        "add_container")
     @mock.patch.object(docker_helper.DockerController,
@@ -348,9 +349,10 @@ class TestServerController(testtools.TestCase):
             container_id,
         )
 
-    @mock.patch.object(docker_helper.DockerController, "run_container")
+    @mock.patch.object(docker_helper.DockerController,
+                       "run_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     @mock.patch.object(credentials.UserController,
                        "add_container")
     @mock.patch.object(docker_helper.DockerController,
@@ -359,7 +361,8 @@ class TestServerController(testtools.TestCase):
                        "logs_container")
     @mock.patch.object(credentials.UserController,
                        "get_job_from_token")
-    def test_run_No_host_dir(self, m_get_j, m_log, m_start, madd, math, mr):
+    def test_run_no_host_dir(self, m_get_j, m_log, m_start,
+                             madd, math, mr):
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
@@ -389,7 +392,7 @@ class TestServerController(testtools.TestCase):
 
     @mock.patch.object(docker_helper.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     @mock.patch.object(credentials.UserController,
                        "add_container")
     @mock.patch.object(docker_helper.DockerController,
@@ -427,7 +430,7 @@ class TestServerController(testtools.TestCase):
 
     @mock.patch.object(docker_helper.DockerController, "run_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     @mock.patch.object(credentials.UserController,
                        "add_container")
     @mock.patch.object(docker_helper.DockerController,
@@ -475,10 +478,9 @@ class TestServerController(testtools.TestCase):
                       'admin_token': uuid.uuid4().hex}
         results = self.controller.notify_accounting(parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "accounting_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_notify_accounting_unauthorized(self, mac, mu, ml):
+    def test_notify_accounting_unauthorized(self, mac, mu):
         mu.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token": uuid.uuid4().hex,
                       'admin_token': uuid.uuid4().hex}
@@ -511,30 +513,10 @@ class TestServerController(testtools.TestCase):
                           self.controller.stop_container,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "accounting_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_accounting(self, mu, ml):
-        c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
-        parameters = {"token": uuid.uuid4().hex}
-        results = self.controller.accounting(parameters)
-        self.assertEqual(info_containers, results)
-
-    @mock.patch.object(docker_helper.DockerController, "accounting_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_accounting_unauthorized(self, mu, ml):
-        mu.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token": uuid.uuid4().hex}
-        self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.accounting,
-                          parameters)
-
     @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     def test_copy_to_container(self, m_au, mu, ml):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
@@ -552,7 +534,7 @@ class TestServerController(testtools.TestCase):
     @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     def test_copy_check_direction_to(self, m_au, mu, m_to, m_from):
         c1 = uuid.uuid4().hex
         mu.return_value = c1
@@ -569,7 +551,7 @@ class TestServerController(testtools.TestCase):
     @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     def test_copy_check_direction_from(self, m_au, mu, m_to, m_from):
         c1 = uuid.uuid4().hex
         mu.return_value = c1
@@ -585,7 +567,7 @@ class TestServerController(testtools.TestCase):
     @mock.patch.object(docker_helper.DockerController, "copy_from_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     def test_copy_from_container(self, m_au, mu, ml):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
@@ -602,7 +584,7 @@ class TestServerController(testtools.TestCase):
     @mock.patch.object(docker_helper.DockerController, "copy_to_container")
     @mock.patch.object(credentials.UserController, "authorize_container")
     @mock.patch.object(credentials.UserController,
-                   "authorize_directory")
+                       "authorize_directory")
     def test_copy_unauthorized(self, m_au, mu, ml):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}

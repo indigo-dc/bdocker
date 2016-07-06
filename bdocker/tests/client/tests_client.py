@@ -33,7 +33,7 @@ class TestCaseCommandLine(testtools.TestCase):
 
     def test_openstack(self):
         result = self.runner.invoke(cli.bdocker)
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
 
@@ -93,7 +93,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['ps', token]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -105,7 +105,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['ps', all_containers]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         m_l.assert_called_with(None, True)
 
@@ -193,7 +193,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['inspect', token, container_id]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -205,7 +205,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['inspect', contanier_id]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -230,7 +230,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['rm', container_id, token]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -242,7 +242,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['rm', container_id]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -268,7 +268,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['rm', "--token=%s" % token, c1, c2]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -281,7 +281,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['rm', container_id, force]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         m_l.assert_called_with(None, mock.ANY, True)
 
@@ -296,7 +296,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['run', token, image_id, command]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -307,15 +307,15 @@ class TestCommandProject(TestCaseCommandLine):
         token = "--token=%s" % uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         command = 'ls'
-        host_path= "/foo"
-        doc_path= "/baa"
+        host_path = "/foo"
+        doc_path = "/baa"
         volume = '--volume=%s:%s' % (host_path, doc_path)
         result = self.runner.invoke(
             cli.bdocker, ['run', token,
                           image_id,
                           command, volume]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -332,7 +332,7 @@ class TestCommandProject(TestCaseCommandLine):
                           image_id,
                           command, detach]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -348,7 +348,7 @@ class TestCommandProject(TestCaseCommandLine):
             cli.bdocker, ['run', token, image_id,
                           command, workdir]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -364,7 +364,7 @@ class TestCommandProject(TestCaseCommandLine):
             cli.bdocker, ['run', token, image_id,
                           command, workdir]
         )
-        self.assertEqual(result.exit_code, 2)
+        self.assertEqual(2, result.exit_code)
         self.assertIsNotNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -380,9 +380,8 @@ class TestCommandProject(TestCaseCommandLine):
             cli.bdocker, [host, 'run', token, image_id,
                           command]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "clean_environment")
@@ -391,7 +390,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['clean']
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -404,7 +403,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['clean', token_var]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -419,7 +418,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['cp', token, path, path2]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")
@@ -434,9 +433,8 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['cp', token, path, path2]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
-
 
     @mock.patch.object(commands.CommandController, "__init__")
     @mock.patch.object(commands.CommandController, "copy_to_from_container")
@@ -449,7 +447,7 @@ class TestCommandProject(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['cp', path, path2]
         )
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch.object(commands.CommandController, "__init__")

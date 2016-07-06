@@ -121,8 +121,7 @@ def clean_environment(ctx, token):
     Command executed by the root in prolog
 
     :param ctx: context
-    :param user: user uid, optional
-    :param jobid: jobid, optional
+    :param token: token, optional
     :return:
     """
 
@@ -194,7 +193,7 @@ def container_logs(ctx, token, container_id):
     try:
         out = ctx.obj.container_logs(token, container_id)
         print_message(out)
-    except BaseException as e:
+    except BaseException:
         m = ("Error: No container related to %s" %
              container_id)
         print_error(m)

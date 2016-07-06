@@ -89,7 +89,7 @@ def write_user_credentials(token, file_path,
     :param uid: user id
     :param gid: user group id
     """
-    out = open(file_path,'w')
+    out = open(file_path, 'w')
     out.write(token)
     # set_environ('BDOCKER_TOKEN_FILE',
     # file_path)
@@ -147,8 +147,8 @@ class CommandController(object):
         parameters = {"admin_token": admin_token, "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
         write_user_credentials(token, self.token_file,
-                                         user_info['uid'],
-                                         user_info['gid'])
+                               user_info['uid'],
+                               user_info['gid'])
         return {"token": token, "path": self.token_file}
 
     def clean_environment(self, token):
@@ -185,10 +185,10 @@ class CommandController(object):
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
 
-    def container_list(self, token, all=False):
+    def container_list(self, token, all_containers=False):
         path = "/ps"
         token = token_parse(token, self.token_file)
-        parameters = {"token": token, "all": all}
+        parameters = {"token": token, "all": all_containers}
         results = self.control.execute_get(path=path, parameters=parameters)
 
         return results
@@ -247,17 +247,17 @@ class CommandController(object):
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
 
-    # def container_start(self, token, container_id):
-    #     path = "/start"
-    #     parameters = {"token": token, "container_id": container_id}
-    #     results = self.control.execute_post(path=path, parameters=parameters)
-    #     # todo(jorgesece): implement message output
-    #     return results
-    #
-    #
-    # def container_stop(self, token, container_id):
-    #     path = "/stop"
-    #     parameters = {"token": token, "container_id": container_id}
-    #     results = self.control.execute_post(path=path, parameters=parameters)
-    #     # todo(jorgesece): implement message output
-    #     return results
+        # def container_start(self, token, container_id):
+        #     path = "/start"
+        #     parameters = {"token": token, "container_id": container_id}
+        #     results = self.control.execute_post(path=path, parameters=parameters)
+        #     # todo(jorgesece): implement message output
+        #     return results
+        #
+        #
+        # def container_stop(self, token, container_id):
+        #     path = "/stop"
+        #     parameters = {"token": token, "container_id": container_id}
+        #     results = self.control.execute_post(path=path, parameters=parameters)
+        #     # todo(jorgesece): implement message output
+        #     return results

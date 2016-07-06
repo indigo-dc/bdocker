@@ -76,8 +76,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "user_credentials":
                           {'uid': 'uuuuuuuuuuiiiidddddd',
                            'gid': 'gggggggggguuuiiidd',
-                           'job': {'id':'gggggggggguuuiiidd',
-                                   'spool':'/faa'}
+                           'job': {'id': 'gggggggggguuuiiidd',
+                                   'spool': '/faa'}
                            }
                       }
         body = request.make_body(parameters)
@@ -94,8 +94,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "user_credentials":
                           {'uid': 'uuuuuuuuuuiiiidddddd',
                            'gid': 'gggggggggguuuiiidd',
-                           'job': {'id':'gggggggggguuuiiidd',
-                                   'spool':'/faa'}
+                           'job': {'id': 'gggggggggguuuiiidd',
+                                   'spool': '/faa'}
                            }
                       }
         body = request.make_body(parameters)
@@ -134,8 +134,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "pull")
     def test_pull(self, md):
         im_id = 'X'
-        md.return_value = {'image_id': im_id, 'status':'OK'}
-        parameters = {"token":"tokennnnnn",
+        md.return_value = {'image_id': im_id, 'status': 'OK'}
+        parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/pull",
@@ -146,7 +146,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "pull")
     def test_pull_405(self, m):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/pull",
@@ -157,7 +157,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "pull")
     def test_pull_400(self, m):
-        parameters = {"token":"tokennnnnn"}
+        parameters = {"token": "tokennnnnn"}
         body = request.make_body(parameters)
         m.side_effect = exceptions.ParseException("")
         result = webob.Request.blank("/pull",
@@ -166,9 +166,10 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      method="POST").get_response(self.app)
         self.assertEqual(400, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "delete_container")
+    @mock.patch.object(controller.ServerController,
+                       "delete_container")
     def test_delete(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'repoooo'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
@@ -177,7 +178,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      method="PUT").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "delete_container")
+    @mock.patch.object(controller.ServerController,
+                       "delete_container")
     def test_delete_several(self, md):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
@@ -218,7 +220,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "delete_container")
     def test_delete_405(self, m):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'repoooo'}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/rm?%s" % query,
@@ -230,7 +232,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
         mu.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": [c1, c2]}
         body = request.make_body(parameters)
         result = webob.Request.blank("/rm",
@@ -242,12 +244,13 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps(self, ml):
         token = "3333"
-        all = True
-        result = webob.Request.blank("/ps?token=%s&all=%s" % (token, all),
-                                     method="GET").get_response(self.app)
+        all_containers = True
+        result = webob.Request.blank(
+            "/ps?token=%s&all=%s" % (token, all_containers),
+            method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(token, ml.call_args_list[0][0][0]["token"])
-        self.assertEqual(str(all), ml.call_args_list[0][0][0]["all"])
+        self.assertEqual(str(all_containers), ml.call_args_list[0][0][0]["all"])
 
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps_401(self, m):
@@ -264,7 +267,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "show")
     def test_show(self, md):
-        parameters = {"token":"tokennnnnn"}
+        parameters = {"token": "tokennnnnn"}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/inspect?%s" % query,
                                      method="GET").get_response(self.app)
@@ -273,7 +276,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "show")
     def test_show_401(self, md):
         md.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn"}
+        parameters = {"token": "tokennnnnn"}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/inspect?%s" % query,
                                      method="GET").get_response(self.app)
@@ -281,7 +284,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "logs")
     def test_logs(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
@@ -291,7 +294,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "logs")
     def test_logs_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
@@ -300,7 +303,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "logs")
     def test_logs_405(self, m):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
         result = webob.Request.blank("/logs?%s" % query,
@@ -309,7 +312,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "stop_container")
     def test_stop(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
@@ -320,7 +323,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "stop_container")
     def test_stop_405(self, m):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
@@ -332,7 +335,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "stop_container")
     def test_stop_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
         result = webob.Request.blank("/stop",
@@ -364,7 +367,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "run")
     def test_run_405(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = request.make_body(parameters)
@@ -377,7 +380,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "run")
     def test_run_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = request.make_body(parameters)
@@ -389,7 +392,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "run")
     def test_run_400(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "script": "scriptttt"}
         body = request.make_body(parameters)
         md.side_effect = exceptions.ParseException("")
@@ -431,37 +434,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      method="GET").get_response(self.app)
         self.assertEqual(405, result.status_code)
 
-    @mock.patch.object(controller.ServerController, "accounting")
-    def test_acc(self, md):
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        query = request.get_query_string(parameters)
-        result = webob.Request.blank("/accounting?%s" % query,
-                                     method="GET").get_response(self.app)
-        self.assertEqual(200, result.status_code)
-
-    @mock.patch.object(controller.ServerController, "accounting")
-    def test_acc_401(self, m):
-        m.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        query = request.get_query_string(parameters)
-        result = webob.Request.blank("/accounting?%s" % query,
-                                     method="GET").get_response(self.app)
-        self.assertEqual(401, result.status_code)
-
-    @mock.patch.object(controller.ServerController, "accounting")
-    def test_acc_405(self, m):
-        parameters = {"token":"tokennnnnn",
-                      "container_id": 'containerrrrr'}
-        query = request.get_query_string(parameters)
-        result = webob.Request.blank("/accounting?%s" % query,
-                                     method="POST").get_response(self.app)
-        self.assertEqual(405, result.status_code)
-
     @mock.patch.object(controller.ServerController, "copy")
     def test_output(self, md):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         body = request.make_body(parameters)
@@ -473,7 +448,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
 
     @mock.patch.object(controller.ServerController, "copy")
     def test_output_405(self, m):
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         query = request.get_query_string(parameters)
@@ -484,7 +459,7 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
     @mock.patch.object(controller.ServerController, "copy")
     def test_output_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
-        parameters = {"token":"tokennnnnn",
+        parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         body = request.make_body(parameters)
@@ -494,7 +469,3 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                                      method="PUT").get_response(self.app)
         self.assertEqual(401, result.status_code)
 
-
-
-    # TODO(jorgesece): delete deprectated
-    # credentials

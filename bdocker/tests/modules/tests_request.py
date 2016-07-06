@@ -40,7 +40,7 @@ class TestRequest(testtools.TestCase):
         self.control = request.RequestController()
 
     @mock.patch.object(webob.Request, "get_response")
-    def test_PUT(self, m):
+    def test_put(self, m):
         t = "tokenResult"
         fake_response = webob.Response()
         fake_response.status_int = 201
@@ -56,7 +56,7 @@ class TestRequest(testtools.TestCase):
         self.assertEqual(t, result)
 
     @mock.patch.object(webob.Request, "get_response")
-    def test_GET(self, m):
+    def test_get(self, m):
         r = ['cont1', 'cont2', 'cont3']
         fake_response = create_fake_json_resp({'results': r
                                                }, 200)
@@ -67,10 +67,10 @@ class TestRequest(testtools.TestCase):
         self.assertEqual(r, result)
 
     @mock.patch.object(webob.Request, "get_response")
-    def test_GET_500(self, m):
+    def test_get_500(self, m):
         fake_response = create_fake_json_resp({}, 500)
         m.return_value = fake_response
-        parameters = {"token":"tokennnnnn"}
+        parameters = {"token": "tokennnnnn"}
         path = "/ps?token"
         self.assertRaises(webob.exc.HTTPInternalServerError,
                           self.control.execute_get,

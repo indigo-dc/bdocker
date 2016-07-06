@@ -32,7 +32,7 @@ class TestCaseCommandLine(testtools.TestCase):
 
     def test_openstack(self):
         result = self.runner.invoke(cli.bdocker)
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
 
@@ -63,8 +63,7 @@ class TestFunctionalClient(TestCaseCommandLine):
                     "container_path": path,
                     "host_path": path_host,
                     "host_to_container": True
-
-        }
+                    }
         m_put.assert_called_with(path="/copy",
                                  parameters=expected)
 
@@ -94,7 +93,7 @@ class TestFunctionalClient(TestCaseCommandLine):
     @mock.patch("bdocker.modules.load_batch_module")
     @mock.patch.object(request.RequestController, "execute_post")
     def test_configure(self, m_post, m_batch, m_load, m_yaml,
-                             m_cre, m_open, m_chown):
+                       m_cre, m_open, m_chown):
         result = self.runner.invoke(
             cli.bdocker, ['configure']
         )
@@ -107,7 +106,6 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(True, m_open.called)
         self.assertEqual(True, m_post.called)
 
-
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.modules.load_batch_module")
     @mock.patch.object(request.RequestController, "execute_get")
@@ -117,7 +115,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['ps', token]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -125,11 +123,11 @@ class TestFunctionalClient(TestCaseCommandLine):
     @mock.patch.object(request.RequestController, "execute_get")
     def test_docker_list_all(self, m_get, m_batch, m_load):
         m_get.return_value = {}
-        all = "--all"
+        all_containers = "--all"
         result = self.runner.invoke(
-            cli.bdocker, ['ps', all]
+            cli.bdocker, ['ps', all_containers]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -142,7 +140,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['inspect', token, container_id]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -166,7 +164,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['logs', token, container_id]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -190,7 +188,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         result = self.runner.invoke(
             cli.bdocker, ['rm', token, container_id]
         )
-        self.assertEqual(result.exit_code,0)
+        self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -233,11 +231,11 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
         expected = {
-                    "token": token_id,
-                    "image_id": image_id,
-                    "script": command,
-                    "detach": None
-                    }
+            "token": token_id,
+            "image_id": image_id,
+            "script": command,
+            "detach": None
+        }
         m_rq.assert_called_with(path="/run", parameters=expected)
 
     @mock.patch("bdocker.utils.load_configuration_from_file")
@@ -249,8 +247,8 @@ class TestFunctionalClient(TestCaseCommandLine):
         token = "--token=%s" % token_id
         image_id = uuid.uuid4().hex
         command = 'ls'
-        host_path= "/foo"
-        doc_path= "/baa"
+        host_path = "/foo"
+        doc_path = "/baa"
         w_path = "/work"
         work_dir = "--workdir=%s" % w_path
         volume = '--volume=%s:%s' % (host_path, doc_path)
@@ -269,4 +267,5 @@ class TestFunctionalClient(TestCaseCommandLine):
                     "working_dir": w_path,
                     "detach": None
                     }
-        m_rq.assert_called_with(path="/run", parameters=expected)
+        m_rq.assert_called_with(path="/run",
+                                parameters=expected)

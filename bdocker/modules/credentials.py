@@ -210,9 +210,9 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         if container_id not in token_info['containers']:
-            len = container_id.__len__()
+            num_containers = container_id.__len__()
             for c in token_info['containers']:
-                if container_id == c[:len]:
+                if container_id == c[:num_containers]:
                     return c
             raise exceptions.DockerException(
                 message="No such container:"

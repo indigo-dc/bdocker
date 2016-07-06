@@ -78,9 +78,11 @@ class DockerController(object):
     def list_containers(self, containers, all=False):
         result = []
         try:
-            docker_containers = self.control.containers(all=all)
+            docker_containers = self.control.containers(
+                all=all
+            )
             for c in containers:
-               for d_c in docker_containers:
+                for d_c in docker_containers:
                     if c in d_c["Id"]:
                         d_c['Id'] = c[:12]
                         # it set the short id like in docker
@@ -171,8 +173,5 @@ class DockerController(object):
     def stop_container(self, container_id):
         self.control.stop(container=container_id)
         return "stop container"
-
-    def accounting_container(self, container_id):
-        raise exceptions.DockerException()
 
 

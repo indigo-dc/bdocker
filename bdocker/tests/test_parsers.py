@@ -33,7 +33,6 @@ class TestParsers(testtools.TestCase):
         result = parsers.get_date_diff(d[:-4], "%Y-%m-%dT%H:%M:%S.%f")
         self.assertIsNotNone(result)
 
-
     def test_validate_dir(self):
         home_path = '/home/jorge'
         req_path = '%s/nuevo/script_dir' % home_path
@@ -72,6 +71,6 @@ class TestParsers(testtools.TestCase):
         self.assertIsNotNone(out)
         self.assertEqual(nanosenconds, out)
 
-    def test_parse_hours_None(self):
+    def test_parse_hours_none(self):
         out = parsers.parse_time_to_nanoseconds(None)
         self.assertIsNone(out)

@@ -66,7 +66,7 @@ def exception_from_response(response):
 
 def manage_http_exception(code, message):
     exc = default_exceptions.get(code, webob.exc.HTTPInternalServerError)
-    return exc(message=("%s") % (message))
+    return exc(message="%s" % message)
 
 
 class BDockerException(Exception):
@@ -106,7 +106,6 @@ class UserCredentialsException(BDockerException):
                         % self.message)
 
 
-
 class ConfigurationException(BDockerException):
     def __init__(self, message, exc=None, code=None):
         super(ConfigurationException, self).__init__(
@@ -117,7 +116,7 @@ class ConfigurationException(BDockerException):
 
 
 class BatchException(BDockerException):
-     def __init__(self, message, e=None, code=None):
+    def __init__(self, message, e=None, code=None):
         super(BatchException, self).__init__(
             e, message, code
         )
@@ -141,7 +140,7 @@ class CgroupException(BDockerException):
             e, message, code
         )
         self.message = ("Cgroup Exception: %s"
-                       % self.message)
+                        % self.message)
 
 
 def get_exception_details(ex=None, custom_message=None,

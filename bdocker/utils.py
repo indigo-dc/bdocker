@@ -63,7 +63,7 @@ def delete_file(path):
     os.remove(path)
 
 
-default_conf_file = ("/etc/configure_bdocker.cfg")
+default_conf_file = "/etc/configure_bdocker.cfg"
 
 
 def validate_config(conf):
@@ -153,10 +153,11 @@ def load_configuration_from_file(path=None):
         }
         if WORKING_NODE == conf["resource"]["role"]:
             conf.update(
-                {'accounting_server':
-                     dict(config.items("accounting_server")),
-                 'dockerAPI': dict(config.items("dockerAPI"))
-                 }
+                {
+                    'accounting_server':
+                        dict(config.items("accounting_server")),
+                    'dockerAPI': dict(config.items("dockerAPI"))
+                }
             )
         validate_config(conf)
     except exceptions.ParseException as e:
@@ -171,6 +172,7 @@ def load_configuration_from_file(path=None):
 
 def load_sge_job_configuration(path):
     config = ConfigParser.SafeConfigParser()
+    f = None
     try:
         with open(path, 'r') as f:
             string = '[root]\n' + f.read()
@@ -215,26 +217,26 @@ def read_user_credentials(file_path):
 
 
 def read_file(file_path):
-    input = open(file_path,'r')
-    token = input.read().rstrip('\n')
-    input.close()
+    stream_read = open(file_path, 'r')
+    token = stream_read.read().rstrip('\n')
+    stream_read.close()
     return token
 
 
 def find_line(file_path, search_str):
     found = None
-    input = open(file_path,'r')
-    line = input.readline()
+    stream_read = open(file_path, 'r')
+    line = stream_read.readline()
     # Loop until EOF
-    while line != '' :
+    while line != '':
         # Search for string in line
         index = re.findall(search_str, line)
         if index > 0:
             return line
         # Read next line
-        line = input.readline()
+        line = stream_read.readline()
     # Close the files
-    input.close()
+    stream_read.close()
     return found
 
 
@@ -264,7 +266,7 @@ def read_tar_raw_data_stream(path):
 
 def change_owner_dir(path, uid, gid):
     for root, dirs, files in os.walk(path):
-      for momo in dirs:
-        os.chown(os.path.join(root, momo), uid, gid)
-      for momo in files:
-        os.chown(os.path.join(root, momo), uid, gid)
+        for momo in dirs:
+            os.chown(os.path.join(root, momo), uid, gid)
+        for momo in files:
+            os.chown(os.path.join(root, momo), uid, gid)

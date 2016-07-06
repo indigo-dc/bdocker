@@ -85,7 +85,7 @@ class SGEAccountingController(BatchMasterController):
         any_word = "[^:]+"
         job_string = "%s:%s:%s:%s:%s:%s:" % (
             queue_name, host_name, any_word,
-            any_word, any_word,job_id
+            any_word, any_word, job_id
         )
         job = utils.find_line(self.sge_accounting, job_string)
         return job.split(":")
@@ -109,8 +109,6 @@ class SGEAccountingController(BatchMasterController):
             message = "ERROR UPDATING ACCOUNTING: %s. " % e.message
             LOG.exception(message)
             raise exceptions.BatchException(message=message)
-        raise exceptions.NoImplementedException("Needs to be implemented"
-                                                "--set_job_accounting()--")
 
 
 class BatchWNController(object):
@@ -139,10 +137,11 @@ class BatchWNController(object):
                            % e.message)
                 raise exceptions.ParseException(message=message)
             parent_pid = utils.read_file("%s/pid" % job_spool)
-            cgroups_utils.create_tree_cgroups(job_id,
-                                self.parent_group,
-                                root_parent=self.root_cgroup,
-                                pid=parent_pid)
+            cgroups_utils.create_tree_cgroups(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup,
+                pid=parent_pid)
             if self.parent_group == "/":
                 cgroup_job = "/%s" % job_id
             else:
@@ -150,7 +149,7 @@ class BatchWNController(object):
             batch_info = {"cgroup": cgroup_job}
             LOG.debug("CGROUP CONTROL ACTIVATED ON: %s "
                       "JOB CGROUP: %s "
-                     % (self.parent_group, cgroup_job))
+                      % (self.parent_group, cgroup_job))
         else:
             LOG.exception("CGROUP CONTROL NOT ACTIVATED")
             batch_info = None
@@ -160,9 +159,10 @@ class BatchWNController(object):
         if self.enable_cgroups:
             flag = True
             job_id = session_data["job"]["job_id"]
-            cgroups_utils.delete_tree_cgroups(job_id,
-                                self.parent_group,
-                                root_parent=self.root_cgroup)
+            cgroups_utils.delete_tree_cgroups(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup)
         else:
             LOG.exception("CGROUP CONTROL NOT ACTIVATED")
             flag = False
@@ -181,15 +181,16 @@ class BatchWNController(object):
 
     def create_accounting(self, job):
         raise exceptions.NoImplementedException(
-                message="Still not supported")
+            message="Still not supported")
 
     def notify_accounting(self, admin_token, path):
         raise exceptions.NoImplementedException(
-                message="Still not supported")
+            message="Still not supported")
 
     def get_job_info(self):
-        raise exceptions.NoImplementedException("Get job information"
-                                       "method")
+        raise exceptions.NoImplementedException(
+            "Get job information"
+            "method")
 
 
 class SGEController(BatchWNController):
@@ -228,7 +229,7 @@ class SGEController(BatchWNController):
             raise exceptions.BatchException(
                 message
             )
-            os.exit(1)
+            # os.exit(1)
         LOG.exception("MONITORING JOB %s." % job_id)
         while True:
             try:
@@ -256,9 +257,9 @@ class SGEController(BatchWNController):
                         break
 
                 LOG.exception("JOB CPU %s. Acc: %s. Max: %s" %
-                                      (job_id, acc["cpu_usage"],
-                                       cpu_max
-                                       ))
+                              (job_id, acc["cpu_usage"],
+                               cpu_max
+                               ))
             except exceptions.CgroupException as e:
                 LOG.exception("MONITORING FINISHED")
                 break
@@ -267,7 +268,7 @@ class SGEController(BatchWNController):
                                                  e.message)
                 LOG.exception(message)
                 break
-                #raise exceptions.CgroupException(message)
+                # raise exceptions.CgroupException(message)
 
         child = os.getpid()
         os.kill(child, signal.SIG_IGN)
@@ -359,8 +360,8 @@ class SGEController(BatchWNController):
             accounting = self.create_accounting(job_info)
             LOG.exception("CREATE ACCOUNTING STRING: %s" % accounting)
             results = self.notification_controller.notify_accounting(
-                    admin_token,
-                    accounting)
+                admin_token,
+                accounting)
             LOG.exception("NOTIFIED")
             return results
         else:
@@ -424,5 +425,5 @@ class SGEController(BatchWNController):
                 job_pid = int(job_pid) * -1
                 os.kill(job_pid, signal.SIGKILL)
             return job_pid
-        except BaseException as e:
+        except BaseException:
             return None

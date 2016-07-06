@@ -31,6 +31,7 @@ def get_pids_from_cgroup(cgroup):
 
 
 def task_to_cgroup(cgroup_dir, pid):
+    tasks = "NO TASK FILE"
     try:
         tasks = "%s/tasks" % cgroup_dir
         utils.add_to_file(tasks, pid)
@@ -73,13 +74,13 @@ def create_tree_cgroups(group_name, parent_group_dir,
                 LOG.exception("Node: %s" % node.full_path)
                 try:
                     new_node = node.create_cgroup(group_name)
+                    if pid:
+                        task_to_cgroup(new_node.full_path, pid)
                 except OSError as e:
                     if e.errno == 17:
                         LOG.exception(e.message)
                     else:
                         raise e
-                if pid:
-                    task_to_cgroup(new_node.full_path, pid)
         else:
             raise exceptions.BatchException(
                 "Not found cgroup parent: %s,"
@@ -113,7 +114,7 @@ def delete_tree_cgroups(group_name, parent_group,
 
 
 def create_cgroups(group_name, parent_groups, pid=None,
-                  root_parent="/sys/fs/cgroup"):
+                   root_parent="/sys/fs/cgroup"):
     try:
         c_tree = trees.Tree(root_path=root_parent)
         # test it GroupedTree
@@ -130,7 +131,7 @@ def create_cgroups(group_name, parent_groups, pid=None,
 
 
 def delete_cgroups(group_name, parent_groups,
-                  root_parent="/sys/fs/cgroup"):
+                   root_parent="/sys/fs/cgroup"):
     try:
         c_tree = trees.Tree(root_path=root_parent)
         for parent in parent_groups:
@@ -144,7 +145,7 @@ def delete_cgroups(group_name, parent_groups,
 
 
 def get_accounting(group_name, parent_group,
-                        root_parent="/sys/fs/cgroup"):
+                   root_parent="/sys/fs/cgroup"):
     memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
         root_parent, parent_group, group_name
     )

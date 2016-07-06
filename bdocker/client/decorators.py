@@ -42,9 +42,9 @@ def parse_cp_path(ctx, param, value):
                 else:
                     raise Exception("Wrong parameter: %s"
                                     % param)
-            if not (container_path
-                    and container_id
-                    and host_path):
+            if not (container_path and
+                    container_id and
+                    host_path):
                 raise Exception("Missed parameters")
         except BaseException as e:
             raise click.BadParameter(
@@ -72,7 +72,7 @@ def parse_volume(ctx, param, value):
             volume_info = value.split(":")
             h_dir = volume_info[0]
             docker_dir = volume_info[1]
-            result = {"host_dir": h_dir,"docker_dir": docker_dir}
+            result = {"host_dir": h_dir, "docker_dir": docker_dir}
         except Exception:
             raise exceptions.ParseException(
                 "%s is not an absolute path" % value
@@ -97,6 +97,7 @@ def parse_bool(ctx, param, value):
             raise exceptions.ParseException(
                 'Value error: %s' % value
             )
+
 
 def endpoint_argument(f):
     return click.option(
@@ -155,6 +156,7 @@ def image_id_argument(f):
                           , type=click.STRING
                           )(f)
 
+
 def command_argument(f):
     return click.argument("script"
                           , type=click.STRING
@@ -206,6 +208,7 @@ def force_option_clean(f):
         , type=click.BOOL, is_flag=True
         , help='Force the removal of a running container (uses SIGKILL)'
     )(f)
+
 
 def volume_option(f):
     return click.option(

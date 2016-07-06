@@ -78,7 +78,7 @@ class TestUserCredentials(testtools.TestCase):
             "prolog")['token']
         u = create_parameters()['user_credentials']
         u.update({'job': {'job_id': jobid,
-                         'spool': spool}
+                          'spool': spool}
                   })
         token = self.control.authenticate(admin_token=t,
                                           session_data=u)
@@ -127,18 +127,17 @@ class TestUserCredentials(testtools.TestCase):
     #     self.assertNotIn('cgroup', job_info)
     #     self.control.remove_token_from_cache(token)
 
-
     @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate_with_job_batch_info(self, m):
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
-        batch_info = {"cgroup" : cgroup}
+        batch_info = {"cgroup": cgroup}
         t = self.control._get_token_from_cache(
             "prolog")['token']
         u = create_parameters()['user_credentials']
         u.update({'job': {'job_id': jobid,
-                         'spool': spool}
+                          'spool': spool}
                   })
         token = self.control.authenticate(admin_token=t,
                                           session_data=u)
@@ -272,9 +271,9 @@ class TestUserCredentials(testtools.TestCase):
 
     def test_list_containers(self):
         t = 'token2'
-        list = self.control.list_containers(
+        list_containers = self.control.list_containers(
             token=t)
-        self.assertIsNotNone(list)
+        self.assertIsNotNone(list_containers)
 
     def test_authorize_admin(self):
         pass
@@ -288,10 +287,8 @@ class TestUserCredentials(testtools.TestCase):
     def test_list_containers(self):
         pass
 
-    def test_list_containers_err(self):
-        pass
-
-    @mock.patch.object(credentials.UserController,"_get_token_from_cache")
+    @mock.patch.object(credentials.UserController,
+                       "_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory(self, m_val, m_token):
         token = uuid.uuid4().hex
@@ -301,20 +298,21 @@ class TestUserCredentials(testtools.TestCase):
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
         home = uuid.uuid4().hex
-        token_info = { "home": home,
-                       "uid": uid,
-                       "gid": gid,
-                       "job": {
-                           "id": jobid,
-                           "cgroup": cgroup,
-                           "spool": spool}
-                       }
+        token_info = {"home": home,
+                      "uid": uid,
+                      "gid": gid,
+                      "job": {
+                          "id": jobid,
+                          "cgroup": cgroup,
+                          "spool": spool}
+                      }
         m_token.return_value = token_info
         out = self.control.authorize_directory(token, None)
         self.assertEqual(uid, out["uid"])
         self.assertEqual(gid, out["gid"])
 
-    @mock.patch.object(credentials.UserController,"_get_token_from_cache")
+    @mock.patch.object(credentials.UserController,
+                       "_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory_err(self, m_val, m_token):
         token = uuid.uuid4().hex
@@ -322,12 +320,12 @@ class TestUserCredentials(testtools.TestCase):
         spool = uuid.uuid4().hex
         cgroup = uuid.uuid4().hex
         home = uuid.uuid4().hex
-        token_info = { "home": home,
-                       "job": {
-                           "id": jobid,
-                           "cgroup": cgroup,
-                           "spool": spool}
-                       }
+        token_info = {"home": home,
+                      "job": {
+                          "id": jobid,
+                          "cgroup": cgroup,
+                          "spool": spool}
+                      }
         m_token.return_value = token_info
         m_val.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,

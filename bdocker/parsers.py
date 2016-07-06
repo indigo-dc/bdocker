@@ -15,7 +15,6 @@
 # under the License.
 from datetime import datetime
 from datetime import timedelta
-import math
 import json
 import re
 
@@ -136,7 +135,7 @@ def parse_list_container_details(data):
         #     'NAMES': data['Name']
         # }
 
-    except BaseException as e:
+    except BaseException:
         raise exceptions.ParseException('Container information error',
                                         code=406)
     return dict_data
@@ -184,5 +183,5 @@ def parse_time_to_nanoseconds(time_str):
                                seconds=int(parsed[2]))
         nanoseg = time_struc.total_seconds() * 1000000000
         return nanoseg
-    except BaseException as e:
+    except BaseException:
         return None

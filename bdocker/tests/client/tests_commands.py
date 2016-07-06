@@ -97,9 +97,9 @@ class TestCommands(testtools.TestCase):
         spool = "/faa"
         user = 'peter'
         job_value = {'home': home_dir,
-                               'job_id': job_id,
-                               'spool': spool,
-                               'user_name': user}
+                     'job_id': job_id,
+                     'spool': spool,
+                     'user_name': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
         with mock.patch('bdocker.utils.load_configuration_from_file',
@@ -228,7 +228,6 @@ class TestCommands(testtools.TestCase):
                           self.control.clean_environment,
                           None)
 
-
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.commands.get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
@@ -270,8 +269,8 @@ class TestCommands(testtools.TestCase):
         m_put.assert_called_with(path='/copy',
                                  parameters=expected)
 
-    # def test_crendentials(self):
-    #     results = self.control.create_credentials(1000)
-    #     self.assertIsNotNone(results)
+        # def test_crendentials(self):
+        #     results = self.control.create_credentials(1000)
+        #     self.assertIsNotNone(results)
 
         # CREATE CONTAINER {'Id': '8a61192da2b3bb2d922875585e29b74ec0dc4e0117fcbf84c962204e97564cd7', 'Warnings': None}

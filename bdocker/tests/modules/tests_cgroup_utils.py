@@ -30,7 +30,6 @@ class TestCgroups(testtools.TestCase):
         super(TestCgroups, self).setUp()
         self.parent_path = "/systemd/user/"
 
-
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
@@ -89,19 +88,22 @@ class TestCgroups(testtools.TestCase):
                           pid='19858',
                           )
 
-    @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
-    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
+    @mock.patch.object(cgroupspy.trees.GroupedTree,
+                       "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     @mock.patch("bdocker.utils.read_file")
     def test_delete_tree_cgroup(self, m_rad, m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
-        gnodes.nodes = [cgroupspy.nodes.Node("", parent=parent_node)]
+        gnodes.nodes = [cgroupspy.nodes.Node("",
+                                             parent=parent_node)]
         m_path.side_effect = [gnodes]
         name = uuid.uuid4().hex
-        out = cgroups_utils.delete_tree_cgroups(name,
-                                   self.parent_path
-                                   )
+        out = cgroups_utils.delete_tree_cgroups(
+            name,
+            self.parent_path
+        )
         self.assertIsNone(out)
         self.assertEqual(1, m_del.call_count)
         self.assertEqual(
@@ -114,11 +116,13 @@ class TestCgroups(testtools.TestCase):
             m_path.call_args_list[0][0][0]
         )
 
-    @mock.patch.object(cgroupspy.trees.GroupedTree,"get_node_by_path")
-    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
+    @mock.patch.object(cgroupspy.trees.GroupedTree,
+                       "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     @mock.patch("bdocker.utils.read_file")
-    def test_delete_tree_cgroup_several_nodes(self, m_rad, m_task, m_del, m_path):
+    def test_delete_tree_cgroup_several_nodes(self, m_rad,
+                                              m_task, m_del, m_path):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
         gnodes.nodes = [cgroupspy.nodes.Node("", parent=parent_node),
@@ -126,9 +130,10 @@ class TestCgroups(testtools.TestCase):
         m_path.side_effect = [gnodes,
                               ]
         name = uuid.uuid4().hex
-        out = cgroups_utils.delete_tree_cgroups(name,
-                                   self.parent_path
-                                   )
+        out = cgroups_utils.delete_tree_cgroups(
+            name,
+            self.parent_path
+        )
         self.assertIsNone(out)
         self.assertEqual(2, m_del.call_count)
         self.assertEqual(
@@ -149,9 +154,9 @@ class TestCgroups(testtools.TestCase):
                               ]
         parent_groups = ["systemd/user"]
         out = cgroups_utils.create_cgroups("66",
-                                   parent_groups,
-                                   pid='19858'
-                                   )
+                                           parent_groups,
+                                           pid='19858'
+                                           )
         self.assertIsNone(out)
         self.assertEqual(
             "/%s/" % parent_groups[0],
@@ -170,9 +175,9 @@ class TestCgroups(testtools.TestCase):
         parent_groups = ["systemd/user", "foo", "cpu"]
         name = uuid.uuid4().hex
         out = cgroups_utils.create_cgroups(name,
-                                   parent_groups,
-                                   pid='19858'
-                                   )
+                                           parent_groups,
+                                           pid='19858'
+                                           )
         self.assertIsNone(out)
         self.assertEqual(parent_groups.__len__(), m_cre.call_count)
         self.assertEqual(
@@ -210,9 +215,10 @@ class TestCgroups(testtools.TestCase):
                               cgroupspy.nodes.Node]
         parent_groups = ["systemd/user", "cpu"]
         name = uuid.uuid4().hex
-        out = cgroups_utils.create_cgroups(name,
-                                   parent_groups,
-                                   )
+        out = cgroups_utils.create_cgroups(
+            name,
+            parent_groups,
+        )
         self.assertIsNone(out)
         self.assertEqual(parent_groups.__len__(), m_cre.call_count)
         self.assertEqual(
@@ -234,15 +240,16 @@ class TestCgroups(testtools.TestCase):
         )
         self.assertEqual(0, m_add.call_count)
 
-    @mock.patch.object(cgroupspy.trees.Tree,"get_node_by_path")
-    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
-    def test_delete_cgroup(self,m_del, m_path):
+    @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
+    def test_delete_cgroup(self, m_del, m_path):
         m_path.side_effect = [cgroupspy.nodes.Node]
         parent_groups = ["foo"]
         name = uuid.uuid4().hex
-        out = cgroups_utils.delete_cgroups(name,
-                                   parent_groups
-                                   )
+        out = cgroups_utils.delete_cgroups(
+            name,
+            parent_groups
+        )
         self.assertIsNone(out)
         self.assertEqual(parent_groups.__len__(), m_del.call_count)
         self.assertEqual(
@@ -255,16 +262,16 @@ class TestCgroups(testtools.TestCase):
             m_path.call_args_list[0][0][0]
         )
 
-    @mock.patch.object(cgroupspy.trees.Tree,"get_node_by_path")
-    @mock.patch.object(cgroupspy.nodes.Node,"delete_cgroup")
+    @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
+    @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
     def test_delete_cgroup_several_parents(self, m_del, m_path):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               cgroupspy.nodes.Node]
         parent_groups = ["foo", "joo"]
         name = uuid.uuid4().hex
         out = cgroups_utils.delete_cgroups(name,
-                                   parent_groups
-                                   )
+                                           parent_groups
+                                           )
         self.assertIsNone(out)
         self.assertEqual(parent_groups.__len__(), m_del.call_count)
         self.assertEqual(

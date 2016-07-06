@@ -255,9 +255,10 @@ class TestSgeRestApiWn(testtools.TestCase):
              "Command": "ls",
              "Status": "status"}]
 
-        all = True
-        result = webob.Request.blank("/ps?token=%s&all=%s" % (token, all),
-                                     method="GET").get_response(self.app)
+        all_containers = True
+        result = webob.Request.blank(
+            "/ps?token=%s&all=%s" % (token, all_containers),
+            method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertIn(result.json_body["results"][0][0], containers[0])
         self.assertIn(result.json_body["results"][1][0], containers[1])

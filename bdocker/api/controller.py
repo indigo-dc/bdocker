@@ -124,7 +124,7 @@ class ServerController(object):
         :param data: dict parameter with attributes
         :return: output
         """
-        required = {'token','image_id', 'script'}
+        required = {'token', 'image_id', 'script'}
         api.validate(data, required)
         token = data['token']
         image_id = data['image_id']
@@ -144,13 +144,13 @@ class ServerController(object):
         job_info = self.credentials_module.get_job_from_token(token)
         cgroup_parent = job_info.get('cgroup', None)
         container_id = self.docker_module.run_container(
-        image_id,
-        detach,
-        script,
-        host_dir=host_dir,
-        docker_dir=docker_dir,
-        working_dir=working_dir,
-        cgroup=cgroup_parent
+            image_id,
+            detach,
+            script,
+            host_dir=host_dir,
+            docker_dir=docker_dir,
+            working_dir=working_dir,
+            cgroup=cgroup_parent
         )
         self.credentials_module.add_container(token, container_id)
         self.docker_module.start_container(container_id)
@@ -173,8 +173,9 @@ class ServerController(object):
         containers = self.credentials_module.list_containers(token)
         results = []
         if containers:
-            results = self.docker_module.list_containers(containers,
-                                                    all=all_list)
+            results = self.docker_module.list_containers(
+                containers,
+                all=all_list)
         return results
 
     def show(self, data):
@@ -299,9 +300,8 @@ class ServerController(object):
                                                              )
         return results
 
-
     ########################
-    ### UN IMPLEMENTED ####
+    # UN IMPLEMENTED ####
     ######################
 
     def stop_container(self, data):
@@ -309,18 +309,9 @@ class ServerController(object):
         api.validate(data, required)
         token = data['token']
         container_id = data['container_id']
-        self.credentials_module.authorize_container(token,
-                                               container_id)
+        self.credentials_module.authorize_container(
+            token,
+            container_id)
         results = self.docker_module.stop_container(
-        container_id)
+            container_id)
         return results
-
-    def accounting(self, data):
-        required = {'token'}
-        api.validate(data, required)
-        token = data['token']
-        # todo: study the implementation
-        token_info = self.credentials_module.authorize_container(token)
-        results = self.docker_module.accounting_container(token_info)
-        return results
-

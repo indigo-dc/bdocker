@@ -112,7 +112,6 @@ class TestDocker(testtools.TestCase):
         out = self.control.delete_container(c_1)
         self.assertEqual([], out)
 
-
     @mock.patch.object(docker.Client, 'remove_container')
     def test_clean_several_containers(self, m):
         c_1 = uuid.uuid4().hex
@@ -158,8 +157,8 @@ class TestDocker(testtools.TestCase):
         )
         containers = [uuid.uuid4().hex, uuid.uuid4().hex]
         self.assertRaises(exceptions.DockerException,
-                  self.control.list_containers_details,
-                  containers[0])
+                          self.control.list_containers_details,
+                          containers[0])
 
     @mock.patch.object(docker.Client, 'containers')
     def test_list_containers(self, m):
@@ -206,8 +205,8 @@ class TestDocker(testtools.TestCase):
             message="Not Found"
         )
         self.assertRaises(exceptions.DockerException,
-                  self.control.container_details,
-                  container_id)
+                          self.control.container_details,
+                          container_id)
 
     @mock.patch.object(docker.Client, 'logs')
     @mock.patch("bdocker.parsers.parse_docker_log")
@@ -229,8 +228,8 @@ class TestDocker(testtools.TestCase):
             message="Not Found"
         )
         self.assertRaises(exceptions.DockerException,
-                  self.control.container_details,
-                  container_id)
+                          self.control.container_details,
+                          container_id)
 
     @mock.patch.object(docker.Client, 'start')
     def test_start(self, m):
@@ -247,8 +246,8 @@ class TestDocker(testtools.TestCase):
             message="Not Found"
         )
         self.assertRaises(exceptions.DockerException,
-                  self.control.start_container,
-                  container_id)
+                          self.control.start_container,
+                          container_id)
 
     @mock.patch.object(docker.Client, 'get_archive')
     @mock.patch("io.FileIO")
@@ -262,8 +261,8 @@ class TestDocker(testtools.TestCase):
         container_path = "/baa"
         host_path = "/foo"
         out = self.control.copy_from_container(container_id,
-                                             container_path,
-                                             host_path)
+                                               container_path,
+                                               host_path)
         expected = {"path": "%s/%s.tar.gz" % (
             host_path, container_id)
                     }
@@ -282,11 +281,3 @@ class TestDocker(testtools.TestCase):
                                              container_path,
                                              host_path)
         self.assertEqual(True, out)
-
-# TODO(jorgesece): implement and test it
-
-    def test_accouning_error(self):
-        self.assertRaises(exceptions.DockerException, self.control.accounting_container, None)
-
-
-
