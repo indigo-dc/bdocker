@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import exceptions
+
 import uuid
 
 import cgroupspy
@@ -79,7 +79,7 @@ class TestCgroups(testtools.TestCase):
         gnodes.nodes = [cgroupspy.nodes.Node]
         m_path.side_effect = [gnodes,
                               ]
-        m_cre.side_effect = exceptions.OSError(13, "err", "file")
+        m_cre.side_effect = OSError(13, "err", "file")
 
         self.assertRaises(bdocker_exceptions.CgroupException,
                           cgroups_utils.create_tree_cgroups,

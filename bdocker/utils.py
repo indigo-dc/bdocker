@@ -14,12 +14,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import ConfigParser
+try:
+    import ConfigParser as cfg
+except:
+    import configparser as cfg
 import io
 import os
 import pwd
 import re
-import StringIO
+try:
+    import StringIO as stringio
+except ImportError:
+    from io import StringIO as stringio
 import tarfile
 import uuid
 
@@ -135,7 +141,7 @@ def validate_config(conf):
 
 def load_configuration_from_file(path=None):
 
-    config = ConfigParser.SafeConfigParser()
+    config = cfg.SafeConfigParser()
     if not path:
         path = os.getenv(
             'BDOCKER_CONF_FILE',
@@ -175,12 +181,12 @@ def load_configuration_from_file(path=None):
 
 
 def load_sge_job_configuration(path):
-    config = ConfigParser.SafeConfigParser()
+    config = cfg.SafeConfigParser()
     f = None
     try:
         with open(path, 'r') as f:
             string = '[root]\n' + f.read()
-            ini_fp = StringIO.StringIO(string)
+            ini_fp = stringio.StringIO(string)
             config.readfp(ini_fp)
     except IOError:
         raise exceptions.UserCredentialsException(
@@ -252,7 +258,7 @@ def add_to_file(file_path, data):
 
 
 def write_tar_raw_data_stream(path, stream, uid, gid):
-    strema_io = StringIO.StringIO(stream)
+    strema_io = stringio.StringIO(stream)
     my_tar = tarfile.TarFile(fileobj=strema_io)
     my_tar.extractall(path=path)
     change_owner_dir(path, uid, gid)
