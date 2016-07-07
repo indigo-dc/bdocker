@@ -22,8 +22,6 @@ from bdocker import api
 from bdocker.api import controller
 from bdocker import utils
 
-conf = utils.load_configuration_from_file()
-server_controller = controller.ServerController(conf)
 
 app = flask.Flask(__name__)
 
@@ -43,7 +41,7 @@ def configuration():
     """
     data = flask.request.get_json()
     try:
-        user_token = server_controller.configuration(data)
+        user_token = get_server_controller().configuration(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(
@@ -62,7 +60,7 @@ def clean():
     """
     data = flask.request.args
     try:
-        result = server_controller.clean(data)
+        result = get_server_controller().clean(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(204, [result])
@@ -78,7 +76,7 @@ def pull():
     """
     data = flask.request.get_json()
     try:
-        result = server_controller.pull(data)
+        result = get_server_controller().pull(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(201, result)
@@ -92,7 +90,7 @@ def run():
     """
     data = flask.json.loads(flask.request.data)
     try:
-        results = server_controller.run(data)
+        results = get_server_controller().run(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(201, results)
@@ -106,7 +104,7 @@ def list_containers():
     """
     data = flask.request.args
     try:
-        results = server_controller.list_containers(data)
+        results = get_server_controller().list_containers(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
@@ -120,7 +118,7 @@ def show():
     """
     data = flask.request.args
     try:
-        results = server_controller.show(data)
+        results = get_server_controller().show(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
@@ -134,7 +132,7 @@ def logs():
     """
     data = flask.request.args
     try:
-        results = server_controller.logs(data)
+        results = get_server_controller().logs(data)
     except Exception as e:
         return api.manage_exceptions(e)
 
@@ -149,7 +147,7 @@ def delete():
     """
     data = flask.json.loads(flask.request.data)
     try:
-        docker_out = server_controller.delete_container(data)
+        docker_out = get_server_controller().delete_container(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, docker_out)
@@ -168,7 +166,7 @@ def notify_accounting():
 
     data = flask.json.loads(flask.request.data)
     try:
-        results = server_controller.notify_accounting(data)
+        results = get_server_controller().notify_accounting(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(201, results)
@@ -182,7 +180,7 @@ def copy():
     """
     data = flask.json.loads(flask.request.data)
     try:
-        results = server_controller.copy(data)
+        results = get_server_controller().copy(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(201, results)
@@ -193,23 +191,45 @@ def copy():
 ####################
 
 
-@app.route('/stop', methods=['POST'])
+@app.route('/stop', methods=['PUT'])
 def stop():
     data = flask.json.loads(flask.request.data)
     try:
-        results = server_controller.stop_container(data)
+        results = get_server_controller().stop_container(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
+
+
+def load_configuration():
+    flask.g.conf = utils.load_configuration_from_file()
+
+
+def init_server():
+    flask.g.server_controller = controller.ServerController(
+        get_conf()
+    )
+
+
+def get_conf():
+    if not hasattr(flask.g, 'conf'):
+        return load_configuration()
+    return flask.g.conf
+
+
+def get_server_controller():
+    if not hasattr(flask.g, 'server_controller'):
+        return init_server()
+    return flask.g.server_controller
 
 ########################
 #  UNIMPLEMETED  ######
 ######################
 
 if __name__ == '__main__':
-    environ = conf['server']['environ']
-    port = int(conf['server']['port'])
-    host = conf['server']['host']
+    environ = get_conf()['server']['environ']
+    port = int(get_conf()['server']['port'])
+    host = get_conf()['server']['host']
     debug = False
     if environ == 'public':
         host = '0.0.0.0'

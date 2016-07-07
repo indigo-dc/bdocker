@@ -18,8 +18,8 @@ import testtools
 
 from bdocker import exceptions
 from bdocker import parsers
-from bdocker.tests.modules import fake_docker_outputs
 from bdocker import utils
+from bdocker.tests.unit.modules import fake_docker_outputs
 
 
 class TestParsers(testtools.TestCase):

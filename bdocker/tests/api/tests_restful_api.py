@@ -16,31 +16,42 @@
 
 import uuid
 
+import flask.ext.testing as flask_tests
 import mock
-import testtools
-import webob
 
+from bdocker.api import accounting
 from bdocker.api import controller
+from bdocker.api import working_node
 from bdocker import exceptions
 from bdocker.modules import request
 
 
-class TestAccRESTAPI(testtools.TestCase):
+class TestConfiguration(object):
+    TESTING = True
+    WTF_CSRF_ENABLED = False
+    HASH_ROUNDS = 1
+
+
+class TestAccRESTAPI(flask_tests.TestCase):
     """Test REST request mapping."""
 
+    def create_app(self):
+        accounting.app.config.from_object(TestConfiguration)
+        return accounting.app
+
     def setUp(self):
-        super(TestAccRESTAPI, self).setUp()
         with mock.patch.object(controller.AccountingServerController,
                                "__init__",
                                return_value=None):
             with mock.patch("bdocker.utils.load_configuration_from_file"):
-                from bdocker.api import accounting
-                self.app = accounting.app
+                self.app_context = self.app.app_context()
+                with self.app_context:
+                    accounting.load_configuration()
+                    accounting.init_server()
 
     @mock.patch.object(controller.AccountingServerController,
                        "set_job_accounting")
     def test_set_job(self, m):
-        pass
         m.return_value = 'tokenresult'
         parameters = {"admin_token": "tokennnnnn",
                       "user_credentials":
@@ -51,24 +62,30 @@ class TestAccRESTAPI(testtools.TestCase):
                            }
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/set_accounting",
+        with self.app_context:
+            result = self.client.put("/set_accounting",
                                      method="PUT",
                                      content_type="application/json",
-                                     body=body).get_response(self.app)
+                                     data=body)
         self.assertEqual(201, result.status_code)
 
 
-class TestWorkingNodeRESTAPI(testtools.TestCase):
+class TestWorkingNodeRESTAPI(flask_tests.TestCase):
     """Test REST request mapping."""
 
+    def create_app(self):
+        working_node.app.config.from_object(TestConfiguration)
+        return working_node.app
+
     def setUp(self):
-        super(TestWorkingNodeRESTAPI, self).setUp()
         with mock.patch.object(controller.ServerController,
                                "__init__",
                                return_value=None):
             with mock.patch("bdocker.utils.load_configuration_from_file"):
-                from bdocker.api import working_node
-                self.app = working_node.app
+                self.app_context = self.app.app_context()
+                with self.app_context:
+                    working_node.load_configuration()
+                    working_node.init_server()
 
     @mock.patch.object(controller.ServerController, "configuration")
     def test_configuration(self, m):
@@ -82,10 +99,10 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                            }
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/configuration",
-                                     method="POST",
-                                     content_type="application/json",
-                                     body=body).get_response(self.app)
+        with self.app_context:
+            result = self.client.post("/configuration",
+                                      content_type="application/json",
+                                  data=body)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "configuration")
@@ -100,10 +117,10 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                            }
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/configuration",
-                                     method="POST",
-                                     content_type="application/json",
-                                     body=body).get_response(self.app)
+        with self.app_context:
+            result = self.client.post("/configuration",
+                                  content_type="application/json",
+                                  data=body)
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "clean")
@@ -113,10 +130,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.return_value = token
         parameters = {"admin_token": token_admin, "token": token}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/clean?%s" % query,
-                                     method="DELETE",
-                                     content_type="application/json"
-                                     ).get_response(self.app)
+        with self.app_context:
+            result = self.client.delete("/clean?%s" % query)
         self.assertEqual(204, result.status_code)
 
     @mock.patch.object(controller.ServerController, "clean")
@@ -126,10 +141,8 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         m.side_effect = exceptions.UserCredentialsException("")
         parameters = {"admin_token": token_admin, "token": token}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/clean?%s" % query,
-                                     method="DELETE",
-                                     content_type="application/json"
-                                     ).get_response(self.app)
+        with self.app_context:
+                    result = self.client.delete("/clean?%s" % query)
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "pull")
@@ -139,10 +152,10 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/pull",
+        with self.app_context:
+            result = self.client.post("/pull",
                                      content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+                                     data=body)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "pull")
@@ -150,10 +163,10 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/pull",
+        with self.app_context:
+            result = self.client.put("/pull",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body)
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "pull")
@@ -161,10 +174,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn"}
         body = request.make_body(parameters)
         m.side_effect = exceptions.ParseException("")
-        result = webob.Request.blank("/pull",
+        with self.app_context:
+            result = self.client.post("/pull",
                                      content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(400, result.status_code)
 
     @mock.patch.object(controller.ServerController,
@@ -173,10 +187,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'repoooo'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
+        with self.app_context:
+            result = self.client.put("/rm",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(controller.ServerController,
@@ -191,13 +206,14 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "container_id": [c1, c2],
                       "force": force}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
+        with self.app_context:
+            result = self.client.put("/rm",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(200, result.status_code)
-        self.assertEqual(c1, result.json_body["results"][0])
-        self.assertEqual(c2, result.json_body["results"][1])
+        self.assertEqual(c1, result.json["results"][0])
+        self.assertEqual(c2, result.json["results"][1])
         self.assertEqual(token, md.call_args_list[0][0][0]["token"])
         self.assertEqual(force, md.call_args_list[0][0][0]["force"])
 
@@ -212,10 +228,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "container_id": [c1],
                       "force": force}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
+        with self.app_context:
+            result = self.client.put("/rm",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(200, result.status_code)
         self.assertEqual(force, md.call_args_list[0][0][0]["force"])
 
@@ -224,8 +241,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'repoooo'}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/rm?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/rm?%s" % query,
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "delete_container")
@@ -236,19 +254,21 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": [c1, c2]}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
+        with self.app_context:
+            result = self.client.put("/rm",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps(self, ml):
         token = "3333"
         all_containers = True
-        result = webob.Request.blank(
+        with self.app_context:
+            result = self.client.get(
             "/ps?token=%s&all=%s" % (token, all_containers),
-            method="GET").get_response(self.app)
+            )
         self.assertEqual(200, result.status_code)
         self.assertEqual(token, ml.call_args_list[0][0][0]["token"])
         self.assertEqual(str(all_containers),
@@ -258,22 +278,25 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                        "list_containers")
     def test_ps_401(self, m):
         m.side_effect = exceptions.UserCredentialsException("")
-        result = webob.Request.blank("/ps?token=333333",
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/ps?token=333333",
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps_405(self, m):
-        result = webob.Request.blank("/ps?token=333333",
-                                     method="PUT").get_response(self.app)
+        with self.app_context:
+            result = self.client.put("/ps?token=333333",
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "show")
     def test_show(self, md):
         parameters = {"token": "tokennnnnn"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/inspect?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/inspect?%s" % query,
+                                     )
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(controller.ServerController, "show")
@@ -281,8 +304,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         md.side_effect = exceptions.UserCredentialsException("")
         parameters = {"token": "tokennnnnn"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/inspect?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/inspect?%s" % query,
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "logs")
@@ -290,8 +314,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/logs?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/logs?%s" % query,
+                                     )
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(controller.ServerController, "logs")
@@ -300,8 +325,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/logs?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/logs?%s" % query,
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "logs")
@@ -309,8 +335,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/logs?%s" % query,
-                                     method="POST").get_response(self.app)
+        with self.app_context:
+            result = self.client.put("/logs?%s" % query,
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "stop_container")
@@ -318,10 +345,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/stop",
+        with self.app_context:
+            result = self.client.put("/stop",
                                      content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(controller.ServerController, "stop_container")
@@ -329,10 +357,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/stop",
+        with self.app_context:
+            result = self.client.post("/stop",
                                      content_type="application/json",
-                                     body=body,
-                                     method="GET").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "stop_container")
@@ -341,10 +370,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/stop",
+        with self.app_context:
+            result = self.client.put("/stop",
                                      content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "run")
@@ -361,12 +391,13 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "detach": detach
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/run",
+        with self.app_context:
+            result = self.client.put("/run",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(201, result.status_code)
-        # todo: parse to get id
+        self.assertEqual(container_id, result.json["results"]["Id"])
 
     @mock.patch.object(controller.ServerController, "run")
     def test_run_405(self, md):
@@ -374,10 +405,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/run",
+        with self.app_context:
+            result = self.client.post("/run",
                                      content_type="application/json",
-                                     body=body,
-                                     method="GET").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "run")
@@ -387,10 +419,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "image_id": 'containerrrrr',
                       "script": "scriptttt"}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/run",
+        with self.app_context:
+            result = self.client.put("/run",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "run")
@@ -399,10 +432,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "script": "scriptttt"}
         body = request.make_body(parameters)
         md.side_effect = exceptions.ParseException("")
-        result = webob.Request.blank("/run",
+        with self.app_context:
+            result = self.client.put("/run",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(400, result.status_code)
 
     @mock.patch.object(controller.ServerController, "notify_accounting")
@@ -410,10 +444,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/notify_accounting",
+        with self.app_context:
+            result = self.client.put("/notify_accounting",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "notify_accounting")
@@ -422,10 +457,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/notify_accounting",
+        with self.app_context:
+            result = self.client.put("/notify_accounting",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "notify_accounting")
@@ -433,8 +469,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/notify_accounting?%s" % query,
-                                     method="GET").get_response(self.app)
+        with self.app_context:
+            result = self.client.get("/notify_accounting?%s" % query,
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "copy")
@@ -443,10 +480,11 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/copy",
+        with self.app_context:
+            result = self.client.put("/copy",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "copy")
@@ -455,8 +493,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/copy?%s" % query,
-                                     method="POST").get_response(self.app)
+        with self.app_context:
+            result = self.client.post("/copy?%s" % query,
+                                     )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "copy")
@@ -466,8 +505,9 @@ class TestWorkingNodeRESTAPI(testtools.TestCase):
                       "container_id": 'containerrrrr',
                       "path": "/foo"}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/copy",
+        with self.app_context:
+            result = self.client.put("/copy",
                                      content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+                                     data=body
+                                     )
         self.assertEqual(401, result.status_code)

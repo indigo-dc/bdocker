@@ -25,6 +25,7 @@ import mock
 import testtools
 import webob
 
+from bdocker.api import accounting
 from bdocker.modules import request
 import bdocker.tests.functional.fakes as fakes
 
@@ -40,14 +41,28 @@ def create_fake_json_resp(data, status=200):
 
 class TestSgeRestApiAccounting(testtools.TestCase):
     """Tests the all workflow of REST API methods for Accounting."""
+
     def setUp(self):
         super(TestSgeRestApiAccounting, self).setUp()
         self.admin_token = fakes.admin_token
         self.user_token = fakes.user_token
-        self.app = fakes.create_accounting_app()
+        self.file_name = os.path.join(
+            os.path.dirname(__file__),
+            'sge_accounting_configure.cfg')
+        self.token_store = {
+            "prolog": {"token": self.admin_token},
+            self.user_token: {
+                "uid": uuid.uuid4().hex,
+                "gid": uuid.uuid4().hex,
+                "home_dir": "/foo",
+                "job": {
+                    "id": uuid.uuid4().hex,
+                    "spool": "/baa"}
+            }}
+        self.app = accounting.app
 
-    @mock.patch("__builtin__.open")
-    def test_set_job(self, m_file):
+    @mock.patch("bdocker.utils.add_to_file")
+    def test_set_job(self, m_add):
         line = (
             "docker:ge-wn03.novalocal:hpc:"
             "jorgesece:bdocker_job.sh.o80:81:sge:15:"
@@ -58,18 +73,20 @@ class TestSgeRestApiAccounting(testtools.TestCase):
             "0.000000:-U sysusers:0.000000:"
             "NONE:0.000000:0:0"
         )
-        m_class = mock.MagicMock()
-        m_class.readline.return_value = line
-        m_file.return_value = m_class
         parameters = {"admin_token": self.admin_token,
                       "accounting": line
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/set_accounting",
-                                     method="PUT",
-                                     content_type="application/json",
-                                     body=body).get_response(self.app)
-        self.assertEqual(201, result.status_code)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                    return_value=self.token_store):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name):
+                result = webob.Request.blank("/set_accounting",
+                                             method="PUT",
+                                             content_type="application/json",
+                                             body=body).get_response(self.app)
+                self.assertEqual(201, result.status_code)
+                self.assertEqual(line, m_add.call_args_list[0][0][1])
 
 
 class TestSgeRestApiWn(testtools.TestCase):

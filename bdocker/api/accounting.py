@@ -22,8 +22,6 @@ from bdocker import api
 from bdocker.api import controller
 from bdocker import utils
 
-conf = utils.load_configuration_from_file()
-server_controller = controller.AccountingServerController(conf)
 
 app = flask.Flask(__name__)
 
@@ -40,7 +38,7 @@ def set_job_accounting():
     """
     data = flask.request.get_json()
     try:
-        data = server_controller.set_job_accounting(data)
+        data = get_server_controller().set_job_accounting(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(
@@ -48,10 +46,29 @@ def set_job_accounting():
     )
 
 
+def load_configuration():
+    flask.g.conf = utils.load_configuration_from_file()
+
+def init_server():
+    c = get_conf()
+    flask.g.server_controller = controller.AccountingServerController(c)
+
+
+def get_conf():
+    if not hasattr(flask.g, 'conf'):
+        load_configuration()
+    return flask.g.conf
+
+
+def get_server_controller():
+    if not hasattr(flask.g, 'server_controller'):
+        init_server()
+    return flask.g.server_controller
+
 if __name__ == '__main__':
-    environ = conf['server']['environ']
-    port = int(conf['server']['port'])
-    host = conf['server']['host']
+    environ = get_conf()['server']['environ']
+    port = int(get_conf()['server']['port'])
+    host = get_conf()['server']['host']
     debug = False
     if environ == 'public':
         host = '0.0.0.0'

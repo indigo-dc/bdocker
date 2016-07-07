@@ -18,6 +18,7 @@ import copy
 import os
 import uuid
 
+from bdocker.api import accounting
 import mock
 
 user_token = uuid.uuid4().hex
@@ -83,7 +84,6 @@ def create_accounting_app():
                     ):
         with mock.patch("os.getenv",
                         return_value=file_name):
-            from bdocker.api import accounting
             app = accounting.app
     return app
 
