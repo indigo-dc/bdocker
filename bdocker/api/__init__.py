@@ -54,7 +54,7 @@ def error_json_handler(exception):
 
 
 def set_error_handler(app):
-    for code in exceptions.default_exceptions.iterkeys():
+    for code in exceptions.default_exceptions.keys():
         app.error_handler_spec[None][code] = error_json_handler
 
 
