@@ -25,8 +25,8 @@ import mock
 import testtools
 import webob
 
-from bdocker.api import working_node
 from bdocker.api import accounting
+from bdocker.api import working_node
 from bdocker.modules import request
 import bdocker.tests.functional.fakes as fakes
 
@@ -87,7 +87,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
                                              content_type="application/json",
                                              body=body).get_response(self.app)
                 self.assertEqual(201, result.status_code)
-                self.assertEqual(line+"\n", m_add.call_args_list[0][0][1])
+                self.assertEqual(line + "\n", m_add.call_args_list[0][0][1])
 
 
 class TestSgeRestApiWn(testtools.TestCase):
@@ -239,7 +239,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                 result = webob.Request.blank("/pull",
                                              content_type="application/json",
                                              body=body,
-                                             method="POST").get_response(self.app)
+                                             method="POST"
+                                             ).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertIn(image_id_1, result.json_body["results"][0])
         self.assertIn(image_id_2, result.json_body["results"][1])
@@ -266,7 +267,8 @@ class TestSgeRestApiWn(testtools.TestCase):
             result = webob.Request.blank("/rm",
                                          content_type="application/json",
                                          body=body,
-                                         method="PUT").get_response(self.app)
+                                         method="PUT"
+                                         ).get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(containers[0], result.json_body["results"][0])
         self.assertEqual(containers[1], result.json_body["results"][1])
@@ -325,7 +327,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                             return_value=self.file_name
                             ):
                 result = webob.Request.blank("/inspect?%s" % query,
-                                             method="GET").get_response(self.app)
+                                             method="GET"
+                                             ).get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertIsNotNone(json.loads(result.json_body["results"])[0])
         out = json.loads(result.json_body["results"])[0]
@@ -352,7 +355,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                             return_value=self.file_name
                             ):
                 result = webob.Request.blank("/logs?%s" % query,
-                                             method="GET").get_response(self.app)
+                                             method="GET"
+                                             ).get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(logs, result.json_body["results"])
 
@@ -372,7 +376,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                 result = webob.Request.blank("/stop",
                                              content_type="application/json",
                                              body=body,
-                                             method="PUT").get_response(self.app)
+                                             method="PUT"
+                                             ).get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker_py.Client, "put_archive")
@@ -397,7 +402,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                 result = webob.Request.blank("/copy",
                                              content_type="application/json",
                                              body=body,
-                                             method="PUT").get_response(self.app)
+                                             method="PUT"
+                                             ).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(True, result.json_body["results"])
 
@@ -431,7 +437,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                 result = webob.Request.blank("/copy",
                                              content_type="application/json",
                                              body=body,
-                                             method="PUT").get_response(self.app)
+                                             method="PUT"
+                                             ).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(stat, result.json_body["results"])
 
@@ -471,7 +478,8 @@ class TestSgeRestApiWn(testtools.TestCase):
             result = webob.Request.blank("/run",
                                          content_type="application/json",
                                          body=body,
-                                         method="PUT").get_response(self.app)
+                                         method="PUT"
+                                         ).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(True, m_log.called)
         self.assertEqual(True, m_start.called)
@@ -508,7 +516,8 @@ class TestSgeRestApiWn(testtools.TestCase):
             result = webob.Request.blank("/run",
                                          content_type="application/json",
                                          body=body,
-                                         method="PUT").get_response(self.app)
+                                         method="PUT"
+                                         ).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(False, m_log.called)
         self.assertEqual(True, m_start.called)

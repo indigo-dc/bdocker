@@ -102,7 +102,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         with self.app_context:
             result = self.client.post("/configuration",
                                       content_type="application/json",
-                                  data=body)
+                                      data=body)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "configuration")
@@ -119,8 +119,8 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         body = request.make_body(parameters)
         with self.app_context:
             result = self.client.post("/configuration",
-                                  content_type="application/json",
-                                  data=body)
+                                      content_type="application/json",
+                                      data=body)
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "clean")
@@ -142,7 +142,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         parameters = {"admin_token": token_admin, "token": token}
         query = request.get_query_string(parameters)
         with self.app_context:
-                    result = self.client.delete("/clean?%s" % query)
+            result = self.client.delete("/clean?%s" % query)
         self.assertEqual(401, result.status_code)
 
     @mock.patch.object(controller.ServerController, "pull")
@@ -154,8 +154,8 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         body = request.make_body(parameters)
         with self.app_context:
             result = self.client.post("/pull",
-                                     content_type="application/json",
-                                     data=body)
+                                      content_type="application/json",
+                                      data=body)
         self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "pull")
@@ -176,9 +176,9 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         m.side_effect = exceptions.ParseException("")
         with self.app_context:
             result = self.client.post("/pull",
-                                     content_type="application/json",
-                                     data=body
-                                     )
+                                      content_type="application/json",
+                                      data=body
+                                      )
         self.assertEqual(400, result.status_code)
 
     @mock.patch.object(controller.ServerController,
@@ -267,8 +267,8 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         all_containers = True
         with self.app_context:
             result = self.client.get(
-            "/ps?token=%s&all=%s" % (token, all_containers),
-            )
+                "/ps?token=%s&all=%s" % (token, all_containers),
+                )
         self.assertEqual(200, result.status_code)
         self.assertEqual(token, ml.call_args_list[0][0][0]["token"])
         self.assertEqual(str(all_containers),
@@ -359,9 +359,9 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         body = request.make_body(parameters)
         with self.app_context:
             result = self.client.post("/stop",
-                                     content_type="application/json",
-                                     data=body
-                                     )
+                                      content_type="application/json",
+                                      data=body
+                                      )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "stop_container")
@@ -407,9 +407,9 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         body = request.make_body(parameters)
         with self.app_context:
             result = self.client.post("/run",
-                                     content_type="application/json",
-                                     data=body
-                                     )
+                                      content_type="application/json",
+                                      data=body
+                                      )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "run")
@@ -495,7 +495,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
         query = request.get_query_string(parameters)
         with self.app_context:
             result = self.client.post("/copy?%s" % query,
-                                     )
+                                      )
         self.assertEqual(405, result.status_code)
 
     @mock.patch.object(controller.ServerController, "copy")

@@ -14,12 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import copy
-import os
 import uuid
-
-from bdocker.api import accounting
-import mock
 
 user_token = uuid.uuid4().hex
 user_token_clean = uuid.uuid4().hex
@@ -66,28 +61,6 @@ token_store = {
 }
 
 
-def create_accounting_app():
-    file_name = os.path.join(os.path.dirname(__file__),
-                             'sge_accounting_configure.cfg')
-    token_store_acc = {
-        "prolog": {"token": admin_token},
-        user_token: {
-            "uid": uuid.uuid4().hex,
-            "gid": uuid.uuid4().hex,
-            "home_dir": "/foo",
-            "job": {
-                "id": uuid.uuid4().hex,
-                "spool": "/baa"}
-        }}
-    with mock.patch("bdocker.utils.read_yaml_file",
-                    return_value=copy.deepcopy(token_store_acc)
-                    ):
-        with mock.patch("os.getenv",
-                        return_value=file_name):
-            app = accounting.app
-    return app
-
-
 def create_job_info(job_ident):
     job_data = {
         "job_id": job_ident,
@@ -102,15 +75,3 @@ def create_job_info(job_ident):
         "log_name": ""
     }
     return job_data
-
-
-def create_working_node_app(file_name):
-    with mock.patch("bdocker.utils.read_yaml_file",
-                    return_value=copy.deepcopy(token_store)
-                    ):
-        with mock.patch("os.getenv",
-                        return_value=file_name
-                        ):
-            from bdocker.api import working_node
-            app = working_node.app
-    return app

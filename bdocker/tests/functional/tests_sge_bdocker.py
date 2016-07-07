@@ -196,8 +196,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("os.getenv",
-                            return_value=self.file_name
-                            ):
+                        return_value=self.file_name
+                        ):
             with mock.patch("webob.Request.get_response",
                             side_effect=mocked_some_method,
                             autospec=True) as mock_method:
@@ -247,8 +247,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("os.getenv",
-                            return_value=self.file_name
-                            ):
+                        return_value=self.file_name
+                        ):
             with mock.patch("webob.Request.get_response",
                             side_effect=mocked_some_method,
                             autospec=True) as mock_method:
@@ -301,8 +301,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("os.getenv",
-                            return_value=self.file_name
-                            ):
+                        return_value=self.file_name
+                        ):
             with mock.patch("webob.Request.get_response",
                             side_effect=mocked_some_method,
                             autospec=True) as mock_method:
@@ -498,8 +498,8 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         with mock.patch("os.getenv",
-                            return_value=self.file_name
-                            ):
+                        return_value=self.file_name
+                        ):
             with mock.patch("webob.Request.get_response",
                             side_effect=mocked_some_method,
                             autospec=True) as mock_method:
@@ -550,8 +550,8 @@ class TestBdockerSgeWn(testtools.TestCase):
                     acc_app = fakes.create_accounting_app()
                     return orig(self, acc_app)
         with mock.patch("os.getenv",
-                            return_value=self.file_name
-                            ):
+                        return_value=self.file_name
+                        ):
             with mock.patch("webob.Request.get_response",
                             side_effect=mocked_some_method,
                             autospec=True) as mock_method:
