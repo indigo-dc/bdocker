@@ -25,7 +25,7 @@ class DockerController(object):
     def __init__(self, url, cgroup=None):
         try:
             self.control = docker_py.Client(base_url=url, version='1.20')
-        except Exception as e:
+        except BaseException as e:
             message = ("Unable to connect to the docker server: %s" %
                        e.message)
             raise exceptions.DockerException(message=message)
@@ -64,6 +64,8 @@ class DockerController(object):
                     docker_out.append(c_id)
                 except exceptions.DockerException as e:
                     docker_out.append(e.message)
+                except BaseException as e:
+                    raise exceptions.DockerException(e)
         return docker_out
 
     def list_containers_details(self, containers):
