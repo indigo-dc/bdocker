@@ -16,16 +16,12 @@
 
 try:
     import ConfigParser as cfg
-except:
+except Exception:
     import configparser as cfg
 import io
 import os
 import pwd
 import re
-try:
-    import StringIO as stringio
-except ImportError:
-    from io import StringIO as stringio
 import tarfile
 import uuid
 
@@ -186,7 +182,7 @@ def load_sge_job_configuration(path):
     try:
         with open(path, 'r') as f:
             string = '[root]\n' + f.read()
-            ini_fp = stringio.StringIO(string)
+            ini_fp = io.BytesIO(string)
             config.readfp(ini_fp)
     except IOError:
         raise exceptions.UserCredentialsException(
@@ -258,7 +254,7 @@ def add_to_file(file_path, data):
 
 
 def write_tar_raw_data_stream(path, stream, uid, gid):
-    strema_io = stringio.StringIO(stream)
+    strema_io = io.StringIO(stream)
     my_tar = tarfile.TarFile(fileobj=strema_io)
     my_tar.extractall(path=path)
     change_owner_dir(path, uid, gid)

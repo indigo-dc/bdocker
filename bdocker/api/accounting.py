@@ -49,6 +49,7 @@ def set_job_accounting():
 def load_configuration():
     flask.g.conf = utils.load_configuration_from_file()
 
+
 def init_server():
     c = get_conf()
     flask.g.server_controller = controller.AccountingServerController(c)
