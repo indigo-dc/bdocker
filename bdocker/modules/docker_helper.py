@@ -23,11 +23,12 @@ from bdocker import utils
 class DockerController(object):
 
     def __init__(self, url, cgroup=None):
-        # tls_config = docker.tls.TLSConfig(
-        #     client_cert=('/path/to/client-cert.pem',
-        # '/path/to/client-key.pem')
-        # )
-        self.control = docker_py.Client(base_url=url, version='1.20')
+        try:
+            self.control = docker_py.Client(base_url=url, version='1.20')
+        except Exception as e:
+            message = ("Unable to connect to the docker server: %s" %
+                       e.message)
+            raise exceptions.DockerException(message=message)
 
     def pull_image(self, repo, tag='latest'):
         try:
