@@ -55,14 +55,14 @@ token_store = {
         "gid": uuid.uuid4().hex,
         "job": job_info,
         "home": "/boo",
-        "containers": [uuid.uuid4().hex, uuid.uuid4().hex]
+        "containers": containers
     },
     user_token_delete: {
         "uid": uuid.uuid4().hex,
         "gid": uuid.uuid4().hex,
         "job": job_info,
         "home": "/boo",
-        "containers": [uuid.uuid4().hex, uuid.uuid4().hex]
+        "containers": containers
     },
     user_token_no_container: {
         "uid": uuid.uuid4().hex,

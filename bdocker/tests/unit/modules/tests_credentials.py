@@ -173,7 +173,7 @@ class TestUserCredentials(testtools.TestCase):
                 self.assertEqual(3,
                                  token_info['containers'].__len__())
 
-    def test_create_remove_container(self):
+    def test_remove_container(self):
         token = fakes.user_token_no_container
         c_id = uuid.uuid4().hex
         token_info = self.control._get_token_from_cache(token)
@@ -217,8 +217,7 @@ class TestUserCredentials(testtools.TestCase):
                     token_info['images'])
                 self.assertEqual(1,
                                  token_info['images'].__len__())
-
-    def test_create_remove_image(self):
+    def test_remove_image(self):
         token = fakes.user_token
         c_id = fakes.images[0]
         token_info = self.control._get_token_from_cache(token)
@@ -241,13 +240,16 @@ class TestUserCredentials(testtools.TestCase):
                          list_containers)
 
     def test_authorize_admin(self):
-        pass
+        t = fakes.admin_token
+        out = self.control.authorize_admin(t)
+        self.assertEqual(True, out)
 
-    def remove_container(self):
-        pass
-
-    def remove_container_err(self):
-        pass
+    def test_authorize_admin_err(self):
+        t = "err"
+        self.assertRaises(exceptions.UserCredentialsException,
+                          self.control.authorize_admin,
+                          t
+                          )
 
     @mock.patch.object(credentials.UserController,
                        "_get_token_from_cache")

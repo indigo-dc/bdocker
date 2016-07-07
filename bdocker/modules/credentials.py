@@ -115,6 +115,7 @@ class UserController(object):
         if admin_token != prolog_token['token']:
             raise exceptions.UserCredentialsException(
                 "Unauthorized user with token: %s" % admin_token)
+        return True
 
     def get_token_from_file(self, path, file_name, jobid):
         path = "%s/%s_%s" % (path, file_name, jobid)
