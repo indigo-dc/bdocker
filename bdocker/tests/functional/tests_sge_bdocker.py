@@ -25,6 +25,7 @@ import mock
 import testtools
 import webob
 
+from bdocker.api import working_node
 from bdocker.client import cli
 from bdocker.modules import batch
 import bdocker.tests.functional.fakes as fakes
@@ -37,9 +38,9 @@ class TestBdockerSgeWn(testtools.TestCase):
         super(TestBdockerSgeWn, self).setUp()
         self.file_name = os.path.join(os.path.dirname(__file__),
                                       'sge_wn_configure.cfg')
-        self.app = fakes.create_working_node_app(self.file_name)
         self.token_store = copy.deepcopy(fakes.token_store)
         self.admin_token = self.token_store["prolog"]["token"]
+        self.app = working_node.app
         self.runner = testing.CliRunner()
 
     @mock.patch("os.getenv")
@@ -74,13 +75,19 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, app)
 
         token = "--token=%s" % token
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['ps', token]
-            )
-            assert mock_method.called
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['ps', token]
+                    )
+                    assert mock_method.called
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
         self.assertIn(containers[0][:12], result.output)
@@ -108,13 +115,19 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, app)
 
         token = "--token=%s" % token
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['inspect', token, container_id]
-            )
-            assert mock_method.called
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['inspect', token, container_id]
+                    )
+                    assert mock_method.called
 
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
@@ -142,12 +155,18 @@ class TestBdockerSgeWn(testtools.TestCase):
             else:
                 return orig(self, app)
         token = "--token=%s" % token
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['logs', token, container_id]
-            )
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['logs', token, container_id]
+                    )
             assert mock_method.called
 
         self.assertEqual(0, result.exit_code)
@@ -176,15 +195,18 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['rm', token_param,
-                              containers[0],
-                              containers[1]]
-            )
-            assert mock_method.called
+        with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+            with mock.patch("webob.Request.get_response",
+                            side_effect=mocked_some_method,
+                            autospec=True) as mock_method:
+                result = self.runner.invoke(
+                    cli.bdocker, ['rm', token_param,
+                                  containers[0],
+                                  containers[1]]
+                )
+                assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertIn(containers[0], result.output)
@@ -224,15 +246,18 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['run', token_param, detach,
-                              image_id, work_dir,
-                              command, volume]
-            )
-            assert mock_method.called
+        with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+            with mock.patch("webob.Request.get_response",
+                            side_effect=mocked_some_method,
+                            autospec=True) as mock_method:
+                result = self.runner.invoke(
+                    cli.bdocker, ['run', token_param, detach,
+                                  image_id, work_dir,
+                                  command, volume]
+                )
+                assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEqual("%s\n" % container_id, result.output)
@@ -275,15 +300,18 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['run', token,
-                              image_id, work_dir,
-                              command, volume]
-            )
-            assert mock_method.called
+        with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+            with mock.patch("webob.Request.get_response",
+                            side_effect=mocked_some_method,
+                            autospec=True) as mock_method:
+                result = self.runner.invoke(
+                    cli.bdocker, ['run', token,
+                                  image_id, work_dir,
+                                  command, volume]
+                )
+                assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEqual("\n".join(logs) + "\n", result.output)
@@ -312,14 +340,20 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['cp', token_param,
-                              path_host, path_container]
-            )
-            assert mock_method.called
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['cp', token_param,
+                                      path_host, path_container]
+                    )
+                    assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEqual("%s\n" % True, result.output)
@@ -356,14 +390,20 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['cp', token_param, path_container,
-                              path_host]
-            )
-            assert mock_method.called
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['cp', token_param, path_container,
+                                      path_host]
+                    )
+                    assert mock_method.called
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         expected = []
@@ -457,13 +497,16 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['configure']
-            )
-            assert mock_method.called
+        with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+            with mock.patch("webob.Request.get_response",
+                            side_effect=mocked_some_method,
+                            autospec=True) as mock_method:
+                result = self.runner.invoke(
+                    cli.bdocker, ['configure']
+                )
+                assert mock_method.called
 
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
@@ -506,12 +549,15 @@ class TestBdockerSgeWn(testtools.TestCase):
                 else:
                     acc_app = fakes.create_accounting_app()
                     return orig(self, acc_app)
-        with mock.patch("webob.Request.get_response",
-                        side_effect=mocked_some_method,
-                        autospec=True) as mock_method:
-            result = self.runner.invoke(
-                cli.bdocker, ['clean', token]
-            )
-            assert mock_method.called
+        with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+            with mock.patch("webob.Request.get_response",
+                            side_effect=mocked_some_method,
+                            autospec=True) as mock_method:
+                result = self.runner.invoke(
+                    cli.bdocker, ['clean', token]
+                )
+                assert mock_method.called
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)

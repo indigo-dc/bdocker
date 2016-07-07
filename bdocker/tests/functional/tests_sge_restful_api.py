@@ -25,6 +25,7 @@ import mock
 import testtools
 import webob
 
+from bdocker.api import working_node
 from bdocker.api import accounting
 from bdocker.modules import request
 import bdocker.tests.functional.fakes as fakes
@@ -78,7 +79,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
                       }
         body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
-                    return_value=self.token_store):
+                        return_value=self.token_store):
             with mock.patch("os.getenv",
                             return_value=self.file_name):
                 result = webob.Request.blank("/set_accounting",
@@ -86,7 +87,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
                                              content_type="application/json",
                                              body=body).get_response(self.app)
                 self.assertEqual(201, result.status_code)
-                self.assertEqual(line, m_add.call_args_list[0][0][1])
+                self.assertEqual(line+"\n", m_add.call_args_list[0][0][1])
 
 
 class TestSgeRestApiWn(testtools.TestCase):
@@ -94,11 +95,11 @@ class TestSgeRestApiWn(testtools.TestCase):
 
     def setUp(self):
         super(TestSgeRestApiWn, self).setUp()
-        file_name = os.path.join(os.path.dirname(__file__),
-                                 'sge_wn_configure.cfg')
-        self.app = fakes.create_working_node_app(file_name)
-        self.token_store = copy.copy(fakes.token_store)
+        self.file_name = os.path.join(os.path.dirname(__file__),
+                                      'sge_wn_configure.cfg')
+        self.token_store = copy.deepcopy(fakes.token_store)
         self.admin_token = self.token_store["prolog"]["token"]
+        self.app = working_node.app
 
     @mock.patch("pwd.getpwuid")
     @mock.patch("os.path.realpath")
@@ -152,11 +153,18 @@ class TestSgeRestApiWn(testtools.TestCase):
         m_getpi.return_value = m_class
         m_path.return_value = user_home
         body = request.make_body(parameters)
-        with mock.patch.object(uuid, "uuid4", return_value=mock_uid):
-            result = webob.Request.blank("/configuration",
-                                         method="POST",
-                                         content_type="application/json",
-                                         body=body).get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=self.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch.object(uuid, "uuid4", return_value=mock_uid):
+                    result = webob.Request.blank(
+                        "/configuration",
+                        method="POST",
+                        content_type="application/json",
+                        body=body).get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(user_token_conf,
                          result.json_body["results"])
@@ -179,17 +187,22 @@ class TestSgeRestApiWn(testtools.TestCase):
         m_rq.return_value.get_response.return_value = out
         m_r.return_value = "2222\n3333"
         m_ry.side_effect = [
+            fakes.token_store,
             self.token_store[token]['job'],
             self.token_store
         ]
         parameters = {"admin_token": fakes.admin_token,
                       "token": token}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank(
-            "/clean?%s" % query,
-            method="DELETE",
-            content_type="application/json"
-        ).get_response(self.app)
+
+        with mock.patch("os.getenv",
+                        return_value=self.file_name
+                        ):
+            result = webob.Request.blank(
+                "/clean?%s" % query,
+                method="DELETE",
+                content_type="application/json"
+            ).get_response(self.app)
         self.assertEqual(204, result.status_code)
         self.assertNotIn(token,
                          self.token_store)
@@ -217,10 +230,16 @@ class TestSgeRestApiWn(testtools.TestCase):
         parameters = {"token": token,
                       "source": 'repoooo'}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/pull",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/pull",
+                                             content_type="application/json",
+                                             body=body,
+                                             method="POST").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertIn(image_id_1, result.json_body["results"][0])
         self.assertIn(image_id_2, result.json_body["results"][1])
@@ -240,10 +259,14 @@ class TestSgeRestApiWn(testtools.TestCase):
             "container_id": containers,
             "force": force}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/rm",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+
+        with mock.patch("os.getenv",
+                        return_value=self.file_name
+                        ):
+            result = webob.Request.blank("/rm",
+                                         content_type="application/json",
+                                         body=body,
+                                         method="PUT").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(containers[0], result.json_body["results"][0])
         self.assertEqual(containers[1], result.json_body["results"][1])
@@ -271,9 +294,15 @@ class TestSgeRestApiWn(testtools.TestCase):
              "Status": "status"}]
 
         all_containers = True
-        result = webob.Request.blank(
-            "/ps?token=%s&all=%s" % (token, all_containers),
-            method="GET").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank(
+                    "/ps?token=%s&all=%s" % (token, all_containers),
+                    method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertIn(result.json_body["results"][0][0], containers[0])
         self.assertIn(result.json_body["results"][1][0], containers[1])
@@ -289,8 +318,14 @@ class TestSgeRestApiWn(testtools.TestCase):
             "command": "ls"
         }
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/inspect?%s" % query,
-                                     method="GET").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/inspect?%s" % query,
+                                             method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertIsNotNone(json.loads(result.json_body["results"])[0])
         out = json.loads(result.json_body["results"])[0]
@@ -310,8 +345,14 @@ class TestSgeRestApiWn(testtools.TestCase):
         parameters = {"token": token,
                       "container_id": containers[0]}
         query = request.get_query_string(parameters)
-        result = webob.Request.blank("/logs?%s" % query,
-                                     method="GET").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/logs?%s" % query,
+                                             method="GET").get_response(self.app)
         self.assertEqual(200, result.status_code)
         self.assertEqual(logs, result.json_body["results"])
 
@@ -322,10 +363,16 @@ class TestSgeRestApiWn(testtools.TestCase):
         parameters = {"token": token,
                       "container_id": containers[0]}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/stop",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="POST").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/stop",
+                                             content_type="application/json",
+                                             body=body,
+                                             method="PUT").get_response(self.app)
         self.assertEqual(200, result.status_code)
 
     @mock.patch.object(docker_py.Client, "put_archive")
@@ -341,10 +388,16 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "host_path": user_home,
                       "host_to_container": True}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/copy",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/copy",
+                                             content_type="application/json",
+                                             body=body,
+                                             method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(True, result.json_body["results"])
 
@@ -369,10 +422,16 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "host_path": user_home,
                       "host_to_container": False}
         body = request.make_body(parameters)
-        result = webob.Request.blank("/copy",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/copy",
+                                             content_type="application/json",
+                                             body=body,
+                                             method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(stat, result.json_body["results"])
 
@@ -406,10 +465,13 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "working_dir": "/doo",
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/run",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+        with mock.patch("os.getenv",
+                        return_value=self.file_name
+                        ):
+            result = webob.Request.blank("/run",
+                                         content_type="application/json",
+                                         body=body,
+                                         method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(True, m_log.called)
         self.assertEqual(True, m_start.called)
@@ -440,10 +502,13 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "working_dir": "/doo",
                       }
         body = request.make_body(parameters)
-        result = webob.Request.blank("/run",
-                                     content_type="application/json",
-                                     body=body,
-                                     method="PUT").get_response(self.app)
+        with mock.patch("os.getenv",
+                        return_value=self.file_name
+                        ):
+            result = webob.Request.blank("/run",
+                                         content_type="application/json",
+                                         body=body,
+                                         method="PUT").get_response(self.app)
         self.assertEqual(201, result.status_code)
         self.assertEqual(False, m_log.called)
         self.assertEqual(True, m_start.called)
