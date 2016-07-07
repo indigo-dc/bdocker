@@ -19,16 +19,16 @@ import json
 import os
 import uuid
 
-from cgroupspy import nodes
 import docker as docker_py
 import mock
 import testtools
 import webob
+from cgroupspy import nodes
 
+import bdocker.tests.fakes as fakes
 from bdocker.api import accounting
 from bdocker.api import working_node
 from bdocker.modules import request
-import bdocker.tests.functional.fakes as fakes
 
 
 def create_fake_json_resp(data, status=200):

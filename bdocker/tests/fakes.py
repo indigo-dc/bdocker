@@ -19,8 +19,13 @@ import uuid
 user_token = uuid.uuid4().hex
 user_token_clean = uuid.uuid4().hex
 user_token_delete = uuid.uuid4().hex
+user_token_no_container = uuid.uuid4().hex
+user_token_no_images = uuid.uuid4().hex
 job_id = uuid.uuid4().hex
 admin_token = uuid.uuid4().hex
+containers = [uuid.uuid4().hex,
+              uuid.uuid4().hex]
+images = [uuid.uuid4().hex]
 
 job_info = {
     "job_id": job_id,
@@ -41,8 +46,9 @@ token_store = {
         "uid": uuid.uuid4().hex,
         "gid": uuid.uuid4().hex,
         "job": job_info,
+        "images": images,
         "home": "/boo",
-        "containers": [uuid.uuid4().hex, uuid.uuid4().hex]
+        "containers": containers
     },
     user_token_clean: {
         "uid": uuid.uuid4().hex,
@@ -57,6 +63,19 @@ token_store = {
         "job": job_info,
         "home": "/boo",
         "containers": [uuid.uuid4().hex, uuid.uuid4().hex]
+    },
+    user_token_no_container: {
+        "uid": uuid.uuid4().hex,
+        "gid": uuid.uuid4().hex,
+        "job": job_info,
+        "images": images,
+        "home": "/boo",
+    },
+    user_token_no_images: {
+        "uid": uuid.uuid4().hex,
+        "gid": uuid.uuid4().hex,
+        "job": job_info,
+        "home": "/boo",
     }
 }
 

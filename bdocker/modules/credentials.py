@@ -214,7 +214,7 @@ class UserController(object):
             for c in token_info['containers']:
                 if container_id == c[:num_containers]:
                     return c
-            raise exceptions.DockerException(
+            raise exceptions.UserCredentialsException(
                 message="No such container:"
                         " %s " % container_id,
                 code=404)
@@ -232,7 +232,7 @@ class UserController(object):
                 "No container related to %s"
                 % token)
         if image_id not in token_info['images']:
-            raise exceptions.DockerException(
+            raise exceptions.UserCredentialsException(
                 message="No such image:"
                         " %s " % image_id,
                 code=404)

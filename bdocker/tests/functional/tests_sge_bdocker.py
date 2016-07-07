@@ -18,17 +18,17 @@ import copy
 import os
 import uuid
 
-from cgroupspy import nodes
-from click import testing
 import docker as docker_py
 import mock
 import testtools
 import webob
+from cgroupspy import nodes
+from click import testing
 
+import bdocker.tests.fakes as fakes
 from bdocker.api import working_node
 from bdocker.client import cli
 from bdocker.modules import batch
-import bdocker.tests.functional.fakes as fakes
 
 
 class TestBdockerSgeWn(testtools.TestCase):
