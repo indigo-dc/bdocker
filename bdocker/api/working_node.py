@@ -213,13 +213,13 @@ def init_server():
 
 def get_conf():
     if not hasattr(flask.g, 'conf'):
-        return load_configuration()
+        load_configuration()
     return flask.g.conf
 
 
 def get_server_controller():
     if not hasattr(flask.g, 'server_controller'):
-        return init_server()
+        init_server()
     return flask.g.server_controller
 
 ########################
