@@ -16,7 +16,7 @@
 
 import uuid
 
-import flask.ext.testing as flask_tests
+import flask_testing as flask_tests
 import mock
 
 from bdocker.api import accounting
