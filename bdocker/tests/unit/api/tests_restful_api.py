@@ -184,6 +184,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
     @mock.patch.object(controller.ServerController,
                        "delete_container")
     def test_delete(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": "tokennnnnn",
                       "container_id": 'repoooo'}
         body = request.make_body(parameters)
@@ -264,6 +265,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
     @mock.patch.object(controller.ServerController, "list_containers")
     def test_ps(self, ml):
         token = "3333"
+        ml.return_value = ["c1", "c2"]
         all_containers = True
         with self.app_context:
             result = self.client.get(
@@ -292,6 +294,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "show")
     def test_show(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": "tokennnnnn"}
         query = request.get_query_string(parameters)
         with self.app_context:
@@ -311,6 +314,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "logs")
     def test_logs(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         query = request.get_query_string(parameters)
@@ -342,6 +346,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "stop_container")
     def test_stop(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr'}
         body = request.make_body(parameters)
@@ -379,6 +384,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "run")
     def test_run(self, md):
+        md.return_value = {"out": "fake"}
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
@@ -441,6 +447,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "notify_accounting")
     def test_notify_acc(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": uuid.uuid4().hex,
                       "admin_token": uuid.uuid4().hex}
         body = request.make_body(parameters)
@@ -476,6 +483,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
 
     @mock.patch.object(controller.ServerController, "copy")
     def test_output(self, md):
+        md.return_value = {"out": "fake"}
         parameters = {"token": "tokennnnnn",
                       "container_id": 'containerrrrr',
                       "path": "/foo"}

@@ -3,7 +3,7 @@ datetime
 WebOb
 tabulate
 click
-Flask
+Flask===0.10.1
 six
 pyyaml
 docker-py > 1.8
