@@ -18,12 +18,8 @@ import logging
 
 import webob.exc
 
-FORMAT = '%(asctime)-15s %(message)s'
-logging.basicConfig(format=FORMAT)
-logger = logging.getLogger('tcpserver')
 
 LOG = logging.getLogger(__name__)
-
 
 default_exceptions = {
     400: webob.exc.HTTPBadRequest,
@@ -76,7 +72,7 @@ class BDockerException(Exception):
         details = get_exception_details(exc, message, code)
         self.message = details['message']
         self.code = details['code']
-        LOG.exception(message)
+        make_log("exception", message)
 
     def __str__(self):
         return repr(self.message)
@@ -173,3 +169,15 @@ def get_exception_details(ex=None, custom_message=None,
         code = custom_code
     details = {"message": message, "code": code}
     return details
+
+
+
+def make_log(level, message):
+    # FORMAT = '%(asctime)-15s %(message)s'
+    # logging.basicConfig(format=FORMAT)
+    if level == "debug":
+        LOG.exception(message)
+    elif level == "exception":
+        LOG.debug(message)
+    else:
+        LOG.info(message)

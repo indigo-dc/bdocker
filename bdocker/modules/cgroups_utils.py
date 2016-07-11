@@ -20,8 +20,6 @@ from cgroupspy import trees
 from bdocker import exceptions
 from bdocker import utils
 
-LOG = logging.getLogger(__name__)
-
 
 def get_pids_from_cgroup(cgroup):
     tasks_path = "%s/tasks" % cgroup
@@ -36,16 +34,17 @@ def task_to_cgroup(cgroup_dir, pid):
         tasks = "%s/tasks" % cgroup_dir
         utils.add_to_file(tasks, pid)
     except IOError as e:
-        LOG.exception("Error when assign %s to %s. %s"
-                      % (pid, tasks, e.message))
+        exceptions.make_log("exception",
+                       "Error when assign %s to %s. %s"
+                       % (pid, tasks, e.message))
 
 
 def remove_tasks(cgroup_name, cgroup_parent):
     child_path = "%s/%s" % (cgroup_parent, cgroup_name)
-    LOG.exception("TESTS: DELETING %s" % child_path)
+    exceptions.make_log("exception", "TESTS: DELETING %s" % child_path)
     job_pids = get_pids_from_cgroup(child_path)
     for pid in job_pids:
-        LOG.exception("TESTS: PID TO %s" % cgroup_parent)
+        exceptions.make_log("exception", "TESTS: PID TO %s" % cgroup_parent)
         task_to_cgroup(cgroup_parent, pid)
 
 
@@ -73,14 +72,14 @@ def create_tree_cgroups(group_name, parent_group_dir,
         parent_node = c_trees.get_node_by_path(parent_group)
         if parent_node:
             for node in parent_node.nodes:
-                LOG.exception("Node: %s" % node.full_path)
+                exceptions.make_log("exception", "Node: %s" % node.full_path)
                 try:
                     new_node = node.create_cgroup(group_name)
                     if pid:
                         task_to_cgroup(new_node.full_path, pid)
                 except OSError as e:
                     if e.errno == 17:
-                        LOG.exception(e.message)
+                        exceptions.make_log("exception", e.message)
                     else:
                         raise e
         else:
@@ -89,8 +88,8 @@ def create_tree_cgroups(group_name, parent_group_dir,
                 " in root: %s"
                 % (parent_group_dir, root_parent))
     except BaseException as e:
-        LOG.exception("CGROUPS creation problem. %s"
-                      % e.message)
+        exceptions.make_log("exception", "CGROUPS creation problem. %s"
+                       % e.message)
         raise exceptions.CgroupException(e)
 
 
@@ -106,12 +105,12 @@ def delete_tree_cgroups(group_name, parent_group,
                 node.delete_cgroup(group_name)
             except IOError as e:
                 if e.errno == 2:
-                    LOG.exception(e.message)
+                    exceptions.make_log("exception", e.message)
                 else:
                     raise e
     except BaseException as e:
-        LOG.exception("CGROUPS delete problem. %s"
-                      % e.message)
+        exceptions.make_log("exception", "CGROUPS delete problem. %s"
+                       % e.message)
         raise exceptions.CgroupException(e)
 
 
@@ -127,8 +126,8 @@ def create_cgroups(group_name, parent_groups, pid=None,
             if pid:
                 task_to_cgroup(node.full_path, pid)
     except BaseException as e:
-        LOG.exception("CGROUPS creation problem. %s"
-                      % e.message)
+        exceptions.make_log("exception", "CGROUPS creation problem. %s"
+                       % e.message)
         raise exceptions.CgroupException(e)
 
 
@@ -141,8 +140,8 @@ def delete_cgroups(group_name, parent_groups,
             parent_node = c_tree.get_node_by_path(parent)
             parent_node.delete_cgroup(group_name)
     except BaseException as e:
-        LOG.exception("CGROUPS delete problem. %s"
-                      % e.message)
+        exceptions.make_log("exception", "CGROUPS delete problem. %s"
+                       % e.message)
         raise exceptions.CgroupException(e)
 
 
