@@ -69,6 +69,25 @@ class TestAccRESTAPI(flask_tests.TestCase):
                                      data=body)
         self.assertEqual(201, result.status_code)
 
+    @mock.patch.object(controller.AccountingServerController,
+                       "set_job_accounting")
+    def test_set_job_405(self, m):
+        m.return_value = 'tokenresult'
+        parameters = {"admin_token": "tokennnnnn",
+                      "user_credentials":
+                          {'uid': 'uuuuuuuuuuiiiidddddd',
+                           'gid': 'gggggggggguuuiiidd',
+                           'job': {'id': 'gggggggggguuuiiidd',
+                                   'spool': '/faa'}
+                           }
+                      }
+        body = request.make_body(parameters)
+        with self.app_context:
+            result = self.client.post("/set_accounting",
+                                     content_type="application/json",
+                                     data=body)
+        self.assertEqual(405, result.status_code)
+
 
 class TestWorkingNodeRESTAPI(flask_tests.TestCase):
     """Test REST request mapping."""

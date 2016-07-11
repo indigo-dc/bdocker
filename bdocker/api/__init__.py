@@ -47,15 +47,15 @@ def make_json_response(status_code, description):
     }), status_code
 
 
-def error_json_handler(exception):
-    ex = exceptions.manage_http_exception(exception.code, exception.message)
-    response = make_json_response(ex.code, ex.message)
-    return response
+# def error_json_handler(exception):
+#     ex = exceptions.manage_http_exception(exception)
+#     response = make_json_response(ex.code, ex.message)
+#     return response
+#
 
-
-def set_error_handler(app):
-    for code in exceptions.default_exceptions.keys():
-        app.error_handler_spec[None][code] = error_json_handler
+# def set_error_handler(app):
+#     for code in exceptions.default_exceptions.keys():
+#         app.error_handler_spec[None][code] = error_json_handler
 
 
 def manage_exceptions(e):

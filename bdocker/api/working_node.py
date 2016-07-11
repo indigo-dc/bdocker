@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
-
 import flask
 
 from bdocker import api
@@ -24,10 +22,6 @@ from bdocker import utils
 
 
 app = flask.Flask(__name__)
-
-LOG = logging.getLogger(__name__)
-
-api.set_error_handler(app)
 
 
 @app.route('/configuration', methods=['POST'])
