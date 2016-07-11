@@ -182,7 +182,10 @@ def load_sge_job_configuration(path):
     try:
         with open(path, 'r') as f:
             string = '[root]\n' + f.read()
-            ini_fp = io.BytesIO(string)
+            try:
+                ini_fp = io.BytesIO(string)
+            except TypeError:
+                ini_fp = io.StringIO(string)
             config.readfp(ini_fp)
     except IOError:
         raise exceptions.UserCredentialsException(
