@@ -18,6 +18,8 @@ import logging
 
 import webob.exc
 
+logging.basicConfig(format='%(asctime)s %(message)s')
+
 LOG = logging.getLogger(__name__)
 
 default_exceptions = {
@@ -175,11 +177,9 @@ def make_log(level, message):
     # --- Logging error ---
     # Traceback (most recent call last):
     # AttributeError: 'NoneType' object has no attribute '__context__'
-
-    # logging.basicConfig(format=FORMAT)
-    # if level == "debug":
-    #     LOG.debug(message)
-    # elif level == "exception":
-    #     LOG.exception(message)
-    # else:
-    #     LOG.info(message)
+    if level == "debug":
+        LOG.debug(message)
+    elif level == "exception":
+        LOG.exception(message)
+    else:
+        LOG.info(message)
