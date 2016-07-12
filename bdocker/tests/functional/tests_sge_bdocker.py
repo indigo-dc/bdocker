@@ -418,7 +418,6 @@ class TestBdockerSgeWn(testtools.TestCase):
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.read_file")
     @mock.patch.object(nodes.Node, "create_cgroup")
-    @mock.patch.object(uuid, "uuid4")
     @mock.patch("os.fork")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.setsid")
@@ -434,7 +433,7 @@ class TestBdockerSgeWn(testtools.TestCase):
                        m_get_cre, m_chown,
                        m_time, m_kill,
                        m_setsid, m_up, m_fork,
-                       m_uuid, m_cre, m_r, m_ry, m_w,
+                       m_cre, m_r, m_ry, m_w,
                        m_path, m_getpi):
         """Test configuration command.
 
@@ -484,7 +483,6 @@ class TestBdockerSgeWn(testtools.TestCase):
         m_ry.return_value = self.token_store
         mock_uid = mock.MagicMock()
         mock_uid.hex = token
-        m_uuid.return_value = mock_uid
         m_class = mock.MagicMock()
         m_class.pw_gid = user_gid
         m_getpi.return_value = m_class
@@ -497,16 +495,17 @@ class TestBdockerSgeWn(testtools.TestCase):
                 return orig(self, bar)
             else:
                 return orig(self, app)
-        with mock.patch("os.getenv",
-                        return_value=self.file_name
-                        ):
-            with mock.patch("webob.Request.get_response",
-                            side_effect=mocked_some_method,
-                            autospec=True) as mock_method:
-                result = self.runner.invoke(
-                    cli.bdocker, ['configure']
+        with mock.patch.object(uuid, "uuid4", return_value=mock_uid):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                with mock.patch("webob.Request.get_response",
+                                side_effect=mocked_some_method,
+                                autospec=True) as mock_method:
+                    result = self.runner.invoke(
+                        cli.bdocker, ['configure']
                 )
-                assert mock_method.called
+                    assert mock_method.called
 
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
