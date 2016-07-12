@@ -221,14 +221,15 @@ def get_server_controller():
 ######################
 
 if __name__ == '__main__':
-    environ = get_conf()['server']['environ']
-    port = int(get_conf()['server']['port'])
-    host = get_conf()['server']['host']
-    debug = False
-    if environ == 'public':
-        host = '0.0.0.0'
-    elif environ == 'debug':
-        debug = True
-    app.run(host=host,
-            port=port,
-            debug=debug)
+    with app.app_context():
+        environ = get_conf()['server']['environ']
+        port = int(get_conf()['server']['port'])
+        host = get_conf()['server']['host']
+        debug = False
+        if environ == 'public':
+            host = '0.0.0.0'
+        elif environ == 'debug':
+            debug = True
+        app.run(host=host,
+                port=port,
+                debug=debug)
