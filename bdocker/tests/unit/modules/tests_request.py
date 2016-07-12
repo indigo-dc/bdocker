@@ -45,7 +45,7 @@ class TestRequest(testtools.TestCase):
         t = "tokenResult"
         fake_response = webob.Response()
         fake_response.status_int = 201
-        fake_response.body = '{"results": "%s", "status_code": 201}' % t
+        fake_response.text = u'{"results": "%s", "status_code": 201}' % t
         m.return_value = fake_response
         parameters = {"token": "tokennnnnn",
                       "user_credentials": {
