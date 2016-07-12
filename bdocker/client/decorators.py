@@ -45,7 +45,9 @@ def parse_cp_path(ctx, param, value):
             if not (container_path and
                     container_id and
                     host_path):
-                raise Exception("Missed parameters")
+                raise click.BadParameter(
+                    message="Missed parameters"
+                )
         except BaseException as e:
             raise click.BadParameter(
                 message=e.message
