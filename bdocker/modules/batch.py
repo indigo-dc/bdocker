@@ -433,8 +433,7 @@ class SGEController(BatchWNController):
             exceptions.make_log("exception",
                                 "KILL JOB with PID: %s " % job_pid)
             if job_pid:
-                job_pid = int(job_pid) * -1
-                os.kill(job_pid, signal.SIGKILL)
+                os.killpg(job_pid, signal.SIGKILL)
             return job_pid
         except BaseException:
             return None
