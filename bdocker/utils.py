@@ -279,3 +279,13 @@ def change_owner_dir(path, uid, gid):
             os.chown(os.path.join(root, momo), uid, gid)
         for momo in files:
             os.chown(os.path.join(root, momo), uid, gid)
+
+
+def get_environment(key):
+    value = os.getenv(key)
+    if value:
+        return value
+    else:
+        raise exceptions.ConfigurationException(
+            message="Not found varialbe %s" %
+                    key)

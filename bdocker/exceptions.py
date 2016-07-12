@@ -144,7 +144,7 @@ class CgroupException(BDockerException):
 def get_exception_details(ex=None, custom_message=None,
                           custom_code=None):
     code = 500
-    message = 'Internal Error'
+    message = None
     if ex:
         if isinstance(ex, OSError):
             if ex.errno == 13:
@@ -164,9 +164,12 @@ def get_exception_details(ex=None, custom_message=None,
             if hasattr(ex, 'code'):
                 code = ex.code
     if custom_message:
-        message = custom_message
+        message = "%s. %s" % (
+            custom_message, message)
     if custom_code:
         code = custom_code
+    if not message:
+        message = 'Internal Error'
     details = {"message": message, "code": code}
     return details
 

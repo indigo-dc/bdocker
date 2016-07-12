@@ -379,14 +379,14 @@ class SGEController(BatchWNController):
                 message="Still not supported")
 
     def get_job_info(self):
-        job_id = os.getenv(
-            'JOB_ID', None)
-        home = os.path.realpath(os.getenv(
-            'HOME', None))
-        user = os.getenv(
-            'USER', None)
-        spool_dir = os.getenv(
-            "SGE_JOB_SPOOL_DIR", None)
+        job_id = utils.get_environment(
+            'JOB_ID')
+        home = os.path.realpath(utils.get_environment(
+            'HOME'))
+        user = utils.get_environment(
+            'USER')
+        spool_dir = utils.get_environment(
+            "SGE_JOB_SPOOL_DIR")
         job_info = {'home': home,
                     'job_id': job_id,
                     'user_name': user,

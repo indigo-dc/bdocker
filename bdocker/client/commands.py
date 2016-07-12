@@ -125,10 +125,9 @@ class CommandController(object):
             self.user_name = job_info['user_name']
             self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
-        except Exception:
+        except BaseException as e:
             raise exceptions.ConfigurationException(
-                "Configuring server %s"
-                % endpoint
+                message="", exc=e
             )
 
     def configuration(self, user_name=None, jobid=None):
