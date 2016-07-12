@@ -22,7 +22,7 @@ import testtools
 
 from bdocker import exceptions
 from bdocker.modules import docker_helper
-from bdocker.tests.unit.modules import fake_docker_outputs
+from bdocker.tests import fakes
 
 
 def create_generator(json_data):
@@ -41,14 +41,14 @@ class TestDocker(testtools.TestCase):
     @mock.patch.object(docker.Client, 'pull')
     def test_pull(self, m):
         image = 'imageOK'
-        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
+        m.return_value = create_generator(fakes.fake_pull[image])
         out = self.control.pull_image(image)
         self.assertIsNotNone(out)
 
     @mock.patch.object(docker.Client, 'pull')
     def test_pull_exist(self, m):
         image = 'imageExist'
-        m.return_value = create_generator(fake_docker_outputs.fake_pull[image])
+        m.return_value = create_generator(fakes.fake_pull[image])
         out = self.control.pull_image(image)
         self.assertIsNotNone(out)
 
@@ -56,7 +56,7 @@ class TestDocker(testtools.TestCase):
     def test_pull_error(self, m):
         image = 'imageError'
         m.return_value = create_generator(
-            fake_docker_outputs.fake_pull[image]
+            fakes.fake_pull[image]
         )
         self.assertRaises(exceptions.DockerException,
                           self.control.pull_image, image)
@@ -112,7 +112,7 @@ class TestDocker(testtools.TestCase):
 
     @mock.patch.object(docker.Client, 'inspect_container')
     def test_list_containers_details(self, m):
-        m.return_value = fake_docker_outputs.fake_container_details
+        m.return_value = fakes.fake_container_details
         containers = [uuid.uuid4().hex, uuid.uuid4().hex]
         out = self.control.list_containers_details(containers)
         self.assertIsNotNone(out)
@@ -136,8 +136,8 @@ class TestDocker(testtools.TestCase):
 
     @mock.patch.object(docker.Client, 'containers')
     def test_list_containers(self, m):
-        m.return_value = fake_docker_outputs.fake_container_info
-        containers = fake_docker_outputs.fake_containers
+        m.return_value = fakes.fake_container_info
+        containers = fakes.fake_containers
         out = self.control.list_containers(containers)
         self.assertIsNotNone(out)
         self.assertEqual(2, out.__len__())
@@ -146,26 +146,26 @@ class TestDocker(testtools.TestCase):
     @mock.patch.object(docker.Client, 'create_container')
     @mock.patch.object(docker.Client, 'start')
     def test_run_containers(self, ms, mc, ml):
-        mc.return_value = fake_docker_outputs.fake_create
+        mc.return_value = fakes.fake_create
         ms.return_value = None
-        ml.return_value = fake_docker_outputs.fake_log
+        ml.return_value = fakes.fake_log
         image_id = uuid.uuid4()
         detach = False
         container_id = self.control.run_container(
             image_id=image_id, detach=detach, command='')
         self.control.start_container(container_id)
         out_put = self.control.logs_container(container_id)
-        self.assertEqual(fake_docker_outputs.fake_create['Id'],
+        self.assertEqual(fakes.fake_create['Id'],
                          container_id)
         self.assertIsNotNone(out_put)
-        self.assertEqual(out_put, fake_docker_outputs.fake_log)
+        self.assertEqual(out_put, fakes.fake_log)
 
     @mock.patch.object(docker.Client, 'inspect_container')
     @mock.patch("bdocker.parsers.parse_inspect_container")
     def test_containers_details(self, m_parse, m_ins):
-        details = fake_docker_outputs.fake_container_details
+        details = fakes.fake_container_details
         m_parse.return_value = json.dumps(details)
-        m_ins.return_value = fake_docker_outputs.create_generator(details)
+        m_ins.return_value = fakes.create_generator(details)
         container_id = uuid.uuid4().hex
         out = self.control.container_details(container_id)
         self.assertIsNotNone(out)
@@ -187,9 +187,9 @@ class TestDocker(testtools.TestCase):
     @mock.patch.object(docker.Client, 'logs')
     @mock.patch("bdocker.parsers.parse_docker_log")
     def test_logs(self, m_parse, m_log):
-        logs = fake_docker_outputs.fake_log
+        logs = fakes.fake_log
         m_parse.return_value = logs
-        m_log.return_value = fake_docker_outputs.create_generator(logs)
+        m_log.return_value = fakes.create_generator(logs)
         container_id = uuid.uuid4().hex
         out = self.control.logs_container(container_id)
         self.assertIsNotNone(out)

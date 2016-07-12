@@ -18,7 +18,7 @@ import testtools
 
 from bdocker import exceptions
 from bdocker import parsers
-from bdocker.tests.unit.modules import fake_docker_outputs
+from bdocker.tests import fakes
 from bdocker import utils
 
 
@@ -49,14 +49,14 @@ class TestParsers(testtools.TestCase):
                           req_path, home_path)
 
     def test_logs(self):
-        log_list = fake_docker_outputs.fake_log
-        log_gen = fake_docker_outputs.create_generator(log_list)
+        log_list = fakes.fake_log
+        log_gen = fakes.create_generator(log_list)
         out = parsers.parse_docker_log(log_gen)
         self.assertIsNotNone(out)
         self.assertEqual(log_list, out)
 
     def test_details(self):
-        details = fake_docker_outputs.fake_container_details
+        details = fakes.fake_container_details
         out = parsers.parse_inspect_container(details)
         self.assertIsNotNone(out)
 
