@@ -17,6 +17,7 @@
 import logging
 
 import webob.exc
+import werkzeug.exceptions as werk_exceptions
 
 
 LOG = logging.getLogger(__name__)
@@ -57,14 +58,13 @@ def exception_from_response(response):
         title = response.json_body['results']
     except Exception:
         code = 500
-        message = "Unknown error happenened processing response %s" % response
-        title = message
+        title = "Unknown error happenened processing response"
     return manage_http_exception(code, title)
 
 
 def manage_http_exception(code, message):
     exc = default_exceptions.get(code, webob.exc.HTTPInternalServerError)
-    return exc(message="%s" % message)
+    return exc("%s" % message)
 
 
 class BDockerException(Exception):
@@ -171,13 +171,17 @@ def get_exception_details(ex=None, custom_message=None,
     return details
 
 
-
 def make_log(level, message):
-    # FORMAT = '%(asctime)-15s %(message)s'
+    pass
+    # pass
+    # --- Logging error ---
+    # Traceback (most recent call last):
+    # AttributeError: 'NoneType' object has no attribute '__context__'
+
     # logging.basicConfig(format=FORMAT)
-    if level == "debug":
-        LOG.exception(message)
-    elif level == "exception":
-        LOG.debug(message)
-    else:
-        LOG.info(message)
+    # if level == "debug":
+    #     LOG.debug(message)
+    # elif level == "exception":
+    #     LOG.exception(message)
+    # else:
+    #     LOG.info(message)

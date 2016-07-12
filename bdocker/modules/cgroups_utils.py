@@ -13,7 +13,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import logging
 
 from cgroupspy import trees
 
@@ -88,9 +87,10 @@ def create_tree_cgroups(group_name, parent_group_dir,
                 " in root: %s"
                 % (parent_group_dir, root_parent))
     except BaseException as e:
+        exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                       % e.message)
-        raise exceptions.CgroupException(e)
+                       % exc.message)
+        raise exc
 
 
 def delete_tree_cgroups(group_name, parent_group,
@@ -109,9 +109,10 @@ def delete_tree_cgroups(group_name, parent_group,
                 else:
                     raise e
     except BaseException as e:
+        exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                       % e.message)
-        raise exceptions.CgroupException(e)
+                       % exc.message)
+        raise exc
 
 
 def create_cgroups(group_name, parent_groups, pid=None,
@@ -126,9 +127,10 @@ def create_cgroups(group_name, parent_groups, pid=None,
             if pid:
                 task_to_cgroup(node.full_path, pid)
     except BaseException as e:
+        exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                       % e.message)
-        raise exceptions.CgroupException(e)
+                       % exc.message)
+        raise exc
 
 
 def delete_cgroups(group_name, parent_groups,
@@ -140,9 +142,10 @@ def delete_cgroups(group_name, parent_groups,
             parent_node = c_tree.get_node_by_path(parent)
             parent_node.delete_cgroup(group_name)
     except BaseException as e:
+        exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                       % e.message)
-        raise exceptions.CgroupException(e)
+                       % exc.message)
+        raise exc
 
 
 def get_accounting(group_name, parent_group,

@@ -72,7 +72,7 @@ class RequestController(object):
     @staticmethod
     def _get_from_response(response, data_field='results'):
         if response.status_int in [200, 201, 202]:
-            exceptions.logger.debug('HTTP response: %s',
+            exceptions.make_log('debug', 'HTTP response: %s' %
                                     response.status_int)
             return response.json_body[data_field]
         elif response.status_int in [204]:
