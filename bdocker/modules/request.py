@@ -73,7 +73,7 @@ class RequestController(object):
     def _get_from_response(response, data_field='results'):
         if response.status_int in [200, 201, 202]:
             exceptions.make_log('debug', 'HTTP response: %s' %
-                                    response.status_int)
+                                response.status_int)
             return response.json_body[data_field]
         elif response.status_int in [204]:
             return "Non Content"

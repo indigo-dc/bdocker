@@ -69,17 +69,19 @@ class SGEAccountingController(BatchMasterController):
             self.bdocker_accounting = conf["bdocker_accounting"]
         else:
             self.bdocker_accounting = "/etc/bdocker_accounting"
-            exceptions.make_log("exception", "bdocker_accounting parameter is not defined."
-                                        " Using %s by default. " %
-                           self.bdocker_accounting)
+            exceptions.make_log("exception",
+                                "bdocker_accounting parameter is not defined."
+                                " Using %s by default. " %
+                                self.bdocker_accounting)
 
         if 'sge_accounting' in conf:
             self.sge_accounting = conf["sge_accounting"]
         else:
             self.sge_accounting = "/opt/sge/default/common/accounting"
-            exceptions.make_log("exception", "sge_accounting parameter is not defined."
-                                        " Using %s by default. " %
-                           self.sge_accounting)
+            exceptions.make_log("exception",
+                                "sge_accounting parameter is not defined."
+                                " Using %s by default. " %
+                                self.sge_accounting)
 
     def _get_sge_job_accounting(self, queue_name, host_name, job_id):
         any_word = "[^:]+"
@@ -101,7 +103,8 @@ class SGEAccountingController(BatchMasterController):
         :return:
         """
         try:
-            exceptions.make_log("exception", "WRITING in %s" % self.bdocker_accounting)
+            exceptions.make_log("exception",
+                                "WRITING in %s" % self.bdocker_accounting)
             accounting_end_line = "%s\n" % accounting
             utils.add_to_file(self.bdocker_accounting, accounting_end_line)
             return []
@@ -148,9 +151,9 @@ class BatchWNController(object):
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
             batch_info = {"cgroup": cgroup_job}
             exceptions.make_log("debug",
-                           "CGROUP CONTROL ACTIVATED ON: %s "
-                           "JOB CGROUP: %s "
-                           % (self.parent_group, cgroup_job))
+                                "CGROUP CONTROL ACTIVATED ON: %s "
+                                "JOB CGROUP: %s "
+                                % (self.parent_group, cgroup_job))
         else:
             exceptions.make_log("exception", "CGROUP CONTROL NOT ACTIVATED")
             batch_info = None
@@ -242,25 +245,30 @@ class SGEController(BatchWNController):
                 utils.update_yaml_file(file_path, acc)
                 if cpu_max:
                     if int(acc["cpu_usage"]) >= int(cpu_max):
-                        exceptions.make_log("exception", "KILL JOB by CPU %s. Acc: %s. Max: %s" %
-                                       (job_id, acc["cpu_usage"],
-                                        cpu_max
-                                        ))
+                        exceptions.make_log(
+                            "exception",
+                            "KILL JOB by CPU %s. Acc: %s. Max: %s" %
+                            (job_id, acc["cpu_usage"],
+                             cpu_max
+                             ))
                         self._kill_job(spool)
                         break
                 if mem_max:
                     if int(acc["memory_usage"]) >= int(mem_max):
-                        exceptions.make_log("exception", "KILL JOB by MEM %s. Acc: %s. Max: %s" %
-                                       (job_id, acc["memory_usage"],
-                                        mem_max
-                                        ))
+                        exceptions.make_log(
+                            "exception",
+                            "KILL JOB by MEM %s. Acc: %s. Max: %s" %
+                            (job_id, acc["memory_usage"],
+                             mem_max
+                             ))
                         self._kill_job(spool)
                         break
 
-                exceptions.make_log("exception", "JOB CPU %s. Acc: %s. Max: %s" %
-                               (job_id, acc["cpu_usage"],
-                                cpu_max
-                                ))
+                exceptions.make_log("exception",
+                                    "JOB CPU %s. Acc: %s. Max: %s" %
+                                    (job_id, acc["cpu_usage"],
+                                     cpu_max
+                                     ))
             except exceptions.CgroupException as e:
                 exceptions.make_log("exception", "MONITORING FINISHED")
                 break
@@ -359,7 +367,8 @@ class SGEController(BatchWNController):
         if self.enable_cgroups:
             job_info = utils.read_yaml_file(path)
             accounting = self.create_accounting(job_info)
-            exceptions.make_log("exception", "CREATE ACCOUNTING STRING: %s" % accounting)
+            exceptions.make_log("exception",
+                                "CREATE ACCOUNTING STRING: %s" % accounting)
             results = self.notification_controller.notify_accounting(
                 admin_token,
                 accounting)
@@ -421,7 +430,8 @@ class SGEController(BatchWNController):
         try:
             job_pid_path = "%s/job_pid" % spool
             job_pid = utils.read_file(job_pid_path)
-            exceptions.make_log("exception", "KILL JOB with PID: %s " % job_pid)
+            exceptions.make_log("exception",
+                                "KILL JOB with PID: %s " % job_pid)
             if job_pid:
                 job_pid = int(job_pid) * -1
                 os.kill(job_pid, signal.SIGKILL)

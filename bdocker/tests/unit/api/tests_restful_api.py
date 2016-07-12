@@ -84,8 +84,8 @@ class TestAccRESTAPI(flask_tests.TestCase):
         body = request.make_body(parameters)
         with self.app_context:
             result = self.client.post("/set_accounting",
-                                     content_type="application/json",
-                                     data=body)
+                                      content_type="application/json",
+                                      data=body)
         self.assertEqual(405, result.status_code)
 
 

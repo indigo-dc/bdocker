@@ -17,8 +17,6 @@
 import logging
 
 import webob.exc
-import werkzeug.exceptions as werk_exceptions
-
 
 LOG = logging.getLogger(__name__)
 

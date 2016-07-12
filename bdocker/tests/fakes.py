@@ -14,7 +14,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import uuid
+
+import webob
 
 user_token = uuid.uuid4().hex
 user_token_clean = uuid.uuid4().hex
@@ -94,3 +97,24 @@ def create_job_info(job_ident):
         "log_name": ""
     }
     return job_data
+
+
+def create_usercrentials():
+    parameters = {
+        "token": "tokennnnnn",
+        "user_credentials":
+            {'uid': 'uuuuuuuuuuiiiidddddd',
+             'gid': 'gggggggggguuuiiidd',
+             'home': '/home',
+             }
+    }
+    return parameters
+
+
+def create_fake_json_resp(data, status=200):
+    r = webob.Response()
+    r.headers["Content-Type"] = "application/json"
+    r.charset = "utf8"
+    r.body = json.dumps(data).encode("utf8")
+    r.status_code = status
+    return r

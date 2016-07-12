@@ -15,8 +15,8 @@
 # under the License.
 
 from bdocker import api
-from bdocker import modules
 from bdocker import exceptions
+from bdocker import modules
 
 
 class AccountingServerController(object):
@@ -62,7 +62,7 @@ class ServerController(object):
         user_token = self.credentials_module.authenticate(
             admin_token, session_data
         )
-        exceptions.make_log("info","Authentication. Token: %s" % user_token)
+        exceptions.make_log("info", "Authentication. Token: %s" % user_token)
 
         batch_info = self.batch_module.conf_environment(
             session_data, admin_token
@@ -70,7 +70,7 @@ class ServerController(object):
         self.credentials_module.set_token_batch_info(
             user_token, batch_info
         )
-        exceptions.make_log("info","Batch system configured")
+        exceptions.make_log("info", "Batch system configured")
         return user_token
 
     def clean(self, data):
@@ -91,13 +91,13 @@ class ServerController(object):
         containers = self.credentials_module.list_containers(token)
         if containers:
             self.docker_module.clean_containers(containers, force)
-            exceptions.make_log("info","Delete containers")
+            exceptions.make_log("info", "Delete containers")
 
         token_info = self.credentials_module.get_token(token)
         self.batch_module.clean_environment(token_info, admin_token)
-        exceptions.make_log("info","Batch system cleaned")
+        exceptions.make_log("info", "Batch system cleaned")
         self.credentials_module.remove_token_from_cache(token)
-        exceptions.make_log("info","Delete token: %s" % token)
+        exceptions.make_log("info", "Delete token: %s" % token)
         return token
 
     def pull(self, data):

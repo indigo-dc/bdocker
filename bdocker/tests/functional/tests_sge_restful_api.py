@@ -19,25 +19,16 @@ import json
 import os
 import uuid
 
+from cgroupspy import nodes
 import docker as docker_py
 import mock
 import testtools
 import webob
-from cgroupspy import nodes
 
-import bdocker.tests.fakes as fakes
 from bdocker.api import accounting
 from bdocker.api import working_node
 from bdocker.modules import request
-
-
-def create_fake_json_resp(data, status=200):
-    r = webob.Response()
-    r.headers["Content-Type"] = "application/json"
-    r.charset = "utf8"
-    r.body = json.dumps(data).encode("utf8")
-    r.status_code = status
-    return r
+import bdocker.tests.fakes as fakes
 
 
 class TestSgeRestApiAccounting(testtools.TestCase):
@@ -182,7 +173,7 @@ class TestSgeRestApiWn(testtools.TestCase):
     def test_clean(self, m_dock, m_rq, m_w, m_ry,
                    m_del, m_add, m_r, m_delgroup):
         token = fakes.user_token_clean
-        out = create_fake_json_resp(
+        out = fakes.create_fake_json_resp(
             {}, 204)
         m_rq.return_value.get_response.return_value = out
         m_r.return_value = "2222\n3333"

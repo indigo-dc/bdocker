@@ -14,26 +14,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import uuid
 
-import copy
 import mock
 import testtools
 
 from bdocker import exceptions
 from bdocker.modules import credentials
 from bdocker.tests import fakes
-
-def create_parameters():
-    parameters = {
-        "token": "tokennnnnn",
-        "user_credentials":
-            {'uid': 'uuuuuuuuuuiiiidddddd',
-             'gid': 'gggggggggguuuiiidd',
-             'home': '/home',
-             }
-    }
-    return parameters
 
 
 class TestUserCredentials(testtools.TestCase):
@@ -61,7 +50,7 @@ class TestUserCredentials(testtools.TestCase):
     def test_authenticate(self, m):
         t = self.control._get_token_from_cache(
             "prolog")['token']
-        u = create_parameters()['user_credentials']
+        u = fakes.create_usercrentials()['user_credentials']
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=self.token_store):
             with mock.patch("bdocker.utils.write_yaml_file"):
@@ -81,7 +70,7 @@ class TestUserCredentials(testtools.TestCase):
         spool = uuid.uuid4().hex
         t = self.control._get_token_from_cache(
             "prolog")['token']
-        u = create_parameters()['user_credentials']
+        u = fakes.create_usercrentials()['user_credentials']
         u.update({'job': {'job_id': jobid,
                           'spool': spool}
                   })
@@ -96,7 +85,6 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(spool, job_info['spool'])
         self.assertNotIn('cgroup', job_info)
 
-
     @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate_with_job_batch_info(self, m):
         jobid = uuid.uuid4().hex
@@ -105,7 +93,7 @@ class TestUserCredentials(testtools.TestCase):
         batch_info = {"cgroup": cgroup}
         t = self.control._get_token_from_cache(
             "prolog")['token']
-        u = create_parameters()['user_credentials']
+        u = fakes.create_usercrentials()['user_credentials']
         u.update({'job': {'job_id': jobid,
                           'spool': spool}
                   })
@@ -164,9 +152,8 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(2,
                          token_info['containers'].__len__())
         with mock.patch("bdocker.utils.read_yaml_file",
-                        return_value=self.token_store) as m_r:
-            with mock.patch("bdocker.utils.write_yaml_file"
-                            )as m_w:
+                        return_value=self.token_store):
+            with mock.patch("bdocker.utils.write_yaml_file"):
                 self.control.add_container(token, c_id)
                 self.assertIsNotNone(
                     token_info['containers'])
@@ -179,9 +166,8 @@ class TestUserCredentials(testtools.TestCase):
         token_info = self.control._get_token_from_cache(token)
         self.assertNotIn('containers', token_info)
         with mock.patch("bdocker.utils.read_yaml_file",
-                        return_value=self.token_store) as m_r:
-            with mock.patch("bdocker.utils.write_yaml_file"
-                            )as m_w:
+                        return_value=self.token_store):
+            with mock.patch("bdocker.utils.write_yaml_file"):
                 self.control.add_container(token, c_id)
                 self.assertIsNotNone(token_info['containers'])
                 self.assertEqual(1,
@@ -209,14 +195,14 @@ class TestUserCredentials(testtools.TestCase):
         token_info = self.control._get_token_from_cache(token)
         self.assertNotIn('images', token_info)
         with mock.patch("bdocker.utils.read_yaml_file",
-                        return_value=self.token_store) as m_r:
-            with mock.patch("bdocker.utils.write_yaml_file"
-                            )as m_w:
+                        return_value=self.token_store):
+            with mock.patch("bdocker.utils.write_yaml_file"):
                 self.control.add_image(token, image_id)
                 self.assertIsNotNone(
                     token_info['images'])
                 self.assertEqual(1,
                                  token_info['images'].__len__())
+
     def test_remove_image(self):
         token = fakes.user_token
         c_id = fakes.images[0]
@@ -225,9 +211,8 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(1,
                          token_info['images'].__len__())
         with mock.patch("bdocker.utils.read_yaml_file",
-                        return_value=self.token_store) as m_r:
-            with mock.patch("bdocker.utils.write_yaml_file"
-                            )as m_w:
+                        return_value=self.token_store):
+            with mock.patch("bdocker.utils.write_yaml_file"):
                 self.control.remove_image(token, c_id)
                 self.assertNotIn('images', token_info)
 

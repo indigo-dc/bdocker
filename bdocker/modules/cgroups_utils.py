@@ -34,8 +34,8 @@ def task_to_cgroup(cgroup_dir, pid):
         utils.add_to_file(tasks, pid)
     except IOError as e:
         exceptions.make_log("exception",
-                       "Error when assign %s to %s. %s"
-                       % (pid, tasks, e.message))
+                            "Error when assign %s to %s. %s"
+                            % (pid, tasks, e.message))
 
 
 def remove_tasks(cgroup_name, cgroup_parent):
@@ -89,7 +89,7 @@ def create_tree_cgroups(group_name, parent_group_dir,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                       % exc.message)
+                            % exc.message)
         raise exc
 
 
@@ -111,7 +111,7 @@ def delete_tree_cgroups(group_name, parent_group,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                       % exc.message)
+                            % exc.message)
         raise exc
 
 
@@ -129,7 +129,7 @@ def create_cgroups(group_name, parent_groups, pid=None,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                       % exc.message)
+                            % exc.message)
         raise exc
 
 
@@ -144,7 +144,7 @@ def delete_cgroups(group_name, parent_groups,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                       % exc.message)
+                            % exc.message)
         raise exc
 
 
