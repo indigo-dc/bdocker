@@ -79,26 +79,6 @@ class TestSGEAccController(testtools.TestCase):
                          controller.bdocker_accounting)
         self.assertEqual(sge_accounting, controller.sge_accounting)
 
-    @mock.patch("__builtin__.open")
-    def test_get_sge_job_accounting(self, mock_open):
-        line = ("docker:ge-wn03.novalocal:hpc:jorgesece:"
-                "bdocker_job.sh.o80:81:sge:15:1465486337:"
-                "1465486332:1465486332:0:127:0:0.053201:"
-                "0.100611:5632.000000:0:0:0:0:25024:0:0:0.000000:"
-                "72:0:0:0:242:55:NONE:sysusers:NONE:1:0:"
-                "0.000000:0.000000:0.000000:-U sysusers:0.000000:"
-                "NONE:0.000000:0:0"
-                )
-        m_class = mock.MagicMock()
-        m_class.readline.return_value = line
-        mock_open.return_value = m_class
-        queue = "docker"
-        host_name = "ge-wn03.novalocal"
-        job_id = "81"
-        out = self.controller._get_sge_job_accounting(queue, host_name, job_id)
-        expected = line.split(":")
-        self.assertEqual(expected, out)
-
     @mock.patch("bdocker.utils.add_to_file")
     def test_update_accounting(self, m):
         controller = batch.SGEAccountingController(mock.MagicMock())
