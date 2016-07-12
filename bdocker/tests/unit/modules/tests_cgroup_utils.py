@@ -30,13 +30,15 @@ class TestCgroups(testtools.TestCase):
         super(TestCgroups, self).setUp()
         self.parent_path = "/systemd/user/"
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
-    def test_create_tree_cgroup(self, m_add, m_cre, m_path):
+    def test_create_tree_cgroup(self, m_add, m_cre, m_path, m_tree):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node]
         m_path.side_effect = [gnodes]
+        m_tree.return_value = None
         out = cgroups_utils.create_tree_cgroups(
             "66",
             self.parent_path,
@@ -49,16 +51,17 @@ class TestCgroups(testtools.TestCase):
         )
         self.assertEqual(1, m_add.call_count)
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
-    def test_create_tree_cgroup_several(self, m_add, m_cre, m_path):
+    def test_create_tree_cgroup_several(self, m_add, m_cre, m_path, m_tree):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node,
                         cgroupspy.nodes.Node
                         ]
         m_path.side_effect = [gnodes]
-
+        m_tree.return_value = None
         out = cgroups_utils.create_tree_cgroups(
             "66",
             self.parent_path,
@@ -71,16 +74,17 @@ class TestCgroups(testtools.TestCase):
         )
         self.assertEqual(2, m_add.call_count)
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.GroupedTree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
-    def test_create_tree_cgroup_exception(self, m_add, m_cre, m_path):
+    def test_create_tree_cgroup_exception(self, m_add, m_cre, m_path, m_tree):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         gnodes.nodes = [cgroupspy.nodes.Node]
         m_path.side_effect = [gnodes,
                               ]
         m_cre.side_effect = OSError(13, "err", "file")
-
+        m_tree.return_value = None
         self.assertRaises(bdocker_exceptions.CgroupException,
                           cgroups_utils.create_tree_cgroups,
                           "66",
@@ -88,17 +92,19 @@ class TestCgroups(testtools.TestCase):
                           pid='19858',
                           )
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.GroupedTree,
                        "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     @mock.patch("bdocker.utils.read_file")
-    def test_delete_tree_cgroup(self, m_rad, m_task, m_del, m_path):
+    def test_delete_tree_cgroup(self, m_rad, m_task, m_del, m_path, m_tree):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
         gnodes.nodes = [cgroupspy.nodes.Node("",
                                              parent=parent_node)]
         m_path.side_effect = [gnodes]
+        m_tree.return_value = None
         name = uuid.uuid4().hex
         out = cgroups_utils.delete_tree_cgroups(
             name,
@@ -116,19 +122,22 @@ class TestCgroups(testtools.TestCase):
             m_path.call_args_list[0][0][0]
         )
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.GroupedTree,
                        "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.modules.cgroups_utils.task_to_cgroup")
     @mock.patch("bdocker.utils.read_file")
     def test_delete_tree_cgroup_several_nodes(self, m_rad,
-                                              m_task, m_del, m_path):
+                                              m_task, m_del, m_path,
+                                              m_tree):
         gnodes = cgroupspy.nodes.NodeControlGroup("na")
         parent_node = cgroupspy.nodes.Node("parent")
         gnodes.nodes = [cgroupspy.nodes.Node("", parent=parent_node),
                         cgroupspy.nodes.Node("", parent=parent_node)]
         m_path.side_effect = [gnodes,
                               ]
+        m_tree.return_value = None
         name = uuid.uuid4().hex
         out = cgroups_utils.delete_tree_cgroups(
             name,
@@ -146,10 +155,11 @@ class TestCgroups(testtools.TestCase):
             m_path.call_args_list[0][0][0]
         )
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.utils.add_to_file")
-    def test_create_cgroup(self, m_add, m_cre, m_path):
+    def test_create_cgroup(self, m_add, m_cre, m_path, m_tree):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               ]
         parent_groups = ["systemd/user"]
@@ -157,6 +167,7 @@ class TestCgroups(testtools.TestCase):
                                            parent_groups,
                                            pid='19858'
                                            )
+        m_tree.return_value = None
         self.assertIsNone(out)
         self.assertEqual(
             "/%s/" % parent_groups[0],
@@ -166,15 +177,18 @@ class TestCgroups(testtools.TestCase):
         # I have problems controlling how many
         # times the create method is exected
 
+    @mock.patch.object(cgroupspy.trees.GroupedTree, "__init__")
     @mock.patch.object(cgroupspy.trees.Tree, "get_node_by_path")
     @mock.patch.object(cgroupspy.nodes.Node, "create_cgroup")
     @mock.patch("bdocker.utils.add_to_file")
-    def test_create_cgroup_several_parents(self, m_add, m_cre, m_path):
+    def test_create_cgroup_several_parents(self, m_add, m_cre, m_path,
+                                           m_tree):
         m_path.side_effect = [cgroupspy.nodes.Node,
                               cgroupspy.nodes.Node,
                               cgroupspy.nodes.Node]
         parent_groups = ["systemd/user", "foo", "cpu"]
         name = uuid.uuid4().hex
+        m_tree.return_value = None
         out = cgroups_utils.create_cgroups(name,
                                            parent_groups,
                                            pid='19858'
