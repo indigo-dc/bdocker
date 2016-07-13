@@ -84,7 +84,6 @@ class CommandController(object):
     def __init__(self, endpoint=None):
         self.conf = utils.load_configuration_from_file()
         self.batch_module = modules.load_batch_module(self.conf)
-        self.credential_module = modules.load_credentials_module(self.conf)
         try:
             if not endpoint:  # TODO(jorgesece): host should have http or https
                 endpoint = 'http://%s:%s' % (
@@ -125,7 +124,8 @@ class CommandController(object):
 
     def configuration(self, user_name=None, jobid=None):
         path = "/configuration"
-        admin_token = self.credential_module.get_admin_token()
+        credential_module = modules.load_credentials_module(self.conf)
+        admin_token = credential_module.get_admin_token()
         job_info = self._get_job_info()
         if user_name:
             user_info = get_user_credentials(user_name)
@@ -147,14 +147,15 @@ class CommandController(object):
 
     def clean_environment(self, token):
         path = "/clean"
-        admin_token = self.credential_module.get_admin_token()
+        credential_module = modules.load_credentials_module(self.conf)
+        admin_token = credential_module.get_admin_token()
         if not token:
             job_info = self._get_job_info()
             token_file = self._get_token_file(job_info["home"],
                                               job_info['job_id'])
             token = token_parse(token, token_file)
         else:
-            job_info = self.credential_module.get_job_from_token(token)
+            job_info = credential_module.get_job_from_token(token)
             token_file = self._get_token_file(job_info["home"],
                                               job_info['job_id'])
         parameters = {"admin_token": admin_token, 'token': token}
@@ -226,7 +227,8 @@ class CommandController(object):
 
     def notify_accounting(self, token):
         path = "/notify_accounting"
-        admin_token = self.credential_module.get_admin_token()
+        credential_module = modules.load_credentials_module(self.conf)
+        admin_token = credential_module.get_admin_token()
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
                                           job_info['job_id'])

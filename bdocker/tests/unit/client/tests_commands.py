@@ -75,10 +75,10 @@ class TestCommands(testtools.TestCase):
         m_post.return_value = admin_token
         with mock.patch('bdocker.utils.load_configuration_from_file',
                         return_value=fakes.conf_sge):
-            with mock.patch("bdocker.utils.read_yaml_file",
-                            return_value=copy.deepcopy(fakes.token_store)):
-                controller = commands.CommandController()
-        u = controller.configuration()
+            controller = commands.CommandController()
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=copy.deepcopy(fakes.token_store)):
+            u = controller.configuration()
         self.assertIsNotNone(u)
         self.assertEqual(admin_token, u['token'])
         self.assertIn(home_dir, u['path'])
@@ -105,10 +105,10 @@ class TestCommands(testtools.TestCase):
         m_ad.return_value = fakes.admin_token
         with mock.patch('bdocker.utils.load_configuration_from_file',
                         return_value=fakes.conf_sge):
-            with mock.patch("bdocker.utils.read_yaml_file",
-                            return_value=copy.deepcopy(fakes.token_store)):
-                controller = commands.CommandController()
-        u = controller.configuration(1000, job_id)
+            controller = commands.CommandController()
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=copy.deepcopy(fakes.token_store)):
+            u = controller.configuration(1000, job_id)
         self.assertIsNotNone(u)
         self.assertEqual(token, u['token'])
         self.assertIn(home_dir, u['path'])
@@ -169,13 +169,15 @@ class TestCommands(testtools.TestCase):
     @mock.patch("bdocker.client.commands.token_parse")
     @mock.patch("os.remove")
     @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_clean(self, m_env, m_rm, m_t, m_ad, m_del):
+    @mock.patch("bdocker.utils.read_yaml_file")
+    def test_clean(self, m_y, m_env, m_rm, m_t, m_ad, m_del):
         token = uuid.uuid4().hex
         admin_token = fakes.admin_token
         m_t.return_value = token
         m_ad.return_value = admin_token
         containers = ["container_1", "container_2"]
         m_del.return_value = containers
+        m_y.return_value = copy.deepcopy(fakes.token_store)
         self.control.clean_environment(None)
         expected = {"admin_token": admin_token,
                     "token": token}
@@ -215,7 +217,9 @@ class TestCommands(testtools.TestCase):
         accounting = {"cpu": 1,
                       "mem": 2}
         m_acc.return_value = accounting
-        out = self.control.notify_accounting(None)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=copy.deepcopy(fakes.token_store)):
+            out = self.control.notify_accounting(None)
         self.assertEqual(token, out)
         expected = {"admin_token": admin_token,
                     "accounting": accounting}
