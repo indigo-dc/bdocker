@@ -13,13 +13,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import sys
+# import sys
+
 import uuid
 
 from bdocker import exceptions
 from bdocker import utils
 
-sys.tracebacklimit = 0
+# sys.tracebacklimit = 0
 
 
 class UserController(object):
@@ -27,7 +28,12 @@ class UserController(object):
     def __init__(self, path):
         # TODO(jorgesece): control refresh token
         self.path = path
-        self.token_store = utils.read_yaml_file(path)
+        try:
+            self.token_store = utils.read_yaml_file(path)
+        except IOError:
+            raise exceptions.UserCredentialsException(
+                "Unable to open file %s " % path
+            )
 
     def save_token_file(self):
         """Save token store in the file
@@ -294,3 +300,14 @@ class UserController(object):
         current_token = self._get_token_from_cache(token)
         current_token["job"].update(batch_info)
         self._update_token(token, current_token)
+
+    def get_admin_token(self):
+        """Get admin token from token store
+
+        """
+        try:
+            prolog_token = self._get_token_from_cache("prolog")
+            return prolog_token["token"]
+        except BaseException:
+            raise exceptions.UserCredentialsException(
+                "Token not found")

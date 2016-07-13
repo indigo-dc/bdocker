@@ -102,8 +102,9 @@ class TestSgeRestApiWn(testtools.TestCase):
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.setsid")
     @mock.patch("os.kill")
+    @mock.patch("os.killpg")
     @mock.patch("time.sleep")
-    def test_configuration(self, m_time, m_kill,
+    def test_configuration(self, m_time, m_killpg, m_kill,
                            m_setsid, m_up, m_fork,
                            m_cre, m_r, m_ry, m_w,
                            m_path, m_getpi):
@@ -160,7 +161,8 @@ class TestSgeRestApiWn(testtools.TestCase):
         self.assertEqual(user_token_conf,
                          result.json_body["results"])
         self.assertIn(user_token_conf, self.token_store)
-        self.assertEqual(2, m_kill.call_count)
+        self.assertEqual(1, m_kill.call_count)
+        self.assertEqual(1, m_killpg.call_count)
 
     @mock.patch.object(nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.utils.read_file")

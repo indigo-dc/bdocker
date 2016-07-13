@@ -129,6 +129,8 @@ class ServerController(object):
         image_id = data['image_id']
         script = data['script']
         detach = data.get('detach', False)
+        if not detach:
+            detach = False
         host_dir = data.get('host_dir', None)
         docker_dir = data.get('docker_dir', None)
         working_dir = data.get('working_dir', None)

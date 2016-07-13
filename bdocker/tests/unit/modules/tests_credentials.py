@@ -331,6 +331,11 @@ class TestUserCredentials(testtools.TestCase):
         t_info = self.control.get_token(t)
         self.assertEqual(expected, t_info)
 
+    def test_get_admin(self):
+        expected = fakes.admin_token
+        t_info = self.control.get_admin_token()
+        self.assertEqual(expected, t_info)
+
     @mock.patch.object(credentials.UserController, "_get_token_from_cache")
     def test_get_job_from_token(self, m_gt):
         uid = uuid.uuid4().hex

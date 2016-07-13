@@ -246,3 +246,21 @@ def create_generator(n):
     while i < n.__len__():
         yield n[i]
         i += 1
+
+conf_sge = {
+    'batch': {
+        'system': "SGE"
+    },
+    'accounting_server':
+        {'host': 'host',
+         'port': 'port'},
+
+    'server':
+        {'host': 'host',
+         'port': 'port',
+         'environ': 'debug'},
+    'credentials':
+        {'token_store': "/fake"}
+}
+
+job_env = ["algo", "/", "algo", "algo"]

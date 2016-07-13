@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import uuid
 
 import mock
@@ -22,24 +23,9 @@ import testtools
 from bdocker.client import commands
 from bdocker import exceptions
 from bdocker.modules import batch
+from bdocker.modules import credentials
 from bdocker.modules import request
-
-
-conf_sge = {
-    'batch': {
-        'system': "SGE"
-    },
-    'accounting_server':
-        {'host': 'host',
-         'port': 'port'},
-
-    'server':
-        {'host': 'host',
-         'port': 'port',
-         'environ': 'debug'},
-    'credentials':
-        {'token_store': 'kk'}
-}
+from bdocker.tests import fakes
 
 
 class TestCommands(testtools.TestCase):
@@ -48,20 +34,11 @@ class TestCommands(testtools.TestCase):
     def setUp(self):
         super(TestCommands, self).setUp()
         self.job_id = uuid.uuid4().hex
-        home_dir = "/foo"
-        job_id = '88'
-        spool = "/faa"
-        user = 'peter'
-        job_value = {'home': home_dir,
-                     'job_id': job_id,
-                     'spool': spool,
-                     'user_name': user}
         with mock.patch(
                 'bdocker.utils.load_configuration_from_file',
-                return_value=conf_sge):
-            with mock.patch.object(
-                    batch.SGEController, "get_job_info",
-                    return_value=job_value):
+                return_value=fakes.conf_sge):
+            with mock.patch("bdocker.utils.read_yaml_file",
+                            return_value=copy.deepcopy(fakes.token_store)):
                 self.control = commands.CommandController()
 
     @mock.patch('bdocker.utils.load_configuration_from_file')
@@ -75,8 +52,10 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.commands.get_user_credentials")
     @mock.patch("bdocker.client.commands.write_user_credentials")
-    @mock.patch("bdocker.client.commands.get_admin_token")
-    def test_configuration_token_error(self, m_ad, m_write, m_u, m_post):
+    @mock.patch.object(credentials.UserController, "get_admin_token")
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_configuration_token_error(self, m_env, m_ad, m_write,
+                                       m_u, m_post):
         home_dir = "/foo"
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.side_effect = exceptions.UserCredentialsException('')
@@ -87,24 +66,17 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.commands.get_user_credentials")
     @mock.patch("bdocker.client.commands.write_user_credentials")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch.object(batch.SGEController, "get_job_info")
     def test_configuration(self, m_conf, m_ad, m_write, m_u, m_post):
         admin_token = uuid.uuid4().hex
         home_dir = "/foo"
-        job_id = '88'
-        spool = "/faa"
-        user = 'peter'
-        job_value = {'home': home_dir,
-                     'job_id': job_id,
-                     'spool': spool,
-                     'user_name': user}
         m_u.return_value = {'uid': "", 'gid': "", 'home': home_dir}
         m_post.return_value = admin_token
         with mock.patch('bdocker.utils.load_configuration_from_file',
-                        return_value=conf_sge):
-            with mock.patch.object(batch.SGEController, "get_job_info",
-                                   return_value=job_value):
+                        return_value=fakes.conf_sge):
+            with mock.patch("bdocker.utils.read_yaml_file",
+                            return_value=copy.deepcopy(fakes.token_store)):
                 controller = commands.CommandController()
         u = controller.configuration()
         self.assertIsNotNone(u)
@@ -114,27 +86,27 @@ class TestCommands(testtools.TestCase):
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.commands.get_user_credentials")
     @mock.patch("bdocker.client.commands.write_user_credentials")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch.object(batch.SGEController, "get_job_info")
-    def test_configuration_with_job(self, m_conf, m_ad, m_write, m_u, m_post):
-        admin_token = uuid.uuid4().hex
+    def test_configuration_with_job(self, m_env, m_ad, m_write, m_u, m_post):
         token = uuid.uuid4().hex
         home_dir = "/foo"
-        spool = "/faa"
+        spool_dir = "/foo"
         job_id = 8934
         user = 'peter'
-        job_value = {'home': home_dir,
-                     'job_id': job_id,
-                     'spool': spool,
-                     'user_name': user}
+        m_env.return_value = {'home': home_dir,
+                              'job_id': job_id,
+                              'user_name': user,
+                              'spool': spool_dir,
+                              }
         user_credentials = {'uid': "", 'gid': "", 'home': home_dir}
         m_u.return_value = user_credentials
         m_post.return_value = token
-        m_ad.return_value = admin_token
+        m_ad.return_value = fakes.admin_token
         with mock.patch('bdocker.utils.load_configuration_from_file',
-                        return_value=conf_sge):
-            with mock.patch.object(batch.SGEController, "get_job_info",
-                                   return_value=job_value):
+                        return_value=fakes.conf_sge):
+            with mock.patch("bdocker.utils.read_yaml_file",
+                            return_value=copy.deepcopy(fakes.token_store)):
                 controller = commands.CommandController()
         u = controller.configuration(1000, job_id)
         self.assertIsNotNone(u)
@@ -143,14 +115,15 @@ class TestCommands(testtools.TestCase):
         token_file = "%s/.bdocker_token_%s" % (home_dir, job_id)
         self.assertIn(token_file, u['path'])
         self.assertIn('job', user_credentials)
-        expected = {"admin_token": admin_token,
+        expected = {"admin_token": fakes.admin_token,
                     "user_credentials": user_credentials}
         m_post.assert_called_with(path='/configuration',
                                   parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_post")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_container_pull(self, m_t, m):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_container_pull(self, m_env, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         source = "foo"
@@ -160,7 +133,8 @@ class TestCommands(testtools.TestCase):
 
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_container_run(self, m_t, m):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_container_run(self, m_env, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
@@ -170,7 +144,8 @@ class TestCommands(testtools.TestCase):
 
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_container_run_2(self, m_t, m):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_container_run_2(self, m_env, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
         out = ['bin', 'etc', 'lib']
@@ -180,7 +155,8 @@ class TestCommands(testtools.TestCase):
 
     @mock.patch.object(request.RequestController, "execute_get")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_container_list(self, m_t, m):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_container_list(self, m_env, m_t, m):
         m_t.return_value = uuid.uuid4().hex
         containers = ["container_1", "container_2"]
         m.return_value = containers
@@ -189,12 +165,13 @@ class TestCommands(testtools.TestCase):
         self.assertEqual(containers[1], results[1])
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
     @mock.patch("os.remove")
-    def test_clean(self, m_rm, m_t, m_ad, m_del):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_clean(self, m_env, m_rm, m_t, m_ad, m_del):
         token = uuid.uuid4().hex
-        admin_token = uuid.uuid4().hex
+        admin_token = fakes.admin_token
         m_t.return_value = token
         m_ad.return_value = admin_token
         containers = ["container_1", "container_2"]
@@ -206,7 +183,7 @@ class TestCommands(testtools.TestCase):
                                  parameters=expected)
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
     def test_clean_admin_err(self, m_t, m_ad, m_del):
         m_ad.side_effect = exceptions.UserCredentialsException("")
@@ -216,19 +193,21 @@ class TestCommands(testtools.TestCase):
                           )
 
     @mock.patch.object(request.RequestController, "execute_delete")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_clean_token_err(self, m_t, m_ad, m_del):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_clean_token_err(self, m_env, m_t, m_ad, m_del):
         m_t.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.clean_environment,
                           None)
 
     @mock.patch.object(request.RequestController, "execute_put")
-    @mock.patch("bdocker.client.commands.get_admin_token")
+    @mock.patch.object(credentials.UserController, "get_admin_token")
     @mock.patch("bdocker.client.commands.token_parse")
     @mock.patch.object(batch.SGEController, "create_accounting")
-    def test_notify_accounting(self, m_acc, m_t, m_ad, m_del):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_notify_accounting(self, m_env, m_acc, m_t, m_ad, m_del):
         token = uuid.uuid4().hex
         admin_token = uuid.uuid4().hex
         m_t.return_value = token
@@ -245,7 +224,8 @@ class TestCommands(testtools.TestCase):
 
     @mock.patch.object(request.RequestController, "execute_put")
     @mock.patch("bdocker.client.commands.token_parse")
-    def test_copy_to_container(self, m_token, m_put):
+    @mock.patch.object(batch.SGEController, "get_job_info")
+    def test_copy_to_container(self, m_env, m_token, m_put):
         token = uuid.uuid4().hex
         container_id = uuid.uuid4().hex
         container_path = uuid.uuid4().hex

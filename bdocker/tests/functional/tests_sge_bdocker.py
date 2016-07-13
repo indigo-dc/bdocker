@@ -261,6 +261,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEqual("%s\n" % container_id, result.output)
+        self.assertEqual(True, m_cre.call_args[1]['detach'])
 
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")
@@ -315,6 +316,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual(0, result.exit_code)
         self.assertIsNone(result.exception)
         self.assertEqual("\n".join(logs) + "\n", result.output)
+        self.assertEqual(False, m_cre.call_args[1]['detach'])
 
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEController, "get_job_info")

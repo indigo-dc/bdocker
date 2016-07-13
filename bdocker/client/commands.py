@@ -61,25 +61,6 @@ def get_user_credentials(name):
     return user
 
 
-def get_admin_token(path):
-    """Get admin token from path file
-
-    :param path: file to be read
-    """
-    try:
-        token_store = utils.read_yaml_file(path)
-        token = token_store['prolog']['token']
-    except IOError:
-        raise exceptions.UserCredentialsException(
-            "No admin credentials"
-        )
-    except BaseException:
-        raise exceptions.ParseException(
-            "Token not found"
-        )
-    return token
-
-
 def write_user_credentials(token, file_path,
                            uid=None, gid=None):
     """Write token in file and change its owner,
@@ -101,28 +82,28 @@ def write_user_credentials(token, file_path,
 class CommandController(object):
 
     def __init__(self, endpoint=None):
-        conf = utils.load_configuration_from_file()
-        self.batch_module = modules.load_batch_module(conf)
+        self.conf = utils.load_configuration_from_file()
+        self.batch_module = modules.load_batch_module(self.conf)
+        self.credential_module = modules.load_credentials_module(self.conf)
         try:
-            job_info = self.batch_module.get_job_info()
             if not endpoint:  # TODO(jorgesece): host should have http or https
                 endpoint = 'http://%s:%s' % (
-                    conf['server']['host'],
-                    conf['server']['port']
+                    self.conf['server']['host'],
+                    self.conf['server']['port']
                 )
-            cred_info = conf['credentials']
+            cred_info = self.conf['credentials']
             self.defaul_token_name = (
                 cred_info.get("token_client_file",
                               TOKEN_FILE_NAME)
             )
-            self.job_info = job_info
-            self.job_id = job_info["job_id"]
-            self.token_file = "%s/%s_%s" % (
-                job_info['home'],  # TODO(jorgesece): pop it
-                self.defaul_token_name,
-                self.job_id
-            )
-            self.user_name = job_info['user_name']
+            # self.job_info = job_info
+            # self.job_id = job_info["job_id"]
+            # self.token_file = "%s/%s_%s" % (
+            #     job_info['home'],  # TODO(jorgesece): pop it
+            #     self.defaul_token_name,
+            #     self.job_id
+            # )
+            # self.user_name = job_info['user_name']
             self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except BaseException as e:
@@ -130,41 +111,61 @@ class CommandController(object):
                 message="", exc=e
             )
 
+    def _get_job_info(self):
+        job_info = self.batch_module.get_job_info()
+        return job_info
+
+    def _get_token_file(self, user_name, job_id):
+        token_file = "%s/%s_%s" % (
+            user_name,
+            self.defaul_token_name,
+            job_id
+        )
+        return token_file
+
     def configuration(self, user_name=None, jobid=None):
         path = "/configuration"
-        admin_token = get_admin_token(self.token_storage)
+        admin_token = self.credential_module.get_admin_token()
+        job_info = self._get_job_info()
         if user_name:
-            self.user_name = user_name
-            user_info = get_user_credentials(self.user_name)
-            self.token_file = "%s/%s_%s" % (
-                user_info.get("home"),
-                self.defaul_token_name,
-                self.job_id
-            )
+            user_info = get_user_credentials(user_name)
         else:
-            user_info = get_user_credentials(self.user_name)
-        user_info.update({'job': self.job_info})
+            user_info = get_user_credentials(
+                job_info['user_name']
+            )
+        token_file = self._get_token_file(user_info.get("home"),
+                                          job_info['job_id'])
+
+        user_info.update({'job': job_info})
         parameters = {"admin_token": admin_token,
                       "user_credentials": user_info}
         token = self.control.execute_post(path=path, parameters=parameters)
-        write_user_credentials(token, self.token_file,
+        write_user_credentials(token, token_file,
                                user_info['uid'],
                                user_info['gid'])
-        return {"token": token, "path": self.token_file}
+        return {"token": token, "path": token_file}
 
     def clean_environment(self, token):
         path = "/clean"
-        admin_token = get_admin_token(self.token_storage)
-        token = token_parse(token, self.token_file)
+        admin_token = self.credential_module.get_admin_token()
+        if not token:
+            job_info = self._get_job_info()
+            token_file = self._get_token_file(job_info["home"],
+                                              job_info['job_id'])
+            token = token_parse(token, token_file)
+
         parameters = {"admin_token": admin_token, 'token': token
                       }
         self.control.execute_delete(path=path, parameters=parameters)
-        os.remove(self.token_file)
+        os.remove(token_file)
         return token
 
     def container_pull(self, token, source):
         path = "/pull"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "source": source}
         results = self.control.execute_post(path=path, parameters=parameters)
         return results
@@ -172,7 +173,10 @@ class CommandController(object):
     def container_run(self, token, image_id, detach, script,
                       working_dir=None, volume=None):
         path = "/run"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -188,7 +192,10 @@ class CommandController(object):
 
     def container_list(self, token, all_containers=False):
         path = "/ps"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "all": all_containers}
         results = self.control.execute_get(path=path, parameters=parameters)
 
@@ -196,14 +203,20 @@ class CommandController(object):
 
     def container_logs(self, token, container_id):
         path = "/logs"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_delete(self, token, container_ids, force=False):
         path = "/rm"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "container_id": container_ids,
                       "force": force}
         out = self.control.execute_put(path=path, parameters=parameters)
@@ -211,9 +224,13 @@ class CommandController(object):
 
     def notify_accounting(self, token):
         path = "/notify_accounting"
-        admin_token = get_admin_token(self.token_storage)
-        token = token_parse(token, self.token_file)
-        acc = self.batch_module.create_accounting(self.job_id)
+        admin_token = self.credential_module.get_admin_token()
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        # FIXME (jorgesece): check jobid from token
+        token = token_parse(None, token_file)
+        acc = self.batch_module.create_accounting(job_info['job_id'])
         parameters = {"admin_token": admin_token,
                       'accounting': acc
                       }
@@ -222,14 +239,20 @@ class CommandController(object):
 
     def accounting_retrieve(self, token, container_id):
         path = "/accounting"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
 
     def container_inspect(self, token, container_id):
         path = "/inspect"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token, "container_id": container_id}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
@@ -239,7 +262,10 @@ class CommandController(object):
                                host_path,
                                host_to_container):
         path = "/copy"
-        token = token_parse(token, self.token_file)
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
         parameters = {"token": token,
                       "container_id": container_id,
                       "container_path": container_path,
