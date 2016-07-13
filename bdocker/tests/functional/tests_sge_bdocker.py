@@ -531,12 +531,11 @@ class TestBdockerSgeWn(testtools.TestCase):
                          m_delgroup, m_osre,
                          m_getjob, m_env):
         m_env.return_value = self.file_name
-        token = fakes.user_token_clean
         m_ry.side_effect = [self.token_store,
                             fakes.job_info,
                             self.token_store,
                             ]
-        user_token = fakes.user_token
+        user_token = fakes.user_token_clean
         token = "--token=%s" % user_token
         orig = webob.Request.get_response
         app = self.app

@@ -40,7 +40,8 @@ job_info = {
     "host_name": "",
     "job_name": "",
     "account_name": "",
-    "log_name": ""
+    "log_name": "",
+    "home": ""
 }
 
 token_store = {

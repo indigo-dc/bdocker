@@ -153,7 +153,10 @@ class CommandController(object):
             token_file = self._get_token_file(job_info["home"],
                                               job_info['job_id'])
             token = token_parse(token, token_file)
-
+        else:
+            job_info = self.credential_module.get_job_from_token(token)
+            token_file = self._get_token_file(job_info["home"],
+                                              job_info['job_id'])
         parameters = {"admin_token": admin_token, 'token': token}
         self.control.execute_delete(path=path, parameters=parameters)
         os.remove(token_file)
