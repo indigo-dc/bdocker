@@ -154,8 +154,7 @@ class CommandController(object):
                                               job_info['job_id'])
             token = token_parse(token, token_file)
 
-        parameters = {"admin_token": admin_token, 'token': token
-                      }
+        parameters = {"admin_token": admin_token, 'token': token}
         self.control.execute_delete(path=path, parameters=parameters)
         os.remove(token_file)
         return token
