@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from bdocker import middleware
 from bdocker.api import accounting
+from bdocker import middleware
 
 if __name__ == '__main__':
     conf = accounting.load_configuration()

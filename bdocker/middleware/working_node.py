@@ -14,8 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from bdocker import middleware
 from bdocker.api import working_node
+from bdocker import middleware
 
 if __name__ == '__main__':
     conf = working_node.load_configuration()
