@@ -46,8 +46,8 @@ class TestAccRESTAPI(flask_tests.TestCase):
             with mock.patch("bdocker.utils.load_configuration_from_file"):
                 self.app_context = self.app.app_context()
                 with self.app_context:
-                    accounting.load_configuration()
-                    accounting.init_server()
+                    accounting.get_conf()
+                    accounting.get_server_controller()
 
     @mock.patch.object(controller.AccountingServerController,
                        "set_job_accounting")
@@ -103,8 +103,8 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
             with mock.patch("bdocker.utils.load_configuration_from_file"):
                 self.app_context = self.app.app_context()
                 with self.app_context:
-                    working_node.load_configuration()
-                    working_node.init_server()
+                    working_node.get_conf()
+                    working_node.get_server_controller()
 
     @mock.patch.object(controller.ServerController, "configuration")
     def test_configuration(self, m):

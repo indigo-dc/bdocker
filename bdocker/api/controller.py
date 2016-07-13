@@ -216,6 +216,7 @@ class ServerController(object):
         :param data: dict parameter with attributes
         :return: container id
         """
+        exceptions.make_log("exceptions", "deleting")
         required = {'token', 'container_id'}
         api.validate(data, required)
         token = data['token']
@@ -228,10 +229,13 @@ class ServerController(object):
             container_ids = [container_ids]
         for c_id in container_ids:
             try:
+                exceptions.make_log("exceptions", "deleting - credentials")
                 full_id = self.credentials_module.authorize_container(
                     token,
                     c_id)
+                exceptions.make_log("exceptions", "deleting - container")
                 self.docker_module.delete_container(full_id, force)
+                exceptions.make_log("exceptions", "deleting - token")
                 self.credentials_module.remove_container(token, full_id)
                 docker_out.append(full_id)
             except BaseException as e:

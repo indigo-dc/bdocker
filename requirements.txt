@@ -8,3 +8,4 @@ six
 pyyaml
 docker-py > 1.8
 cgroupspy
+gunicorn

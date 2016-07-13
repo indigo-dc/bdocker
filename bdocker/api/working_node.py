@@ -196,24 +196,22 @@ def stop():
 
 
 def load_configuration():
-    flask.g.conf = utils.load_configuration_from_file()
+    return utils.load_configuration_from_file()
 
 
 def init_server():
-    flask.g.server_controller = controller.ServerController(
-        get_conf()
-    )
+    return controller.ServerController(get_conf())
 
 
 def get_conf():
     if not hasattr(flask.g, 'conf'):
-        load_configuration()
+        flask.g.conf = load_configuration()
     return flask.g.conf
 
 
 def get_server_controller():
     if not hasattr(flask.g, 'server_controller'):
-        init_server()
+        flask.g.server_controller = init_server()
     return flask.g.server_controller
 
 ########################
