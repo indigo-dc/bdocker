@@ -56,12 +56,16 @@ class BatchNotificationController(object):
         return out
 
 
-class BatchMasterController(object):
+class AccountingController(object):
     def __init__(self, conf):
         pass
 
+    def set_job_accounting(self, accounting):
+        raise exceptions.NoImplementedException(
+            message="Still not supported")
 
-class SGEAccountingController(BatchMasterController):
+
+class SGEAccountingController(AccountingController):
 
     def __init__(self, conf):
         super(SGEAccountingController, self).__init__(conf=conf)
@@ -114,7 +118,7 @@ class SGEAccountingController(BatchMasterController):
             raise exceptions.BatchException(message=message)
 
 
-class BatchWNController(object):
+class WNController(object):
 
     def __init__(self, conf, accounting_conf):
         self.conf = conf
@@ -197,7 +201,7 @@ class BatchWNController(object):
             "method")
 
 
-class SGEController(BatchWNController):
+class SGEController(WNController):
 
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)

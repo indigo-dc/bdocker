@@ -21,34 +21,6 @@ import testtools
 
 from bdocker.api import controller
 from bdocker import exceptions
-from bdocker.modules import batch
-from bdocker.modules import credentials
-from bdocker.modules import docker_helper
-
-FAKE_CONF = {
-    'server': mock.MagicMock(),
-    'batch': mock.MagicMock(),
-    'credentials': mock.MagicMock(),
-    'dockerAPI': mock.MagicMock(),
-}
-
-conf_sge = {
-    'batch': {
-        'system': "SGE"
-    },
-    'accounting_server':
-        {'host': 'host',
-         'port': 'port'},
-
-    'server':
-        {'host': 'host',
-         'port': 'port',
-         'environ': 'debug'},
-    'credentials':
-        {'token_store': 'kk'},
-    'dockerAPI':
-        {'base_url': '/kk'}
-}
 
 
 class TestAccountingServerController(testtools.TestCase):
@@ -57,16 +29,16 @@ class TestAccountingServerController(testtools.TestCase):
     def setUp(self):
         super(TestAccountingServerController, self).setUp()
 
-    @mock.patch.object(credentials.UserController, "authorize_admin")
-    @mock.patch.object(batch.SGEAccountingController, "set_job_accounting")
-    @mock.patch("bdocker.utils.read_yaml_file")
-    def test_set_job_accounting(self, m_r, m, m_au):
-        contr = controller.AccountingServerController(conf_sge)
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_accounting_module")
+    def test_set_job_accounting(self, m_batch, m_cre):
         token = uuid.uuid4().hex
         accounting = uuid.uuid4().hex
-        m_au.return_value = token
         expected = uuid.uuid4().hex
-        m.return_value = expected
+        m_class = mock.MagicMock()
+        m_class.set_job_accounting.return_value = expected
+        m_batch.return_value = m_class
+        contr = controller.AccountingServerController(None)
         data = {'admin_token': token,
                 'accounting': accounting}
 
@@ -80,243 +52,278 @@ class TestServerController(testtools.TestCase):
 
     def setUp(self):
         super(TestServerController, self).setUp()
-        with mock.patch("bdocker.utils.read_yaml_file"):
-            with mock.patch.object(
-                    docker_helper.DockerController,
-                    "__init__",
-                    return_value=None):
-                self.controller = controller.ServerController(conf_sge)
 
-    @mock.patch.object(credentials.UserController, "authenticate")
-    @mock.patch.object(credentials.UserController, "set_token_batch_info")
-    @mock.patch.object(batch.SGEController, "conf_environment")
-    def test_configuration(self, m_conf, m_t, m_au):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_configuration(self, m_dock, m_batch, m_cre):
         token = uuid.uuid4().hex
-        m_au.return_value = token
-        data = {"admin_token": "tokennnnnn",
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authenticate.return_value = token
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
+        data = {"admin_token": uuid.uuid4().hex,
                 "user_credentials": {"job": {
                     "id": uuid.uuid4().hex,
                     "spool": "/foo"
                 }}
                 }
-        result = self.controller.configuration(data)
+        result = contr.configuration(data)
 
         self.assertEqual(token, result)
 
-    @mock.patch.object(docker_helper.DockerController,
-                       "pull_image")
-    @mock.patch.object(credentials.UserController,
-                       "authorize")
-    def test_pull(self, mu, md):
-        im_id = 'X'
-        mu.return_value = True
-        md.return_value = im_id
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_pull(self, m_dock, m_batch, m_cre):
+        m_class_dock = mock.MagicMock()
+        im_id = uuid.uuid4().hex
+        m_class_dock.pull_image.return_value = im_id
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
-        result = self.controller.pull(parameters)
+        result = contr.pull(parameters)
         self.assertEqual(im_id, result)
 
-    @mock.patch.object(docker_helper.DockerController,
-                       "pull_image")
-    @mock.patch.object(credentials.UserController,
-                       "authorize")
-    def test_pull_unauthorized(self, mu, md):
-        im_id = 'X'
-        mu.side_effect = exceptions.UserCredentialsException("")
-        md.return_value = im_id
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_pull_unauthorized(self, m_dock, m_batch, m_cre):
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": "tokennnnnn",
                       "source": 'repoooo'}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.pull,
+                          contr.pull,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "list_containers")
-    @mock.patch.object(credentials.UserController, "list_containers")
-    def test_list(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_list(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
         c3 = uuid.uuid4().hex
         containers = [c1, c2, c3]
+        m_class_cre = mock.MagicMock()
+        m_class_cre.list_containers.return_value = containers
+        m_cre.return_value = m_class_cre
         info_containers = [{"info"}, {"info"}]
-        mu.return_value = containers
-        ml.return_value = info_containers
+        m_class_dock = mock.MagicMock()
+        m_class_dock.list_containers.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex}
-        results = self.controller.list_containers(parameters)
+        results = contr.list_containers(parameters)
         self.assertEqual(results.__len__(), info_containers.__len__())
 
-    @mock.patch.object(docker_helper.DockerController, "list_containers")
-    @mock.patch.object(credentials.UserController, "list_containers")
-    def test_list_empty(self, mu, ml):
-        mu.return_value = []
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_list_empty(self, m_dock, m_batch, m_cre):
+        containers = []
+        m_class_cre = mock.MagicMock()
+        m_class_cre.list_containers.return_value = containers
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex}
-        results = self.controller.list_containers(parameters)
+        results = contr.list_containers(parameters)
         self.assertEqual([], results)
 
-    @mock.patch.object(docker_helper.DockerController, "list_containers")
-    @mock.patch.object(credentials.UserController, "list_containers")
-    def test_list_unauthorized(self, mu, ml):
-        mu.side_effect = exceptions.UserCredentialsException("")
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_list_unauthorized(self, m_dock, m_batch, m_cre):
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.list_containers.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.list_containers,
+                          contr.list_containers,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "container_details")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_show(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_show(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.return_value = c1
+        m_cre.return_value = m_class_cre
         info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
+        m_class_dock = mock.MagicMock()
+        m_class_dock.container_details.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
-        results = self.controller.show(parameters)
+        results = contr.show(parameters)
         self.assertEqual(info_containers, results)
 
-    @mock.patch.object(docker_helper.DockerController, "container_details")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_show_unauthorized(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_show_unauthorized(self, m_dock, m_batch, m_cre):
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": uuid.uuid4().hex}
+        self.assertRaises(exceptions.UserCredentialsException,
+                          contr.show,
+                          parameters)
+
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_logs(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.return_value = c1
+        m_cre.return_value = m_class_cre
         info_containers = {"info"}
-        mu.side_effect = exceptions.UserCredentialsException("")
-        ml.return_value = info_containers
+        m_class_dock = mock.MagicMock()
+        m_class_dock.logs_container.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
+        parameters = {"token": uuid.uuid4().hex,
+                      "container_id": c1}
+        results = contr.logs(parameters)
+        self.assertEqual(info_containers, results)
+
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_log_unauthorized(self, m_dock, m_batch, m_cre):
+        c1 = uuid.uuid4().hex
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.show,
+                          contr.logs,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "logs_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_logs(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_delete(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.return_value = c1
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
-        results = self.controller.logs(parameters)
-        self.assertEqual(info_containers, results)
-
-    @mock.patch.object(docker_helper.DockerController, "logs_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_log_unauthorized(self, mu, ml):
-        c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.side_effect = exceptions.UserCredentialsException("")
-        ml.return_value = info_containers
-        parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1}
-        self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.logs,
-                          parameters)
-
-    @mock.patch.object(docker_helper.DockerController, "delete_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "remove_container")
-    def test_delete(self, mr, mu, md):
-        c1 = uuid.uuid4().hex
-        mu.side_effect = [c1]
-        parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1}
-        results = self.controller.delete_container(parameters)
+        results = contr.delete_container(parameters)
         self.assertEqual([c1], results)
 
-    @mock.patch.object(docker_helper.DockerController, "delete_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "remove_container")
-    def test_delete_force(self, mr, mu, md):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_delete_force(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        mu.side_effect = [c1]
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.return_value = c1
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         force = True
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "force": force}
-        results = self.controller.delete_container(parameters)
+        results = contr.delete_container(parameters)
         self.assertEqual([c1], results)
-        md.assert_called_with(c1, force)
+        self.assertEqual(force, m_dock.mock_calls[1][1][1])
+        self.assertEqual(c1, m_dock.mock_calls[1][1][0])
 
-    @mock.patch.object(docker_helper.DockerController, "delete_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "remove_container")
-    def test_delete_several(self, mr, mu, md):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_delete_several(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
-        mr.return_value = True
-        mu.side_effect = [c1, c2]
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = [c1, c2]
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": [c1, c2]}
-        results = self.controller.delete_container(parameters)
+        results = contr.delete_container(parameters)
         self.assertEqual([c1, c2], results)
 
-    @mock.patch.object(docker_helper.DockerController, "delete_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "remove_container")
-    def test_delete_unauthorized(self, mr, mu, md):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_delete_unauthorized(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        mu.side_effect = exceptions.UserCredentialsException("")
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
-        results = self.controller.delete_container(parameters)
+        results = contr.delete_container(parameters)
         self.assertEqual(1, results.__len__())
         self.assertIn("Exception", results[0])
 
-    @mock.patch.object(docker_helper.DockerController, "delete_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "remove_container")
-    def test_delete_several_unauthorized(self, mr, mu, md):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_delete_several_unauthorized(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
         c2 = uuid.uuid4().hex
         c3 = uuid.uuid4().hex
-        mu.side_effect = [exceptions.UserCredentialsException(""),
-                          c2,
-                          c3]
+        expected = [exceptions.UserCredentialsException(""),
+                    c2,
+                    c3]
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": [c1, c2, c3]}
-        results = self.controller.delete_container(parameters)
+        results = contr.delete_container(parameters)
         self.assertEqual(3, results.__len__())
         self.assertIn("Exception", results[0])
         self.assertEqual(c2, results[1])
         self.assertEqual(c3, results[2])
 
-    @mock.patch.object(docker_helper.DockerController,
-                       "run_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    @mock.patch.object(credentials.UserController,
-                       "add_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "start_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "logs_container")
-    @mock.patch.object(credentials.UserController,
-                       "get_job_from_token")
-    def test_run_full(self, m_get_j, m_log, m_start, madd, math, mr):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_run_full(self, m_dock, m_batch, m_cre):
+        m_class_cre = mock.MagicMock()
+        cgroup = uuid.uuid4().hex
+        expected_job = {"cgroup": cgroup}
+        m_class_cre.get_job_from_token.return_value = expected_job
+        log_info = "logsssss"
+        m_cre.return_value = m_class_cre
+        container_id = uuid.uuid4().hex
+        m_class_dock = mock.MagicMock()
+        m_class_dock.run_container.return_value = container_id
+        m_class_dock.logs_container.return_value = log_info
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
-        container_id = uuid.uuid4().hex
         log_info = "logsssss"
         script = 'ls'
         detach = False
         host_dir = "/foo"
         docker_dir = "/foo"
         working_dir = "/foo"
-        cgroup = uuid.uuid4().hex
-        madd.return_value = True
-        math.return_value = True
-        m_log.return_value = log_info
-        m_get_j.return_value = {"cgroup": cgroup}
-        mr.return_value = container_id
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -325,58 +332,53 @@ class TestServerController(testtools.TestCase):
                       "docker_dir": docker_dir,
                       "working_dir": working_dir
                       }
-        results = self.controller.run(parameters)
+        results = contr.run(parameters)
         self.assertEqual(log_info, results)
-        math.assert_called_with(
-            token,
-            host_dir,
-        )
-        mr.assert_called_with(
-            image_id,
-            detach,
-            script,
-            host_dir=host_dir,
-            docker_dir=docker_dir,
-            working_dir=working_dir,
-            cgroup=cgroup
-        )
-        madd.assert_called_with(
-            token,
-            container_id,
-        )
-        m_start.assert_called_with(
-            container_id,
-        )
+        self.assertEqual((token, host_dir), m_cre.mock_calls[1][1])
+        expected_run_call = (image_id,
+                             detach,
+                             script)
 
-    @mock.patch.object(docker_helper.DockerController,
-                       "run_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    @mock.patch.object(credentials.UserController,
-                       "add_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "start_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "logs_container")
-    @mock.patch.object(credentials.UserController,
-                       "get_job_from_token")
-    def test_run_no_host_dir(self, m_get_j, m_log, m_start,
-                             madd, math, mr):
+        expected_run_dict = {
+            "host_dir": host_dir,
+            "docker_dir": docker_dir,
+            "working_dir": working_dir,
+            "cgroup": cgroup
+        }
+        self.assertEqual(expected_run_call,
+                         m_dock.mock_calls[1][1])
+        self.assertEqual(expected_run_dict,
+                         m_dock.mock_calls[1][2])
+        self.assertEqual((token, container_id), m_cre.mock_calls[3][1])
+        self.assertIn(container_id,
+                      m_dock.mock_calls[2][1])
+        self.assertIn(container_id,
+                      m_dock.mock_calls[3][1])
+
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_run_no_host_dir(self, m_dock, m_batch, m_cre):
+        m_class_cre = mock.MagicMock()
+        cgroup = uuid.uuid4().hex
+        expected_job = {"cgroup": cgroup}
+        m_class_cre.get_job_from_token.return_value = expected_job
+        log_info = "logsssss"
+        m_cre.return_value = m_class_cre
+        container_id = uuid.uuid4().hex
+        m_class_dock = mock.MagicMock()
+        m_class_dock.run_container.return_value = container_id
+        m_class_dock = mock.MagicMock()
+        m_class_dock.run_container.return_value = container_id
+        m_class_dock.logs_container.return_value = log_info
+        m_dock.return_value = m_class_dock
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
-        container_id = uuid.uuid4().hex
-        log_info = "logsssss"
         script = 'ls'
         detach = False
         host_dir = None
         docker_dir = "/foo"
         working_dir = "/foo"
-        cgroup = uuid.uuid4().hex
-        madd.return_value = True
-        math.return_value = True
-        m_log.return_value = log_info
-        m_get_j.return_value = {"cgroup": cgroup}
-        mr.return_value = container_id
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -385,37 +387,34 @@ class TestServerController(testtools.TestCase):
                       "docker_dir": docker_dir,
                       "working_dir": working_dir
                       }
-        results = self.controller.run(parameters)
+        contr = controller.ServerController(None)
+        results = contr.run(parameters)
         self.assertEqual(log_info, results)
-        self.assertIs(False, math.called)
+        self.assertNotIn('().authorize_directory', m_cre.mock_calls[1])
 
-    @mock.patch.object(docker_helper.DockerController, "run_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    @mock.patch.object(credentials.UserController,
-                       "add_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "start_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "logs_container")
-    @mock.patch.object(credentials.UserController,
-                       "get_job_from_token")
-    def test_run_detach(self, m_get_j, m_log, m_start, madd, math, mr):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_run_detach(self, m_dock, m_batch, m_cre):
+        m_class_cre = mock.MagicMock()
+        cgroup = uuid.uuid4().hex
+        expected_job = {"cgroup": cgroup}
+        m_class_cre.get_job_from_token.return_value = expected_job
+        log_info = "logsssss"
+        m_cre.return_value = m_class_cre
+        container_id = uuid.uuid4().hex
+        m_class_dock = mock.MagicMock()
+        m_class_dock.run_container.return_value = container_id
+        m_class_dock.logs_container.return_value = log_info
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
-        container_id = uuid.uuid4().hex
-        log_info = "logsssss"
         script = 'ls'
         detach = True
         host_dir = None
         docker_dir = "/foo"
         working_dir = "/foo"
-        cgroup = uuid.uuid4().hex
-        madd.return_value = True
-        math.return_value = True
-        m_log.return_value = log_info
-        m_get_j.return_value = {"cgroup": cgroup}
-        mr.return_value = container_id
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -424,36 +423,25 @@ class TestServerController(testtools.TestCase):
                       "docker_dir": docker_dir,
                       "working_dir": working_dir
                       }
-        results = self.controller.run(parameters)
+        results = contr.run(parameters)
         self.assertEqual(container_id, results)
 
-    @mock.patch.object(docker_helper.DockerController, "run_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    @mock.patch.object(credentials.UserController,
-                       "add_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "start_container")
-    @mock.patch.object(docker_helper.DockerController,
-                       "logs_container")
-    @mock.patch.object(credentials.UserController,
-                       "get_job_from_token")
-    def test_run_unautorized(self, m_get_j, m_log, m_start, madd, math, mr):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_run_unautorized(self, m_dock, m_batch, m_cre):
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_directory.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         token = uuid.uuid4().hex
         image_id = uuid.uuid4().hex
-        container_id = uuid.uuid4().hex
-        log_info = "logsssss"
         script = 'ls'
         detach = True
         host_dir = "/foo"
         docker_dir = "/foo"
         working_dir = "/foo"
-        cgroup = uuid.uuid4().hex
-        madd.return_value = True
-        math.side_effect = exceptions.UserCredentialsException("")
-        m_log.return_value = log_info
-        m_get_j.return_value = {"cgroup": cgroup}
-        mr.return_value = container_id
         parameters = {"token": token,
                       "image_id": image_id,
                       "script": script,
@@ -463,145 +451,124 @@ class TestServerController(testtools.TestCase):
                       "working_dir": working_dir
                       }
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.run,
+                          contr.run,
                           parameters)
 
-    @mock.patch.object(credentials.UserController, "get_job_from_token")
-    @mock.patch.object(credentials.UserController, "authorize_admin")
-    @mock.patch.object(batch.SGEController, "get_accounting")
-    @mock.patch.object(credentials.UserController, "update_job")
-    @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_notify_accounting(self, m_not, m_up, m_acc, mad, mjob):
-        info = uuid.uuid4().hex
-        m_not.return_value = info
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_notify_accounting(self, m_dock, m_batch, m_cre):
+        expected = uuid.uuid4().hex
+        m_class_batch = mock.MagicMock()
+        m_class_batch.notify_accounting.return_value = expected
+        m_batch.return_value = m_class_batch
         parameters = {"token": uuid.uuid4().hex,
                       'admin_token': uuid.uuid4().hex}
-        results = self.controller.notify_accounting(parameters)
-        self.assertEqual(info, results)
+        contr = controller.ServerController(None)
+        results = contr.notify_accounting(parameters)
+        self.assertEqual(expected, results)
 
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_notify_accounting_unauthorized(self, mac, mu):
-        mu.side_effect = exceptions.UserCredentialsException("")
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_notify_accounting_unauthorized(self, m_dock, m_batch, m_cre):
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_admin.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       'admin_token': uuid.uuid4().hex}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.notify_accounting,
+                          contr.notify_accounting,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "stop_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_stop(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_stop(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
+        m_class_dock = mock.MagicMock()
+        m_class_dock.stop_container.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
-        results = self.controller.stop_container(parameters)
+        results = contr.stop_container(parameters)
         self.assertEqual(info_containers, results)
 
-    @mock.patch.object(docker_helper.DockerController, "stop_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    def test_stop_unauthorized(self, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_stop_unauthorized(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.side_effect = exceptions.UserCredentialsException("")
-        ml.return_value = info_containers
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.stop_container,
+                          contr.stop_container,
                           parameters)
 
-    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    def test_copy_to_container(self, m_au, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_copy_to_container(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
         info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
+        m_class_dock = mock.MagicMock()
+        m_class_dock.copy_to_container.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "container_path": "/foo",
                       "host_path": "/foo",
                       "host_to_container": True}
-        results = self.controller.copy(parameters)
+        results = contr.copy(parameters)
+        self.assertNotIn('().copy_from_container', m_dock.mock_calls[1])
+        self.assertIn('().copy_to_container', m_dock.mock_calls[1])
         self.assertEqual(info_containers, results)
 
-    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
-    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    def test_copy_check_direction_to(self, m_au, mu, m_to, m_from):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_copy_from_container(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        mu.return_value = c1
-        info_containers = "info"
-        m_to.return_value = info_containers
-        parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1,
-                      "container_path": "/foo",
-                      "host_path": "/foo",
-                      "host_to_container": True}
-        results = self.controller.copy(parameters)
-        self.assertEqual(True, m_to.called)
-        self.assertEqual(False, m_from.called)
-        self.assertEqual(info_containers, results)
-
-    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
-    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    def test_copy_check_direction_from(self, m_au, mu, m_to, m_from):
-        c1 = uuid.uuid4().hex
-        info_containers = "info"
-        mu.return_value = c1
-        m_from.return_value = info_containers
+        info_containers = {"info"}
+        m_class_dock = mock.MagicMock()
+        m_class_dock.copy_from_container.return_value = info_containers
+        m_dock.return_value = m_class_dock
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "container_path": "/foo",
                       "host_path": "/foo",
                       "host_to_container": False}
-        results = self.controller.copy(parameters)
-        self.assertEqual(False, m_to.called)
-        self.assertEqual(True, m_from.called)
+        results = contr.copy(parameters)
+        self.assertIn('().copy_from_container', m_dock.mock_calls[1])
+        self.assertNotIn('().copy_to_container', m_dock.mock_calls[1])
         self.assertEqual(info_containers, results)
 
-    @mock.patch.object(docker_helper.DockerController, "copy_from_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    def test_copy_from_container(self, m_au, mu, ml):
+    @mock.patch("bdocker.modules.load_credentials_module")
+    @mock.patch("bdocker.modules.load_batch_module")
+    @mock.patch("bdocker.modules.load_docker_module")
+    def test_copy_unauthorized(self, m_dock, m_batch, m_cre):
         c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.return_value = c1
-        ml.return_value = info_containers
-        parameters = {"token": uuid.uuid4().hex,
-                      "container_id": c1,
-                      "container_path": "/foo",
-                      "host_path": "/foo",
-                      "host_to_container": False}
-        results = self.controller.copy(parameters)
-        self.assertEqual(info_containers, results)
-
-    @mock.patch.object(docker_helper.DockerController, "copy_to_container")
-    @mock.patch.object(credentials.UserController, "authorize_container")
-    @mock.patch.object(credentials.UserController,
-                       "authorize_directory")
-    def test_copy_unauthorized(self, m_au, mu, ml):
-        c1 = uuid.uuid4().hex
-        info_containers = {"info"}
-        mu.side_effect = exceptions.UserCredentialsException("")
-        ml.return_value = info_containers
+        expected = exceptions.UserCredentialsException("")
+        m_class_cre = mock.MagicMock()
+        m_class_cre.authorize_container.side_effect = expected
+        m_cre.return_value = m_class_cre
+        contr = controller.ServerController(None)
         parameters = {"token": uuid.uuid4().hex,
                       "container_id": c1,
                       "container_path": "/foo",
                       "host_path": "/foo",
                       "host_to_container": True}
         self.assertRaises(exceptions.UserCredentialsException,
-                          self.controller.copy,
+                          contr.copy,
                           parameters)
