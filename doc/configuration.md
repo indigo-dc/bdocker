@@ -84,11 +84,11 @@ The accounting node configures the following fields::
 |                     |``port``          |Port in which the service is located              
 |``batch``        |                      |Batch system configuration                        
 |                 |``system``            |Specify the type of resource manager              
-|                 |``enable_cgroups``    |Enable cgroup accounting management.              
+|                 |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
 |                 |``cgroups_dir``       |CGroup root directory. By default:                
 |                 |                      |"/sys/fs/cgroup"                                    
 |                 |``parent_cgroup``     |Cgroup parent group: By default: "/"
-|                 |``bdocker_accounting``|Accountig file for bdocker jobs.
+|                 |``bdocker_accounting``|Accountig file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |Credential module configuration
 |                 |``token_store``       |File in which the tokens are store (root rights)
 |                 |``token_client_file`` |Token file name. By default: ".bdocker_token".
