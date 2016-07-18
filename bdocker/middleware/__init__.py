@@ -16,7 +16,7 @@
 
 
 from gunicorn.app import base
-from gunicorn.six import iteritems
+from gunicorn import six
 
 
 class StandaloneApplication(base.BaseApplication):
@@ -26,9 +26,10 @@ class StandaloneApplication(base.BaseApplication):
         super(StandaloneApplication, self).__init__()
 
     def load_config(self):
-        config = dict([(key, value) for key, value in iteritems(self.options)
+        config = dict([(key, value) for key,
+                                        value in six.iteritems(self.options)
                        if key in self.cfg.settings and value is not None])
-        for key, value in iteritems(config):
+        for key, value in six.iteritems(config):
             self.cfg.set(key.lower(), value)
 
     def load(self):

@@ -261,7 +261,8 @@ conf_sge = {
          'port': 'port',
          'environ': 'debug'},
     'credentials':
-        {'token_store': "/fake"}
+        {'token_store': "/fake",
+         'token_client_file': 'token_file'}
 }
 
 job_env = ["algo", "/", "algo", "algo"]

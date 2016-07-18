@@ -84,9 +84,8 @@ def bdocker(ctx, host):
                       "prepare the batch environment."
                       " ROOT privileges needed")
 @decorators.user_option
-@decorators.job_option
 @click.pass_context
-def configure_environment(ctx, user, jobid):
+def configure_environment(ctx, user):
     """Configure credentials and batch environment.
 
     It creates a token credential for the user, and
@@ -101,8 +100,7 @@ def configure_environment(ctx, user, jobid):
     """
     try:
         out = ctx.obj.configuration(
-            user,
-            jobid
+            user
         )
         print_message(out["path"])
     except BaseException as e:

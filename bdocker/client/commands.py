@@ -95,14 +95,6 @@ class CommandController(object):
                 cred_info.get("token_client_file",
                               TOKEN_FILE_NAME)
             )
-            # self.job_info = job_info
-            # self.job_id = job_info["job_id"]
-            # self.token_file = "%s/%s_%s" % (
-            #     job_info['home'],  # TODO(jorgesece): pop it
-            #     self.defaul_token_name,
-            #     self.job_id
-            # )
-            # self.user_name = job_info['user_name']
             self.token_storage = cred_info["token_store"]
             self.control = request.RequestController(endopoint=endpoint)
         except BaseException as e:
@@ -122,7 +114,7 @@ class CommandController(object):
         )
         return token_file
 
-    def configuration(self, user_name=None, jobid=None):
+    def configuration(self, user_name=None):
         path = "/configuration"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
@@ -233,8 +225,7 @@ class CommandController(object):
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
                                           job_info['job_id'])
-        # FIXME (jorgesece): check jobid from token
-        token = token_parse(None, token_file)
+        token = token_parse(token, token_file)
         acc = self.batch_module.create_accounting(job_info['job_id'])
         parameters = {"admin_token": admin_token,
                       'accounting': acc
