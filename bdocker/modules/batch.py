@@ -296,7 +296,7 @@ class SGEController(WNController):
                     if int(acc["cpu_usage"]) >= int(cpu_max):
                         exceptions.make_log(
                             "exception",
-                            "KILL JOB by CPU %s. Acc: %s. Max: %s" %
+                            "KILL JOB %s by CPU limit. Acc: %s. Max: %s" %
                             (job_id, acc["cpu_usage"],
                              cpu_max
                              ))
@@ -306,7 +306,7 @@ class SGEController(WNController):
                     if int(acc["memory_usage"]) >= int(mem_max):
                         exceptions.make_log(
                             "exception",
-                            "KILL JOB by MEM %s. Acc: %s. Max: %s" %
+                            "KILL JOB %s by MEM limit. Acc: %s. Max: %s" %
                             (job_id, acc["memory_usage"],
                              mem_max
                              ))
