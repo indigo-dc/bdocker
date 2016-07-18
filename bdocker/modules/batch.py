@@ -29,7 +29,7 @@ class BatchNotificationController(object):
     def __init__(self, accounting_conf):
         try:
             # TODO(jorgesece): host should have http or https
-            endpoint = 'http://%s:%s' % (
+            endpoint = '%s:%s' % (
                 accounting_conf['host'],
                 accounting_conf['port']
             )
@@ -282,6 +282,7 @@ class SGEController(WNController):
             raise exceptions.BatchException(
                 message
             )
+            # os.exit(1)
         exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
         while True:
             try:
@@ -310,6 +311,12 @@ class SGEController(WNController):
                              ))
                         self._kill_job(spool)
                         break
+
+                exceptions.make_log("debug",
+                                    "JOB CPU %s. Acc: %s. Max: %s" %
+                                    (job_id, acc["cpu_usage"],
+                                     cpu_max
+                                     ))
                 time.sleep(self.flush_time)
             except exceptions.CgroupException as e:
                 exceptions.make_log("debug", "MONITORING FINISHED")

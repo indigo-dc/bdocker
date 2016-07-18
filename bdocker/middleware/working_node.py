@@ -21,12 +21,11 @@ if __name__ == '__main__':
     conf = working_node.load_configuration()
     port = conf['server']['port']
     host = conf['server']['host']
-    environ = conf['server']['environ']
-    if environ == 'public':
-            host = '0.0.0.0'
-    workers = conf["server"].get("workers", 4)
+    workers = conf["server"].get("workers", 2)
+    time_out = conf["server"].get("timeout", 200)
     options = {
         'bind': '%s:%s' % (host, port),
         'workers': workers,
+        'timeout': time_out
     }
     middleware.StandaloneApplication(working_node.app, options).run()

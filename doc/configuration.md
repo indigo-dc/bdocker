@@ -20,6 +20,8 @@ Every working node configures the following fields::
     host = http://localhost
     port = 5000
     environ = debug
+    workers = 2
+    time_out = 200
 
     [accounting_server]
     host = http://localhost
@@ -51,6 +53,8 @@ The accounting node configures the following fields::
     host = http://localhost
     port = 5002
     environ = debug
+    workers = 2
+    time_out = 200
 
     [batch]
     # system can be: SGE, ...(add more modules)
@@ -66,14 +70,17 @@ The accounting node configures the following fields::
 | Group             |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
 |``server``         |                    |RESTFUL API access configuration                  
-|                   |``host``            |Host in which the service will be provided        
-|                   |``port``            |Port in which the service will be provided        
-|                   |``environ``         |Run mode. It could be: debug, public, private.    
+|                   |``host``            |Host in which the service will be provided. Format: ``http(s)://xx``
+|                   |``port``            |Port in which the service will be provided
+|                   |``workers``         |Middleware multithread. It is 2 threads by default.
+|                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
+|                   |``environ``         |Run mode for RESTFUL API. Middleware does not support it.
+|                   |                     |It could be: debug, public, private.
 |                   |                     |In case of public, the service will listen from  
 |                  |                      |all the local IPs, it will use 0.0.0.0 IP.          
 |``accounting_server``|                  |Configures in the WN the location of the          
 |                   |                     |accounting service.                               
-|                     |``host``          |Host in which the service is located              
+|                     |``host``          |Host in which the service is located. Format: ``http(s)://xx``              
 |                     |``port``          |Port in which the service is located              
 |``batch``        |                      |Batch system configuration                        
 |                 |``system``            |Specify the type of resource manager              
@@ -84,11 +91,12 @@ The accounting node configures the following fields::
 |                 |``bdocker_accounting``|Accountig file for bdocker jobs.
 |``credentials``  |                      |Credential module configuration
 |                 |``token_store``       |File in which the tokens are store (root rights)
-|                 |``token_client_file`` |Token file name. In configuration process, the user
-|                 |                      |token is stored in the user home directory by using
+|                 |``token_client_file`` |Token file name. By default: ".bdocker_token".
+|                 |                      |In configuration process, the user token is stored
+|                 |                      |in the user home directory by using
 |                 |                      |the name: $HOME/``token_client_file``_$JOB_ID.
 |``dockerAPI``    |                      |
-|                 | ``base_url``          |Docker server url. It could be a http link
+|                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
 
@@ -103,16 +111,28 @@ The accounting node configures the following fields::
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
 |``server``      |                     |RESTFUL API access configuration
-|                |``host``             |Host in which the service is located
+|                |``host``             |Host in which the service is located. Format: ``http(s)://xx``
 |                |``port``             |Port in which the service is located
 |``credentials`` |                     |Credential module configuration
-|                |``token_store``      |File in which the tokens are store (root rights).
+|                |``token_store``      |File in which the tokens are stored (root rights).
 |                |                     |The client will use the administation token to
-|                |                     |   execute configuration and cleaning tasks.
+|                |                     |execute configuration and cleaning tasks.
 
 
 ##Bacth environment configuration
 
+The configuration file is located in /etc/configure_bdocker.cfg by default. But it can be modified
+by setting the environment variable ``BDOCKER_CONF_FILE``.
+
+###Prolog::
+
+    ################
+    ### BDOCKER ####
+    ################
+    ## For JOB_ID with value 1
+    ## The tocken will store the file in $HOME/.bdocker_token_1
+    export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
+    bdocker configure
 
 ###Epilog::
 
@@ -120,14 +140,6 @@ The accounting node configures the following fields::
     ### BDOCKER ####
     ################
     ## For JOB_ID with value 1
-    ## The tocken will store the token in $HOME/.bdocker_token_1
-    export BDOCKER_CONF_FILE="/home/jorge/conf.cfg
-    bdocker configure
-
-###Prolog::
-
-    ################
-    ### BDOCKER ####
-    ################
-    export BDOCKER_CONF_FILE="/home/jorge/conf.cfg
+    ## It will take the tocken from token in $HOME/.bdocker_token_1
+    export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker clean
