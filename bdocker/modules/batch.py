@@ -268,7 +268,8 @@ class SGEController(WNController):
     def _launch_job_monitoring(self, job_id, file_path, spool,
                                cpu_max=None,
                                mem_max=None):
-        exceptions.make_log("exception", "LAUNCH MONITORING")
+        exceptions.make_log("exception", "LAUNCH MONITORING Job: %s"
+                            % job_id)
         try:
             pid = os.fork()
             if pid > 0:
