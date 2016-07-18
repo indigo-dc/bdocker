@@ -70,9 +70,9 @@ The accounting node configures the following fields::
 | Group             |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
 |``server``         |                    |RESTFUL API access configuration                  
-|                   |``host``            |Host in which the service will be provided. Format: ``http(s)://xx``
+|                   |``host``            |Host (IP or hostname) in which the service will be provided.
 |                   |``port``            |Port in which the service will be provided
-|                   |``workers``         |Middleware multithread. It is 2 threads by default.
+|                   |``workers``         |Middleware multi-threads. It is 2 threads by default.
 |                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
 |                   |``environ``         |Run mode for RESTFUL API. Middleware does not support it.
 |                   |                     |It could be: debug, public, private.
@@ -99,6 +99,11 @@ The accounting node configures the following fields::
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
+The parameter ``time_out`` is important for syncorinized long docker executions, since the server will
+reset the request in case it exceed this time.
+The working node daemon raise this exception in case this time is exceeded:
+    [2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)
+
 
 ##Client configuration
 
@@ -111,7 +116,7 @@ The accounting node configures the following fields::
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
 |``server``      |                     |RESTFUL API access configuration
-|                |``host``             |Host in which the service is located. Format: ``http(s)://xx``
+|                |``host``             |Host (IP or hostname) in which the service is located.
 |                |``port``             |Port in which the service is located
 |``credentials`` |                     |Credential module configuration
 |                |``token_store``      |File in which the tokens are stored (root rights).
