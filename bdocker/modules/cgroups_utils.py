@@ -156,7 +156,7 @@ def get_accounting(group_name, parent_group,
     try:
         memory_usage = utils.read_file(memory_file)
         cpu_usage = utils.read_file(cpu_file)
-    except IOError:
+    except BaseException:
         raise exceptions.CgroupException("%s/%s Not found"
                                          % (parent_group,
                                             group_name))
