@@ -40,10 +40,8 @@ def task_to_cgroup(cgroup_dir, pid):
 
 def remove_tasks(cgroup_name, cgroup_parent):
     child_path = "%s/%s" % (cgroup_parent, cgroup_name)
-    exceptions.make_log("exception", "TESTS: DELETING %s" % child_path)
     job_pids = get_pids_from_cgroup(child_path)
     for pid in job_pids:
-        exceptions.make_log("exception", "TESTS: PID TO %s" % cgroup_parent)
         task_to_cgroup(cgroup_parent, pid)
 
 
@@ -71,14 +69,13 @@ def create_tree_cgroups(group_name, parent_group_dir,
         parent_node = c_trees.get_node_by_path(parent_group)
         if parent_node:
             for node in parent_node.nodes:
-                exceptions.make_log("exception", "Node: %s" % node.full_path)
                 try:
                     new_node = node.create_cgroup(group_name)
                     if pid:
                         task_to_cgroup(new_node.full_path, pid)
                 except OSError as e:
                     if e.errno == 17:
-                        exceptions.make_log("exception", e.message)
+                        exceptions.make_log("info", e.message)
                     else:
                         raise e
         else:
@@ -105,7 +102,7 @@ def delete_tree_cgroups(group_name, parent_group,
                 node.delete_cgroup(group_name)
             except IOError as e:
                 if e.errno == 2:
-                    exceptions.make_log("exception", e.message)
+                    exceptions.make_log("info", e.message)
                 else:
                     raise e
     except BaseException as e:
@@ -161,7 +158,7 @@ def get_accounting(group_name, parent_group,
         cpu_usage = utils.read_file(cpu_file)
     except IOError:
         raise exceptions.CgroupException("%s/%s Not found"
-                                         % parent_group,
-                                         group_name)
+                                         % (parent_group,
+                                            group_name))
     return {"memory_usage": memory_usage,
             "cpu_usage": cpu_usage}

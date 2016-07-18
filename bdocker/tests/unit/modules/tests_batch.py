@@ -406,7 +406,6 @@ class TestSGEController(testtools.TestCase):
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller._launch_job_monitoring(job_id,
                                           path,
-                                          admin_token,
                                           None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
@@ -441,7 +440,6 @@ class TestSGEController(testtools.TestCase):
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller._launch_job_monitoring(job_id,
                                           path,
-                                          admin_token,
                                           None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
@@ -481,7 +479,6 @@ class TestSGEController(testtools.TestCase):
         controller = batch.SGEController(conf, mock.MagicMock())
         controller._launch_job_monitoring(job_id,
                                           path,
-                                          admin_token,
                                           spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
@@ -524,7 +521,6 @@ class TestSGEController(testtools.TestCase):
 
         controller._launch_job_monitoring(job_id,
                                           path,
-                                          admin_token,
                                           spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
@@ -567,7 +563,6 @@ class TestSGEController(testtools.TestCase):
 
         controller._launch_job_monitoring(job_id,
                                           path,
-                                          admin_token,
                                           spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(

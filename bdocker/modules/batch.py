@@ -207,6 +207,52 @@ class SGEController(WNController):
         super(SGEController, self).__init__(*args, **kwargs)
 
     @staticmethod
+    def _get_job_configuration(spool):
+        path = "%s/config" % spool
+        conf = utils.load_sge_job_configuration(path)
+        qname = conf['queue']
+        hostname = conf['host']
+        logname = conf['job_owner']
+        job_name = conf['job_name']
+        account = conf['account']
+        max_cpu = conf['h_cpu']
+        if max_cpu == "INFINITY":
+            max_cpu = None
+        else:
+            max_cpu = parsers.parse_time_to_nanoseconds(
+                max_cpu
+            )
+        max_memory = conf['h_data']
+        if max_memory == "INFINITY":
+            max_memory = None
+
+        return {
+            'queue_name': qname,
+            'host_name': hostname,
+            'log_name': logname,
+            'job_name': job_name,
+            'account_name': account,
+            'max_cpu': max_cpu,
+            'max_memory': max_memory
+        }
+
+    @staticmethod
+    def _kill_job(spool):
+        try:
+            job_pid_path = "%s/job_pid" % spool
+            job_pid = utils.read_file(job_pid_path)
+            if job_pid:
+                job_pid = int(job_pid)
+                os.kill(job_pid, signal.SIGKILL)
+            return job_pid
+        except BaseException as e:
+            exc = exceptions.BatchException(
+                message="COULD NOT KILL JOB",
+                e=e)
+            exceptions.make_log("exception", exc.message)
+            raise exc
+
+    @staticmethod
     def _create_accounting_file(path, job_info):
         data = {
             "job_id": job_info['job_id'],
@@ -219,8 +265,7 @@ class SGEController(WNController):
         }
         utils.write_yaml_file(path, data)
 
-    def _launch_job_monitoring(self, job_id, file_path,
-                               admin_token, spool,
+    def _launch_job_monitoring(self, job_id, file_path, spool,
                                cpu_max=None,
                                mem_max=None):
         exceptions.make_log("exception", "LAUNCH MONITORING")
@@ -238,7 +283,7 @@ class SGEController(WNController):
                 message
             )
             # os.exit(1)
-        exceptions.make_log("exception", "MONITORING JOB %s." % job_id)
+        exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
         while True:
             try:
                 time.sleep(self.flush_time)
@@ -268,13 +313,13 @@ class SGEController(WNController):
                         self._kill_job(spool)
                         break
 
-                exceptions.make_log("exception",
+                exceptions.make_log("debug",
                                     "JOB CPU %s. Acc: %s. Max: %s" %
                                     (job_id, acc["cpu_usage"],
                                      cpu_max
                                      ))
             except exceptions.CgroupException as e:
-                exceptions.make_log("exception", "MONITORING FINISHED")
+                exceptions.make_log("debug", "MONITORING FINISHED")
                 break
             except BaseException as e:
                 message = "ERROR IN: %s. %s." % (file_path,
@@ -302,7 +347,6 @@ class SGEController(WNController):
                 out.update({"acc_file": path})
                 self._create_accounting_file(path, job_info)
                 self._launch_job_monitoring(job_id, path,
-                                            admin_token,
                                             spool=job_spool,
                                             cpu_max=job_cpu_max,
                                             mem_max=job_mem_max)
@@ -371,12 +415,12 @@ class SGEController(WNController):
         if self.enable_cgroups:
             job_info = utils.read_yaml_file(path)
             accounting = self.create_accounting(job_info)
-            exceptions.make_log("exception",
+            exceptions.make_log("debug",
                                 "CREATE ACCOUNTING STRING: %s" % accounting)
             results = self.notification_controller.notify_accounting(
                 admin_token,
                 accounting)
-            exceptions.make_log("exception", "NOTIFIED")
+            exceptions.make_log("debug", "NOTIFIED")
             return results
         else:
             raise exceptions.NoImplementedException(
@@ -398,51 +442,3 @@ class SGEController(WNController):
                     }
         job_info.update(self._get_job_configuration(spool_dir))
         return job_info
-
-    @staticmethod
-    def _get_job_configuration(spool):
-        path = "%s/config" % spool
-        conf = utils.load_sge_job_configuration(path)
-        qname = conf['queue']
-        hostname = conf['host']
-        logname = conf['job_owner']
-        job_name = conf['job_name']
-        account = conf['account']
-        max_cpu = conf['h_cpu']
-        if max_cpu == "INFINITY":
-            max_cpu = None
-        else:
-            max_cpu = parsers.parse_time_to_nanoseconds(
-                max_cpu
-            )
-        max_memory = conf['h_data']
-        if max_memory == "INFINITY":
-            max_memory = None
-
-        return {
-            'queue_name': qname,
-            'host_name': hostname,
-            'log_name': logname,
-            'job_name': job_name,
-            'account_name': account,
-            'max_cpu': max_cpu,
-            'max_memory': max_memory
-        }
-
-    @staticmethod
-    def _kill_job(spool):
-        try:
-            job_pid_path = "%s/job_pid" % spool
-            job_pid = utils.read_file(job_pid_path)
-            exceptions.make_log("exception",
-                                "KILL JOB with PID: %s " % job_pid)
-            if job_pid:
-                job_pid = int(job_pid)
-                os.kill(job_pid, signal.SIGKILL)
-            return job_pid
-        except BaseException as e:
-            exc = exceptions.BatchException(
-                message="COULD NOT KILL JOB",
-                e=e)
-            exceptions.make_log("exception", exc.message)
-            raise exc
