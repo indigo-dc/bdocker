@@ -24,6 +24,8 @@ from bdocker.modules import request
 from bdocker import parsers
 from bdocker import utils
 
+BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
+
 
 class BatchNotificationController(object):
     def __init__(self, accounting_conf):
@@ -72,33 +74,30 @@ class SGEAccountingController(AccountingController):
         if 'bdocker_accounting' in conf:
             self.bdocker_accounting = conf["bdocker_accounting"]
         else:
-            self.bdocker_accounting = "/etc/bdocker_accounting"
+            self.bdocker_accounting = BDOCKER_ACCOUNTING
             exceptions.make_log("exception",
                                 "bdocker_accounting parameter is not defined."
                                 " Using %s by default. " %
                                 self.bdocker_accounting)
 
-        if 'sge_accounting' in conf:
-            self.sge_accounting = conf["sge_accounting"]
-        else:
-            self.sge_accounting = "/opt/sge/default/common/accounting"
-            exceptions.make_log("exception",
-                                "sge_accounting parameter is not defined."
-                                " Using %s by default. " %
-                                self.sge_accounting)
-
     def _get_sge_job_accounting(self, queue_name, host_name, job_id):
+        """Get information from the SGE accounting file.
+
+        It is DEPRECATED. We mantein in case we need in the future.
+
+        :param queue_name:
+        :param host_name:
+        :param job_id:
+        :return:
+        """
+        sge_accounting = "/opt/sge/default/common/accounting"
         any_word = "[^:]+"
         job_string = "%s:%s:%s:%s:%s:%s:" % (
             queue_name, host_name, any_word,
             any_word, any_word, job_id
         )
-        job = utils.find_line(self.sge_accounting, job_string)
+        job = utils.find_line(sge_accounting, job_string)
         return job.split(":")
-
-    def _update_sge_accounting(self, string_list):
-        job_string = ":".join(string_list)
-        utils.add_to_file(self.bdocker_accounting, job_string)
 
     def set_job_accounting(self, accounting):
         """Add accounting line to the bdocker accounting file
@@ -127,14 +126,95 @@ class WNController(object):
         self.root_cgroup = conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
         self.parent_group = conf.get("parent_cgroup", '/')
-        self.flush_time = conf.get("flush_time", 10)
+        self.flush_time = conf.get("monitor_time", 10)
         self.default_acc_file = ".bdocker_accounting"
 
         self.notification_controller = BatchNotificationController(
             accounting_conf
         )
 
+    @staticmethod
+    def create_accounting_file(path, job_info):
+        raise exceptions.NoImplementedException(
+            message="Still not supported")
+
+    def launch_job_monitoring(self, job_id, file_path, job_pid,
+                              cpu_max=None,
+                              mem_max=None):
+        exceptions.make_log("exception", "LAUNCH MONITORING Job: %s"
+                            % job_id)
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # Exit parent process
+                return 0
+            os.setsid()
+        except OSError as e:
+            message = "fork failed: %d (%s)" % (
+                e.errno, e.strerror)
+            exceptions.make_log("exception", message)
+            raise exceptions.BatchException(
+                message
+            )
+            # os.exit(1)
+        exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
+        while True:
+            try:
+                acc = cgroups_utils.get_accounting(
+                    job_id,
+                    self.parent_group,
+                    root_parent=self.root_cgroup)
+                utils.update_yaml_file(file_path, acc)
+                if cpu_max:
+                    if int(acc["cpu_usage"]) >= int(cpu_max):
+                        exceptions.make_log(
+                            "exception",
+                            "KILL JOB %s by CPU limit. Acc: %s. Max: %s" %
+                            (job_id, acc["cpu_usage"],
+                             cpu_max
+                             ))
+                        self.kill_job(job_pid)
+                        break
+                if mem_max:
+                    if int(acc["memory_usage"]) >= int(mem_max):
+                        exceptions.make_log(
+                            "exception",
+                            "KILL JOB %s by MEM limit. Acc: %s. Max: %s" %
+                            (job_id, acc["memory_usage"],
+                             mem_max
+                             ))
+                        self.kill_job(job_pid)
+                        break
+
+                exceptions.make_log("debug",
+                                    "JOB CPU %s. Acc: %s. Max: %s" %
+                                    (job_id, acc["cpu_usage"],
+                                     cpu_max
+                                     ))
+                time.sleep(self.flush_time)
+            except exceptions.CgroupException as e:
+                exceptions.make_log("debug", "MONITORING FINISHED")
+                break
+            except BaseException as e:
+                message = "ERROR IN: %s. %s." % (file_path,
+                                                 e.message)
+                exceptions.make_log("exception", message)
+                break
+
+        child = os.getpid()
+        os.kill(child, signal.SIG_IGN)
+        time.sleep(0.1)
+
     def conf_environment(self, session_data, admin_token=None):
+        """Configures the Working node environment by using CGROUPS.
+
+        If cgroups control is enabled by using "enable_groups" option,
+        It creates a cgroup and move the parent pid of the job to it.
+
+        :param session_data:
+        :param admin_token:
+        :return:
+        """
         if self.enable_cgroups:
             try:
                 job_id = session_data['job']['job_id']
@@ -153,7 +233,12 @@ class WNController(object):
                 cgroup_job = "/%s" % job_id
             else:
                 cgroup_job = "%s/%s" % (self.parent_group, job_id)
-            batch_info = {"cgroup": cgroup_job}
+            acc_path = "%s/%s_%s" % (session_data['home'],
+                                     self.default_acc_file,
+                                     job_id)
+            batch_info = {"cgroup": cgroup_job,
+                          "acc_file": acc_path}
+
             exceptions.make_log("debug",
                                 "CGROUP CONTROL ACTIVATED ON: %s "
                                 "JOB CGROUP: %s "
@@ -164,6 +249,14 @@ class WNController(object):
         return batch_info
 
     def clean_environment(self, session_data, admin_token=None):
+        """Clean the batch environment for the job.
+
+        It deletes the cgroups created for the job.
+
+        :param session_data:
+        :param admin_token:
+        :return:
+        """
         if self.enable_cgroups:
             flag = True
             job_id = session_data["job"]["job_id"]
@@ -177,6 +270,11 @@ class WNController(object):
         return flag
 
     def get_accounting(self, job_id):
+        """Get the accounting information from the job cgroup
+
+        :param job_id:
+        :return:
+        """
         if self.enable_cgroups:
             accounting = cgroups_utils.get_accounting(
                 job_id,
@@ -199,6 +297,11 @@ class WNController(object):
         raise exceptions.NoImplementedException(
             "Get job information"
             "method")
+
+    @staticmethod
+    def kill_job(spool):
+        raise exceptions.NoImplementedException(
+            message="Still not supported")
 
 
 class SGEController(WNController):
@@ -237,14 +340,14 @@ class SGEController(WNController):
         }
 
     @staticmethod
-    def _kill_job(spool):
+    def kill_job(job_pid):
         try:
-            job_pid_path = "%s/job_pid" % spool
-            job_pid = utils.read_file(job_pid_path)
-            if job_pid:
-                job_pid = int(job_pid)
-                os.kill(job_pid, signal.SIGKILL)
-            return job_pid
+            job_pid_path = job_pid
+            pid = utils.read_file(job_pid_path)
+            if pid:
+                pid = int(pid)
+                os.kill(pid, signal.SIGKILL)
+            return pid
         except BaseException as e:
             exc = exceptions.BatchException(
                 message="COULD NOT KILL JOB",
@@ -253,7 +356,7 @@ class SGEController(WNController):
             raise exc
 
     @staticmethod
-    def _create_accounting_file(path, job_info):
+    def create_accounting_file(path, job_info):
         data = {
             "job_id": job_info['job_id'],
             "user_name": job_info['user_name'],
@@ -265,91 +368,27 @@ class SGEController(WNController):
         }
         utils.write_yaml_file(path, data)
 
-    def _launch_job_monitoring(self, job_id, file_path, spool,
-                               cpu_max=None,
-                               mem_max=None):
-        exceptions.make_log("exception", "LAUNCH MONITORING Job: %s"
-                            % job_id)
-        try:
-            pid = os.fork()
-            if pid > 0:
-                # Exit parent process
-                return 0
-            os.setsid()
-        except OSError as e:
-            message = "fork failed: %d (%s)" % (
-                e.errno, e.strerror)
-            exceptions.make_log("exception", message)
-            raise exceptions.BatchException(
-                message
-            )
-            # os.exit(1)
-        exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
-        while True:
-            try:
-                acc = cgroups_utils.get_accounting(
-                    job_id,
-                    self.parent_group,
-                    root_parent=self.root_cgroup)
-                utils.update_yaml_file(file_path, acc)
-                if cpu_max:
-                    if int(acc["cpu_usage"]) >= int(cpu_max):
-                        exceptions.make_log(
-                            "exception",
-                            "KILL JOB %s by CPU limit. Acc: %s. Max: %s" %
-                            (job_id, acc["cpu_usage"],
-                             cpu_max
-                             ))
-                        self._kill_job(spool)
-                        break
-                if mem_max:
-                    if int(acc["memory_usage"]) >= int(mem_max):
-                        exceptions.make_log(
-                            "exception",
-                            "KILL JOB %s by MEM limit. Acc: %s. Max: %s" %
-                            (job_id, acc["memory_usage"],
-                             mem_max
-                             ))
-                        self._kill_job(spool)
-                        break
-
-                exceptions.make_log("debug",
-                                    "JOB CPU %s. Acc: %s. Max: %s" %
-                                    (job_id, acc["cpu_usage"],
-                                     cpu_max
-                                     ))
-                time.sleep(self.flush_time)
-            except exceptions.CgroupException as e:
-                exceptions.make_log("debug", "MONITORING FINISHED")
-                break
-            except BaseException as e:
-                message = "ERROR IN: %s. %s." % (file_path,
-                                                 e.message)
-                exceptions.make_log("exception", message)
-                break
-
-        child = os.getpid()
-        os.kill(child, signal.SIG_IGN)
-        time.sleep(0.1)
-
     def conf_environment(self, session_data, admin_token):
+        """Configures the cgroup and the sge features.
+
+        :param session_data:
+        :param admin_token:
+        :return:
+        """
         out = super(SGEController, self).conf_environment(session_data)
         if out:
             try:
                 job_info = session_data['job']
                 job_id = job_info['job_id']
-                job_spool = job_info['spool']
+                job_pid = "%s/job_pid" % job_info['spool']
                 job_cpu_max = job_info['max_cpu']
                 job_mem_max = job_info['max_memory']
-                path = "%s/%s_%s" % (session_data['home'],
-                                     self.default_acc_file,
-                                     job_id)
-                out.update({"acc_file": path})
-                self._create_accounting_file(path, job_info)
-                self._launch_job_monitoring(job_id, path,
-                                            spool=job_spool,
-                                            cpu_max=job_cpu_max,
-                                            mem_max=job_mem_max)
+                path = out["acc_file"]
+                self.create_accounting_file(path, job_info)
+                self.launch_job_monitoring(job_id, path,
+                                           job_pid=job_pid,
+                                           cpu_max=job_cpu_max,
+                                           mem_max=job_mem_max)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
