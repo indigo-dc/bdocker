@@ -88,6 +88,7 @@ The accounting node configures the following fields::
 |                 |``cgroups_dir``       |CGroup root directory. By default:                
 |                 |                      |"/sys/fs/cgroup"                                    
 |                 |``parent_cgroup``     |Cgroup parent group: By default: "/"
+|                 |``monitoring_time``   |Interval time for monitoring the accounting. Even copy it to the file.
 |                 |``bdocker_accounting``|Accountig file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |Credential module configuration
 |                 |``token_store``       |File in which the tokens are store (root rights)
