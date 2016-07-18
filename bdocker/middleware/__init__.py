@@ -26,9 +26,9 @@ class StandaloneApplication(base.BaseApplication):
         super(StandaloneApplication, self).__init__()
 
     def load_config(self):
-        config = dict([(key, value) for key,
-                                        value in six.iteritems(self.options)
-                       if key in self.cfg.settings and value is not None])
+        config = dict(
+            [(key, value) for key, value in six.iteritems(self.options)
+             if key in self.cfg.settings and value is not None])
         for key, value in six.iteritems(config):
             self.cfg.set(key.lower(), value)
 

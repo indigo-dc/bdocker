@@ -390,7 +390,6 @@ class TestSGEController(testtools.TestCase):
                                             m_setsid, m_fork):
         job_id = uuid.uuid4().hex
         path = "/foo"
-        admin_token = uuid.uuid4().hex
         memory_usage = 99
         cpu_usage = 111
         interval = 33
@@ -424,7 +423,6 @@ class TestSGEController(testtools.TestCase):
                                    m_setsid, m_fork):
         job_id = uuid.uuid4().hex
         path = "/foo"
-        admin_token = uuid.uuid4().hex
         memory_usage = 99
         cpu_usage = 111
         interval = 33
@@ -460,7 +458,6 @@ class TestSGEController(testtools.TestCase):
                                           m_setsid, m_fork):
         job_id = uuid.uuid4().hex
         path = "/foo"
-        admin_token = uuid.uuid4().hex
         memory_usage = 99
         cpu_usage = 111
         interval = 33
@@ -501,7 +498,6 @@ class TestSGEController(testtools.TestCase):
                                                      m_setsid, m_fork):
         job_id = uuid.uuid4().hex
         path = "/foo"
-        admin_token = uuid.uuid4().hex
         memory_usage = 99
         cpu_usage = 111
         interval = 33
@@ -543,7 +539,6 @@ class TestSGEController(testtools.TestCase):
                                                      m_setsid, m_fork):
         job_id = uuid.uuid4().hex
         path = "/foo"
-        admin_token = uuid.uuid4().hex
         memory_usage = 99
         cpu_usage = 2  # nanoseconds
         interval = 33
