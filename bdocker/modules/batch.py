@@ -282,11 +282,9 @@ class SGEController(WNController):
             raise exceptions.BatchException(
                 message
             )
-            # os.exit(1)
         exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
         while True:
             try:
-                time.sleep(self.flush_time)
                 acc = cgroups_utils.get_accounting(
                     job_id,
                     self.parent_group,
@@ -312,12 +310,7 @@ class SGEController(WNController):
                              ))
                         self._kill_job(spool)
                         break
-
-                exceptions.make_log("debug",
-                                    "JOB CPU %s. Acc: %s. Max: %s" %
-                                    (job_id, acc["cpu_usage"],
-                                     cpu_max
-                                     ))
+                time.sleep(self.flush_time)
             except exceptions.CgroupException as e:
                 exceptions.make_log("debug", "MONITORING FINISHED")
                 break
@@ -326,7 +319,6 @@ class SGEController(WNController):
                                                  e.message)
                 exceptions.make_log("exception", message)
                 break
-                # raise exceptions.CgroupException(message)
 
         child = os.getpid()
         os.kill(child, signal.SIG_IGN)
