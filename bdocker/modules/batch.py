@@ -28,7 +28,7 @@ BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
 
 
 class BatchNotificationController(object):
-    """ Notification controller for batch systems"""
+    """Notification controller for batch systems."""
     def __init__(self, accounting_conf):
         """Initialize the controller
 
@@ -77,7 +77,7 @@ class BatchNotificationController(object):
 
 
 class AccountingController(object):
-    """Base of the Accounting the controller"""
+    """Base of the Accounting the controller."""
     def __init__(self, conf):
         """Initialize the controller"""
         pass
@@ -97,7 +97,7 @@ class AccountingController(object):
 
 
 class SGEAccountingController(AccountingController):
-    """SGE accounting controller"""
+    """SGE accounting controller."""
     def __init__(self, conf):
         """Initialize controller
 
