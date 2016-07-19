@@ -28,9 +28,17 @@ BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
 
 
 class BatchNotificationController(object):
+    """ Notification controller for batch systems"""
     def __init__(self, accounting_conf):
+        """Initialize the controller
+
+        It set attributes and creates a Request controller by using
+        the endpoint related to the accounting server.
+
+        :param accounting_conf:
+        :return:
+        """
         try:
-            # TODO(jorgesece): host should have http or https
             endpoint = '%s:%s' % (
                 accounting_conf['host'],
                 accounting_conf['port']
@@ -46,6 +54,16 @@ class BatchNotificationController(object):
             )
 
     def notify_accounting(self, admin_token, accounting_info):
+        """Execute a PUT request to notify the accounting
+
+        In order to notify the job accounting information,
+        it executes a PUT request to the accounting server
+
+        :param admin_token: administration token.
+        :param accounting_info: string within the accounting
+         information
+        :return: response output
+        """
         path = "/set_accounting"
 
         parameters = {"admin_token": admin_token,
@@ -59,17 +77,33 @@ class BatchNotificationController(object):
 
 
 class AccountingController(object):
+    """Base of the Accounting the controller"""
     def __init__(self, conf):
+        """Initialize the controller"""
         pass
 
     def set_job_accounting(self, accounting):
+        """Add accounting line to the bdocker accounting file
+
+        It is different for each batch scheduler, so, this class
+        does not implement it.
+
+        :param accounting: string with sge accounting format
+        :return: empty array
+        """
         raise exceptions.NoImplementedException(
-            message="Still not supported")
+            message="set_job_accounting is "
+                    "still not supported")
 
 
 class SGEAccountingController(AccountingController):
-
+    """SGE accounting controller"""
     def __init__(self, conf):
+        """Initialize controller
+
+        :param conf: dictionary with the accounting configuration
+        :return:
+        """
         super(SGEAccountingController, self).__init__(conf=conf)
         if 'bdocker_accounting' in conf:
             self.bdocker_accounting = conf["bdocker_accounting"]
@@ -80,6 +114,7 @@ class SGEAccountingController(AccountingController):
                                 " Using %s by default. " %
                                 self.bdocker_accounting)
 
+    @staticmethod
     def _get_sge_job_accounting(self, queue_name, host_name, job_id):
         """Get information from the SGE accounting file.
 
@@ -103,7 +138,7 @@ class SGEAccountingController(AccountingController):
         """Add accounting line to the bdocker accounting file
 
         :param accounting: string with sge accounting format
-        :return:
+        :return: empty array
         """
         try:
             exceptions.make_log("exception",
@@ -118,8 +153,19 @@ class SGEAccountingController(AccountingController):
 
 
 class WNController(object):
+    """Working node controller based in Cgroups."""
 
     def __init__(self, conf, accounting_conf):
+        """Initialize controller.
+
+        Set attributes and instanciate the Batch Notification
+         Controller.
+
+        :param conf: dictionary with configuration properties.
+        :param accounting_conf: dictionary with accounting
+         server configuration.
+        :return:
+        """
         self.conf = conf
         self.enable_cgroups = conf.get("enable_cgroups",
                                        False)
@@ -134,13 +180,54 @@ class WNController(object):
         )
 
     @staticmethod
-    def create_accounting_file(path, job_info):
-        raise exceptions.NoImplementedException(
-            message="Still not supported")
+    def kill_job(spool):
+        """Kill job
 
-    def launch_job_monitoring(self, job_id, file_path, job_pid,
+        It is different for each batch scheduler, so, this class
+        does not implement it.
+
+        :param spool:
+        :return:
+        """
+        raise exceptions.NoImplementedException(
+            message="kill_job is still not supported")
+
+    @staticmethod
+    def create_accounting_file(path, job_info):
+        """Create accounting file with the relevant job information.
+
+        It creates a yaml file by using the content of job_info.
+
+        :param path: path in which store de file
+        :param job_info: dictionary with job information
+        :return:
+        """
+        try:
+            utils.write_yaml_file(path, job_info)
+        except BaseException as e:
+            raise exceptions.BatchException(
+                message="Creating accounting file",
+                e=e)
+
+    def launch_job_monitoring(self, job_id, job_info, file_path, job_pid,
                               cpu_max=None,
                               mem_max=None):
+        """It monitors job resources consumption
+
+         It tracks the accounting and store it in a local accounting file.
+         Furthermore, it controls that the job does not exeed the cpu and
+        memory quota. In case the job pass any limit, it is deleted by
+        killing the process associated to it.
+
+        :param job_id: job identification, used to name the cgroup.
+        :param job_info: relevant information useful to identify the job
+        in the batch system accounting file.
+        :param file_path: location of the local accounting path
+        :param job_pid: job process id.
+        :param cpu_max: CPU quota limit.
+        :param mem_max: memory quota limit.
+        :return:
+        """
         exceptions.make_log("exception", "LAUNCH MONITORING Job: %s"
                             % job_id)
         try:
@@ -158,6 +245,7 @@ class WNController(object):
             )
             # os.exit(1)
         exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
+        self.create_accounting_file(file_path, job_info)
         while True:
             try:
                 acc = cgroups_utils.get_accounting(
@@ -209,11 +297,12 @@ class WNController(object):
         """Configures the Working node environment by using CGROUPS.
 
         If cgroups control is enabled by using "enable_groups" option,
-        It creates a cgroup and move the parent pid of the job to it.
+        it creates a cgroup and move the parent pid of the job to it.
+        Only administration users can execute this method.
 
-        :param session_data:
-        :param admin_token:
-        :return:
+        :param session_data: job and user information
+        :param admin_token: administration token.
+        :return: relevant information about the configuration.
         """
         if self.enable_cgroups:
             try:
@@ -244,7 +333,10 @@ class WNController(object):
                                 "JOB CGROUP: %s "
                                 % (self.parent_group, cgroup_job))
         else:
-            exceptions.make_log("exception", "CGROUP CONTROL NOT ACTIVATED")
+            exceptions.make_log(
+                "exception",
+                "Accounting not available without enabling"
+                "cgroups")
             batch_info = None
         return batch_info
 
@@ -252,10 +344,11 @@ class WNController(object):
         """Clean the batch environment for the job.
 
         It deletes the cgroups created for the job.
+        Only administration users can execute this method.
 
-        :param session_data:
-        :param admin_token:
-        :return:
+        :param session_data: job and user information
+        :param admin_token: administration token.
+        :return: True or False
         """
         if self.enable_cgroups:
             flag = True
@@ -265,15 +358,20 @@ class WNController(object):
                 self.parent_group,
                 root_parent=self.root_cgroup)
         else:
-            exceptions.make_log("exception", "CGROUP CONTROL NOT ACTIVATED")
+            exceptions.make_log(
+                "exception",
+                "Accounting not available without enabling"
+                "cgroups")
             flag = False
         return flag
 
     def get_accounting(self, job_id):
-        """Get the accounting information from the job cgroup
+        """Get the accounting information from the cgroup.
 
-        :param job_id:
-        :return:
+        It retrieve the accounting information relative of job.
+
+        :param job_id: job identificator
+        :return: dictionary within accounting information
         """
         if self.enable_cgroups:
             accounting = cgroups_utils.get_accounting(
@@ -282,35 +380,77 @@ class WNController(object):
                 root_parent=self.root_cgroup
             )
             return accounting
-        raise exceptions.NoImplementedException(
-            message="Still not supported")
+        else:
+            raise exceptions.NoImplementedException(
+                message="Accounting not available without enabling"
+                        "cgroups")
 
-    def create_accounting(self, job):
-        raise exceptions.NoImplementedException(
-            message="Still not supported")
+    def create_accounting_register(self, accounting_source):
+        """Create a accounting register in the bath system format.
 
-    def notify_accounting(self, admin_token, path):
+        It is different for each batch scheduler, so that, this class
+        does not implement it.
+
+        :param accounting_source: file path or dict with the information.
+        :return: string with the accounting information
+        """
         raise exceptions.NoImplementedException(
-            message="Still not supported")
+            message="Create_accounting is still not supported")
+
+    def notify_accounting(self, admin_token, accounting_source):
+        """Submit job accounting information to the accounting server.
+
+        Only administration users can execute this method.
+        It generates the accounting message and sends it to the
+        accounting server.
+
+        :param admin_token: administration token
+        :param accounting_source: accounting source.
+        :return: response from the server
+        """
+        if self.enable_cgroups:
+            exceptions.make_log("debug",
+                                "CREATE ACCOUNTING STRING.")
+            accounting = self.create_accounting_register(accounting_source)
+            results = self.notification_controller.notify_accounting(
+                admin_token,
+                accounting)
+            exceptions.make_log("debug", "NOTIFIED.")
+            return results
+        else:
+            raise exceptions.NoImplementedException(
+                message="Accounting not available without enabling"
+                        "cgroups")
 
     def get_job_info(self):
+        """Get job information.
+
+        It is different for each batch scheduler, so, this class
+        does not implement it.
+
+        :return: dictionary with the relevant job information
+        """
         raise exceptions.NoImplementedException(
             "Get job information"
             "method")
 
-    @staticmethod
-    def kill_job(spool):
-        raise exceptions.NoImplementedException(
-            message="Still not supported")
-
 
 class SGEController(WNController):
+    """Working node controller based in SGE."""
 
     def __init__(self, *args, **kwargs):
         super(SGEController, self).__init__(*args, **kwargs)
 
     @staticmethod
     def _get_job_configuration(spool):
+        """Private method to get the complete SGE job information.
+
+        It gets the information related to relevant properties of the
+        user and the job, including the job quotas.
+
+        :param spool:
+        :return:
+        """
         path = "%s/config" % spool
         conf = utils.load_sge_job_configuration(path)
         qname = conf['queue']
@@ -341,6 +481,14 @@ class SGEController(WNController):
 
     @staticmethod
     def kill_job(job_pid):
+        """Kill job
+
+        It takes the job pid from the job spool directory and
+        kills such process by using SIG.KILL signal.
+
+        :param spool:
+        :return:
+        """
         try:
             job_pid_path = job_pid
             pid = utils.read_file(job_pid_path)
@@ -355,37 +503,37 @@ class SGEController(WNController):
             exceptions.make_log("exception", exc.message)
             raise exc
 
-    @staticmethod
-    def create_accounting_file(path, job_info):
-        data = {
-            "job_id": job_info['job_id'],
-            "user_name": job_info['user_name'],
-            "queue_name": job_info['queue_name'],
-            "host_name": job_info['host_name'],
-            "job_name": job_info['job_name'],
-            "log_name": job_info['log_name'],
-            "account_name": job_info['account_name']
-        }
-        utils.write_yaml_file(path, data)
-
     def conf_environment(self, session_data, admin_token):
         """Configures the cgroup and the sge features.
 
-        :param session_data:
-        :param admin_token:
-        :return:
+        Only administration users can execute this method.
+        It invoked the configuration of cgroup from WNController,
+        in addition to launch the job monitoring functionality.
+
+        :param session_data: job and user information
+        :param admin_token: administration token.
+        :return: relevant information about the configuration.
         """
         out = super(SGEController, self).conf_environment(session_data)
         if out:
             try:
-                job_info = session_data['job']
-                job_id = job_info['job_id']
-                job_pid = "%s/job_pid" % job_info['spool']
-                job_cpu_max = job_info['max_cpu']
-                job_mem_max = job_info['max_memory']
+                job = session_data['job']
+                job_id = job['job_id']
+                job_pid = "%s/job_pid" % job['spool']
+                job_cpu_max = job['max_cpu']
+                job_mem_max = job['max_memory']
                 path = out["acc_file"]
-                self.create_accounting_file(path, job_info)
-                self.launch_job_monitoring(job_id, path,
+                job_info = {
+                    "job_id": job['job_id'],
+                    "user_name": job['user_name'],
+                    "queue_name": job['queue_name'],
+                    "host_name": job['host_name'],
+                    "job_name": job['job_name'],
+                    "log_name": job['log_name'],
+                    "account_name": job['account_name']
+                }
+
+                self.launch_job_monitoring(job_id, job_info, path,
                                            job_pid=job_pid,
                                            cpu_max=job_cpu_max,
                                            mem_max=job_mem_max)
@@ -396,15 +544,27 @@ class SGEController(WNController):
         return out
 
     def clean_environment(self, session_data, admin_token):
+        """Clean the SGE batch environment for the job.
+
+        Only administration users can execute this method.
+        It deletes the cgroups created for the job.
+        In addition it notify the accounting information to the
+        accounting server, and clean the local accounting file.
+
+        :param session_data: job and user information
+        :param admin_token: administration token.
+        :return: True or False
+        """
+
         out = super(SGEController, self).clean_environment(session_data)
         if out:
             try:
                 job_id = session_data["job"]["job_id"]
-                path = "%s/%s_%s" % (session_data['home'],
-                                     self.default_acc_file,
-                                     job_id)
-                self.notify_accounting(admin_token, path)
-                utils.delete_file(path)
+                acc_path = "%s/%s_%s" % (session_data['home'],
+                                         self.default_acc_file,
+                                         job_id)
+                self.notify_accounting(admin_token, acc_path)
+                utils.delete_file(acc_path)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
@@ -414,8 +574,17 @@ class SGEController(WNController):
                            % e.message)
                 raise exceptions.BatchException(message=message)
 
-    def create_accounting(self, job):
+    def create_accounting_register(self, accounting_source):
+        """Create a accounting register in SGE bath system format.
+
+        It retrieves a string following the same format than the SGE accounting
+        file.
+
+        :param accounting_source: file path or dict with the information.
+        :return: string with the accounting information
+        """
         try:
+            job = utils.read_yaml_file(accounting_source)
             job_id = job['job_id']
             qname = job['queue_name']
             hostname = job['host_name']
@@ -450,22 +619,15 @@ class SGEController(WNController):
                 "Job accountig file malformed: %s. " % e.message
             )
 
-    def notify_accounting(self, admin_token, path):
-        if self.enable_cgroups:
-            job_info = utils.read_yaml_file(path)
-            accounting = self.create_accounting(job_info)
-            exceptions.make_log("debug",
-                                "CREATE ACCOUNTING STRING: %s" % accounting)
-            results = self.notification_controller.notify_accounting(
-                admin_token,
-                accounting)
-            exceptions.make_log("debug", "NOTIFIED")
-            return results
-        else:
-            raise exceptions.NoImplementedException(
-                message="Still not supported")
-
     def get_job_info(self):
+        """Get job information.
+
+        It retrieves the relevant information related to the job
+        and the its execution environment.
+
+        :return: dictionary with the relevant job information
+        """
+
         job_id = utils.get_environment(
             'JOB_ID')
         home = os.path.realpath(utils.get_environment(

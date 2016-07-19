@@ -22,6 +22,7 @@ import testtools
 from bdocker import exceptions
 from bdocker.modules import batch
 from bdocker.modules import request
+from bdocker.tests import fakes
 
 
 class TestBacthNotificationController(testtools.TestCase):
@@ -86,14 +87,17 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.WNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
     def test_launch_job_monitoring_interval(self, m_kill,
                                             m_getpid, m_update,
+                                            m_read,
                                             m_acc, m_sleep,
                                             m_setsid, m_fork):
-        job_id = uuid.uuid4().hex
+        job_id = fakes.job_id
+        job_info = fakes.job_info
         path = "/foo"
         memory_usage = 99
         cpu_usage = 111
@@ -109,25 +113,29 @@ class TestWNController(testtools.TestCase):
         controller = batch.WNController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller.launch_job_monitoring(job_id,
+                                         job_info,
                                          path,
                                          None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
+        m_read.assert_called_with(path, job_info)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.WNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
     @mock.patch.object(batch.WNController, "kill_job")
     def test_launch_job_monitoring(self, m_kill_job, m_kill,
-                                   m_getpid, m_update,
+                                   m_getpid, m_update, m_read,
                                    m_acc, m_sleep,
                                    m_setsid, m_fork):
-        job_id = uuid.uuid4().hex
+        job_id = fakes.job_id
+        job_info = fakes.job_info
         path = "/foo"
         memory_usage = 99
         cpu_usage = 111
@@ -142,17 +150,19 @@ class TestWNController(testtools.TestCase):
         m_acc.return_value = acc
         controller = batch.WNController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
-        controller.launch_job_monitoring(job_id,
+        controller.launch_job_monitoring(job_id, job_info,
                                          path,
                                          None, None, None)
         m_sleep.side_effect = [interval, 0.1]
         m_update.assert_called_with(
             path, acc)
+        m_read.assert_called_with(path, job_info)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.WNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
@@ -160,9 +170,11 @@ class TestWNController(testtools.TestCase):
     def test_launch_job_monitoring_cuotas(self, m_kill_job,
                                           m_kill,
                                           m_getpid, m_update,
+                                          m_read,
                                           m_acc, m_sleep,
                                           m_setsid, m_fork):
-        job_id = uuid.uuid4().hex
+        job_id = fakes.job_id
+        job_info = fakes.job_info
         path = "/foo"
         memory_usage = 99
         cpu_usage = 111
@@ -181,6 +193,7 @@ class TestWNController(testtools.TestCase):
                              exceptions.CgroupException("Finished")]
         controller = batch.WNController(conf, mock.MagicMock())
         controller.launch_job_monitoring(job_id,
+                                         job_info,
                                          path,
                                          spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
@@ -188,21 +201,24 @@ class TestWNController(testtools.TestCase):
             path, acc)
         self.assertEqual(False, m_kill_job.called)
         self.assertEqual(0, m_kill_job.call_count)
+        m_read.assert_called_with(path, job_info)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.WNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
     @mock.patch.object(batch.WNController, "kill_job")
     def test_launch_job_monitoring_cuotas_killed_cpu(self, m_kill_job,
-                                                     m_kill,
-                                                     m_getpid, m_update,
+                                                     m_kill, m_getpid,
+                                                     m_update, m_read,
                                                      m_acc, m_sleep,
                                                      m_setsid, m_fork):
-        job_id = uuid.uuid4().hex
+        job_id = fakes.job_id
+        job_info = fakes.job_info
         path = "/foo"
         memory_usage = 99
         cpu_usage = 111
@@ -222,6 +238,7 @@ class TestWNController(testtools.TestCase):
         controller = batch.WNController(conf, mock.MagicMock())
 
         controller.launch_job_monitoring(job_id,
+                                         job_info,
                                          path,
                                          spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
@@ -229,21 +246,24 @@ class TestWNController(testtools.TestCase):
             path, acc)
         self.assertEqual(True, m_kill_job.called)
         self.assertEqual(1, m_kill_job.call_count)
+        m_read.assert_called_with(path, job_info)
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.WNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
     @mock.patch.object(batch.WNController, "kill_job")
     def test_launch_job_monitoring_cuotas_killed_mem(self, m_kill_job,
-                                                     m_kill,
-                                                     m_getpid, m_update,
+                                                     m_kill, m_getpid,
+                                                     m_update, m_read,
                                                      m_acc, m_sleep,
                                                      m_setsid, m_fork):
-        job_id = uuid.uuid4().hex
+        job_id = fakes.job_id
+        job_info = fakes.job_info
         path = "/foo"
         memory_usage = 99
         cpu_usage = 2  # nanoseconds
@@ -263,6 +283,7 @@ class TestWNController(testtools.TestCase):
         controller = batch.WNController(conf, mock.MagicMock())
 
         controller.launch_job_monitoring(job_id,
+                                         job_info,
                                          path,
                                          spool, cpu_max, mem_max)
         m_sleep.side_effect = [interval, 0.1]
@@ -270,6 +291,7 @@ class TestWNController(testtools.TestCase):
             path, acc)
         self.assertEqual(True, m_kill_job.called)
         self.assertEqual(1, m_kill_job.call_count)
+        m_read.assert_called_with(path, job_info)
 
 
 class TestSGEController(testtools.TestCase):
@@ -308,14 +330,11 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
-    @mock.patch.object(batch.SGEController, "create_accounting_file")
     @mock.patch.object(batch.WNController, "launch_job_monitoring")
     @mock.patch.object(batch.SGEController, "notify_accounting")
-    def test_conf_environment(self, m_not, m_lan, m_file, m_cre, m_read):
-        job_id = uuid.uuid4().hex
-        admin_token = uuid.uuid4().hex
-        spool_dir = "/foo"
-        home = "/foo"
+    def test_conf_environment(self, m_not, m_lan, m_cre, m_read):
+        admin_token = fakes.admin_token
+        home = "/aa"
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {"cgroups_dir": "/foo",
@@ -324,22 +343,19 @@ class TestSGEController(testtools.TestCase):
         m_read.return_value = parent_id
         controller = batch.SGEController(conf, self.acc_conf)
         job_info = {"home": home,
-                    "job": {"job_id": job_id,
-                            "spool": spool_dir,
-                            "max_cpu": 99,
-                            "max_memory": 99,
-                            }
+                    "job": fakes.job_info,
                     }
         batch_info = controller.conf_environment(job_info, admin_token)
         expected_cgroup = {
-            "cgroup": "%s/%s" % (parent_dir, job_id),
-            "acc_file": "%s/.bdocker_accounting_%s" % (home, job_id)
+            "cgroup": "%s/%s" % (parent_dir, fakes.job_id),
+            "acc_file": "%s/.bdocker_accounting_%s" % (home,
+                                                       fakes.job_id)
         }
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
         m_cre.assert_called_with(
-            job_id,
+            fakes.job_id,
             conf["parent_cgroup"],
             root_parent=conf["cgroups_dir"],
             pid=parent_id
@@ -347,15 +363,12 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
-    @mock.patch.object(batch.SGEController, "create_accounting_file")
     @mock.patch.object(batch.SGEController, "launch_job_monitoring")
     @mock.patch.object(batch.SGEController, "notify_accounting")
     def test_conf_environment_no_root_dir(self, m_not, m_lan,
-                                          m_file, m_cre, m_read):
-        spool_dir = "/foo"
+                                          m_cre, m_read):
         home = "/foo"
         admin_token = uuid.uuid4().hex
-        job_id = uuid.uuid4().hex
         parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {
@@ -363,23 +376,19 @@ class TestSGEController(testtools.TestCase):
             "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
         job_info = {"home": home,
-                    "job": {"job_id": job_id,
-                            "spool": spool_dir,
-                            "max_cpu": 99,
-                            "max_memory": 99,
-                            }
+                    "job": fakes.job_info,
                     }
         controller = batch.SGEController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_info, admin_token)
         expected_cgroup = {
-            "cgroup": "%s/%s" % (parent_dir, job_id),
-            "acc_file": "%s/.bdocker_accounting_%s" % (home, job_id)
+            "cgroup": "%s/%s" % (parent_dir, fakes.job_id),
+            "acc_file": "%s/.bdocker_accounting_%s" % (home, fakes.job_id)
         }
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
         m_cre.assert_called_with(
-            job_id,
+            fakes.job_id,
             conf["parent_cgroup"],
             root_parent="/sys/fs/cgroup",
             pid=parent_id
@@ -495,10 +504,9 @@ class TestSGEController(testtools.TestCase):
         out = batch.SGEController({}, self.acc_conf).get_job_info()
         self.assertEqual(expected, out)
 
-    @mock.patch.object(batch.SGEController, "create_accounting")
-    @mock.patch("bdocker.utils.read_yaml_file")
+    @mock.patch.object(batch.SGEController, "create_accounting_register")
     @mock.patch.object(batch.BatchNotificationController, "notify_accounting")
-    def test_notify_accounting(self, m_ba_not, m_not, m_acc):
+    def test_notify_accounting(self, m_ba_not, m_acc):
         job_id = uuid.uuid4().hex
         admin_token = uuid.uuid4().hex
         memory_usage = "1000"
@@ -524,7 +532,8 @@ class TestSGEController(testtools.TestCase):
                           None)
 
     @mock.patch("os.getenv")
-    def test_create_accounting(self, m):
+    @mock.patch("bdocker.utils.read_yaml_file")
+    def test_create_accounting(self, m_read, m):
         queue_name = "docker"
         host_name = "ge-wn03.novalocal"
         log_name = "jorgesece"
@@ -550,17 +559,17 @@ class TestSGEController(testtools.TestCase):
                          job_id,
                          account
                          ]
-        job = {'job_id': job_id,
-               'queue_name': queue_name,
-               'host_name': host_name,
-               'log_name': log_name,
-               'job_name': job_name,
-               'account_name': account,
-               'cpu_usage': cpu_usage,
-               'memory_usage': memory_usage,
-               'io_usage': io_usage
-               }
-        out = controller.create_accounting(job)
+        m_read.return_value = {'job_id': job_id,
+                               'queue_name': queue_name,
+                               'host_name': host_name,
+                               'log_name': log_name,
+                               'job_name': job_name,
+                               'account_name': account,
+                               'cpu_usage': cpu_usage,
+                               'memory_usage': memory_usage,
+                               'io_usage': io_usage
+                               }
+        out = controller.create_accounting_register(None)
         self.assertEqual(expected, out)
 
     @mock.patch("bdocker.parsers.parse_time_to_nanoseconds")
