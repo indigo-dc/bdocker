@@ -72,14 +72,14 @@ class BatchNotificationController(object):
         out = self.request_control.execute_put(
             path=path, parameters=parameters
         )
-        exceptions.make_log("exception", "ACCOUNTING DONE")
+        exceptions.make_log("info", "ACCOUNTING DONE")
         return out
 
 
 class AccountingController(object):
     """Base of the Accounting the controller."""
     def __init__(self, conf):
-        """Initialize the controller"""
+        """Initialize the controller."""
         pass
 
     def set_job_accounting(self, accounting):
@@ -141,7 +141,7 @@ class SGEAccountingController(AccountingController):
         :return: empty array
         """
         try:
-            exceptions.make_log("exception",
+            exceptions.make_log("info",
                                 "WRITING in %s" % self.bdocker_accounting)
             accounting_end_line = "%s\n" % accounting
             utils.add_to_file(self.bdocker_accounting, accounting_end_line)
@@ -228,7 +228,7 @@ class WNController(object):
         :param mem_max: memory quota limit.
         :return:
         """
-        exceptions.make_log("exception", "LAUNCH MONITORING Job: %s"
+        exceptions.make_log("info", "LAUNCH MONITORING Job: %s"
                             % job_id)
         try:
             pid = os.fork()
@@ -239,12 +239,12 @@ class WNController(object):
         except OSError as e:
             message = "fork failed: %d (%s)" % (
                 e.errno, e.strerror)
-            exceptions.make_log("exception", message)
+            exceptions.make_log("warning", message)
             raise exceptions.BatchException(
                 message
             )
             # os.exit(1)
-        exceptions.make_log("debug", "MONITORING JOB %s." % job_id)
+        exceptions.make_log("info", "MONITORING JOB %s." % job_id)
         self.create_accounting_file(file_path, job_info)
         while True:
             try:
@@ -283,7 +283,7 @@ class WNController(object):
                                      ))
                 time.sleep(self.flush_time)
             except exceptions.CgroupException as e:
-                exceptions.make_log("debug", "MONITORING FINISHED")
+                exceptions.make_log("info", "MONITORING FINISHED")
                 break
             except BaseException as e:
                 message = "ERROR IN: %s. %s." % (file_path,
@@ -338,7 +338,7 @@ class WNController(object):
             exceptions.make_log(
                 "exception",
                 "Accounting not available without enabling"
-                "cgroups")
+                " cgroups")
             batch_info = None
         return batch_info
 
@@ -411,13 +411,13 @@ class WNController(object):
         :return: response from the server
         """
         if self.enable_cgroups:
-            exceptions.make_log("debug",
+            exceptions.make_log("info",
                                 "CREATE ACCOUNTING STRING.")
             accounting = self.create_accounting_register(accounting_source)
             results = self.notification_controller.notify_accounting(
                 admin_token,
                 accounting)
-            exceptions.make_log("debug", "NOTIFIED.")
+            exceptions.make_log("info", "NOTIFIED.")
             return results
         else:
             raise exceptions.NoImplementedException(

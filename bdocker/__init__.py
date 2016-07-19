@@ -30,6 +30,7 @@ import os
 def log_level():
     return os.getenv("BDOCKER_LOG_LEVEL", None)
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(format='%(asctime)s - %(name)s -'
+                           ' %(levelname)s - %(message)s',
                     level=log_level())
 LOG = logging.getLogger(__name__)

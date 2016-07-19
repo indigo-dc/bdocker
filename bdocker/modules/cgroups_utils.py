@@ -35,7 +35,7 @@ def task_to_cgroup(cgroup_dir, pid):
     except IOError as e:
         if e.errno == 28:
             # IOError: [Errno 28] No space left on device
-            exceptions.make_log("debug", e.message)
+            exceptions.make_log("warning", e.message)
         else:
             exceptions.make_log("exception",
                                 "Error when assign %s to %s. %s"
@@ -79,7 +79,7 @@ def create_tree_cgroups(group_name, parent_group_dir,
                         task_to_cgroup(new_node.full_path, pid)
                 except OSError as e:
                     if e.errno == 17:
-                        exceptions.make_log("info", e.message)
+                        exceptions.make_log("warning", e.message)
                     else:
                         raise e
         else:
@@ -106,7 +106,7 @@ def delete_tree_cgroups(group_name, parent_group,
                 node.delete_cgroup(group_name)
             except IOError as e:
                 if e.errno == 2:
-                    exceptions.make_log("info", e.message)
+                    exceptions.make_log("warning", e.message)
                 else:
                     raise e
     except BaseException as e:

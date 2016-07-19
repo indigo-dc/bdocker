@@ -173,13 +173,11 @@ def get_exception_details(ex=None, custom_message=None,
 
 
 def make_log(level, message):
-    # pass
-    # --- Logging error ---
-    # Traceback (most recent call last):
-    # AttributeError: 'NoneType' object has no attribute '__context__'
     if level == "debug":
         LOG.debug(message)
     elif level == "exception":
         LOG.exception(message)
+    elif level == "warning":
+        LOG.warning(message)
     else:
         LOG.info(message)
