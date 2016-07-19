@@ -33,9 +33,13 @@ def task_to_cgroup(cgroup_dir, pid):
         tasks = "%s/tasks" % cgroup_dir
         utils.add_to_file(tasks, pid)
     except IOError as e:
-        exceptions.make_log("exception",
-                            "Error when assign %s to %s. %s"
-                            % (pid, tasks, e.message))
+        if e.errno == 28:
+            # IOError: [Errno 28] No space left on device
+            exceptions.make_log("debug", e.message)
+        else:
+            exceptions.make_log("exception",
+                                "Error when assign %s to %s. %s"
+                                % (pid, tasks, e.message))
 
 
 def remove_tasks(cgroup_name, cgroup_parent):

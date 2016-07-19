@@ -252,6 +252,8 @@ class WNController(object):
                     job_id,
                     self.parent_group,
                     root_parent=self.root_cgroup)
+                if not acc:
+                    break
                 utils.update_yaml_file(file_path, acc)
                 if cpu_max:
                     if int(acc["cpu_usage"]) >= int(cpu_max):

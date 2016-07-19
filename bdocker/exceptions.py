@@ -18,8 +18,6 @@ import logging
 
 import webob.exc
 
-logging.basicConfig(format='%(asctime)s %(message)s')
-
 LOG = logging.getLogger(__name__)
 
 default_exceptions = {
@@ -72,7 +70,7 @@ class BDockerException(Exception):
         details = get_exception_details(exc, message, code)
         self.message = details['message']
         self.code = details['code']
-        make_log("exception", message)
+        make_log("debug", message)
 
     def __str__(self):
         return repr(self.message)
@@ -175,7 +173,6 @@ def get_exception_details(ex=None, custom_message=None,
 
 
 def make_log(level, message):
-    pass
     # pass
     # --- Logging error ---
     # Traceback (most recent call last):
