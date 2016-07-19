@@ -15,7 +15,8 @@
 # under the License.
 
 import logging
-import os
+
+from bdocker import utils
 
 # import logging.handlers
 #
@@ -28,7 +29,12 @@ import os
 
 
 def log_level():
-    return os.getenv("BDOCKER_LOG_LEVEL", None)
+    try:
+        out = utils.load_configuration_from_file()
+        return out["server"]['environ']
+    except BaseException:
+        return None
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s -'
                            ' %(levelname)s - %(message)s',

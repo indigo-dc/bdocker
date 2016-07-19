@@ -224,9 +224,7 @@ if __name__ == '__main__':
         port = int(get_conf()['server']['port'])
         host = get_conf()['server']['host']
         debug = False
-        if environ == 'public':
-            host = '0.0.0.0'
-        elif environ == 'debug':
+        if environ == 'DEBUG':
             debug = True
         app.run(host=host,
                 port=port,

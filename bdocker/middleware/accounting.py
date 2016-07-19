@@ -21,7 +21,6 @@ if __name__ == '__main__':
     conf = accounting.load_configuration()
     port = conf['server']['port']
     host = conf['server']['host']
-    environ = conf['server']['environ']
     workers = conf["server"].get("workers", 2)
     time_out = conf["server"].get("timeout", 200)
     options = {

@@ -75,10 +75,10 @@ default_conf_file = "/etc/configure_bdocker.cfg"
 def validate_config(conf):
     section_keys = {'resource', 'server', 'batch',
                     'credentials'}
-    server_keys = {'host', 'port'}
+    server_keys = {'host', 'port', 'environ'}
     acc_server_keys = {'host', 'port'}
     resource_options = {'working', 'accounting'}
-    environ_options = {'public', 'debug', 'private'}
+    environ_options = {'ERROR', 'WARNING', 'INFO', 'DEBUG'}
     batch_keys = {'system'}
     credentials_keys = {'token_store'}
     dockers_keys = {'base_url'}
@@ -98,11 +98,10 @@ def validate_config(conf):
             raise exceptions.ParseException(
                 '"Working node server":' + key
             )
-    if 'environ' in server:
-        if server['environ'] not in environ_options:
-            raise exceptions.ParseException(
-                '"environ" has wrong value in the server.'
-            )
+    if server['environ'] not in environ_options:
+        raise exceptions.ParseException(
+            '"environ" has wrong value in the server.'
+        )
 
     # BATCH MODULE
     for key in batch_keys:

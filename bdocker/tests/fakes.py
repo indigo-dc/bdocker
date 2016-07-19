@@ -259,7 +259,7 @@ conf_sge = {
     'server':
         {'host': 'host',
          'port': 'port',
-         'environ': 'debug'},
+         'environ': 'DEBUG'},
     'credentials':
         {'token_store': "/fake",
          'token_client_file': 'token_file'}
