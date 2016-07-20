@@ -1,13 +1,18 @@
-#Configuration
+# Configuration
 
-##Daemon configuration
+In this document the configuration of the three component provided by Bdocker is described. The three components are:
+1. Working node daemon.
+2. Accounting node daemon.
+3. Command line client.
+
+## Daemon configuration
 
 Bdocker provides two daemons one for the working node and another one for the accounting node. They are implemented as
-in RESTFUL APIs. The daemons are configured by using a configuration file, the administrator has to configure this
-file in the environment variable ``BDOCKER_CONF_FILE``. If it is not configured the system looks for the file in
-``/etc/configure_bdocker.cfg``. In the following, we can a example of configuration of both daemons.
+RESTFUL APIs. The daemons are configured by using a configuration file, the administrator has to configure this
+file in the environment variable ``BDOCKER_CONF_FILE``. If that variable is not configured, the system looks for
+the file in ``/etc/configure_bdocker.cfg``. In the following, examples of configuration of both daemons are provided:
 
-###Working Node
+### Working Node
 
 
 Every working node configures the following fields::
@@ -19,7 +24,7 @@ Every working node configures the following fields::
     [server]
     host = http://localhost
     port = 5000
-    environ = debug
+    logging = ERROR
     workers = 2
     time_out = 200
 
@@ -41,7 +46,7 @@ Every working node configures the following fields::
     [dockerAPI]
     base_url = unix://var/run/docker.sock
 
-###Accounting
+### Accounting
 
 The accounting node configures the following fields::
 
@@ -52,7 +57,7 @@ The accounting node configures the following fields::
     [server]
     host = http://localhost
     port = 5002
-    environ = debug
+    logging = DEBUG
     workers = 2
     time_out = 200
 
@@ -64,17 +69,23 @@ The accounting node configures the following fields::
     [credentials]
     token_store = /etc/token_store.yml
 
-###Configuration content
+### Configuration content
 
+The following table describes the possible configuration fields. Note that some of them are only required
+ for some components (working or accounting).
 
 | Group             |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
+|``resource``       |                    |
+|                   |``role``            |Daemon role, it can be ``working`` or ``accounting``.
+|                   |                    |It configures the working node or accounting daemon.
 |``server``         |                    |RESTFUL API access configuration                  
 |                   |``host``            |Host (IP or hostname) in which the service will be provided.
 |                   |``port``            |Port in which the service will be provided
-|                   |``workers``         |Middleware multi-threads. It is 2 threads by default.
+|                   |``workers``         |Number of middleware threads. It is 2 threads by default.
+|                   |                     |It must be equal or higher than 2.
 |                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
-|                   |``environ``         |Configure the logging level of bdocker.
+|                   |``logging``         |Configure the logging level of bdocker.
 |                   |                     |It can be set to the standard logging levels of python:
 |                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.          
 |``accounting_server``|                  |Configures in the WN the location of the          
@@ -82,54 +93,56 @@ The accounting node configures the following fields::
 |                     |``host``          |Host in which the service is located. Format: ``http(s)://xx``              
 |                     |``port``          |Port in which the service is located              
 |``batch``        |                      |Batch system configuration                        
-|                 |``system``            |Specify the type of resource manager              
+|                 |``system``            |Specify the type of resource manager (only SGE is implemented)              
 |                 |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
-|                 |``cgroups_dir``       |CGroup root directory. By default:                
+|  (only working) |``cgroups_dir``       |CGroup root directory. By default:                
 |                 |                      |"/sys/fs/cgroup"                                    
-|                 |``parent_cgroup``     |Cgroup parent group: By default: "/"
-|                 |``monitoring_time``   |Interval time for monitoring the accounting. Even copy it to the file.
-|                 |``bdocker_accounting``|Accountig file for bdocker jobs. By default: "/etc/bdocker_accounting"
+|  (only working) |``parent_cgroup``     |Cgroup parent group: By default: "/"
+|(only accounting)|``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file.
+|(only accounting)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |Credential module configuration
 |                 |``token_store``       |File in which the tokens are store (root rights)
-|                 |``token_client_file`` |Token file name. By default: ".bdocker_token".
-|                 |                      |In configuration process, the user token is stored
-|                 |                      |in the user home directory by using
-|                 |                      |the name: $HOME/``token_client_file``_$JOB_ID.
-|``dockerAPI``    |                      |
+|``dockerAPI``    |  (only working)      |
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
 The parameter ``time_out`` is important for syncorinized long docker executions, since the server will
 reset the request in case it exceed this time.
 The working node daemon raise this exception in case this time is exceeded:
-    [2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)
+
+``[2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)``
 
 
-##Client configuration
+## Client configuration
 
- The client is configures by using the WN configuration file described above. It uses just the
- following fields:
-
-###User configuration
-
+The client command line tool is configured by using the same configuration file. So that, in case it is
+the working daemon environment, it is configured with its configuration. Although the client uses
+the next configuration fileds:
     
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
+|``resource``    |                    |
+|                |``role``            |It should be ``working`` for the client command line.
 |``server``      |                     |RESTFUL API access configuration
 |                |``host``             |Host (IP or hostname) in which the service is located.
 |                |``port``             |Port in which the service is located
+|                |``logging``         |Configure the logging level of bdocker.
 |``credentials`` |                     |Credential module configuration
 |                |``token_store``      |File in which the tokens are stored (root rights).
-|                |                     |The client will use the administation token to
+|                |                     |The client will use the administrator token to
 |                |                     |execute configuration and cleaning tasks.
+|                |``token_client_file`` |Token file name. By default: ".bdocker_token".
+|                |                      |In configuration process, the user token is stored
+|                |                      |in the user home directory by using
+|                |                      |the name: $HOME/``token_client_file``_$JOB_ID.
 
 
-##Bacth environment configuration
+## Bacth environment configuration
 
 The configuration file is located in /etc/configure_bdocker.cfg by default. But it can be modified
 by setting the environment variable ``BDOCKER_CONF_FILE``.
 
-###Prolog::
+### Prolog
 
     ################
     ### BDOCKER ####
@@ -139,7 +152,7 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker configure
 
-###Epilog::
+### Epilog
 
     ################
     ### BDOCKER ####
