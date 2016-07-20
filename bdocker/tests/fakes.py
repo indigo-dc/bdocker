@@ -249,6 +249,9 @@ def create_generator(n):
         i += 1
 
 conf_sge = {
+    'resource': {
+        'role': "working"
+    },
     'batch': {
         'system': "SGE"
     },
@@ -259,10 +262,13 @@ conf_sge = {
     'server':
         {'host': 'host',
          'port': 'port',
-         'environ': 'DEBUG'},
+         'logging': 'DEBUG'},
     'credentials':
         {'token_store': "/fake",
-         'token_client_file': 'token_file'}
+         'token_client_file': 'token_file'},
+    'dockerAPI': {
+        'base_url': "xxx"
+    },
 }
 
 job_env = ["algo", "/", "algo", "algo"]

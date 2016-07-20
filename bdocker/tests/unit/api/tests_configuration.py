@@ -14,12 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import os
 
 import testtools
 
 from bdocker import exceptions
 from bdocker import utils
+from bdocker.tests import fakes
 
 
 class TestConfigurationWorkingNode(testtools.TestCase):
@@ -42,6 +44,104 @@ class TestConfigurationWorkingNode(testtools.TestCase):
                           utils.load_configuration_from_file,
                           file_name
                           )
+
+    def test_validation(self):
+        out = utils.validate_config(fakes.conf_sge)
+        self.assertIsNone(out)
+
+    def test_validation_error_resource(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('resource')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_role(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        right_roles = {'working', 'accounting'}
+        for r in right_roles:
+            conf["resource"]["role"] = r
+            utils.validate_config(conf)
+        conf["resource"]["role"] = "err"
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_accounting_server(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('accounting_server')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_acc_error(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["accounting_server"].pop("host")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_credentials(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('credentials')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_token_store(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["credentials"].pop("token_store")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_docker(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('dockerAPI')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_base_url(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["dockerAPI"].pop("base_url")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_server(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('server')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_host(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["server"].pop("host")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_port(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["server"].pop("port")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_logging(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        right_values = {'ERROR', 'WARNING', 'INFO', 'DEBUG'}
+        for r in right_values:
+            conf["server"]["logging"] = r
+            utils.validate_config(conf)
+        conf["server"]["logging"] = "err"
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+        conf["server"].pop("logging")
+        utils.validate_config(conf)
+
+    def test_validation_error_batch(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf.pop('batch')
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
+
+    def test_validation_error_batch_system(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["batch"].pop("system")
+        self.assertRaises(exceptions.ParseException,
+                          utils.validate_config, conf)
 
 
 class TestConfigurationMaster(testtools.TestCase):
@@ -69,3 +169,23 @@ class TestConfigurationMaster(testtools.TestCase):
                                  'sge_spool_config')
         config_dict = utils.load_sge_job_configuration(file_name)
         self.assertIsNotNone(config_dict)
+
+    def test_validation(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["resource"]["role"] = "accounting"
+        out = utils.validate_config(fakes.conf_sge)
+        self.assertIsNone(out)
+
+    def test_validation_no_error_docker(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["resource"]["role"] = "accounting"
+        conf.pop('dockerAPI')
+        out = utils.validate_config(conf)
+        self.assertIsNone(out)
+
+    def test_validation_error_accounting_server(self):
+        conf = copy.deepcopy(fakes.conf_sge)
+        conf["resource"]["role"] = "accounting"
+        conf.pop('accounting_server')
+        out = utils.validate_config(conf)
+        self.assertIsNone(out)

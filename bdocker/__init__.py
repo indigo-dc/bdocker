@@ -31,7 +31,7 @@ from bdocker import utils
 def log_level():
     try:
         out = utils.load_configuration_from_file()
-        return out["server"]['environ']
+        return out["server"]['logging']
     except BaseException:
         return None
 

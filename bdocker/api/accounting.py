@@ -62,11 +62,11 @@ def get_server_controller():
 
 if __name__ == '__main__':
     with app.app_context():
-        environ = get_conf()['server']['environ']
+        logging = get_conf()['server']['logging']
         port = int(get_conf()['server']['port'])
         host = get_conf()['server']['host']
         debug = False
-        if environ == 'DEBUG':
+        if logging == 'DEBUG':
             debug = True
         app.run(host=host,
                 port=port,
