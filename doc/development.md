@@ -42,12 +42,13 @@ This module is in charge of manage
 
 Bdocker can be extended by adding new modules. 
 
-### Credentials module
-
-In the current version, the credentials module extensibility is limited, because it is dependent on the
-token authentication.
-
-
 ### Batch module
 
 A full support for extending Bdocker with new batch module drivers is provided.
+
+### Credentials module
+
+In the current version, the credentials module extensibility is limited, because it is dependent on the
+token authentication. Thus, it can be extended with new drivers but always following the token mechanism.
+
+

@@ -33,13 +33,14 @@ Every working node configures the following fields::
     port = 5002
 
     [batch]
-    # system can be: SGE, ...(add more modules)
-    system = SGE
+    # controller can be: SGEWNController, ...(add more modules)
+    controller = SGEWNController
     enable_cgroups = True
     cgroups_dir = /sys/fs/cgroup
     parent_cgroup = /user
 
     [credentials]
+    controller = UserController
     token_store = /etc/token_store.yml
     token_client_file = .bdocker_token
 
@@ -62,11 +63,12 @@ The accounting node configures the following fields::
     time_out = 200
 
     [batch]
-    # system can be: SGE, ...(add more modules)
-    system = SGE
+    # controller can be: SGEAccountingController, ...(add more modules)
+    controller = SGEAccountingController
     bdocker_accounting=/home/jorge/bdocker_accounting
 
     [credentials]
+    controller = UserController
     token_store = /etc/token_store.yml
 
 ### Configuration content
@@ -76,33 +78,34 @@ The following table describes the possible configuration fields. Note that some 
 
 | Group             |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
-|``resource``       |                    |
+|``resource``       |                    |**Kind of resource**
 |                   |``role``            |Daemon role, it can be ``working`` or ``accounting``.
 |                   |                    |It configures the working node or accounting daemon.
-|``server``         |                    |RESTFUL API access configuration                  
+|``server``         |                    |**RESTFUL API access configuration**                  
 |                   |``host``            |Host (IP or hostname) in which the service will be provided.
 |                   |``port``            |Port in which the service will be provided
-|                   |``workers``         |Number of middleware threads. It is 2 threads by default.
-|                   |                     |It must be equal or higher than 2.
+|                   |``workers``         |Number of middleware threads. It is 2 threads by default. It must be equal or higher than 2.
 |                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
-|                   |``logging``         |Configure the logging level of bdocker.
-|                   |                     |It can be set to the standard logging levels of python:
+|                   |``logging``         |Configure the logging level of bdocker. It can be set to the standard logging levels of python:
 |                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.          
-|``accounting_server``|                  |Configures in the WN the location of the          
+|``accounting_server``|  (only working)  |**Configures in the WN the location of the**          
 |                   |                     |accounting service.                               
 |                     |``host``          |Host in which the service is located. Format: ``http(s)://xx``              
 |                     |``port``          |Port in which the service is located              
-|``batch``        |                      |Batch system configuration                        
-|                 |``system``            |Specify the type of resource manager (only SGE is implemented)              
+|``batch``        |                      |*Batch system configuration*                        
+|                 |``controller``        |Specify the class to manage the batch system.
+|                 |                      |It can be for working nodes: ``SGEController`` (more will be implemented)
+|                 |                      |It can be for accounting nodes: ``SGEAccountingController`` (more will be implemented)
 |                 |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
-|  (only working) |``cgroups_dir``       |CGroup root directory. By default:                
-|                 |                      |"/sys/fs/cgroup"                                    
+|  (only working) |``cgroups_dir``       |CGroup root directory. By default: "/sys/fs/cgroup"
 |  (only working) |``parent_cgroup``     |Cgroup parent group: By default: "/"
 |(only accounting)|``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file.
 |(only accounting)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
-|``credentials``  |                      |Credential module configuration
+|``credentials``  |                      |**Credential module configuration**
+|                 |``controller``        |Specify the class to manage the user credentials.
+|                 |                      |The only contoller implemented is ``UserCredentials``
 |                 |``token_store``       |File in which the tokens are store (root rights). **It MUST be protected under root permissions**.
-|``dockerAPI``    |  (only working)      |
+|``dockerAPI``    |  (only working)      |**Docker access configuration**
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
@@ -117,7 +120,7 @@ The working node daemon raise this exception in case this time is exceeded:
 
 The client command line tool is configured by using the same configuration file. So that, in case it is
 the working daemon environment, it is configured with its configuration. Although the client uses
-the next configuration fileds:
+the next configuration fields:
     
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
@@ -128,6 +131,7 @@ the next configuration fileds:
 |                |``port``             |Port in which the service is located
 |                |``logging``         |Configure the logging level of bdocker.
 |``credentials`` |                     |Credential module configuration
+|                |``controller``        |Specify the class to manage the user credentials.
 |                |``token_store``      |File in which the tokens are stored. **It MUST be protected under root permissions**.
 |                |                     |The client will use the administrator token to
 |                |                     |execute configuration and cleaning tasks.
