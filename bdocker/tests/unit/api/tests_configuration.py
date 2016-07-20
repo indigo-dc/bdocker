@@ -144,11 +144,11 @@ class TestConfigurationWorkingNode(testtools.TestCase):
                           utils.validate_config, conf)
 
 
-class TestConfigurationMaster(testtools.TestCase):
-    """Test Configuration on Loading."""
+class TestConfigurationAccounting(testtools.TestCase):
+    """Test Accounting Configuration on Loading."""
 
     def setUp(self):
-        super(TestConfigurationMaster, self).setUp()
+        super(TestConfigurationAccounting, self).setUp()
 
     def test_load_config_file(self):
         file_name = os.path.join(os.path.dirname(__file__),
