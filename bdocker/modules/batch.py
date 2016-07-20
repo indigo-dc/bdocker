@@ -99,12 +99,12 @@ class SGEAccountingController(AccountingController):
     def __init__(self, conf):
         """Initialize controller
 
-        :param conf: dictionary with the accounting configuration
+        :param conf: dictionary with the bdocker configuration
         :return:
         """
         super(SGEAccountingController, self).__init__(conf=conf)
-        if 'bdocker_accounting' in conf:
-            self.bdocker_accounting = conf["bdocker_accounting"]
+        if 'bdocker_accounting' in conf["batch"]:
+            self.bdocker_accounting = conf["batch"]["bdocker_accounting"]
         else:
             self.bdocker_accounting = BDOCKER_ACCOUNTING
             exceptions.make_log("exception",
@@ -153,7 +153,7 @@ class SGEAccountingController(AccountingController):
 class WNController(object):
     """Working node controller."""
 
-    def __init__(self, conf, accounting_conf):
+    def __init__(self, conf):
         """Initialize the controller."""
         pass
 
@@ -198,7 +198,7 @@ class WNController(object):
 class CgroupsWNController(WNController):
     """Working node controller based in Cgroups."""
 
-    def __init__(self, conf, accounting_conf):
+    def __init__(self, conf):
         """Initialize controller.
 
         Set attributes and instanciate the Batch Notification
@@ -209,15 +209,15 @@ class CgroupsWNController(WNController):
          server configuration.
         :return:
         """
-        self.conf = conf
-        self.enable_cgroups = conf.get("enable_cgroups",
+        self.conf = conf['batch']
+        self.enable_cgroups = self.conf.get("enable_cgroups",
                                        False)
-        self.root_cgroup = conf.get("cgroups_dir",
+        self.root_cgroup = self.conf.get("cgroups_dir",
                                     "/sys/fs/cgroup")
-        self.parent_group = conf.get("parent_cgroup", '/')
-        self.flush_time = conf.get("monitor_time", 10)
+        self.parent_group = self.conf.get("parent_cgroup", '/')
+        self.flush_time = self.conf.get("monitor_time", 10)
         self.default_acc_file = ".bdocker_accounting"
-
+        accounting_conf = conf["accounting_server"]
         self.notification_controller = BatchNotificationController(
             accounting_conf
         )
