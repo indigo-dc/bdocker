@@ -304,8 +304,8 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.utils.write_yaml_file")
     def test_create_accounting_file(self, m):
-        controller = batch.SGEController(mock.MagicMock(),
-                                         mock.MagicMock())
+        controller = batch.SGEWNController(mock.MagicMock(),
+                                           mock.MagicMock())
         job_id = uuid.uuid4().hex
         username = "username"
         queue_name = "queue_name"
@@ -331,7 +331,7 @@ class TestSGEController(testtools.TestCase):
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.WNController, "launch_job_monitoring")
-    @mock.patch.object(batch.SGEController, "notify_accounting")
+    @mock.patch.object(batch.SGEWNController, "notify_accounting")
     def test_conf_environment(self, m_not, m_lan, m_cre, m_read):
         admin_token = fakes.admin_token
         home = "/aa"
@@ -341,7 +341,7 @@ class TestSGEController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": parent_dir}
         m_read.return_value = parent_id
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         job_info = {"home": home,
                     "job": fakes.job_info,
                     }
@@ -363,8 +363,8 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
-    @mock.patch.object(batch.SGEController, "launch_job_monitoring")
-    @mock.patch.object(batch.SGEController, "notify_accounting")
+    @mock.patch.object(batch.SGEWNController, "launch_job_monitoring")
+    @mock.patch.object(batch.SGEWNController, "notify_accounting")
     def test_conf_environment_no_root_dir(self, m_not, m_lan,
                                           m_cre, m_read):
         home = "/foo"
@@ -378,7 +378,7 @@ class TestSGEController(testtools.TestCase):
         job_info = {"home": home,
                     "job": fakes.job_info,
                     }
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_info, admin_token)
         expected_cgroup = {
             "cgroup": "%s/%s" % (parent_dir, fakes.job_id),
@@ -410,7 +410,7 @@ class TestSGEController(testtools.TestCase):
                             "spool": spool_dir
                             }
                     }
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         batch_info = controller.conf_environment(job_info, admin_token)
         self.assertIsNone(batch_info)
         self.assertIs(False, m_read.called)
@@ -418,7 +418,7 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.modules.cgroups_utils.delete_tree_cgroups")
     @mock.patch("bdocker.utils.delete_file")
-    @mock.patch.object(batch.SGEController, "notify_accounting")
+    @mock.patch.object(batch.SGEWNController, "notify_accounting")
     def test_clean_environment(self, m_not, m_del_file, m_del_tree):
         admin_token = uuid.uuid4().hex
         job_id = uuid.uuid4().hex
@@ -432,7 +432,7 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         controller.clean_environment(job_info, admin_token)
         self.assertIs(True, m_del_file.called)
         self.assertIs(True, m_del_tree.called)
@@ -456,12 +456,12 @@ class TestSGEController(testtools.TestCase):
                     }
         conf = {"cgroups_dir": "/foo",
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         controller.clean_environment(job_info, admin_token)
         self.assertIs(False, m_del_tree.called)
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "_get_job_configuration")
+    @mock.patch.object(batch.SGEWNController, "_get_job_configuration")
     def test_get_job_info(self, m_conf, m_env):
         job_id = uuid.uuid4().hex
         user = uuid.uuid4().hex
@@ -501,10 +501,10 @@ class TestSGEController(testtools.TestCase):
                     'max_cpu': max_cpu,
                     'max_memory': max_memory
                     }
-        out = batch.SGEController({}, self.acc_conf).get_job_info()
+        out = batch.SGEWNController({}, self.acc_conf).get_job_info()
         self.assertEqual(expected, out)
 
-    @mock.patch.object(batch.SGEController, "create_accounting_register")
+    @mock.patch.object(batch.SGEWNController, "create_accounting_register")
     @mock.patch.object(batch.BatchNotificationController, "notify_accounting")
     def test_notify_accounting(self, m_ba_not, m_acc):
         job_id = uuid.uuid4().hex
@@ -517,7 +517,7 @@ class TestSGEController(testtools.TestCase):
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test"}
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         controller.notify_accounting(admin_token, job)
         self.assertIs(True, m_ba_not.called)
 
@@ -525,7 +525,7 @@ class TestSGEController(testtools.TestCase):
         conf = {
             "enable_cgroups": False,
         }
-        controller = batch.SGEController(conf, self.acc_conf)
+        controller = batch.SGEWNController(conf, self.acc_conf)
         self.assertRaises(exceptions.NoImplementedException,
                           controller.notify_accounting,
                           None,
@@ -551,7 +551,7 @@ class TestSGEController(testtools.TestCase):
                        job_name, job_id, account,
                        cpu_usage, memory_usage, io_usage)
                     )
-        controller = batch.SGEController({}, self.acc_conf)
+        controller = batch.SGEWNController({}, self.acc_conf)
         m.side_effect = [queue_name,
                          host_name,
                          log_name,
@@ -592,8 +592,8 @@ class TestSGEController(testtools.TestCase):
                                }
         cpu_parsed = 100
         m_parse.return_value = cpu_parsed
-        controller = batch.SGEController(mock.MagicMock(),
-                                         mock.MagicMock())
+        controller = batch.SGEWNController(mock.MagicMock(),
+                                           mock.MagicMock())
         info = controller._get_job_configuration(None)
         self.assertEqual(queue, info["queue_name"])
         self.assertEqual(host, info["host_name"])

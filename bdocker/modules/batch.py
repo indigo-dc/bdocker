@@ -437,11 +437,11 @@ class WNController(object):
             "method")
 
 
-class SGEController(WNController):
+class SGEWNController(WNController):
     """Working node controller based in SGE."""
 
     def __init__(self, *args, **kwargs):
-        super(SGEController, self).__init__(*args, **kwargs)
+        super(SGEWNController, self).__init__(*args, **kwargs)
 
     @staticmethod
     def _get_job_configuration(spool):
@@ -516,7 +516,7 @@ class SGEController(WNController):
         :param admin_token: administration token.
         :return: relevant information about the configuration.
         """
-        out = super(SGEController, self).conf_environment(session_data)
+        out = super(SGEWNController, self).conf_environment(session_data)
         if out:
             try:
                 job = session_data['job']
@@ -558,7 +558,7 @@ class SGEController(WNController):
         :return: True or False
         """
 
-        out = super(SGEController, self).clean_environment(session_data)
+        out = super(SGEWNController, self).clean_environment(session_data)
         if out:
             try:
                 job_id = session_data["job"]["job_id"]

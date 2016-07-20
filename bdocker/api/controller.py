@@ -22,7 +22,7 @@ from bdocker import modules
 class AccountingServerController(object):
     def __init__(self, conf):
         self.credentials_module = modules.load_credentials_module(conf)
-        self.batch_module = modules.load_batch_accounting_module(conf)
+        self.batch_module = modules.load_batch_module(conf)
 
     def set_job_accounting(self, data):
         """Update the accounting file using the incoming data

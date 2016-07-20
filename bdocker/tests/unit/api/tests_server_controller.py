@@ -30,7 +30,7 @@ class TestAccountingServerController(testtools.TestCase):
         super(TestAccountingServerController, self).setUp()
 
     @mock.patch("bdocker.modules.load_credentials_module")
-    @mock.patch("bdocker.modules.load_batch_accounting_module")
+    @mock.patch("bdocker.modules.load_batch_module")
     def test_set_job_accounting(self, m_batch, m_cre):
         token = uuid.uuid4().hex
         accounting = uuid.uuid4().hex

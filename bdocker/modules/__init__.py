@@ -14,6 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import importlib
+
 from bdocker import exceptions
 from bdocker.modules import batch
 from bdocker.modules import credentials
@@ -28,17 +30,15 @@ def load_credentials_module(conf):
 def load_batch_module(conf):
     if 'batch' not in conf:
         raise exceptions.ConfigurationException("Batch system is not defined")
-    if conf['batch']["system"] == 'SGE':
-        return batch.SGEController(conf['batch'], conf['accounting_server'])
-    exceptions.ConfigurationException("Batch is not supported")
-
-
-def load_batch_accounting_module(conf):
-    if 'batch' not in conf:
-        raise exceptions.ConfigurationException("Batch system is not defined")
-    if conf['batch']["system"] == 'SGE':
-        return batch.SGEAccountingController(conf['batch'])
-    exceptions.ConfigurationException("Batch is not supported")
+    try:
+        batch_module = conf['batch']["controller"]
+        batch_class = getattr(batch, batch_module)
+        if conf["resource"]["role"] == "working":
+            return batch_class(conf['batch'], conf['accounting_server'])
+        else:
+            return batch_class(conf['batch'])
+    except BaseException:
+        raise exceptions.ConfigurationException("Batch is not supported")
 
 
 def load_docker_module(conf):

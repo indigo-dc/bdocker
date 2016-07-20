@@ -45,7 +45,7 @@ class TestBdockerSgeWn(testtools.TestCase):
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "containers")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     def test_docker_list(self, m_inf, m_list, m_env):
         token = fakes.user_token
         containers = self.token_store[token]["containers"]
@@ -95,7 +95,7 @@ class TestBdockerSgeWn(testtools.TestCase):
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "inspect_container")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     def test_docker_inspect(self, m_inf, m_ins, m_env):
         m_env.return_value = self.file_name
         token = fakes.user_token
@@ -135,7 +135,7 @@ class TestBdockerSgeWn(testtools.TestCase):
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "logs")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     def test_docker_logs(self, m_get, m_logs, m_env):
         m_env.return_value = self.file_name
         token = fakes.user_token
@@ -175,7 +175,7 @@ class TestBdockerSgeWn(testtools.TestCase):
 
     @mock.patch("os.getenv")
     @mock.patch.object(docker_py.Client, "remove_container")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch("bdocker.utils.write_yaml_file")
     @mock.patch("bdocker.utils.read_yaml_file")
     def test_docker_delete(self, m_r, m_w, m_inf, m_rm, m_env):
@@ -215,7 +215,7 @@ class TestBdockerSgeWn(testtools.TestCase):
                          self.token_store[token])
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch.object(docker_py.Client, "create_container")
     @mock.patch.object(docker_py.Client, "start")
     @mock.patch.object(docker_py.Client, "logs")
@@ -264,7 +264,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual(True, m_cre.call_args[1]['detach'])
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch.object(docker_py.Client, "create_container")
     @mock.patch.object(docker_py.Client, "start")
     @mock.patch.object(docker_py.Client, "logs")
@@ -319,7 +319,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual(False, m_cre.call_args[1]['detach'])
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch.object(docker_py.Client, "put_archive")
     @mock.patch("bdocker.utils.read_tar_raw_data_stream")
     @mock.patch("bdocker.utils.read_file")
@@ -361,7 +361,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.assertEqual("%s\n" % True, result.output)
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch.object(docker_py.Client, "get_archive")
     @mock.patch("bdocker.utils.write_tar_raw_data_stream")
     @mock.patch("bdocker.utils.read_file")
@@ -428,7 +428,7 @@ class TestBdockerSgeWn(testtools.TestCase):
     @mock.patch("os.chown")
     @mock.patch("pwd.getpwnam")
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "_get_job_configuration")
+    @mock.patch.object(batch.SGEWNController, "_get_job_configuration")
     @mock.patch("bdocker.client.commands.write_user_credentials")
     def test_configure(self, m_wfile,
                        m_jinfo, m_env,
@@ -517,7 +517,7 @@ class TestBdockerSgeWn(testtools.TestCase):
                          )
 
     @mock.patch("os.getenv")
-    @mock.patch.object(batch.SGEController, "get_job_info")
+    @mock.patch.object(batch.SGEWNController, "get_job_info")
     @mock.patch("os.remove")
     @mock.patch.object(nodes.Node, "delete_cgroup")
     @mock.patch("bdocker.utils.read_file")

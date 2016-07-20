@@ -80,7 +80,7 @@ def validate_config(conf):
     acc_server_keys = {'host', 'port'}
     resource_options = {'working', 'accounting'}
     logging_options = {'ERROR', 'WARNING', 'INFO', 'DEBUG'}
-    batch_keys = {'system'}
+    batch_keys = {'controller'}
     credentials_keys = {'token_store'}
     dockers_keys = {'base_url'}
     for key in section_keys:

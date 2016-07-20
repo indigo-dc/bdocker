@@ -139,7 +139,7 @@ class TestConfigurationWorkingNode(testtools.TestCase):
 
     def test_validation_error_batch_system(self):
         conf = copy.deepcopy(fakes.conf_sge)
-        conf["batch"].pop("system")
+        conf["batch"].pop("controller")
         self.assertRaises(exceptions.ParseException,
                           utils.validate_config, conf)
 

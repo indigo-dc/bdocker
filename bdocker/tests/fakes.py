@@ -253,7 +253,7 @@ conf_sge = {
         'role': "working"
     },
     'batch': {
-        'system': "SGE"
+        'controller': "SGEWNController"
     },
     'accounting_server':
         {'host': 'host',
