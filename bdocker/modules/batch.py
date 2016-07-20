@@ -91,9 +91,7 @@ class AccountingController(object):
         :param accounting: string with sge accounting format
         :return: empty array
         """
-        raise exceptions.NoImplementedException(
-            message="set_job_accounting is "
-                    "still not supported")
+        pass
 
 
 class SGEAccountingController(AccountingController):
@@ -153,6 +151,51 @@ class SGEAccountingController(AccountingController):
 
 
 class WNController(object):
+    """Working node controller."""
+
+    def __init__(self, conf, accounting_conf):
+        """Initialize the controller."""
+        pass
+
+    def conf_environment(self, session_data):
+        """Configures the Working node environment by using CGROUPS.
+
+        If cgroups control is enabled by using "enable_groups" option,
+        it creates a cgroup and move the parent pid of the job to it.
+        Only administration users can execute this method.
+
+        :param session_data: job and user information
+        :return: relevant information about the configuration.
+        """
+        raise exceptions.NoImplementedException(
+            message="conf_environment is still not supported")
+
+    def clean_environment(self, session_data, admin_token=None):
+        """Clean the batch environment for the job.
+
+        It deletes the cgroups created for the job.
+        Only administration users can execute this method.
+
+        :param session_data: job and user information
+        :param admin_token: administration token.
+        :return: True or False
+        """
+        raise exceptions.NoImplementedException(
+            message="conf_environment is still not supported")
+
+    def get_job_info(self):
+        """Get job information.
+
+        It is different for each batch scheduler, so, this class
+        does not implement it.
+
+        :return: dictionary with the relevant job information
+        """
+        raise exceptions.NoImplementedException(
+            message="get_job_info is still not supported")
+
+
+class CgroupsWNController(WNController):
     """Working node controller based in Cgroups."""
 
     def __init__(self, conf, accounting_conf):
@@ -387,18 +430,6 @@ class WNController(object):
                 message="Accounting not available without enabling"
                         "cgroups")
 
-    def create_accounting_register(self, accounting_source):
-        """Create a accounting register in the bath system format.
-
-        It is different for each batch scheduler, so that, this class
-        does not implement it.
-
-        :param accounting_source: file path or dict with the information.
-        :return: string with the accounting information
-        """
-        raise exceptions.NoImplementedException(
-            message="Create_accounting is still not supported")
-
     def notify_accounting(self, admin_token, accounting_source):
         """Submit job accounting information to the accounting server.
 
@@ -424,20 +455,8 @@ class WNController(object):
                 message="Accounting not available without enabling"
                         "cgroups")
 
-    def get_job_info(self):
-        """Get job information.
 
-        It is different for each batch scheduler, so, this class
-        does not implement it.
-
-        :return: dictionary with the relevant job information
-        """
-        raise exceptions.NoImplementedException(
-            "Get job information"
-            "method")
-
-
-class SGEWNController(WNController):
+class SGEWNController(CgroupsWNController):
     """Working node controller based in SGE."""
 
     def __init__(self, *args, **kwargs):

@@ -87,7 +87,7 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
-    @mock.patch.object(batch.WNController, "create_accounting_file")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
@@ -110,7 +110,7 @@ class TestWNController(testtools.TestCase):
                 "flush_time": interval}
         m_fork.return_value = 0
         m_acc.return_value = acc
-        controller = batch.WNController(conf, mock.MagicMock())
+        controller = batch.CgroupsWNController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller.launch_job_monitoring(job_id,
                                          job_info,
@@ -125,11 +125,11 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
-    @mock.patch.object(batch.WNController, "create_accounting_file")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
-    @mock.patch.object(batch.WNController, "kill_job")
+    @mock.patch.object(batch.CgroupsWNController, "kill_job")
     def test_launch_job_monitoring(self, m_kill_job, m_kill,
                                    m_getpid, m_update, m_read,
                                    m_acc, m_sleep,
@@ -148,7 +148,7 @@ class TestWNController(testtools.TestCase):
                 "flush_time": interval}
         m_fork.return_value = 0
         m_acc.return_value = acc
-        controller = batch.WNController(conf, mock.MagicMock())
+        controller = batch.CgroupsWNController(conf, mock.MagicMock())
         m_update.side_effect = exceptions.CgroupException("Finished")
         controller.launch_job_monitoring(job_id, job_info,
                                          path,
@@ -162,11 +162,11 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
-    @mock.patch.object(batch.WNController, "create_accounting_file")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
-    @mock.patch.object(batch.WNController, "kill_job")
+    @mock.patch.object(batch.CgroupsWNController, "kill_job")
     def test_launch_job_monitoring_cuotas(self, m_kill_job,
                                           m_kill,
                                           m_getpid, m_update,
@@ -191,7 +191,7 @@ class TestWNController(testtools.TestCase):
         m_fork.return_value = 0
         m_acc.side_effect = [acc,
                              exceptions.CgroupException("Finished")]
-        controller = batch.WNController(conf, mock.MagicMock())
+        controller = batch.CgroupsWNController(conf, mock.MagicMock())
         controller.launch_job_monitoring(job_id,
                                          job_info,
                                          path,
@@ -207,11 +207,11 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
-    @mock.patch.object(batch.WNController, "create_accounting_file")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
-    @mock.patch.object(batch.WNController, "kill_job")
+    @mock.patch.object(batch.CgroupsWNController, "kill_job")
     def test_launch_job_monitoring_cuotas_killed_cpu(self, m_kill_job,
                                                      m_kill, m_getpid,
                                                      m_update, m_read,
@@ -235,7 +235,7 @@ class TestWNController(testtools.TestCase):
         m_fork.return_value = 0
         m_acc.side_effect = [acc,
                              exceptions.CgroupException("Finished")]
-        controller = batch.WNController(conf, mock.MagicMock())
+        controller = batch.CgroupsWNController(conf, mock.MagicMock())
 
         controller.launch_job_monitoring(job_id,
                                          job_info,
@@ -252,11 +252,11 @@ class TestWNController(testtools.TestCase):
     @mock.patch("os.setsid")
     @mock.patch("time.sleep")
     @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
-    @mock.patch.object(batch.WNController, "create_accounting_file")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.getpid")
     @mock.patch("os.kill")
-    @mock.patch.object(batch.WNController, "kill_job")
+    @mock.patch.object(batch.CgroupsWNController, "kill_job")
     def test_launch_job_monitoring_cuotas_killed_mem(self, m_kill_job,
                                                      m_kill, m_getpid,
                                                      m_update, m_read,
@@ -280,7 +280,7 @@ class TestWNController(testtools.TestCase):
         m_fork.return_value = 0
         m_acc.side_effect = [acc,
                              exceptions.CgroupException("Finished")]
-        controller = batch.WNController(conf, mock.MagicMock())
+        controller = batch.CgroupsWNController(conf, mock.MagicMock())
 
         controller.launch_job_monitoring(job_id,
                                          job_info,
@@ -330,7 +330,7 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
-    @mock.patch.object(batch.WNController, "launch_job_monitoring")
+    @mock.patch.object(batch.CgroupsWNController, "launch_job_monitoring")
     @mock.patch.object(batch.SGEWNController, "notify_accounting")
     def test_conf_environment(self, m_not, m_lan, m_cre, m_read):
         admin_token = fakes.admin_token
