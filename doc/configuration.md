@@ -74,10 +74,9 @@ The accounting node configures the following fields::
 |                   |``port``            |Port in which the service will be provided
 |                   |``workers``         |Middleware multi-threads. It is 2 threads by default.
 |                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
-|                   |``environ``         |Run mode for RESTFUL API. Middleware does not support it.
-|                   |                     |It could be: debug, public, private.
-|                   |                     |In case of public, the service will listen from  
-|                  |                      |all the local IPs, it will use 0.0.0.0 IP.          
+|                   |``environ``         |Configure the logging level of bdocker.
+|                   |                     |It can be set to the standard logging levels of python:
+|                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.          
 |``accounting_server``|                  |Configures in the WN the location of the          
 |                   |                     |accounting service.                               
 |                     |``host``          |Host in which the service is located. Format: ``http(s)://xx``              
