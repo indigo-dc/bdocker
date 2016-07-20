@@ -101,7 +101,7 @@ The following table describes the possible configuration fields. Note that some 
 |(only accounting)|``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file.
 |(only accounting)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |Credential module configuration
-|                 |``token_store``       |File in which the tokens are store (root rights)
+|                 |``token_store``       |File in which the tokens are store (root rights). **It MUST be protected under root permissions**.
 |``dockerAPI``    |  (only working)      |
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
@@ -128,7 +128,7 @@ the next configuration fileds:
 |                |``port``             |Port in which the service is located
 |                |``logging``         |Configure the logging level of bdocker.
 |``credentials`` |                     |Credential module configuration
-|                |``token_store``      |File in which the tokens are stored (root rights).
+|                |``token_store``      |File in which the tokens are stored. **It MUST be protected under root permissions**.
 |                |                     |The client will use the administrator token to
 |                |                     |execute configuration and cleaning tasks.
 |                |``token_client_file`` |Token file name. By default: ".bdocker_token".
