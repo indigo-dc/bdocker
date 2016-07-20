@@ -81,7 +81,7 @@ def validate_config(conf):
     resource_options = {'working', 'accounting'}
     logging_options = {'ERROR', 'WARNING', 'INFO', 'DEBUG'}
     batch_keys = {'controller'}
-    credentials_keys = {'token_store'}
+    credentials_keys = {'controller', 'token_store'}
     dockers_keys = {'base_url'}
     for key in section_keys:
         if key not in conf:

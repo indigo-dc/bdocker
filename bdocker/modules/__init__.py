@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import importlib
-
 from bdocker import exceptions
 from bdocker.modules import batch
 from bdocker.modules import credentials
@@ -23,8 +21,15 @@ from bdocker.modules import docker_helper
 
 
 def load_credentials_module(conf):
-    path = conf["credentials"]['token_store']
-    return credentials.UserController(path)
+    if 'credentials' not in conf:
+        raise exceptions.ConfigurationException("Credentials system is not defined")
+    try:
+        credentials_module = conf['credentials']["controller"]
+        credentials_class = getattr(credentials, credentials_module)
+        path = conf["credentials"]['token_store']
+        return credentials_class(path)
+    except BaseException:
+        raise exceptions.ConfigurationException("Credentials is not supported")
 
 
 def load_batch_module(conf):
