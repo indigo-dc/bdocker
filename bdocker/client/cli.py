@@ -72,7 +72,8 @@ def bdocker(ctx, host):
     """Manages docker execution on batch systems.
 
     :param ctx: context
-    :param host: host name
+    :param host: endpoint optional to the one in
+     configuration file
     :return: None
     """
     ctx.obj = commands.CommandController(endpoint=host)
