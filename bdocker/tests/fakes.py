@@ -261,7 +261,7 @@ conf_sge = {
          'port': 'port',
          'logging': 'DEBUG'},
     'credentials':
-        {'controller': "UserController",
+        {'controller': "TokenController",
          'token_store': "/fake",
          'token_client_file': 'token_file'},
     'dockerAPI': {

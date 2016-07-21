@@ -23,7 +23,7 @@ from bdocker import utils
 # sys.tracebacklimit = 0
 
 
-class UserController(object):
+class TokenController(object):
 
     def __init__(self, path):
         # TODO(jorgesece): control refresh token

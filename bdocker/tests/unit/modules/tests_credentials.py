@@ -33,7 +33,7 @@ class TestUserCredentials(testtools.TestCase):
         self.token_store = copy.deepcopy(fakes.token_store)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=self.token_store):
-            self.control = credentials.UserController(None)
+            self.control = credentials.TokenController(None)
 
     def test_token_store(self):
         user_info = self.control._get_token_from_cache(
@@ -236,7 +236,7 @@ class TestUserCredentials(testtools.TestCase):
                           t
                           )
 
-    @mock.patch.object(credentials.UserController,
+    @mock.patch.object(credentials.TokenController,
                        "_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory(self, m_val, m_token):
@@ -260,7 +260,7 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(uid, out["uid"])
         self.assertEqual(gid, out["gid"])
 
-    @mock.patch.object(credentials.UserController,
+    @mock.patch.object(credentials.TokenController,
                        "_get_token_from_cache")
     @mock.patch("bdocker.utils.validate_directory")
     def test_authorize_directory_err(self, m_val, m_token):
@@ -336,7 +336,7 @@ class TestUserCredentials(testtools.TestCase):
         t_info = self.control.get_admin_token()
         self.assertEqual(expected, t_info)
 
-    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    @mock.patch.object(credentials.TokenController, "_get_token_from_cache")
     def test_get_job_from_token(self, m_gt):
         uid = uuid.uuid4().hex
         jobid = uuid.uuid4().hex
@@ -353,15 +353,15 @@ class TestUserCredentials(testtools.TestCase):
         self.assertEqual(cgroup, result['cgroup'])
         self.assertEqual(spool, result['spool'])
 
-    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    @mock.patch.object(credentials.TokenController, "_get_token_from_cache")
     def test_get_job_from_token_err(self, m_gt):
         m_gt.side_effect = exceptions.UserCredentialsException("")
         self.assertRaises(exceptions.UserCredentialsException,
                           self.control.get_job_from_token,
                           None)
 
-    @mock.patch.object(credentials.UserController, "_update_token")
-    @mock.patch.object(credentials.UserController, "_get_token_from_cache")
+    @mock.patch.object(credentials.TokenController, "_update_token")
+    @mock.patch.object(credentials.TokenController, "_get_token_from_cache")
     def test_update_job(self, m_get, m_update):
         token = uuid.uuid4().hex
         jobid = uuid.uuid4().hex

@@ -29,7 +29,7 @@ def load_credentials_module(conf):
         credentials_class = getattr(credentials, credentials_module)
         path = conf["credentials"]['token_store']
         crendentials_instance = credentials_class(path)
-        if not isinstance(crendentials_instance, credentials.UserController):
+        if not isinstance(crendentials_instance, credentials.TokenController):
             raise exceptions.ConfigurationException(
                 "%s is not a Credential module" %
                 credentials_module)

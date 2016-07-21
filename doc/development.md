@@ -96,7 +96,7 @@ token authentication. Thus, it can be extended with new drivers but always follo
 In order to implement a new
 batch controller, these rules **MUST** be satisfied:
 1. The new controller must be located in ``bdocker.modules.credentials`` module.
-2. The new class must inherited from the base class ``bdocker.modules.credentials.UserController``.
+2. The new class must inherited from the base class ``bdocker.modules.credentials.TokenController``.
 3. In order to use the new controller, the class name need to be configured in the bdocker configuration file.
 4. The documentation about documentation must be updated, including the name of the new class.
 

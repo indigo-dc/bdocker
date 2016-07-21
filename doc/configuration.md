@@ -40,7 +40,7 @@ Every working node configures the following fields::
     parent_cgroup = /user
 
     [credentials]
-    controller = UserController
+    controller = TokenController
     token_store = /etc/token_store.yml
     token_client_file = .bdocker_token
 
@@ -68,7 +68,7 @@ The accounting node configures the following fields::
     bdocker_accounting=/home/jorge/bdocker_accounting
 
     [credentials]
-    controller = UserController
+    controller = TokenController
     token_store = /etc/token_store.yml
 
 ### Configuration content
