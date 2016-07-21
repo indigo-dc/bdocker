@@ -22,15 +22,17 @@ from bdocker.modules import docker_helper
 
 def load_credentials_module(conf):
     if 'credentials' not in conf:
-        raise exceptions.ConfigurationException("Credentials system is not defined")
+        raise exceptions.ConfigurationException(
+            "Credentials system is not defined")
     try:
         credentials_module = conf['credentials']["controller"]
         credentials_class = getattr(credentials, credentials_module)
         path = conf["credentials"]['token_store']
         crendentials_instance = credentials_class(path)
         if not isinstance(crendentials_instance, credentials.UserController):
-            raise exceptions.ConfigurationException("%s is not a Credential module" %
-                                                    credentials_module)
+            raise exceptions.ConfigurationException(
+                "%s is not a Credential module" %
+                credentials_module)
         return crendentials_instance
     except BaseException:
         raise exceptions.ConfigurationException("Credentials is not supported")
@@ -42,14 +44,15 @@ def load_batch_module(conf):
     try:
         batch_module = conf['batch']["controller"]
         batch_class = getattr(batch, batch_module)
-        batch_instance = batch_class(conf)
+        batch_instance = batch_class(conf['batch'])
         if conf["resource"]["role"] == "working":
             batch_class = batch.WNController
         else:
             batch_class = batch.AccountingController
         if not isinstance(batch_instance, batch_class):
-            raise exceptions.ConfigurationException("%s is not a Batch module" %
-                                                    batch_module)
+            raise exceptions.ConfigurationException(
+                "%s is not a Batch module" %
+                batch_module)
         return batch_instance
     except BaseException:
         raise exceptions.ConfigurationException("Batch is not supported")

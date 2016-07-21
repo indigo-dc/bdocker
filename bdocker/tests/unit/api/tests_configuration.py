@@ -20,8 +20,8 @@ import os
 import testtools
 
 from bdocker import exceptions
-from bdocker import utils
 from bdocker.tests import fakes
+from bdocker import utils
 
 
 class TestConfigurationWorkingNode(testtools.TestCase):
@@ -35,7 +35,12 @@ class TestConfigurationWorkingNode(testtools.TestCase):
                                  'fake_configure_file.cfg')
         conf = utils.load_configuration_from_file(file_name)
         self.assertIsNotNone(conf)
-        self.assertEqual(6, conf.items().__len__())
+        self.assertEqual(5, conf.items().__len__())
+        self.assertEqual(2, conf['batch'].__len__())
+        self.assertEqual(3, conf['credentials'].__len__())
+        self.assertEqual(3, conf['server'].__len__())
+        self.assertEqual(1, conf['dockerAPI'].__len__())
+        self.assertEqual(1, conf['resource'].__len__())
 
     def test_load_config_file_error(self):
         file_name = os.path.join(os.path.dirname(__file__),
@@ -62,18 +67,6 @@ class TestConfigurationWorkingNode(testtools.TestCase):
             conf["resource"]["role"] = r
             utils.validate_config(conf)
         conf["resource"]["role"] = "err"
-        self.assertRaises(exceptions.ParseException,
-                          utils.validate_config, conf)
-
-    def test_validation_error_accounting_server(self):
-        conf = copy.deepcopy(fakes.conf_sge)
-        conf.pop('accounting_server')
-        self.assertRaises(exceptions.ParseException,
-                          utils.validate_config, conf)
-
-    def test_validation_error_acc_error(self):
-        conf = copy.deepcopy(fakes.conf_sge)
-        conf["accounting_server"].pop("host")
         self.assertRaises(exceptions.ParseException,
                           utils.validate_config, conf)
 
@@ -180,12 +173,5 @@ class TestConfigurationAccounting(testtools.TestCase):
         conf = copy.deepcopy(fakes.conf_sge)
         conf["resource"]["role"] = "accounting"
         conf.pop('dockerAPI')
-        out = utils.validate_config(conf)
-        self.assertIsNone(out)
-
-    def test_validation_error_accounting_server(self):
-        conf = copy.deepcopy(fakes.conf_sge)
-        conf["resource"]["role"] = "accounting"
-        conf.pop('accounting_server')
         out = utils.validate_config(conf)
         self.assertIsNone(out)

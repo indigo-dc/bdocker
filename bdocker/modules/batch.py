@@ -14,9 +14,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import abc
 import os
 import signal
 import time
+
+import six
 
 from bdocker import exceptions
 from bdocker.modules import cgroups_utils
@@ -25,26 +28,23 @@ from bdocker import parsers
 from bdocker import utils
 
 BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
+LOCAL_ACCOUNTING_FILE = ".bdocker_accounting"
 
 
 class BatchNotificationController(object):
     """Notification controller for batch systems."""
-    def __init__(self, accounting_conf):
+    def __init__(self, accounting_endpoint):
         """Initialize the controller
 
         It set attributes and creates a Request controller by using
         the endpoint related to the accounting server.
 
-        :param accounting_conf:
+        :param accounting_endpoint:
         :return:
         """
         try:
-            endpoint = '%s:%s' % (
-                accounting_conf['host'],
-                accounting_conf['port']
-            )
             self.request_control = request.RequestController(
-                endopoint=endpoint
+                endopoint=accounting_endpoint
             )
         except Exception as e:
             raise exceptions.ConfigurationException(
@@ -76,11 +76,24 @@ class BatchNotificationController(object):
         return out
 
 
+@six.add_metaclass(abc.ABCMeta)
 class AccountingController(object):
     """Base of the Accounting the controller."""
+
     def __init__(self, conf):
-        """Initialize the controller."""
-        pass
+        """Initialize controller
+
+        :param conf: dictionary with the bdocker configuration
+        :return:
+        """
+        if 'bdocker_accounting' in conf:
+            self.bdocker_accounting = conf["bdocker_accounting"]
+        else:
+            self.bdocker_accounting = BDOCKER_ACCOUNTING
+            exceptions.make_log("exception",
+                                "bdocker_accounting parameter is not defined."
+                                " Using %s by default. " %
+                                self.bdocker_accounting)
 
     def set_job_accounting(self, accounting):
         """Add accounting line to the bdocker accounting file
@@ -96,24 +109,16 @@ class AccountingController(object):
 
 class SGEAccountingController(AccountingController):
     """SGE accounting controller."""
-    def __init__(self, conf):
+    def __init__(self, *args, **kwargs):
         """Initialize controller
 
         :param conf: dictionary with the bdocker configuration
         :return:
         """
-        super(SGEAccountingController, self).__init__(conf=conf)
-        if 'bdocker_accounting' in conf["batch"]:
-            self.bdocker_accounting = conf["batch"]["bdocker_accounting"]
-        else:
-            self.bdocker_accounting = BDOCKER_ACCOUNTING
-            exceptions.make_log("exception",
-                                "bdocker_accounting parameter is not defined."
-                                " Using %s by default. " %
-                                self.bdocker_accounting)
+        super(SGEAccountingController, self).__init__(*args, **kwargs)
 
     @staticmethod
-    def _get_sge_job_accounting(self, queue_name, host_name, job_id):
+    def _get_sge_job_accounting(queue_name, host_name, job_id):
         """Get information from the SGE accounting file.
 
         It is DEPRECATED. We mantein in case we need in the future.
@@ -150,12 +155,20 @@ class SGEAccountingController(AccountingController):
             raise exceptions.BatchException(message=message)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class WNController(object):
     """Working node controller."""
 
     def __init__(self, conf):
-        """Initialize the controller."""
-        pass
+        """Initialize controller.
+
+        Set attributes and instanciate the Batch Notification
+         Controller.
+
+        :param conf: dictionary with configuration properties.
+        :return:
+        """
+        self.conf = conf
 
     def conf_environment(self, session_data):
         """Configures the Working node environment by using CGROUPS.
@@ -198,26 +211,16 @@ class WNController(object):
 class CgroupsWNController(WNController):
     """Working node controller based in Cgroups."""
 
-    def __init__(self, conf):
-        """Initialize controller.
-
-        Set attributes and instanciate the Batch Notification
-         Controller.
-
-        :param conf: dictionary with configuration properties.
-        :param accounting_conf: dictionary with accounting
-         server configuration.
-        :return:
-        """
-        self.conf = conf['batch']
+    def __init__(self, *args, **kwargs):
+        super(CgroupsWNController, self).__init__(*args, **kwargs)
         self.enable_cgroups = self.conf.get("enable_cgroups",
-                                       False)
+                                            False)
         self.root_cgroup = self.conf.get("cgroups_dir",
-                                    "/sys/fs/cgroup")
+                                         "/sys/fs/cgroup")
         self.parent_group = self.conf.get("parent_cgroup", '/')
         self.flush_time = self.conf.get("monitor_time", 10)
-        self.default_acc_file = ".bdocker_accounting"
-        accounting_conf = conf["accounting_server"]
+        self.default_acc_file = LOCAL_ACCOUNTING_FILE
+        accounting_conf = self.conf["accounting_endpoint"]
         self.notification_controller = BatchNotificationController(
             accounting_conf
         )
@@ -429,6 +432,18 @@ class CgroupsWNController(WNController):
             raise exceptions.NoImplementedException(
                 message="Accounting not available without enabling"
                         "cgroups")
+
+    def create_accounting_register(self, accounting_source):
+        """Create a accounting register in bath system format.
+
+        It is different for each batch scheduler, so, this class
+        does not implement it.
+
+        :param accounting_source: file path or dict with the information.
+        :return: string with the accounting information
+        """
+        raise exceptions.NoImplementedException(
+            message="get_job_info is still not supported")
 
     def notify_accounting(self, admin_token, accounting_source):
         """Submit job accounting information to the accounting server.

@@ -253,12 +253,9 @@ conf_sge = {
         'role': "working"
     },
     'batch': {
-        'controller': "SGEWNController"
+        'controller': "SGEWNController",
+        'accounting_endpoint': 'http://xx:88'
     },
-    'accounting_server':
-        {'host': 'host',
-         'port': 'port'},
-
     'server':
         {'host': 'host',
          'port': 'port',

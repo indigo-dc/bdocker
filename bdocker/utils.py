@@ -75,9 +75,8 @@ default_conf_file = "/etc/configure_bdocker.cfg"
 def validate_config(conf):
     section_keys = {'resource', 'server', 'batch',
                     'credentials'}
-    working_keys = {"accounting_server", "dockerAPI"}
+    working_keys = {"dockerAPI"}
     server_keys = {'host', 'port'}
-    acc_server_keys = {'host', 'port'}
     resource_options = {'working', 'accounting'}
     logging_options = {'ERROR', 'WARNING', 'INFO', 'DEBUG'}
     batch_keys = {'controller'}
@@ -127,14 +126,6 @@ def validate_config(conf):
                 raise exceptions.ParseException(
                     'Working node: %s missed in'
                     ' configuration file' % key)
-        # ACCOUNTING SERVER
-        acc_server = conf['accounting_server']
-        for key in acc_server_keys:
-            if key not in acc_server:
-                raise exceptions.ParseException(
-                    '"Accounting server configuration": %s'
-                    % key
-                )
         # DOCKER MODULE
         docker_info = conf['dockerAPI']
         for key in dockers_keys:
@@ -169,8 +160,6 @@ def load_configuration_from_file(path=None):
         if WORKING_NODE == conf["resource"]["role"]:
             conf.update(
                 {
-                    'accounting_server':
-                        dict(config.items("accounting_server")),
                     'dockerAPI': dict(config.items("dockerAPI"))
                 }
             )
