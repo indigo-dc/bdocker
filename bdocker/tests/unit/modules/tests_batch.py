@@ -360,12 +360,26 @@ class TestSGEController(testtools.TestCase):
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
-        m_cre.assert_called_with(
-            fakes.job_id,
-            conf["parent_cgroup"],
-            root_parent=conf["cgroups_dir"],
-            pid=parent_id
-        )
+
+        expected_dict_1 = {'root_parent': conf["cgroups_dir"],
+                           'pid': None}
+        expected_creation_1 = (fakes.job_id,
+                               conf["parent_cgroup"]
+                               )
+        self.assertEqual(expected_creation_1,
+                         m_cre.mock_calls[0][1])
+        self.assertEqual(expected_dict_1,
+                         m_cre.mock_calls[0][2])
+
+        expected_dict_2 = {'root_parent': conf["cgroups_dir"],
+                           'pid': parent_id}
+        expected_creation_2 = (batch.JOB_PROCESS_CGROUP,
+                               "%s/%s" % (conf["parent_cgroup"], fakes.job_id)
+                               )
+        self.assertEqual(expected_creation_2,
+                         m_cre.mock_calls[1][1])
+        self.assertEqual(expected_dict_2,
+                         m_cre.mock_calls[1][2])
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
@@ -394,12 +408,32 @@ class TestSGEController(testtools.TestCase):
         self.assertEqual(expected_cgroup, batch_info)
         self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
-        m_cre.assert_called_with(
-            fakes.job_id,
-            conf["parent_cgroup"],
-            root_parent="/sys/fs/cgroup",
-            pid=parent_id
-        )
+        # m_cre.assert_called_with(
+        #     fakes.job_id,
+        #     conf["parent_cgroup"],
+        #     root_parent="/sys/fs/cgroup",
+        #     pid=parent_id
+        # )
+
+        expected_dict_1 = {'root_parent': "/sys/fs/cgroup",
+                           'pid': None}
+        expected_creation_1 = (fakes.job_id,
+                               conf["parent_cgroup"]
+                               )
+        self.assertEqual(expected_creation_1,
+                         m_cre.mock_calls[0][1])
+        self.assertEqual(expected_dict_1,
+                         m_cre.mock_calls[0][2])
+
+        expected_dict_2 = {'root_parent': "/sys/fs/cgroup",
+                           'pid': parent_id}
+        expected_creation_2 = (batch.JOB_PROCESS_CGROUP,
+                               "%s/%s" % (conf["parent_cgroup"], fakes.job_id)
+                               )
+        self.assertEqual(expected_creation_2,
+                         m_cre.mock_calls[1][1])
+        self.assertEqual(expected_dict_2,
+                         m_cre.mock_calls[1][2])
 
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")

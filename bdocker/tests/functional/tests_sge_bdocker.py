@@ -19,6 +19,7 @@ import os
 import uuid
 
 from cgroupspy import nodes
+from cgroupspy import trees
 from click import testing
 import docker as docker_py
 import mock
@@ -420,6 +421,7 @@ class TestBdockerSgeWn(testtools.TestCase):
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.read_file")
     @mock.patch.object(nodes.Node, "create_cgroup")
+    @mock.patch.object(trees.GroupedTree, "get_node_by_path")
     @mock.patch("os.fork")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.setsid")
@@ -435,29 +437,9 @@ class TestBdockerSgeWn(testtools.TestCase):
                        m_get_cre, m_chown,
                        m_time, m_kill,
                        m_setsid, m_up, m_fork,
-                       m_cre, m_r, m_ry, m_w,
+                       m_tree_path, m_cre, m_r, m_ry, m_w,
                        m_path, m_getpi):
-        """Test configuration command.
-
-        :param m_wfile:
-        :param m_jinfo:
-        :param m_env:
-        :param m_get_cre:
-        :param m_chown:
-        :param m_time:
-        :param m_kill:
-        :param m_setsid:
-        :param m_up:
-        :param m_fork:
-        :param m_uuid:
-        :param m_cre:
-        :param m_r:
-        :param m_ry:
-        :param m_w:
-        :param m_path:
-        :param m_getpi:
-        :return:
-        """
+        """Test configuration command."""
         token = uuid.uuid4().hex
         user_home = "/ttt"
         user_name = "federico"

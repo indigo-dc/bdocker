@@ -29,6 +29,7 @@ from bdocker import utils
 
 BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
 LOCAL_ACCOUNTING_FILE = ".bdocker_accounting"
+JOB_PROCESS_CGROUP = 'COMMON'
 
 
 class BatchNotificationController(object):
@@ -255,6 +256,41 @@ class CgroupsWNController(WNController):
                 message="Creating accounting file",
                 e=e)
 
+    def _get_cgroup_job(self, job_id):
+        if self.parent_group == "/":
+            cgroup_job = "/%s" % job_id
+        else:
+            cgroup_job = "%s/%s" % (self.parent_group, job_id)
+        return cgroup_job
+
+    def _delete_cgroups(self, job_id):
+        cgroups_utils.delete_tree_cgroups(
+            job_id,
+            self.parent_group,
+            root_parent=self.root_cgroup)
+
+    def track_accounting(self, file_path, job_id):
+        """Get the accounting information from the cgroup.
+
+        It retrieve the accounting information relative of job.
+
+        :param job_id: job identificator
+        :param file_path: location of the local accounting path
+        :return: dictionary within accounting information
+        """
+        if self.enable_cgroups:
+            accounting = cgroups_utils.get_accounting(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup
+            )
+            utils.update_yaml_file(file_path, accounting)
+            return accounting
+        else:
+            raise exceptions.NoImplementedException(
+                message="Accounting not available without enabling"
+                        "cgroups")
+
     def launch_job_monitoring(self, job_id, job_info, file_path, job_pid,
                               cpu_max=None,
                               mem_max=None):
@@ -268,6 +304,7 @@ class CgroupsWNController(WNController):
         :param job_id: job identification, used to name the cgroup.
         :param job_info: relevant information useful to identify the job
         in the batch system accounting file.
+        :param job_cgroup: job cgroups location
         :param file_path: location of the local accounting path
         :param job_pid: job process id.
         :param cpu_max: CPU quota limit.
@@ -294,13 +331,9 @@ class CgroupsWNController(WNController):
         self.create_accounting_file(file_path, job_info)
         while True:
             try:
-                acc = cgroups_utils.get_accounting(
-                    job_id,
-                    self.parent_group,
-                    root_parent=self.root_cgroup)
+                acc = self.track_accounting(file_path, job_id)
                 if not acc:
                     break
-                utils.update_yaml_file(file_path, acc)
                 if cpu_max:
                     if int(acc["cpu_usage"]) >= int(cpu_max):
                         exceptions.make_log(
@@ -361,15 +394,18 @@ class CgroupsWNController(WNController):
                            % e.message)
                 raise exceptions.ParseException(message=message)
             parent_pid = utils.read_file("%s/pid" % job_spool)
+            cgroup_job = self._get_cgroup_job(job_id)
+            # FIXME(jorgesece): create method for it
             cgroups_utils.create_tree_cgroups(
                 job_id,
                 self.parent_group,
                 root_parent=self.root_cgroup,
+                pid=None)
+            cgroups_utils.create_tree_cgroups(
+                JOB_PROCESS_CGROUP,
+                cgroup_job,
+                root_parent=self.root_cgroup,
                 pid=parent_pid)
-            if self.parent_group == "/":
-                cgroup_job = "/%s" % job_id
-            else:
-                cgroup_job = "%s/%s" % (self.parent_group, job_id)
             acc_path = "%s/%s_%s" % (session_data['home'],
                                      self.default_acc_file,
                                      job_id)
@@ -401,10 +437,7 @@ class CgroupsWNController(WNController):
         if self.enable_cgroups:
             flag = True
             job_id = session_data["job"]["job_id"]
-            cgroups_utils.delete_tree_cgroups(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup)
+            self._delete_cgroups(job_id)
         else:
             exceptions.make_log(
                 "exception",
@@ -412,26 +445,6 @@ class CgroupsWNController(WNController):
                 "cgroups")
             flag = False
         return flag
-
-    def get_accounting(self, job_id):
-        """Get the accounting information from the cgroup.
-
-        It retrieve the accounting information relative of job.
-
-        :param job_id: job identificator
-        :return: dictionary within accounting information
-        """
-        if self.enable_cgroups:
-            accounting = cgroups_utils.get_accounting(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup
-            )
-            return accounting
-        else:
-            raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
-                        "cgroups")
 
     def create_accounting_register(self, accounting_source):
         """Create a accounting register in bath system format.
@@ -609,6 +622,59 @@ class SGEWNController(CgroupsWNController):
                 message = ("ACCOUNTING NOTIFICATION ERROR %s"
                            % e.message)
                 raise exceptions.BatchException(message=message)
+
+    def _delete_cgroups(self, job_id):
+        if self.enable_cgroups:
+            cgroup_job = self._get_cgroup_job(job_id)
+            cgroups_utils.delete_tree_cgroups(
+                JOB_PROCESS_CGROUP,
+                cgroup_job,
+                root_parent=self.root_cgroup)
+            cgroups_utils.delete_tree_cgroups(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup
+            )
+        else:
+            raise exceptions.NoImplementedException(
+                message="Accounting not available without enabling"
+                        "cgroups")
+
+    def track_accounting(self, file_path, job_id):
+        """Get the accounting information from the cgroup.
+
+        It retrieve the accounting information relative of job.
+
+        :param job_id: job identificator
+        :param file_path: location of the local accounting path
+        :return: dictionary within accounting information
+        """
+        if self.enable_cgroups:
+            cgroup_job = self._get_cgroup_job(job_id)
+            full_acc = cgroups_utils.get_accounting(
+                job_id,
+                self.parent_group,
+                root_parent=self.root_cgroup
+            )
+            job_acc = cgroups_utils.get_accounting(
+                JOB_PROCESS_CGROUP,
+                cgroup_job,
+                root_parent=self.root_cgroup)
+            track_acc ={
+                "memory_usage": (int(full_acc["memory_usage"]) -
+                                 int(job_acc["memory_usage"])
+                                 ),
+                "cpu_usage": (int(full_acc["cpu_usage"]) -
+                              int(job_acc["cpu_usage"])
+                              ),
+            }
+            utils.update_yaml_file(file_path, track_acc)
+
+            return full_acc
+        else:
+            raise exceptions.NoImplementedException(
+                message="Accounting not available without enabling"
+                        "cgroups")
 
     def create_accounting_register(self, accounting_source):
         """Create a accounting register in SGE bath system format.

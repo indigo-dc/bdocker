@@ -20,6 +20,7 @@ import os
 import uuid
 
 from cgroupspy import nodes
+from cgroupspy import trees
 import docker as docker_py
 import mock
 import testtools
@@ -98,6 +99,7 @@ class TestSgeRestApiWn(testtools.TestCase):
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.read_file")
     @mock.patch.object(nodes.Node, "create_cgroup")
+    @mock.patch.object(trees.GroupedTree, "get_node_by_path")
     @mock.patch("os.fork")
     @mock.patch("bdocker.utils.update_yaml_file")
     @mock.patch("os.setsid")
@@ -106,7 +108,7 @@ class TestSgeRestApiWn(testtools.TestCase):
     @mock.patch("time.sleep")
     def test_configuration(self, m_time, m_killpg, m_kill,
                            m_setsid, m_up, m_fork,
-                           m_cre, m_r, m_ry, m_w,
+                           m_nodepath, m_cre, m_r, m_ry, m_w,
                            m_path, m_getpi):
         cpu_usage = 5
         cpu_max = 1
@@ -165,6 +167,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         # self.assertEqual(1, m_killpg.call_count)
 
     @mock.patch.object(nodes.Node, "delete_cgroup")
+    @mock.patch.object(trees.GroupedTree, "get_node_by_path")
     @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.add_to_file")
     @mock.patch("bdocker.utils.delete_file")
@@ -173,7 +176,7 @@ class TestSgeRestApiWn(testtools.TestCase):
     @mock.patch.object(request.RequestController, "_get_req")
     @mock.patch.object(docker_py.Client, "remove_container")
     def test_clean(self, m_dock, m_rq, m_w, m_ry,
-                   m_del, m_add, m_r, m_delgroup):
+                   m_del, m_add, m_r, m_get_node, m_delgroup):
         token = fakes.user_token_clean
         out = fakes.create_fake_json_resp(
             {}, 204)
