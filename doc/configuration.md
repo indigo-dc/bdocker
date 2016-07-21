@@ -30,7 +30,7 @@ Every working node configures the following fields::
 
     [accounting_server]
     host = http://localhost
-    port = 5002
+    port = 5001
 
     [batch]
     # controller can be: SGEWNController, ...(add more modules)
@@ -38,6 +38,7 @@ Every working node configures the following fields::
     enable_cgroups = True
     cgroups_dir = /sys/fs/cgroup
     parent_cgroup = /user
+    accounting_endpoint = http://localhost:5002
 
     [credentials]
     controller = TokenController
@@ -87,18 +88,15 @@ The following table describes the possible configuration fields. Note that some 
 |                   |``workers``         |Number of middleware threads. It is 2 threads by default. It must be equal or higher than 2.
 |                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
 |                   |``logging``         |Configure the logging level of bdocker. It can be set to the standard logging levels of python:
-|                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.          
-|``accounting_server``|  (only working)  |**Configures in the WN the location of the**          
-|                   |                     |accounting service.                               
-|                     |``host``          |Host in which the service is located. Format: ``http(s)://xx``              
-|                     |``port``          |Port in which the service is located              
+|                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.           
 |``batch``        |                      |*Batch system configuration*                        
 |                 |``controller``        |Specify the class to manage the batch system.
 |                 |                      |It can be for working nodes: ``SGEController`` (more will be implemented)
 |                 |                      |It can be for accounting nodes: ``SGEAccountingController`` (more will be implemented)
-|                 |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
+|  (only working) |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
 |  (only working) |``cgroups_dir``       |CGroup root directory. By default: "/sys/fs/cgroup"
 |  (only working) |``parent_cgroup``     |Cgroup parent group: By default: "/"
+|  (only working) |``accounting_endpoint``|Configures in the WN the location of the accounting server: Format: ``http(s)://host:port``
 |(only accounting)|``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file.
 |(only accounting)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |**Credential module configuration**
