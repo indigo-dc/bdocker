@@ -163,3 +163,13 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ## It will take the tocken from token in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker clean
+
+### Token store file
+
+**It MUSTS exist**. The system use a administration token that si **required for configure bdocker**, this token is
+called ``prolog`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
+So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
+
+    prolog: {token: <token_prolog>}
+    
+where <token_prolog> is the token configured by the admin, **it must be the same in all the componets.**.
