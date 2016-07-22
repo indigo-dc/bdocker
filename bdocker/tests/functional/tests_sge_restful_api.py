@@ -133,6 +133,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                                    "account_name": "",
                                    "log_name": "",
                                    "parent_pid": "",
+                                   "start_time": "",
                                    "submission_time": ""}
                            }
                       }
