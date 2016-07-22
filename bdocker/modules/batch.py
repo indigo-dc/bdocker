@@ -139,7 +139,7 @@ class SGEAccountingController(AccountingController):
             job = utils.find_line(sge_accounting, job_string)
             return job.split(":")
         except BaseException as e:
-            raise exceptions.NotificationException(e=e)
+            raise exceptions.NotificationException(exc=e)
 
     def set_job_accounting(self, accounting):
         """Add accounting line to the bdocker accounting file
@@ -542,7 +542,7 @@ class CgroupsWNController(WNController):
                 exceptions.make_log("info", "NOTIFIED.")
                 return results
             except BaseException as e:
-                raise exceptions.NotificationException(e=e)
+                raise exceptions.NotificationException(exc=e)
         else:
             raise exceptions.NoImplementedException(
                 message="Accounting not available without enabling"
@@ -555,7 +555,7 @@ class SGEWNController(CgroupsWNController):
     def __init__(self, *args, **kwargs):
         super(SGEWNController, self).__init__(*args, **kwargs)
         self.default_wallclock = self.conf.get("default_ru_wallclock", 0)
-        self.include_wallclock= self.conf.get("include_wallclock", False)
+        self.include_wallclock = self.conf.get("include_wallclock", False)
 
     @staticmethod
     def _get_job_configuration(spool):
