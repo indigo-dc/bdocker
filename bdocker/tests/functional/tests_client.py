@@ -227,12 +227,13 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(2, result.exit_code)
         self.assertIsNotNone(result.exception)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.load_sge_job_configuration")
     @mock.patch("os.getenv")
     @mock.patch.object(request.RequestController, "execute_put")
-    def test_docker_delete(self, m_get, m_env, m_conf, m_yaml, m_load):
+    def test_docker_delete(self, m_get, m_env, m_conf, m_yaml, m_load, m_read):
         m_env.side_effect = fakes.job_env
         m_load.return_value = fakes.conf_sge
         m_yaml.return_value = copy.deepcopy(fakes.token_store)
@@ -262,13 +263,14 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(2, result.exit_code)
         self.assertIsNotNone(result.exception)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.load_sge_job_configuration")
     @mock.patch("os.getenv")
     @mock.patch.object(request.RequestController, "execute_put")
     def test_docker_delete_several(self, m_get, m_env, m_conf,
-                                   m_yaml, m_load):
+                                   m_yaml, m_load, m_read):
         m_env.side_effect = fakes.job_env
         m_load.return_value = fakes.conf_sge
         m_yaml.return_value = copy.deepcopy(fakes.token_store)
@@ -282,13 +284,14 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(result.exit_code, 0)
         self.assertIsNone(result.exception)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.load_sge_job_configuration")
     @mock.patch("os.getenv")
     @mock.patch.object(request.RequestController, "execute_put")
     def test_docker_run(self, m_rq, m_env, m_conf,
-                        m_yaml, m_load):
+                        m_yaml, m_load, m_read):
         m_env.side_effect = fakes.job_env
         m_load.return_value = fakes.conf_sge
         m_yaml.return_value = copy.deepcopy(fakes.token_store)
@@ -310,13 +313,14 @@ class TestFunctionalClient(TestCaseCommandLine):
         }
         m_rq.assert_called_with(path="/run", parameters=expected)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.load_sge_job_configuration")
     @mock.patch("os.getenv")
     @mock.patch.object(request.RequestController, "execute_put")
     def test_docker_run_volume(self, m_rq, m_env, m_conf,
-                               m_yaml, m_load):
+                               m_yaml, m_load, m_read):
         m_env.side_effect = fakes.job_env
         m_load.return_value = fakes.conf_sge
         m_yaml.return_value = copy.deepcopy(fakes.token_store)

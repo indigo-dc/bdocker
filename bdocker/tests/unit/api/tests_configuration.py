@@ -36,7 +36,7 @@ class TestConfigurationWorkingNode(testtools.TestCase):
         conf = utils.load_configuration_from_file(file_name)
         self.assertIsNotNone(conf)
         self.assertEqual(5, conf.items().__len__())
-        self.assertEqual(2, conf['batch'].__len__())
+        self.assertEqual(3, conf['batch'].__len__())
         self.assertEqual(3, conf['credentials'].__len__())
         self.assertEqual(3, conf['server'].__len__())
         self.assertEqual(1, conf['dockerAPI'].__len__())

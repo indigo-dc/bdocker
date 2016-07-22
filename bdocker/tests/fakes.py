@@ -29,7 +29,7 @@ admin_token = uuid.uuid4().hex
 containers = [uuid.uuid4().hex,
               uuid.uuid4().hex]
 images = [uuid.uuid4().hex]
-
+parent_pid =  uuid.uuid4().hex
 job_info = {
     "job_id": job_id,
     "spool": "/baa",
@@ -41,6 +41,10 @@ job_info = {
     "job_name": "",
     "account_name": "",
     "log_name": "",
+    "parent_pid": parent_pid,
+    "submission_time": "",
+    "start_time": "",
+    "end_time": "",
     "home": ""
 }
 

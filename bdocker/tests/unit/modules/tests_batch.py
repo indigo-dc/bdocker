@@ -104,6 +104,7 @@ class TestWNController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
                 "flush_time": interval,
+                "only_docker_accounting": False,
                 "accounting_endpoint": mock.MagicMock()
                 }
         m_fork.return_value = 0
@@ -144,6 +145,7 @@ class TestWNController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
                 "flush_time": interval,
+                "only_docker_accounting": False,
                 "accounting_endpoint": mock.MagicMock()
                 }
 
@@ -158,6 +160,54 @@ class TestWNController(testtools.TestCase):
         m_update.assert_called_with(
             path, acc)
         m_read.assert_called_with(path, job_info)
+
+    @mock.patch("os.fork")
+    @mock.patch("os.setsid")
+    @mock.patch("time.sleep")
+    @mock.patch("bdocker.modules.cgroups_utils.get_accounting")
+    @mock.patch.object(batch.CgroupsWNController, "create_accounting_file")
+    @mock.patch("bdocker.utils.update_yaml_file")
+    @mock.patch("os.getpid")
+    @mock.patch("os.kill")
+    @mock.patch.object(batch.CgroupsWNController, "kill_job")
+    def test_launch_job_monitoring_only_docker(self, m_kill_job, m_kill,
+                                               m_getpid, m_update, m_read,
+                                               m_acc, m_sleep,
+                                               m_setsid, m_fork):
+        job_id = fakes.job_id
+        job_info = fakes.job_info
+        path = "/foo"
+        memory_usage = [99, 10]
+        cpu_usage = [111, 10]
+        interval = 33
+        acc = [{"memory_usage": memory_usage[0],
+                "cpu_usage": cpu_usage[0]},
+               {"memory_usage": memory_usage[1],
+                "cpu_usage": cpu_usage[1]}
+               ]
+        expectec_acc = {"memory_usage": memory_usage[0]-memory_usage[1],
+                        "cpu_usage": cpu_usage[0]- cpu_usage[1]
+                        }
+        conf = {"cgroups_dir": "/foo",
+                "enable_cgroups": True,
+                "parent_cgroup": "/bdocker.test",
+                "flush_time": interval,
+                "only_docker_accounting": True,
+                "accounting_endpoint": mock.MagicMock()
+                }
+
+        m_fork.return_value = 0
+        m_acc.side_effect = [acc[0], acc[1]]
+        controller = batch.CgroupsWNController(conf)
+        m_update.side_effect = exceptions.CgroupException("Finished")
+        controller.launch_job_monitoring(job_id, job_info,
+                                         path,
+                                         None, None, None)
+        m_sleep.side_effect = [interval, 0.1]
+        m_update.assert_called_with(
+            path, expectec_acc)
+        m_read.assert_called_with(path, job_info)
+
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
@@ -189,6 +239,7 @@ class TestWNController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
                 "flush_time": interval,
+                "only_docker_accounting": False,
                 "accounting_endpoint": mock.MagicMock()
                 }
         m_fork.return_value = 0
@@ -235,6 +286,7 @@ class TestWNController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
                 "flush_time": interval,
+                "only_docker_accounting": False,
                 "accounting_endpoint": mock.MagicMock()
                 }
         m_fork.return_value = 0
@@ -282,6 +334,7 @@ class TestWNController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": "/bdocker.test",
                 "flush_time": interval,
+                "only_docker_accounting": False,
                 "accounting_endpoint": mock.MagicMock()
                 }
         m_fork.return_value = 0
@@ -318,13 +371,15 @@ class TestSGEController(testtools.TestCase):
         job_name = "job_name"
         log_name = "log_name"
         account_name = "account_name"
+        submission_time = "submission_time"
         job = {"job_id": job_id,
                "user_name": username,
                "queue_name": queue_name,
                "host_name": host_name,
                "job_name": job_name,
                "log_name": log_name,
-               "account_name": account_name
+               "account_name": account_name,
+               "submission_time": submission_time
                }
 
         controller.create_accounting_file(None, job)
@@ -333,11 +388,10 @@ class TestSGEController(testtools.TestCase):
             job
         )
 
-    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.CgroupsWNController, "launch_job_monitoring")
     @mock.patch.object(batch.SGEWNController, "notify_accounting")
-    def test_conf_environment(self, m_not, m_lan, m_cre, m_read):
+    def test_conf_environment(self, m_not, m_lan, m_cre):
         admin_token = fakes.admin_token
         home = "/aa"
         parent_id = uuid.uuid4().hex
@@ -346,7 +400,7 @@ class TestSGEController(testtools.TestCase):
                 "enable_cgroups": True,
                 "parent_cgroup": parent_dir,
                 "accounting_endpoint": self.acc_conf}
-        m_read.return_value = parent_id
+
         controller = batch.SGEWNController(conf)
         job_info = {"home": home,
                     "job": fakes.job_info,
@@ -358,7 +412,6 @@ class TestSGEController(testtools.TestCase):
                                                        fakes.job_id)
         }
         self.assertEqual(expected_cgroup, batch_info)
-        self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
 
         expected_dict_1 = {'root_parent': conf["cgroups_dir"],
@@ -372,7 +425,7 @@ class TestSGEController(testtools.TestCase):
                          m_cre.mock_calls[0][2])
 
         expected_dict_2 = {'root_parent': conf["cgroups_dir"],
-                           'pid': parent_id}
+                           'pid': fakes.parent_pid}
         expected_creation_2 = (batch.JOB_PROCESS_CGROUP,
                                "%s/%s" % (conf["parent_cgroup"], fakes.job_id)
                                )
@@ -381,21 +434,19 @@ class TestSGEController(testtools.TestCase):
         self.assertEqual(expected_dict_2,
                          m_cre.mock_calls[1][2])
 
-    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.modules.cgroups_utils.create_tree_cgroups")
     @mock.patch.object(batch.SGEWNController, "launch_job_monitoring")
     @mock.patch.object(batch.SGEWNController, "notify_accounting")
     def test_conf_environment_no_root_dir(self, m_not, m_lan,
-                                          m_cre, m_read):
+                                          m_cre):
         home = "/foo"
         admin_token = uuid.uuid4().hex
-        parent_id = uuid.uuid4().hex
+        parent_id = fakes.parent_pid
         parent_dir = "/bdocker.test"
         conf = {
             "enable_cgroups": True,
             "parent_cgroup": parent_dir,
             "accounting_endpoint": self.acc_conf}
-        m_read.return_value = parent_id
         job_info = {"home": home,
                     "job": fakes.job_info,
                     }
@@ -406,15 +457,7 @@ class TestSGEController(testtools.TestCase):
             "acc_file": "%s/.bdocker_accounting_%s" % (home, fakes.job_id)
         }
         self.assertEqual(expected_cgroup, batch_info)
-        self.assertIs(True, m_read.called)
         self.assertIs(True, m_cre.called)
-        # m_cre.assert_called_with(
-        #     fakes.job_id,
-        #     conf["parent_cgroup"],
-        #     root_parent="/sys/fs/cgroup",
-        #     pid=parent_id
-        # )
-
         expected_dict_1 = {'root_parent': "/sys/fs/cgroup",
                            'pid': None}
         expected_creation_1 = (fakes.job_id,
@@ -505,11 +548,13 @@ class TestSGEController(testtools.TestCase):
         controller.clean_environment(job_info, admin_token)
         self.assertIs(False, m_del_tree.called)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEWNController, "_get_job_configuration")
-    def test_get_job_info(self, m_conf, m_env):
+    def test_get_job_info(self, m_conf, m_env, m_read):
         job_id = uuid.uuid4().hex
         user = uuid.uuid4().hex
+        m_read.return_value = fakes.parent_pid
         home = "/home/rrr"
         spool_dir = "/foo"
         queue_name = "docker"
@@ -544,7 +589,8 @@ class TestSGEController(testtools.TestCase):
                     'spool': spool_dir,
                     'user_name': user,
                     'max_cpu': max_cpu,
-                    'max_memory': max_memory
+                    'max_memory': max_memory,
+                    'parent_pid': fakes.parent_pid
                     }
         conf = mock.MagicMock()
         out = batch.SGEWNController(conf).get_job_info()
@@ -634,13 +680,15 @@ class TestSGEController(testtools.TestCase):
         max_cpu = "00:40:00"
         max_mem = 11
         job_name = "rrrr"
+        submission_t = 999
         m_load.return_value = {"queue": queue,
                                "host": host,
                                "job_owner": job_owner,
                                "job_name": job_name,
                                "account": account,
                                "h_cpu": max_cpu,
-                               "h_data": max_mem
+                               "h_data": max_mem,
+                               "submission_time": submission_t
                                }
         cpu_parsed = 100
         m_parse.return_value = cpu_parsed

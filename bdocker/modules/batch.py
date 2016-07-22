@@ -122,21 +122,24 @@ class SGEAccountingController(AccountingController):
     def _get_sge_job_accounting(queue_name, host_name, job_id):
         """Get information from the SGE accounting file.
 
-        It is DEPRECATED. We mantein in case we need in the future.
+        It is DEPRECATED. We keep it in case we need in the future.
 
         :param queue_name:
         :param host_name:
         :param job_id:
         :return:
         """
-        sge_accounting = "/opt/sge/default/common/accounting"
-        any_word = "[^:]+"
-        job_string = "%s:%s:%s:%s:%s:%s:" % (
-            queue_name, host_name, any_word,
-            any_word, any_word, job_id
-        )
-        job = utils.find_line(sge_accounting, job_string)
-        return job.split(":")
+        try:
+            sge_accounting = "/opt/sge/default/common/accounting"
+            any_word = "[^:]+"
+            job_string = "%s:%s:%s:%s:%s:%s:" % (
+                queue_name, host_name, any_word,
+                any_word, any_word, job_id
+            )
+            job = utils.find_line(sge_accounting, job_string)
+            return job.split(":")
+        except BaseException as e:
+            raise exceptions.NotificationException(e=e)
 
     def set_job_accounting(self, accounting):
         """Add accounting line to the bdocker accounting file
@@ -214,17 +217,24 @@ class CgroupsWNController(WNController):
 
     def __init__(self, *args, **kwargs):
         super(CgroupsWNController, self).__init__(*args, **kwargs)
-        self.enable_cgroups = self.conf.get("enable_cgroups",
-                                            False)
-        self.root_cgroup = self.conf.get("cgroups_dir",
-                                         "/sys/fs/cgroup")
-        self.parent_group = self.conf.get("parent_cgroup", '/')
-        self.flush_time = self.conf.get("monitor_time", 10)
-        self.default_acc_file = LOCAL_ACCOUNTING_FILE
-        accounting_conf = self.conf["accounting_endpoint"]
-        self.notification_controller = BatchNotificationController(
-            accounting_conf
-        )
+        try:
+            self.enable_cgroups = self.conf.get("enable_cgroups",
+                                                False)
+            self.root_cgroup = self.conf.get("cgroups_dir",
+                                             "/sys/fs/cgroup")
+            self.parent_group = self.conf.get("parent_cgroup", '/')
+            self.flush_time = self.conf.get("monitor_time", 10)
+            self.only_docker_acc = self.conf.get(
+                "only_docker_accounting", True
+            )
+            self.default_acc_file = LOCAL_ACCOUNTING_FILE
+            accounting_conf = self.conf["accounting_endpoint"]
+            self.notification_controller = BatchNotificationController(
+                accounting_conf
+            )
+        except BaseException as e:
+            raise exceptions.ConfigurationException(
+                "CGROUP", e)
 
     @staticmethod
     def kill_job(spool):
@@ -257,17 +267,58 @@ class CgroupsWNController(WNController):
                 e=e)
 
     def _get_cgroup_job(self, job_id):
+        """Generates the job cgroup location.
+
+        :param job_id: Job identificator
+        :return:
+        """
         if self.parent_group == "/":
             cgroup_job = "/%s" % job_id
         else:
             cgroup_job = "%s/%s" % (self.parent_group, job_id)
         return cgroup_job
 
+    def _create_cgroups(self, job_id, parent_pid):
+        """Create CGROUPs realted to the job.
+
+        It creates a cgroup in the parent cgroup (specified in
+        configuration) naming it by using the job_idn. In addition,
+        it creates another cgroup inside of previous one with name COMMON.
+        The process pid of the job parent is included in COMMON.
+
+        :param job_id: Job identificator
+        :param parent_pid: process indentificator ot the
+        job parent process.
+        :return:
+        """
+        cgroups_utils.create_tree_cgroups(
+            job_id,
+            self.parent_group,
+            root_parent=self.root_cgroup,
+            pid=None)
+        cgroup_job = self._get_cgroup_job(job_id)
+        cgroups_utils.create_tree_cgroups(
+            JOB_PROCESS_CGROUP,
+            cgroup_job,
+            root_parent=self.root_cgroup,
+            pid=parent_pid)
+
     def _delete_cgroups(self, job_id):
+        """Delete CGROUPs realted to the job.
+
+        :param job_id:
+        :return:
+        """
+        cgroup_job = self._get_cgroup_job(job_id)
+        cgroups_utils.delete_tree_cgroups(
+            JOB_PROCESS_CGROUP,
+            cgroup_job,
+            root_parent=self.root_cgroup)
         cgroups_utils.delete_tree_cgroups(
             job_id,
             self.parent_group,
-            root_parent=self.root_cgroup)
+            root_parent=self.root_cgroup
+        )
 
     def track_accounting(self, file_path, job_id):
         """Get the accounting information from the cgroup.
@@ -279,13 +330,28 @@ class CgroupsWNController(WNController):
         :return: dictionary within accounting information
         """
         if self.enable_cgroups:
-            accounting = cgroups_utils.get_accounting(
+            track_acc = cgroups_utils.get_accounting(
                 job_id,
                 self.parent_group,
                 root_parent=self.root_cgroup
             )
-            utils.update_yaml_file(file_path, accounting)
-            return accounting
+            if self.only_docker_acc:
+                cgroup_job = self._get_cgroup_job(job_id)
+                job_acc = cgroups_utils.get_accounting(
+                    JOB_PROCESS_CGROUP,
+                    cgroup_job,
+                    root_parent=self.root_cgroup)
+                track_acc ={
+                    "memory_usage": (int(track_acc["memory_usage"]) -
+                                     int(job_acc["memory_usage"])
+                                     ),
+                    "cpu_usage": (int(track_acc["cpu_usage"]) -
+                                  int(job_acc["cpu_usage"])
+                                  ),
+                }
+            utils.update_yaml_file(file_path, track_acc)
+
+            return track_acc
         else:
             raise exceptions.NoImplementedException(
                 message="Accounting not available without enabling"
@@ -388,34 +454,27 @@ class CgroupsWNController(WNController):
         if self.enable_cgroups:
             try:
                 job_id = session_data['job']['job_id']
-                job_spool = session_data['job']['spool']
+                parent_pid = session_data['job']['parent_pid']
+                user_home = session_data['home']
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
                 raise exceptions.ParseException(message=message)
-            parent_pid = utils.read_file("%s/pid" % job_spool)
-            cgroup_job = self._get_cgroup_job(job_id)
-            # FIXME(jorgesece): create method for it
-            cgroups_utils.create_tree_cgroups(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup,
-                pid=None)
-            cgroups_utils.create_tree_cgroups(
-                JOB_PROCESS_CGROUP,
-                cgroup_job,
-                root_parent=self.root_cgroup,
-                pid=parent_pid)
-            acc_path = "%s/%s_%s" % (session_data['home'],
-                                     self.default_acc_file,
-                                     job_id)
-            batch_info = {"cgroup": cgroup_job,
-                          "acc_file": acc_path}
+            try:
+                cgroup_job = self._get_cgroup_job(job_id)
+                self._create_cgroups(job_id, parent_pid)
+                acc_path = "%s/%s_%s" % (user_home,
+                                         self.default_acc_file,
+                                         job_id)
+                batch_info = {"cgroup": cgroup_job,
+                              "acc_file": acc_path}
 
-            exceptions.make_log("debug",
-                                "CGROUP CONTROL ACTIVATED ON: %s "
-                                "JOB CGROUP: %s "
-                                % (self.parent_group, cgroup_job))
+                exceptions.make_log("debug",
+                                    "CGROUP CONTROL ACTIVATED ON: %s "
+                                    "JOB CGROUP: %s "
+                                    % (self.parent_group, cgroup_job))
+            except BaseException as e:
+                raise exceptions.CgroupException(e=e)
         else:
             exceptions.make_log(
                 "exception",
@@ -435,9 +494,12 @@ class CgroupsWNController(WNController):
         :return: True or False
         """
         if self.enable_cgroups:
-            flag = True
-            job_id = session_data["job"]["job_id"]
-            self._delete_cgroups(job_id)
+            try:
+                flag = True
+                job_id = session_data["job"]["job_id"]
+                self._delete_cgroups(job_id)
+            except BaseException as e:
+                raise exceptions.CgroupException(e=e)
         else:
             exceptions.make_log(
                 "exception",
@@ -470,14 +532,17 @@ class CgroupsWNController(WNController):
         :return: response from the server
         """
         if self.enable_cgroups:
-            exceptions.make_log("info",
-                                "CREATE ACCOUNTING STRING.")
-            accounting = self.create_accounting_register(accounting_source)
-            results = self.notification_controller.notify_accounting(
-                admin_token,
-                accounting)
-            exceptions.make_log("info", "NOTIFIED.")
-            return results
+            try:
+                exceptions.make_log("info",
+                                    "CREATE ACCOUNTING STRING.")
+                accounting = self.create_accounting_register(accounting_source)
+                results = self.notification_controller.notify_accounting(
+                    admin_token,
+                    accounting)
+                exceptions.make_log("info", "NOTIFIED.")
+                return results
+            except BaseException as e:
+                raise exceptions.NotificationException(e=e)
         else:
             raise exceptions.NoImplementedException(
                 message="Accounting not available without enabling"
@@ -508,6 +573,7 @@ class SGEWNController(CgroupsWNController):
         job_name = conf['job_name']
         account = conf['account']
         max_cpu = conf['h_cpu']
+        submission_time = conf['submission_time']
         if max_cpu == "INFINITY":
             max_cpu = None
         else:
@@ -525,7 +591,8 @@ class SGEWNController(CgroupsWNController):
             'job_name': job_name,
             'account_name': account,
             'max_cpu': max_cpu,
-            'max_memory': max_memory
+            'max_memory': max_memory,
+            'submission_time': submission_time
         }
 
     @staticmethod
@@ -623,59 +690,6 @@ class SGEWNController(CgroupsWNController):
                            % e.message)
                 raise exceptions.BatchException(message=message)
 
-    def _delete_cgroups(self, job_id):
-        if self.enable_cgroups:
-            cgroup_job = self._get_cgroup_job(job_id)
-            cgroups_utils.delete_tree_cgroups(
-                JOB_PROCESS_CGROUP,
-                cgroup_job,
-                root_parent=self.root_cgroup)
-            cgroups_utils.delete_tree_cgroups(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup
-            )
-        else:
-            raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
-                        "cgroups")
-
-    def track_accounting(self, file_path, job_id):
-        """Get the accounting information from the cgroup.
-
-        It retrieve the accounting information relative of job.
-
-        :param job_id: job identificator
-        :param file_path: location of the local accounting path
-        :return: dictionary within accounting information
-        """
-        if self.enable_cgroups:
-            cgroup_job = self._get_cgroup_job(job_id)
-            full_acc = cgroups_utils.get_accounting(
-                job_id,
-                self.parent_group,
-                root_parent=self.root_cgroup
-            )
-            job_acc = cgroups_utils.get_accounting(
-                JOB_PROCESS_CGROUP,
-                cgroup_job,
-                root_parent=self.root_cgroup)
-            track_acc ={
-                "memory_usage": (int(full_acc["memory_usage"]) -
-                                 int(job_acc["memory_usage"])
-                                 ),
-                "cpu_usage": (int(full_acc["cpu_usage"]) -
-                              int(job_acc["cpu_usage"])
-                              ),
-            }
-            utils.update_yaml_file(file_path, track_acc)
-
-            return full_acc
-        else:
-            raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
-                        "cgroups")
-
     def create_accounting_register(self, accounting_source):
         """Create a accounting register in SGE bath system format.
 
@@ -729,19 +743,24 @@ class SGEWNController(CgroupsWNController):
 
         :return: dictionary with the relevant job information
         """
-
-        job_id = utils.get_environment(
-            'JOB_ID')
-        home = os.path.realpath(utils.get_environment(
-            'HOME'))
-        user = utils.get_environment(
-            'USER')
-        spool_dir = utils.get_environment(
-            "SGE_JOB_SPOOL_DIR")
-        job_info = {'home': home,
-                    'job_id': job_id,
-                    'user_name': user,
-                    'spool': spool_dir,
-                    }
-        job_info.update(self._get_job_configuration(spool_dir))
-        return job_info
+        try:
+            job_id = utils.get_environment(
+                'JOB_ID')
+            home = os.path.realpath(utils.get_environment(
+                'HOME'))
+            user = utils.get_environment(
+                'USER')
+            spool_dir = utils.get_environment(
+                "SGE_JOB_SPOOL_DIR")
+            parent_pid = utils.read_file(
+                "%s/pid" % spool_dir)
+            job_info = {'home': home,
+                        'job_id': job_id,
+                        'user_name': user,
+                        'spool': spool_dir,
+                        'parent_pid': parent_pid
+                        }
+            job_info.update(self._get_job_configuration(spool_dir))
+            return job_info
+        except BaseException as e:
+            raise exceptions.BatchException("Get job information", e=e)
