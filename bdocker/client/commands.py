@@ -118,6 +118,8 @@ class CommandController(object):
         path = "/configuration"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
+        # TODO(jorgesece): job information retrieval when implement the
+        # pararell/mpi version
         job_info = self._get_job_info()
         if user_name:
             user_info = get_user_credentials(user_name)
