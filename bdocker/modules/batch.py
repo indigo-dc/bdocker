@@ -341,7 +341,7 @@ class CgroupsWNController(WNController):
                     JOB_PROCESS_CGROUP,
                     cgroup_job,
                     root_parent=self.root_cgroup)
-                track_acc ={
+                track_acc = {
                     "memory_usage": (int(track_acc["memory_usage"]) -
                                      int(job_acc["memory_usage"])
                                      ),

@@ -291,7 +291,7 @@ def get_environment(key):
 
 def get_boolean(data, key, default):
     s = data.get(key, None)
-    if s == None:
+    if s is None:
         return default
     value = str(s).upper()
     if s:

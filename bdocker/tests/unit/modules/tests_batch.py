@@ -185,8 +185,8 @@ class TestWNController(testtools.TestCase):
                {"memory_usage": memory_usage[1],
                 "cpu_usage": cpu_usage[1]}
                ]
-        expectec_acc = {"memory_usage": memory_usage[0]-memory_usage[1],
-                        "cpu_usage": cpu_usage[0]- cpu_usage[1]
+        expectec_acc = {"memory_usage": memory_usage[0] - memory_usage[1],
+                        "cpu_usage": cpu_usage[0] - cpu_usage[1]
                         }
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
@@ -207,7 +207,6 @@ class TestWNController(testtools.TestCase):
         m_update.assert_called_with(
             path, expectec_acc)
         m_read.assert_called_with(path, job_info)
-
 
     @mock.patch("os.fork")
     @mock.patch("os.setsid")
@@ -394,7 +393,6 @@ class TestSGEController(testtools.TestCase):
     def test_conf_environment(self, m_not, m_lan, m_cre):
         admin_token = fakes.admin_token
         home = "/aa"
-        parent_id = uuid.uuid4().hex
         parent_dir = "/bdocker.test"
         conf = {"cgroups_dir": "/foo",
                 "enable_cgroups": True,
