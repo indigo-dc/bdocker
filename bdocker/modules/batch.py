@@ -218,15 +218,15 @@ class CgroupsWNController(WNController):
     def __init__(self, *args, **kwargs):
         super(CgroupsWNController, self).__init__(*args, **kwargs)
         try:
-            self.enable_cgroups = self.conf.get("enable_cgroups",
-                                                False)
+            self.enable_cgroups = utils.get_boolean(
+                self.conf, "enable_cgroups", False)
             self.root_cgroup = self.conf.get("cgroups_dir",
                                              "/sys/fs/cgroup")
             self.parent_group = self.conf.get("parent_cgroup", '/')
             self.flush_time = self.conf.get("monitor_time", 10)
-            self.only_docker_acc = self.conf.get(
-                "only_docker_accounting", True
-            )
+            self.only_docker_acc = utils.get_boolean(
+                self.conf, "only_docker_accounting", True)
+
             self.default_acc_file = LOCAL_ACCOUNTING_FILE
             accounting_conf = self.conf["accounting_endpoint"]
             self.notification_controller = BatchNotificationController(
@@ -555,7 +555,8 @@ class SGEWNController(CgroupsWNController):
     def __init__(self, *args, **kwargs):
         super(SGEWNController, self).__init__(*args, **kwargs)
         self.default_wallclock = self.conf.get("default_ru_wallclock", 0)
-        self.include_wallclock = self.conf.get("include_wallclock", False)
+        self.include_wallclock = utils.get_boolean(
+            self.conf, "include_wallclock", False)
 
     @staticmethod
     def _get_job_configuration(spool):
@@ -587,7 +588,7 @@ class SGEWNController(CgroupsWNController):
         if max_memory == "INFINITY":
             max_memory = None
         parent_pid = utils.read_file(
-                "%s/pid" % spool)
+            "%s/pid" % spool)
         return {
             'queue_name': qname,
             'host_name': hostname,

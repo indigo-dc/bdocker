@@ -287,3 +287,15 @@ def get_environment(key):
         raise exceptions.ConfigurationException(
             message="Not found varialbe %s" %
                     key)
+
+
+def get_boolean(data, key, default):
+    s = data.get(key, None)
+    if s == None:
+        return default
+    value = str(s).upper()
+    if s:
+        if value == "TRUE" or value == 'YES':
+            return True
+        else:
+            return False

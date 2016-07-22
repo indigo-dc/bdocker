@@ -165,7 +165,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         self.assertEqual(user_token_conf,
                          result.json_body["results"])
         self.assertIn(user_token_conf, self.token_store)
-        self.assertEqual(1, m_kill.call_count)
+        self.assertEqual(2, m_kill.call_count)
 
     @mock.patch.object(nodes.Node, "delete_cgroup")
     @mock.patch.object(trees.GroupedTree, "get_node_by_path")

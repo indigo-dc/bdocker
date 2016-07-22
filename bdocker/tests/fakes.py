@@ -42,9 +42,9 @@ job_info = {
     "account_name": "",
     "log_name": "",
     "parent_pid": parent_pid,
-    "submission_time": "",
-    "start_time": "",
-    "end_time": "",
+    "submission_time": 1,
+    "start_time": 1,
+    "end_time": 1,
     "home": ""
 }
 
