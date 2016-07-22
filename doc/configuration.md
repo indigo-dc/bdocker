@@ -198,7 +198,7 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
 ### Token store file
 
 **It MUSTS exist**. The system use a administration token that si **required for configure bdocker**, this token is
-called ``prolog`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
+called ``admin`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
 So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
     ```
     admin: {token: <token_prolog>}
