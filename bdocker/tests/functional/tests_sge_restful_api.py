@@ -132,7 +132,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                                    "job_name": "",
                                    "account_name": "",
                                    "log_name": "",
-                                   "parent_pid": ""}
+                                   "parent_pid": "",
+                                   "submission_time": ""}
                            }
                       }
         m_r.side_effect = [None, memory_usage,

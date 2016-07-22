@@ -574,6 +574,7 @@ class SGEWNController(CgroupsWNController):
         account = conf['account']
         max_cpu = conf['h_cpu']
         submission_time = conf['submission_time']
+        start_time = int(time.time())
         if max_cpu == "INFINITY":
             max_cpu = None
         else:
@@ -594,6 +595,7 @@ class SGEWNController(CgroupsWNController):
             'max_cpu': max_cpu,
             'max_memory': max_memory,
             'submission_time': submission_time,
+            'start_time': start_time,
             'parent_pid': parent_pid
         }
 
@@ -648,7 +650,9 @@ class SGEWNController(CgroupsWNController):
                     "host_name": job['host_name'],
                     "job_name": job['job_name'],
                     "log_name": job['log_name'],
-                    "account_name": job['account_name']
+                    "account_name": job['account_name'],
+                    "submission_time": job["submission_time"],
+                    "start_time": job["start_time"]
                 }
 
                 self.launch_job_monitoring(job_id, job_info, path,
@@ -714,9 +718,9 @@ class SGEWNController(CgroupsWNController):
             io_usage = job.get('io_usage', "0")  # position 39
             priority = '0'
             group = "0"  # we do not need it for bdocker
-            submission_time = '0'  # position 9
-            start_time = "0"  # position 10
-            end_time = '0'  # position 11
+            submission_time = job.get("submission_time", '0')  # position 9
+            start_time = job.get("start_time", '0')   # position 10
+            end_time = int(time.time())  # position 11
             failed = "0"  # position 12. Set 37 in case we kill it
             status = "0"  # pos 13. 0 for ok, 137 time end
             ru_wallclock = "0"  # end_time - start_time  # pos 14

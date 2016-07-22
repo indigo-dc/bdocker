@@ -626,7 +626,8 @@ class TestSGEController(testtools.TestCase):
 
     @mock.patch("os.getenv")
     @mock.patch("bdocker.utils.read_yaml_file")
-    def test_create_accounting(self, m_read, m):
+    @mock.patch('time.time')
+    def test_create_accounting(self, m_time, m_read, m):
         queue_name = "docker"
         host_name = "ge-wn03.novalocal"
         log_name = "jorgesece"
@@ -634,14 +635,19 @@ class TestSGEController(testtools.TestCase):
         job_name = "test.sh01"
         account = "sge"
         cpu_usage = "33"
+        submission_time = "33"
+        start_time = "334433"
+        end_time = "4444"
+        m_time.return_value = end_time
         memory_usage = "1000"
         io_usage = "0.00"
-        expected = ("%s:%s:0:%s:%s:%s:%s:0:0:"
-                    "0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+        expected = ("%s:%s:0:%s:%s:%s:%s:0:%s:"
+                    "%s:%s:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
                     "0:0:0:0:0:0:0:0:0:0:0:%s:%s:%s:0:0:"
                     "0:0:0:0"
                     % (queue_name, host_name, log_name,
                        job_name, job_id, account,
+                       submission_time, start_time, end_time,
                        cpu_usage, memory_usage, io_usage)
                     )
         conf = {"cgroups_dir": "/foo",
@@ -664,7 +670,10 @@ class TestSGEController(testtools.TestCase):
                                'account_name': account,
                                'cpu_usage': cpu_usage,
                                'memory_usage': memory_usage,
-                               'io_usage': io_usage
+                               'io_usage': io_usage,
+                               'submission_time': submission_time,
+                               'start_time': start_time,
+                               'end_time': end_time
                                }
         out = controller.create_accounting_register(None)
         self.assertEqual(expected, out)
