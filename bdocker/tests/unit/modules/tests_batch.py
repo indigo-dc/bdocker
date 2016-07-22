@@ -548,13 +548,11 @@ class TestSGEController(testtools.TestCase):
         controller.clean_environment(job_info, admin_token)
         self.assertIs(False, m_del_tree.called)
 
-    @mock.patch("bdocker.utils.read_file")
     @mock.patch("os.getenv")
     @mock.patch.object(batch.SGEWNController, "_get_job_configuration")
-    def test_get_job_info(self, m_conf, m_env, m_read):
+    def test_get_job_info(self, m_conf, m_env):
         job_id = uuid.uuid4().hex
         user = uuid.uuid4().hex
-        m_read.return_value = fakes.parent_pid
         home = "/home/rrr"
         spool_dir = "/foo"
         queue_name = "docker"
@@ -577,7 +575,8 @@ class TestSGEController(testtools.TestCase):
             'job_name': job_name,
             'account_name': account,
             'max_cpu': max_cpu,
-            'max_memory': max_memory
+            'max_memory': max_memory,
+            'parent_pid': fakes.parent_pid
         }
         expected = {'home': home,
                     'job_id': job_id,
@@ -670,9 +669,10 @@ class TestSGEController(testtools.TestCase):
         out = controller.create_accounting_register(None)
         self.assertEqual(expected, out)
 
+    @mock.patch("bdocker.utils.read_file")
     @mock.patch("bdocker.parsers.parse_time_to_nanoseconds")
     @mock.patch("bdocker.utils.load_sge_job_configuration")
-    def test_get_job_configuration(self, m_load, m_parse):
+    def test_get_job_configuration(self, m_load, m_parse, m_read):
         queue = "ff"
         host = "ooo.nova"
         job_owner = "uyo"
@@ -681,6 +681,7 @@ class TestSGEController(testtools.TestCase):
         max_mem = 11
         job_name = "rrrr"
         submission_t = 999
+        m_read.return_value = fakes.parent_pid
         m_load.return_value = {"queue": queue,
                                "host": host,
                                "job_owner": job_owner,
@@ -688,7 +689,8 @@ class TestSGEController(testtools.TestCase):
                                "account": account,
                                "h_cpu": max_cpu,
                                "h_data": max_mem,
-                               "submission_time": submission_t
+                               "submission_time": submission_t,
+                               "parent_pid": fakes.parent_pid
                                }
         cpu_parsed = 100
         m_parse.return_value = cpu_parsed

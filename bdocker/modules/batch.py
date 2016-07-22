@@ -583,7 +583,8 @@ class SGEWNController(CgroupsWNController):
         max_memory = conf['h_data']
         if max_memory == "INFINITY":
             max_memory = None
-
+        parent_pid = utils.read_file(
+                "%s/pid" % spool)
         return {
             'queue_name': qname,
             'host_name': hostname,
@@ -592,7 +593,8 @@ class SGEWNController(CgroupsWNController):
             'account_name': account,
             'max_cpu': max_cpu,
             'max_memory': max_memory,
-            'submission_time': submission_time
+            'submission_time': submission_time,
+            'parent_pid': parent_pid
         }
 
     @staticmethod
@@ -752,13 +754,10 @@ class SGEWNController(CgroupsWNController):
                 'USER')
             spool_dir = utils.get_environment(
                 "SGE_JOB_SPOOL_DIR")
-            parent_pid = utils.read_file(
-                "%s/pid" % spool_dir)
             job_info = {'home': home,
                         'job_id': job_id,
                         'user_name': user,
                         'spool': spool_dir,
-                        'parent_pid': parent_pid
                         }
             job_info.update(self._get_job_configuration(spool_dir))
             return job_info
