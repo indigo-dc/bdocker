@@ -60,6 +60,7 @@ a77cdcf07e01441f8305daa169583ad9:
   home_dir: /home/jorge
   job: {cgroup: //2, id: '2', spool: /home/jorge/FAKE_JOB}
   uid: 1000
+admin: {token: token_prolog}
 bcee12d725994f1a9490f743515b4a73:
   gid: 1000
   home: /home/jorge
@@ -99,6 +100,5 @@ f3c69d5928124fb4bed595f02d6f4445:
   home_dir: /home/jorge
   job: {cgroup: //1, id: '1', spool: /home/jorge/FAKE_JOB}
   uid: 1000
-prolog: {token: token_prolog}
 token1: {gid: gid1, home_dir: /fake, jobid: job1, uid: uid1}
 token2: {gid: gid2, home_dir: /fake, jobid: job2, uid: uid2}

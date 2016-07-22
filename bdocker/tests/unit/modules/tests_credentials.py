@@ -41,15 +41,15 @@ class TestUserCredentials(testtools.TestCase):
         )
         self.assertEqual(6, user_info.__len__())
 
-    def test_prolog_token(self):
-        user_info = self.control._get_token_from_cache("prolog")
+    def test_admin_token(self):
+        user_info = self.control._get_token_from_cache("admin")
         self.assertEqual(1, user_info.__len__())
         self.assertEqual(fakes.admin_token, user_info['token'])
 
     @mock.patch('bdocker.utils.check_user_credentials')
     def test_authenticate(self, m):
         t = self.control._get_token_from_cache(
-            "prolog")['token']
+            "admin")['token']
         u = fakes.create_usercrentials()['user_credentials']
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=self.token_store):
@@ -69,7 +69,7 @@ class TestUserCredentials(testtools.TestCase):
         jobid = uuid.uuid4().hex
         spool = uuid.uuid4().hex
         t = self.control._get_token_from_cache(
-            "prolog")['token']
+            "admin")['token']
         u = fakes.create_usercrentials()['user_credentials']
         u.update({'job': {'job_id': jobid,
                           'spool': spool}
@@ -92,7 +92,7 @@ class TestUserCredentials(testtools.TestCase):
         cgroup = uuid.uuid4().hex
         batch_info = {"cgroup": cgroup}
         t = self.control._get_token_from_cache(
-            "prolog")['token']
+            "admin")['token']
         u = fakes.create_usercrentials()['user_credentials']
         u.update({'job': {'job_id': jobid,
                           'spool': spool}

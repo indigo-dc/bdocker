@@ -117,8 +117,8 @@ class TokenController(object):
 
         :param admin_token: token looked for
         """
-        prolog_token = self._get_token_from_cache("prolog")
-        if admin_token != prolog_token['token']:
+        token_info = self._get_token_from_cache("admin")
+        if admin_token != token_info['token']:
             raise exceptions.UserCredentialsException(
                 "Unauthorized user with token: %s" % admin_token)
         return True
@@ -306,8 +306,8 @@ class TokenController(object):
 
         """
         try:
-            prolog_token = self._get_token_from_cache("prolog")
-            return prolog_token["token"]
+            admin_token = self._get_token_from_cache("admin")
+            return admin_token["token"]
         except BaseException:
             raise exceptions.UserCredentialsException(
                 "Token not found")

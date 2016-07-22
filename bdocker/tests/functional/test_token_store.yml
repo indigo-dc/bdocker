@@ -1,4 +1,4 @@
-prolog: {token: token_prolog}
+admin: {token: token_prolog}
 token_test:
   gid: gggggggggguuuiiidd
   home: /foo

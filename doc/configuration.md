@@ -15,8 +15,9 @@ the file in ``/etc/configure_bdocker.cfg``. In the following, examples of config
 ### Working Node
 
 
-Every working node configures the following fields::
+Every working node configures the following fields:
 
+    ```
     [resource]
     # role can be working or accounting
     role = working
@@ -49,11 +50,12 @@ Every working node configures the following fields::
 
     [dockerAPI]
     base_url = unix://var/run/docker.sock
-
+    ```
 ### Accounting
 
-The accounting node configures the following fields::
+The accounting node configures the following fields:
 
+    ```
     [resource]
     # role can be working or accounting
     role = accounting
@@ -73,6 +75,7 @@ The accounting node configures the following fields::
     [credentials]
     controller = TokenController
     token_store = /etc/token_store.yml
+    ```
 
 ### Configuration content
 
@@ -171,6 +174,7 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
 
 ### Prolog
 
+    ```
     ################
     ### BDOCKER ####
     ################
@@ -178,9 +182,11 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ## The tocken will store the file in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker configure
-
+    ```
+    
 ### Epilog
 
+    ```
     ################
     ### BDOCKER ####
     ################
@@ -188,13 +194,13 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ## It will take the tocken from token in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker clean
-
+    ```
 ### Token store file
 
 **It MUSTS exist**. The system use a administration token that si **required for configure bdocker**, this token is
 called ``prolog`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
 So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
-
-    prolog: {token: <token_prolog>}
-    
+    ```
+    admin: {token: <token_prolog>}
+    ```
 where <token_prolog> is the token configured by the admin, **it must be the same in all the componets.**.

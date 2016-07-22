@@ -43,7 +43,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
             os.path.dirname(__file__),
             'sge_accounting_configure.cfg')
         self.token_store = {
-            "prolog": {"token": self.admin_token},
+            "admin": {"token": self.admin_token},
             self.user_token: {
                 "uid": uuid.uuid4().hex,
                 "gid": uuid.uuid4().hex,
@@ -90,7 +90,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         self.file_name = os.path.join(os.path.dirname(__file__),
                                       'sge_wn_configure.cfg')
         self.token_store = copy.deepcopy(fakes.token_store)
-        self.admin_token = self.token_store["prolog"]["token"]
+        self.admin_token = self.token_store["admin"]["token"]
         self.app = working_node.app
 
     @mock.patch("pwd.getpwuid")

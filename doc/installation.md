@@ -4,9 +4,9 @@
 
 At the moment the only way to install Bdocker is by using pip as local repository, we will provide a better
 solution soon.
-
+    ```
     $pip install .
-    
+    ```
 # Deployment
 
 Bdocker RESTFUL APIs are based on [Flask](flask.pocoo.org), but it does not support multi-request, it can attend
@@ -28,23 +28,23 @@ be configured in the configuration file (see documentation about the configurati
 You can run the daemon as follows:
 
 1. Run working node middleware:
-
+    ```
     $python bdocker/middleware/working_node.py
-    
+    ```    
 2. Run accounting node middleware:
-
+    ```
     $python bdocker/middleware/accounting.py
-
+    ```
 
 ## Deploy daemons based on the RestFul APIs:
 Both daemons, working node and accounting, can be launch directly from the RestFul APIs. Since the performance of
 that is not enough to control a batch syste, it is only for testing purposes. You can run the daemon as follows:
 
 1. Run working node API:
-
+    ```
     $python bdocker/api/working_node.py
-    
+    ```
 2. Run accounting node API:
-
+    ```
     $python bdocker/api/accounting.py
-
+    ```

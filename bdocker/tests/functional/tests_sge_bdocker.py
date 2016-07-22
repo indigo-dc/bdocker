@@ -40,7 +40,7 @@ class TestBdockerSgeWn(testtools.TestCase):
         self.file_name = os.path.join(os.path.dirname(__file__),
                                       'sge_wn_configure.cfg')
         self.token_store = copy.deepcopy(fakes.token_store)
-        self.admin_token = self.token_store["prolog"]["token"]
+        self.admin_token = self.token_store["admin"]["token"]
         self.app = working_node.app
         self.runner = testing.CliRunner()
 

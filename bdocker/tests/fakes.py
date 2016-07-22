@@ -49,7 +49,7 @@ job_info = {
 }
 
 token_store = {
-    "prolog": {"token": admin_token},
+    "admin": {"token": admin_token},
     user_token: {
         "uid": uuid.uuid4().hex,
         "gid": uuid.uuid4().hex,
