@@ -39,6 +39,8 @@ Every working node configures the following fields::
     cgroups_dir = /sys/fs/cgroup
     parent_cgroup = /user
     accounting_endpoint = http://localhost:5002
+    include_wallclock = True
+    only_docker_accounting = True
 
     [credentials]
     controller = TokenController
@@ -93,17 +95,12 @@ The following table describes the possible configuration fields. Note that some 
 |                 |``controller``        |Specify the class to manage the batch system.
 |                 |                      |It can be for working nodes: ``SGEController`` (more will be implemented)
 |                 |                      |It can be for accounting nodes: ``SGEAccountingController`` (more will be implemented)
-|  (only working) |``enable_cgroups``    |Enable cgroup accounting management. By default is False.          
-|  (only working) |``cgroups_dir``       |CGroup root directory. By default: "/sys/fs/cgroup"
-|  (only working) |``parent_cgroup``     |Cgroup parent group: By default: "/"
-|  (only working) |``accounting_endpoint``|Configures in the WN the location of the accounting server: Format: ``http(s)://host:port``
-|(only accounting)|``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file.
-|(only accounting)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
+|(only accounting daemon)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
 |``credentials``  |                      |**Credential module configuration**
 |                 |``controller``        |Specify the class to manage the user credentials.
 |                 |                      |The only contoller implemented is ``UserCredentials``
 |                 |``token_store``       |File in which the tokens are store (root rights). **It MUST be protected under root permissions**.
-|``dockerAPI``    |  (only working)      |**Docker access configuration**
+|``dockerAPI``    |(only working daemon) |**Docker access configuration**
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
@@ -112,6 +109,32 @@ reset the request in case it exceed this time.
 The working node daemon raise this exception in case this time is exceeded:
 
 ``[2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)``
+ 
+ In addition, we described the configuration parameters related to the **Cgroup controller**, so that,
+ any controller which inherits from CgroupWNController, include this parameters in the *batch* group:
+ 
+| Daemon            |Field               |Description                                |
+| ----------------- |:------------------:|:------------------------------------------------|
+|    working     |``enable_cgroups``    |Enable cgroup accounting management. By default is 'no' [true, false, yes, no].          
+|    working     |``cgroups_dir``       |CGroup root directory. By default: "/sys/fs/cgroup"
+|    working     |``parent_cgroup``     |Cgroup parent group: By default: "/"
+|    working     |``accounting_endpoint``|Configures in the WN the location of the accounting server: Format: ``http(s)://host:port``
+|    working     |``only_docker_accounting``|Store just the accounting realted to the containers, it avoid the rest of the
+|                |                      |job work. **But it always monitors the total time**. By default is 'yes' [true, false, yes, no].   
+|  working      |``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file. By defaul: 10
+
+**SGE batch controller** inherits from Cgroups controller, thus require its configuration parameters. In addition
+SGE batch controller allows to configure the accounting output:
+ 
+| Daemon            |Field               |Description                                |
+| ----------------- |:--------------------:|:------------------------------------------------|
+|    working     |``include_wallclock``    | Include the ru_wallclock time in the accounting, by default it is 'no' and the
+|                 |                      | system includes the default_run_wallclock value. [true, false, yes, no]
+|    working     |``default_ru_wallclock`` | Default value for ru_wallclock accounting, By default: 0. 
+
+
+
+
 
 
 ## Client configuration
@@ -128,6 +151,8 @@ the next configuration fields:
 |                |``host``             |Host (IP or hostname) in which the service is located.
 |                |``port``             |Port in which the service is located
 |                |``logging``         |Configure the logging level of bdocker.
+|``batch``        |                      |*Batch system configuration*. It provides the job information.      
+|                 |``controller``        |Specify the class to manage the batch system. 
 |``credentials`` |                     |Credential module configuration
 |                |``controller``        |Specify the class to manage the user credentials.
 |                |``token_store``      |File in which the tokens are stored. **It MUST be protected under root permissions**.
