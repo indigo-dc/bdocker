@@ -102,6 +102,16 @@ class UserCredentialsException(BDockerException):
                         % self.message)
 
 
+class NotificationException(BDockerException):
+    def __init__(self, message=None, exc=None, code=None):
+        super(ConfigurationException, self).__init__(
+            exc, message, code
+        )
+        self.message = ("Accounting Notification"
+                        " Exception: %s "
+                        % self.message)
+
+
 class ConfigurationException(BDockerException):
     def __init__(self, message, exc=None, code=None):
         super(ConfigurationException, self).__init__(
