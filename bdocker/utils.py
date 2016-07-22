@@ -285,7 +285,7 @@ def get_environment(key):
         return value
     else:
         raise exceptions.ConfigurationException(
-            message="Not found varialbe %s" %
+            message="Not found variable %s" %
                     key)
 
 
