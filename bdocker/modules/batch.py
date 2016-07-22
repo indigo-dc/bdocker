@@ -554,6 +554,8 @@ class SGEWNController(CgroupsWNController):
 
     def __init__(self, *args, **kwargs):
         super(SGEWNController, self).__init__(*args, **kwargs)
+        self.default_wallclock = self.conf.get("default_ru_wallclock", 0)
+        self.include_wallclock= self.conf.get("include_wallclock", False)
 
     @staticmethod
     def _get_job_configuration(spool):
@@ -719,12 +721,14 @@ class SGEWNController(CgroupsWNController):
             priority = '0'
             group = "0"  # we do not need it for bdocker
             submission_time = job.get("submission_time", '0')  # position 9
-            start_time = job.get("start_time", '0')   # position 10
+            start_time = int(job.get("start_time", '0'))   # position 10
             end_time = int(time.time())  # position 11
             failed = "0"  # position 12. Set 37 in case we kill it
             status = "0"  # pos 13. 0 for ok, 137 time end
-            ru_wallclock = "0"  # end_time - start_time  # pos 14
-
+            if self.include_wallclock:
+                ru_wallclock = end_time - start_time  # pos 14
+            else:
+                ru_wallclock = self.default_wallclock
             full_string = ("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
                            ":0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0"
                            ":%s:%s:%s"
