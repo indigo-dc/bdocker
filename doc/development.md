@@ -1,6 +1,6 @@
 # Development Guide
 
-Bdocker provides two daemons. First, the **working node daemon** daemon is in charge of managing the job execution in the 
+Bdocker provides two daemons. First, the **working node daemon** is in charge of managing the job execution in the 
 the working node. Second, the **accounting daemon** listens the working nodes accounting communication and stores it in the
 bdocker accounting file. They are implemented as in RESTFUL APIs.
 

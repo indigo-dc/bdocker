@@ -10,8 +10,8 @@ solution soon.
 # Deployment
 
 Bdocker RESTFUL APIs are based on [Flask](flask.pocoo.org), but it does not support multi-request, so it can attend
-just one request at the time. Thus, Bdocker middleware is managed by [gunicorn](http://gunicorn.org/)
-which provides a multi-thread solution able to manage several request at the same time.
+just one request at the same time. Thus, Bdocker middleware is managed by [gunicorn](http://gunicorn.org/)
+which provides a multi-thread solution able to manage several requests at the same time.
 
 The daemons can be deployed by using the RESFUL APIs or the middleware solutions. On the other hand, the administrator
 can use any other tool to deploy it.
@@ -36,7 +36,7 @@ You can run the daemon as follows:
 
 Both working node and accounting daemons can be directly launched from the RestFul APIs. This is not recommended for
 a production environment, since it does not provide enough performance to control a batch system.
-You can run the daemon as follows:
+You can run the APIs as follows:
 
 1. Run working node API:
     ```

@@ -127,8 +127,8 @@ SGE batch controller allows to configure the wallclock time:
  
 | Daemon            |Field               |Description                                |
 | ----------------- |:--------------------:|:------------------------------------------------|
-|    working     |``include_wallclock``    | Include the ru_wallclock time in the accounting, by default it is 'no' and the
-|                 |                      | system includes the default_run_wallclock value. [true, false, yes, no]
+|    working     |``include_wallclock``    | Include the ru_wallclock time in the accounting, by default it is 'no' and
+|                 |                      |the system includes the default_run_wallclock value. [true, false, yes, no]
 |    working     |``default_ru_wallclock`` | Default value for ru_wallclock accounting, By default: 0. 
 
 
@@ -138,8 +138,7 @@ SGE batch controller allows to configure the wallclock time:
 
 ## Client configuration
 
-The client command line tool is configured by using the same configuration file format. In the current version the client
-is deployed together to the working , so that, it is configured by using the same configuration file.
+In the current version the client is deployed together to the working , so that, it is configured by using the same configuration file.
 Although the client just uses some of the configuration parameters:
     
 |Group           |Field                |Description
@@ -193,10 +192,14 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     
 ### Token store file
 
-**It MUSTS exist**. The system uses a administration token that is **required for administration tasks**, this token is
-called ``admin`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
-So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
+The credentials module requires this file for storing the job session, which is identified by using a
+token. The tokens are created by de module in the configuration process and they are used for controlling 
+client privileges to access to docker containers host directories.
+In addition, the module uses an administration token, called ``admin``, to communicate the three components for administration tasks 
+(configure, clean and notify functionality). So that, the token file **MUSTS CONTAIN THE FOLLOWING LINE**:
     
     admin: {token: <token_prolog>}
     
 where <token_prolog> is the token configured by the admin, **it must be the same in all the components.**.
+
+In order to have a proper security behaviour in bdocker, this file **must exists under root permissions**.
