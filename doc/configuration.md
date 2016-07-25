@@ -1,6 +1,6 @@
 # Configuration
 
-In this document the configuration of the three component provided by Bdocker is described. The three components are:
+In this document the configuration of the three components provided by Bdocker is described. Those three components are:
 1. Working node daemon.
 2. Accounting node daemon.
 3. Command line client.
@@ -8,14 +8,14 @@ In this document the configuration of the three component provided by Bdocker is
 ## Daemon configuration
 
 Bdocker provides two daemons one for the working node and another one for the accounting node. They are implemented as
-RESTFUL APIs. The daemons are configured by using a configuration file, the administrator has to configure this
-file in the environment variable ``BDOCKER_CONF_FILE``. If that variable is not configured, the system looks for
+RESTFUL APIs. The daemons are configured by using a configuration file, the administrator has to set this
+file in the environment variable ``BDOCKER_CONF_FILE``. If that variable is not configured, the system uses by default
 the file in ``/etc/configure_bdocker.cfg``. In the following, examples of configuration of both daemons are provided:
 
 ### Working Node
 
 
-Every working node configures the following fields:
+The working node configures the following fields:
 
     ```
     [resource]
@@ -29,12 +29,8 @@ Every working node configures the following fields:
     workers = 2
     time_out = 200
 
-    [accounting_server]
-    host = http://localhost
-    port = 5001
-
     [batch]
-    # controller can be: SGEWNController, ...(add more modules)
+    # controller can be: SGEWNController (add more modules)
     controller = SGEWNController
     enable_cgroups = True
     cgroups_dir = /sys/fs/cgroup
@@ -53,7 +49,7 @@ Every working node configures the following fields:
     ```
 ### Accounting
 
-The accounting node configures the following fields:
+The accounting configures the following fields:
 
     ```
     [resource]
@@ -68,7 +64,7 @@ The accounting node configures the following fields:
     time_out = 200
 
     [batch]
-    # controller can be: SGEAccountingController, ...(add more modules)
+    # controller can be: SGEAccountingController (add more modules)
     controller = SGEAccountingController
     bdocker_accounting=/home/jorge/bdocker_accounting
 
@@ -90,15 +86,14 @@ The following table describes the possible configuration fields. Note that some 
 |``server``         |                    |**RESTFUL API access configuration**                  
 |                   |``host``            |Host (IP or hostname) in which the service will be provided.
 |                   |``port``            |Port in which the service will be provided
-|                   |``workers``         |Number of middleware threads. It is 2 threads by default. It must be equal or higher than 2.
-|                   |``timeout``         |Middleware requests timeout. It is 200 seconds by default.
+|                   |``workers``         |Number of threads in the middleware. It is 2 threads by default. It must be equal or higher than 2.
+|                   |``timeout``         |Middleware request timeout. It is 200 seconds by default.
 |                   |``logging``         |Configure the logging level of bdocker. It can be set to the standard logging levels of python:
 |                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.           
 |``batch``        |                      |*Batch system configuration*                        
 |                 |``controller``        |Specify the class to manage the batch system.
-|                 |                      |It can be for working nodes: ``SGEController`` (more will be implemented)
-|                 |                      |It can be for accounting nodes: ``SGEAccountingController`` (more will be implemented)
-|(only accounting daemon)|``bdocker_accounting``|Accounting file for bdocker jobs. By default: "/etc/bdocker_accounting"
+|                 |                      |It can be for working nodes: ``SGEWNController`` (more controllers will be implemented)
+|                 |                      |It can be for accounting nodes: ``SGEAccountingController`` (more controllers will be implemented)
 |``credentials``  |                      |**Credential module configuration**
 |                 |``controller``        |Specify the class to manage the user credentials.
 |                 |                      |The only contoller implemented is ``UserCredentials``
@@ -107,27 +102,29 @@ The following table describes the possible configuration fields. Note that some 
 |                 | ``base_url``         |Docker server url. It could be a http link
 |                 |                      |or a socket link (unix://var/run/docker.sock)
 
-The parameter ``time_out`` is important for syncorinized long docker executions, since the server will
+The parameter ``time_out`` is important for synchronizing long docker executions, since the server will
 reset the request in case it exceed this time.
 The working node daemon raise this exception in case this time is exceeded:
 
 ``[2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)``
  
  In addition, we described the configuration parameters related to the **Cgroup controller**, so that,
- any controller which inherits from CgroupWNController, include this parameters in the *batch* group:
+ any controller, which inherits from CgroupWNController, includes these parameters in the *batch* group:
  
 | Daemon            |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
 |    working     |``enable_cgroups``    |Enable cgroup accounting management. By default is 'no' [true, false, yes, no].          
 |    working     |``cgroups_dir``       |CGroup root directory. By default: "/sys/fs/cgroup"
 |    working     |``parent_cgroup``     |Cgroup parent group: By default: "/"
-|    working     |``accounting_endpoint``|Configures in the WN the location of the accounting server: Format: ``http(s)://host:port``
-|    working     |``only_docker_accounting``|Store just the accounting realted to the containers, it avoid the rest of the
-|                |                      |job work. **But it always monitors the total time**. By default is 'yes' [true, false, yes, no].   
-|  working      |``monitoring_time``   |Interval time for accounting monitoring and coping accounting to a file. By defaul: 10
+|    working     |``accounting_endpoint``|Configure the endpoint of the accounting server: Format: ``http(s)://host:port``
+|    working     |``only_docker_accounting``|Store just the accounting related to the containers, it avoid the rest of the
+|                |                      |job processes. **But it always monitors the total time** for controlling the quota limits.
+|                |                      |By default is 'yes' [true, false, yes, no].   
+|  working      |``monitoring_time``   |Interval time for accounting monitoring and coping accounting data to a file. By default: 10.
+| accounting     |``bdocker_accounting``|Bdocker accounting file. By default: "/etc/bdocker_accounting".
 
 **SGE batch controller** inherits from Cgroups controller, thus require its configuration parameters. In addition
-SGE batch controller allows to configure the accounting output:
+SGE batch controller allows to configure the wallclock time:
  
 | Daemon            |Field               |Description                                |
 | ----------------- |:--------------------:|:------------------------------------------------|
@@ -142,9 +139,9 @@ SGE batch controller allows to configure the accounting output:
 
 ## Client configuration
 
-The client command line tool is configured by using the same configuration file. So that, in case it is
-the working daemon environment, it is configured with its configuration. Although the client uses
-the next configuration fields:
+The client command line tool is configured by using the same configuration file format. In the current version the client
+is deployed together to the working , so that, it is configured by using the same configuration file.
+Although the client just uses some of the configuration parameters:
     
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
@@ -162,7 +159,7 @@ the next configuration fields:
 |                |                     |The client will use the administrator token to
 |                |                     |execute configuration and cleaning tasks.
 |                |``token_client_file`` |Token file name. By default: ".bdocker_token".
-|                |                      |In configuration process, the user token is stored
+|                |                      |In the configuration process, the user token is stored
 |                |                      |in the user home directory by using
 |                |                      |the name: $HOME/``token_client_file``_$JOB_ID.
 
@@ -197,10 +194,10 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ```
 ### Token store file
 
-**It MUSTS exist**. The system use a administration token that si **required for configure bdocker**, this token is
+**It MUSTS exist**. The system uses a administration token that is **required for administration tasks**, this token is
 called ``admin`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
 So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
     ```
     admin: {token: <token_prolog>}
     ```
-where <token_prolog> is the token configured by the admin, **it must be the same in all the componets.**.
+where <token_prolog> is the token configured by the admin, **it must be the same in all the components.**.
