@@ -1,34 +1,33 @@
 # Development Guide
 
-Bdocker provides two daemons one for the working node and another one for the accounting node. They are implemented as
-in RESTFUL APIs.
+Bdocker provides two daemons. First, the **working node daemon** daemon is in charge of managing the job execution in the 
+the working node. Second, the **accounting daemon** listens the working nodes accounting communication and stores it in the
+bdocker accounting file. They are implemented as in RESTFUL APIs.
 
 ## Working Node REST API
 
-The working_node API deploys a daemon in the working nodes, which will
-control the jobs configures under the bdocker environment.
-More documentation will be provided soon. Meanwhile more details about the classes and methods can be found in the
-internal documentation.
+The working node API is deployed as daemon in working nodes. This daemon controls the jobs execution which are configured
+under the bdocker environment. More details about the classes and methods can be found in the internal documentation.
+In addition, we plan to provide more documentation soon.
 
 ## Accounting REST API
 
-The accounting API deploys a daemon in the accounting node, which will
-listen the working node daemos and store the accounting information provided
-from them.
-More documentation will be provided soon. Meanwhile more details about the classes and methods can be found in the
-internal documentation.
+The accounting API is deployed as daemon in the accounting server. This daemon listens the accounting request from the 
+working node daemons and stores the accounting information in the bdocker accounting file. More details about the classes
+and methods can be found in the internal documentation.
+In addition, we plan to provide more documentation soon.
 
 ## Modules
 
 Bdocker has modular design. Three different modules compose the system: credentials, batch, and docker modules.
-In the following we describe the modules and its behaviour, more details about the classes and methods can be found in the
+In the following we describe the modules and its behaviour. More details about the classes and methods can be found in the
 internal documentation.
 
 ### Credentials module
 
 This module manages the authentication and authorization by using tokens. It controls client privileges to access to 
-docker containers, host directories and administrator tasks (such as configure, clean and notify functionalities).
-It is important that the token file store **MUST be protected under root permissions**.
+docker containers, host directories and administration tasks (such as configure, clean and notify functionality).
+The token file **MUST be protected under root permissions**.
 The main authorization rules are:
 1. Containers can be only accesses by their owners.
 2. Users can only access to documents that are inside their ``HOME``.

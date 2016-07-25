@@ -9,22 +9,18 @@ solution soon.
     ```
 # Deployment
 
-Bdocker RESTFUL APIs are based on [Flask](flask.pocoo.org), but it does not support multi-request, it can attend
-just one request at the time. So that, Bdocker middleware is manage by [gunicorn](http://gunicorn.org/)
-which provide middleware multi-thread able to manage several request at the time (see the parameter ``workers``
- in the configuration documentation).
+Bdocker RESTFUL APIs are based on [Flask](flask.pocoo.org), but it does not support multi-request, so it can attend
+just one request at the time. Thus, Bdocker middleware is managed by [gunicorn](http://gunicorn.org/)
+which provides a multi-thread solution able to manage several request at the same time.
 
-The daemons can be deployed by using directly by using the RESFUL APIs or using the middleware solutions. Furthermore,
-the administration can use any other tool to deploy the APIs.
-
-In addition, we plan to provide other deployment solutions.
-
+The daemons can be deployed by using the RESFUL APIs or the middleware solutions. On the other hand, the administrator
+can use any other tool to deploy it.
 
 ## Deploy daemons based on the middleware solutions:
 
 The proper way to launch the daemons is by using the middleware. Those daemons provide multi-thread management able to
-attend several request at the time. In order to configure the middleware, the ``workers`` and ``timeout`` parameters should
-be configured in the configuration file (see documentation about the configuration).
+attend several request at the same time. In order to configure the middleware, the ``workers`` and ``timeout`` parameters
+should be specified in the configuration file (see documentation about [configuration](doc/configuration.md)).
 You can run the daemon as follows:
 
 1. Run working node middleware:
@@ -37,8 +33,10 @@ You can run the daemon as follows:
     ```
 
 ## Deploy daemons based on the RestFul APIs:
-Both daemons, working node and accounting, can be launch directly from the RestFul APIs. Since the performance of
-that is not enough to control a batch syste, it is only for testing purposes. You can run the daemon as follows:
+
+Both working node and accounting daemons can be directly launched from the RestFul APIs. This is not recommended for
+a production environment, since it does not provide enough performance to control a batch system.
+You can run the daemon as follows:
 
 1. Run working node API:
     ```
