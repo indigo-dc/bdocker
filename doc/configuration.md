@@ -17,7 +17,7 @@ the file in ``/etc/configure_bdocker.cfg``. In the following, examples of config
 
 The working node configures the following fields:
 
-    ```
+    
     [resource]
     # role can be working or accounting
     role = working
@@ -46,12 +46,12 @@ The working node configures the following fields:
 
     [dockerAPI]
     base_url = unix://var/run/docker.sock
-    ```
+    
 ### Accounting
 
 The accounting configures the following fields:
 
-    ```
+    
     [resource]
     # role can be working or accounting
     role = accounting
@@ -71,7 +71,7 @@ The accounting configures the following fields:
     [credentials]
     controller = TokenController
     token_store = /etc/token_store.yml
-    ```
+    
 
 ### Configuration content
 
@@ -99,8 +99,7 @@ The following table describes the possible configuration fields. Note that some 
 |                 |                      |The only contoller implemented is ``UserCredentials``
 |                 |``token_store``       |File in which the tokens are store (root rights). **It MUST be protected under root permissions**.
 |``dockerAPI``    |(only working daemon) |**Docker access configuration**
-|                 | ``base_url``         |Docker server url. It could be a http link
-|                 |                      |or a socket link (unix://var/run/docker.sock)
+|                 | ``base_url``         |Docker server url. It could be a http link or a socket link (unix://var/run/docker.sock)
 
 The parameter ``time_out`` is important for synchronizing long docker executions, since the server will
 reset the request in case it exceed this time.
@@ -166,12 +165,12 @@ Although the client just uses some of the configuration parameters:
 
 ## Bacth environment configuration
 
-The configuration file is located in /etc/configure_bdocker.cfg by default. But it can be modified
+The configuration file is located in ``/etc/configure_bdocker.cfg`` by default. But it can be modified
 by setting the environment variable ``BDOCKER_CONF_FILE``.
 
 ### Prolog
 
-    ```
+    
     ################
     ### BDOCKER ####
     ################
@@ -179,11 +178,11 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ## The tocken will store the file in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker configure
-    ```
+    
     
 ### Epilog
 
-    ```
+    
     ################
     ### BDOCKER ####
     ################
@@ -191,13 +190,13 @@ by setting the environment variable ``BDOCKER_CONF_FILE``.
     ## It will take the tocken from token in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker clean
-    ```
+    
 ### Token store file
 
 **It MUSTS exist**. The system uses a administration token that is **required for administration tasks**, this token is
 called ``admin`` and it is used to communicate the three components for administration tasks (configure, clean, and notify).
 So that, the token file **MUST CONTAIN THE FOLLOWING LINE**:
-    ```
+    
     admin: {token: <token_prolog>}
-    ```
+    
 where <token_prolog> is the token configured by the admin, **it must be the same in all the components.**.

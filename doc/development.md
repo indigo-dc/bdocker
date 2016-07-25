@@ -59,8 +59,8 @@ In the following, the workflow of the job accounting management for SGE based in
 * Prolog should run the configuration method ``conf_environment``, which performs the following steps:
   1. It creates the *job cgroup* tree identified by using the job id.
     * In order to keep separated the job and the container accounting, it is created another cgroup for the job processes
-    called *COMMON*. It is located inside the *job cgroup*. It allows to control all the job accounting or only the containers and
-    avoid the job data which is already controlled by SGE.
+    called *COMMON*. It is located inside the *job cgroup*. It allows to store all the job accounting or only the containers and
+    avoid the job data which is already stored in the default SGE file.
   2. It writes the pid of the parent job to the *COMMON* cgroup tasks files. This pid is located in SGE_JOB_SPOOL_DIR/pid file.
   3. The rest of the job processes are children of that pid (prolog, job and epilog), so they are automatically created in the *COMMON* cgroup.
   4. It launches a subprocess to control the accounting.
@@ -78,7 +78,7 @@ In the current version, the SGE batch system is supported by using the SGEAccoun
 ### Docker mudule
 The docker module is in charge of managing the docker-py client for being used in the bdocker tool.
 
-## Extensiblity
+## Extensibility
 
 Bdocker can be extended by adding new controllers related to credentials and batch modules. 
 
