@@ -89,7 +89,8 @@ The following table describes the possible configuration fields. Note that some 
 |                   |``workers``         |Number of threads in the middleware. It is 2 threads by default. It must be equal or higher than 2.
 |                   |``timeout``         |Middleware request timeout. It is 200 seconds by default.
 |                   |``logging``         |Configure the logging level of bdocker. It can be set to the standard logging levels of python:
-|                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.           
+|                   |                     |ERROR, WARNING, INFO or DEBUG. By default it is ERROR.      
+|                 |``logging_file``      |Configure the logging file. By default it is /var/log/bdocker.log.
 |``batch``        |                      |*Batch system configuration*                        
 |                 |``controller``        |Specify the class to manage the batch system.
 |                 |                      |It can be for working nodes: ``SGEWNController`` (more controllers will be implemented)
@@ -149,6 +150,7 @@ Although the client just uses some of the configuration parameters:
 |                |``host``             |Host (IP or hostname) in which the service is located.
 |                |``port``             |Port in which the service is located
 |                |``logging``         |Configure the logging level of bdocker.
+|                |``logging_file``         |Configure the logging file. By default: /var/log/bdocker.log.
 |``batch``        |                      |*Batch system configuration*. It provides the job information.      
 |                 |``controller``        |Specify the class to manage the batch system. 
 |``credentials`` |                     |Credential module configuration

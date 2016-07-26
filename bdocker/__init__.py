@@ -18,25 +18,28 @@ import logging
 
 from bdocker import utils
 
-# import logging.handlers
-#
-# my_logger = logging.getLogger('MyLogger')
-# my_logger.setLevel(logging.DEBUG)
-#
-# handler = logging.handlers.SysLogHandler(address = '/dev/log')
-#
-# my_logger.addHandler(handler)
+DEFAUL_LOG_FILE = "/var/log/bdocker.log"
 
 
-def log_level():
+def get_log_configuration():
+    log_level = None
+    log_file = None
     try:
         out = utils.load_configuration_from_file()
-        return out["server"]['logging']
+        log_file = DEFAUL_LOG_FILE
+        if "logging" in out["server"]:
+            log_level = out["server"]['logging']
+        if "logging_file" in out["server"]:
+            log_file = out["server"]['logging_file']
     except BaseException:
-        return None
+        pass
+    return {"level": log_level, "file": log_file}
 
+log_data = get_log_configuration()
 
 logging.basicConfig(format='%(asctime)s - %(name)s -'
                            ' %(levelname)s - %(message)s',
-                    level=log_level())
+                    level=log_data['level'], filename=log_data['file'])
 LOG = logging.getLogger(__name__)
+# log_handler = logging.handlers.SysLogHandler(address=log_data['file'])
+# LOG.addHandler(log_handler)
