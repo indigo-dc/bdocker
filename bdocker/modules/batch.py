@@ -377,8 +377,7 @@ class CgroupsWNController(WNController):
         :param mem_max: memory quota limit.
         :return:
         """
-        exceptions.make_log("info", "LAUNCH MONITORING Job: %s"
-                            % job_id)
+        exceptions.make_log("info", "LAUNCH MONITORING", job_id)
         try:
             pid = os.fork()
             if pid > 0:
@@ -393,7 +392,7 @@ class CgroupsWNController(WNController):
                 message
             )
             # os.exit(1)
-        exceptions.make_log("info", "MONITORING JOB %s." % job_id)
+        exceptions.make_log("info", "MONITORING.", job_id)
         self.create_accounting_file(file_path, job_info)
         while True:
             try:
@@ -422,13 +421,16 @@ class CgroupsWNController(WNController):
                         break
 
                 exceptions.make_log("debug",
-                                    "JOB CPU %s. Acc: %s. Max: %s" %
+                                    "JOB %s: CPU: Acc: %s. Max: %s."
+                                    " MEMORY: Acc: %s. Max: %s" %
                                     (job_id, acc["cpu_usage"],
-                                     cpu_max
+                                     cpu_max, acc["memory_usage"],
+                                     mem_max
                                      ))
                 time.sleep(self.flush_time)
             except exceptions.CgroupException as e:
-                exceptions.make_log("info", "MONITORING FINISHED")
+                exceptions.make_log("info", "MONITORING FINISHED",
+                                    job_id)
                 break
             except BaseException as e:
                 message = "ERROR IN: %s. %s." % (file_path,
@@ -472,7 +474,8 @@ class CgroupsWNController(WNController):
                 exceptions.make_log("debug",
                                     "CGROUP CONTROL ACTIVATED ON: %s "
                                     "JOB CGROUP: %s "
-                                    % (self.parent_group, cgroup_job))
+                                    % (self.parent_group, cgroup_job),
+                                    job_id)
             except BaseException as e:
                 raise exceptions.CgroupException(e=e)
         else:
@@ -623,7 +626,7 @@ class SGEWNController(CgroupsWNController):
             exc = exceptions.BatchException(
                 message="COULD NOT KILL JOB",
                 e=e)
-            exceptions.make_log("exception", exc.message)
+            exceptions.make_log("exception", exc.message, job_id)
             raise exc
 
     def conf_environment(self, session_data, admin_token):

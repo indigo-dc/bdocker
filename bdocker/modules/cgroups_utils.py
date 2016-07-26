@@ -79,7 +79,8 @@ def create_tree_cgroups(group_name, parent_group_dir,
                         task_to_cgroup(new_node.full_path, pid)
                 except OSError as e:
                     if e.errno == 17:
-                        exceptions.make_log("warning", e.message)
+                        exceptions.make_log("warning", e.message,
+                                            group_name)
                     else:
                         raise e
         else:
@@ -90,7 +91,7 @@ def create_tree_cgroups(group_name, parent_group_dir,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                            % exc.message)
+                            % exc.message, group_name)
         raise exc
 
 
@@ -106,13 +107,14 @@ def delete_tree_cgroups(group_name, parent_group,
                 node.delete_cgroup(group_name)
             except IOError as e:
                 if e.errno == 2:
-                    exceptions.make_log("warning", e.message)
+                    exceptions.make_log("warning", e.message,
+                                        group_name)
                 else:
                     raise e
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                            % exc.message)
+                            % exc.message, group_name)
         raise exc
 
 
@@ -130,7 +132,7 @@ def create_cgroups(group_name, parent_groups, pid=None,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS creation problem. %s"
-                            % exc.message)
+                            % exc.message, group_name)
         raise exc
 
 
@@ -145,7 +147,7 @@ def delete_cgroups(group_name, parent_groups,
     except BaseException as e:
         exc = exceptions.CgroupException(e)
         exceptions.make_log("exception", "CGROUPS delete problem. %s"
-                            % exc.message)
+                            % exc.message, group_name)
         raise exc
 
 
@@ -163,6 +165,7 @@ def get_accounting(group_name, parent_group,
     except BaseException:
         raise exceptions.CgroupException("%s/%s Not found"
                                          % (parent_group,
-                                            group_name))
+                                            group_name)
+                                         , group_name)
     return {"memory_usage": memory_usage,
             "cpu_usage": cpu_usage}

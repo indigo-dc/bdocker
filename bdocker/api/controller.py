@@ -62,7 +62,7 @@ class ServerController(object):
         user_token = self.credentials_module.authenticate(
             admin_token, session_data
         )
-        exceptions.make_log("info", "Authentication. Token: %s" % user_token)
+        exceptions.make_log("info", "User authentication. Token: %s" % user_token)
 
         batch_info = self.batch_module.conf_environment(
             session_data, admin_token

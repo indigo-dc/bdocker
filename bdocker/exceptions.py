@@ -182,7 +182,10 @@ def get_exception_details(ex=None, custom_message=None,
     return details
 
 
-def make_log(level, message):
+def make_log(level, message, job_id=None):
+    if job_id:
+        message = "[JOB %s] %s" % (job_id,
+                                   message)
     if level == "debug":
         LOG.debug(message)
     elif level == "exception":
