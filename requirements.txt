@@ -1,0 +1,11 @@
+pbr
+datetime
+WebOb
+tabulate
+click
+Flask==0.11
+six
+pyyaml
+docker-py > 1.8
+cgroupspy
+gunicorn

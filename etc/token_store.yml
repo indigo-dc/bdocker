@@ -1,0 +1,104 @@
+1c2283f41b114fc29b7afb1c4918006f:
+  gid: 1000
+  home: /home/jorge
+  job: {job_id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+26431bbb8eb94b01b0838689741271f6:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+3b81368016cb4de6916dc6506a3d9ae6:
+  gid: 1000
+  home: /home/jorge
+  job: {job_id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+3cbd0e57d42143f3883118e7bf489fbe:
+  gid: 1000
+  home: /home/jorge
+  job: {id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+3e0b80e480f849f3a13e5fa280182391:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {id: '3', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+543bf1489f114f6285702e6fc88d03cd: {gid: 1000, home_dir: /home/jorge, jobid: null,
+  uid: 1000}
+5e38ff7149324656b890ab417a97dbb8:
+  gid: 1000
+  home: /home/jorge
+  job: {job_id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+6f8768678d2c4be18e7edd78fc34566d:
+  gid: 1000
+  home: /home/jorge
+  job: {id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+82cf93e215bb44b48f809881d69c37c2:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+83e6c694368a44668b6bbd2cb758ccb3:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+98bc472fe6b14a8c9c0a7e2692f354aa:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+a196380163f34c0eb84b0af2ed733df6:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_9, cgroup: /user/9, id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+a77cdcf07e01441f8305daa169583ad9:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: //2, id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+admin: {token: token_prolog}
+bcee12d725994f1a9490f743515b4a73:
+  gid: 1000
+  home: /home/jorge
+  job: {id: '9', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+c2dbe5ea172a4457bd8ea2868791e506:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: /user/4, id: '4', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+cfb389a58bde46c988ace685f7c61dc9:
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_2, cgroup: /user/2, job_id: '2',
+    spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+d0906983f865429ebe6deadf9c263b2b:
+  containers: [fc43f485d64b8d574bdc95454a291e377b47b8f3d3103566fd468147d723c352, ec1dacd765197f2b63230875e388906e4ed6958c6ac71e57de8345c5f7560d54,
+    fe9a09960dc3d2751af1a785857ecf5a7bdcbfd487685f5b250b1cd70258b730]
+  gid: 1000
+  home: /home/jorge
+  job: {acc_file: /home/jorge/.bdocker_accounting_1, cgroup: /user/1, job_id: '1',
+    spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+d76a175134e24e53b6bb9a2b33b4ce72:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: /3, id: '3', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+ee5ce79f4bb34c848676b288f25b14c1:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {id: '2', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+f3c69d5928124fb4bed595f02d6f4445:
+  gid: 1000
+  home_dir: /home/jorge
+  job: {cgroup: //1, id: '1', spool: /home/jorge/FAKE_JOB}
+  uid: 1000
+token1: {gid: gid1, home_dir: /fake, jobid: job1, uid: uid1}
+token2: {gid: gid2, home_dir: /fake, jobid: job2, uid: uid2}
