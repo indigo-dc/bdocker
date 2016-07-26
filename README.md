@@ -7,3 +7,5 @@ It provides two REST Full APIs that are designed for executing as daemons:
 * The accounting API is deployed as daemon in the accounting server.
 This daemon listens the accounting request from the working node daemons and stores the accounting information
 in the bdocker accounting file.
+
+**This sofware is in testing**
