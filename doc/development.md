@@ -49,9 +49,12 @@ but it does not support any batch system management.
    * It writes the pid of the parent job in the cgroup tasks files. Later, children processes are automatically created in our cgroup.
 2. Clean method ``clean_environment``: Delete the new cgroups.
 3. Monitoring method ``launch_job_monitoring``, tracks the CPU and memory accounting a given cgroup and
-  store the information in a local accounting file. If it exceeds the user quotas, the job process is killed. 
+  store the information in a local accounting file. If it exceeds the user quotas, the job process is killed.  
 4. Notify method ``notify_accounting``, sends a request within the accounting information as a string with
 the proper batch system accounting format.
+
+In the current version, CgroupsWNController monitors the CPU and memory accounting. For this purpose, we use the information
+stored in the cpuacct.usage and memory.usage_in_bytes files.
 
 In the current version, the **SGE batch system is supported by using the SGEWNController class** which
 inherits from CgroupController.
