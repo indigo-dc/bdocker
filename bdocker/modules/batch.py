@@ -626,7 +626,7 @@ class SGEWNController(CgroupsWNController):
             exc = exceptions.BatchException(
                 message="COULD NOT KILL JOB",
                 e=e)
-            exceptions.make_log("exception", exc.message, job_id)
+            exceptions.make_log("exception", exc.message)
             raise exc
 
     def conf_environment(self, session_data, admin_token):

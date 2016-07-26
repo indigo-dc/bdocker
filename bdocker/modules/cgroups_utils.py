@@ -165,7 +165,7 @@ def get_accounting(group_name, parent_group,
     except BaseException:
         raise exceptions.CgroupException("%s/%s Not found"
                                          % (parent_group,
-                                            group_name)
-                                         , group_name)
+                                            group_name),
+                                         group_name)
     return {"memory_usage": memory_usage,
             "cpu_usage": cpu_usage}
