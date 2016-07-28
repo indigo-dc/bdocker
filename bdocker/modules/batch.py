@@ -578,6 +578,7 @@ class SGEWNController(CgroupsWNController):
         logname = conf['job_owner']
         job_name = conf['job_name']
         account = conf['account']
+        terminate_method = conf['terminate_method']
         max_cpu = conf['h_cpu']
         submission_time = conf['submission_time']
         start_time = int(time.time())
@@ -602,7 +603,8 @@ class SGEWNController(CgroupsWNController):
             'max_memory': max_memory,
             'submission_time': submission_time,
             'start_time': start_time,
-            'parent_pid': parent_pid
+            'parent_pid': parent_pid,
+            'terminate_method': terminate_method,
         }
 
     @staticmethod
@@ -620,7 +622,7 @@ class SGEWNController(CgroupsWNController):
             pid = utils.read_file(job_pid_path)
             if pid:
                 pid = int(pid)
-                os.kill(pid, signal.SIGKILL)
+                os.kill(pid, signal.SIGTERM)
             return pid
         except BaseException as e:
             exc = exceptions.BatchException(
@@ -648,6 +650,7 @@ class SGEWNController(CgroupsWNController):
                 job_pid = "%s/job_pid" % job['spool']
                 job_cpu_max = job['max_cpu']
                 job_mem_max = job['max_memory']
+                # terminate_method = job['terminate_method']
                 path = out["acc_file"]
                 job_info = {
                     "job_id": job['job_id'],
@@ -664,7 +667,8 @@ class SGEWNController(CgroupsWNController):
                 self.launch_job_monitoring(job_id, job_info, path,
                                            job_pid=job_pid,
                                            cpu_max=job_cpu_max,
-                                           mem_max=job_mem_max)
+                                           mem_max=job_mem_max,)
+#                                           terminate_method=terminate_method)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)

@@ -45,7 +45,8 @@ job_info = {
     "submission_time": 1,
     "start_time": 1,
     "end_time": 1,
-    "home": ""
+    "home": "",
+    "terminate_method": ""
 }
 
 token_store = {

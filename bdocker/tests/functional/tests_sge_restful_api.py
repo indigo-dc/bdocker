@@ -134,7 +134,8 @@ class TestSgeRestApiWn(testtools.TestCase):
                                    "log_name": "",
                                    "parent_pid": "",
                                    "start_time": "",
-                                   "submission_time": ""}
+                                   "submission_time": "",
+                                   "terminate_method": ""}
                            }
                       }
         m_r.side_effect = [None, memory_usage,
