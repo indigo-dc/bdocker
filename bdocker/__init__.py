@@ -21,7 +21,7 @@ from bdocker import utils
 DEFAUL_LOG_FILE = "/var/log/bdocker.log"
 
 
-def get_log_configuration():
+def configure_logging():
     log_level = None
     log_file = None
     try:
@@ -33,13 +33,15 @@ def get_log_configuration():
             log_file = out["server"]['logging_file']
     except BaseException:
         pass
-    return {"level": log_level, "file": log_file}
+    try:
+        logging.basicConfig(format='%(asctime)s - %(name)s -'
+                                   ' %(levelname)s - %(message)s',
+                            level=log_level, filename=log_file)
+    except BaseException:
+        pass
 
-log_data = get_log_configuration()
+configure_logging()
 
-logging.basicConfig(format='%(asctime)s - %(name)s -'
-                           ' %(levelname)s - %(message)s',
-                    level=log_data['level'], filename=log_data['file'])
 LOG = logging.getLogger(__name__)
 # log_handler = logging.handlers.SysLogHandler(address=log_data['file'])
 # LOG.addHandler(log_handler)

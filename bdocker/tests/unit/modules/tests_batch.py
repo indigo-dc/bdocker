@@ -697,7 +697,8 @@ class TestSGEController(testtools.TestCase):
                                "h_cpu": max_cpu,
                                "h_data": max_mem,
                                "submission_time": submission_t,
-                               "parent_pid": fakes.parent_pid
+                               "parent_pid": fakes.parent_pid,
+                               "terminate_method": ""
                                }
         cpu_parsed = 100
         m_parse.return_value = cpu_parsed
