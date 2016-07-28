@@ -39,7 +39,8 @@ log_data = get_log_configuration()
 
 logging.basicConfig(format='%(asctime)s - %(name)s -'
                            ' %(levelname)s - %(message)s',
-                    level=log_data['level'], filename=log_data['file'])
+                    level=log_data['level'],
+                    filename=log_data['file'])
 LOG = logging.getLogger(__name__)
 # log_handler = logging.handlers.SysLogHandler(address=log_data['file'])
 # LOG.addHandler(log_handler)
