@@ -624,7 +624,7 @@ class SGEWNController(CgroupsWNController):
         if term_signal:
             sig = getattr(signal, term_signal)
         else:
-            sig = signal.SIGTERM
+            sig = signal.SIGKILL
 
         try:
             job_pid_path = job_pid
