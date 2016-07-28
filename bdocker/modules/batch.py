@@ -237,13 +237,14 @@ class CgroupsWNController(WNController):
                 "CGROUP", e)
 
     @staticmethod
-    def kill_job(spool):
+    def kill_job(job_pid, term_signal):
         """Kill job
 
         It is different for each batch scheduler, so, this class
         does not implement it.
 
-        :param spool:
+        :param job_pid: id process
+        :param term_signal: signal to kill the job
         :return:
         """
         raise exceptions.NoImplementedException(
@@ -359,7 +360,8 @@ class CgroupsWNController(WNController):
 
     def launch_job_monitoring(self, job_id, job_info, file_path, job_pid,
                               cpu_max=None,
-                              mem_max=None):
+                              mem_max=None,
+                              terminate_method=None):
         """It monitors job resources consumption
 
          It tracks the accounting and store it in a local accounting file.
@@ -375,6 +377,7 @@ class CgroupsWNController(WNController):
         :param job_pid: job process id.
         :param cpu_max: CPU quota limit.
         :param mem_max: memory quota limit.
+        :param terminate_method: signal used to terminate the job
         :return:
         """
         exceptions.make_log("info", "LAUNCH MONITORING", job_id)
@@ -407,7 +410,7 @@ class CgroupsWNController(WNController):
                             (job_id, acc["cpu_usage"],
                              cpu_max
                              ))
-                        self.kill_job(job_pid)
+                        self.kill_job(job_pid, terminate_method)
                         break
                 if mem_max:
                     if int(acc["memory_usage"]) >= int(mem_max):
@@ -417,7 +420,7 @@ class CgroupsWNController(WNController):
                             (job_id, acc["memory_usage"],
                              mem_max
                              ))
-                        self.kill_job(job_pid)
+                        self.kill_job(job_pid, terminate_method)
                         break
 
                 exceptions.make_log("debug",
@@ -608,21 +611,27 @@ class SGEWNController(CgroupsWNController):
         }
 
     @staticmethod
-    def kill_job(job_pid):
+    def kill_job(job_pid, term_signal):
         """Kill job
 
         It takes the job pid from the job spool directory and
         kills such process by using SIG.KILL signal.
 
-        :param spool:
+        :param job_pid: id process
+        :param term_signal: signal to kill the job
         :return:
         """
+        if term_signal:
+            sig = getattr(signal, term_signal)
+        else:
+            sig = signal.SIGTERM
+
         try:
             job_pid_path = job_pid
             pid = utils.read_file(job_pid_path)
             if pid:
                 pid = int(pid)
-                os.kill(pid, signal.SIGTERM)
+                os.kill(pid, sig)
             return pid
         except BaseException as e:
             exc = exceptions.BatchException(
@@ -650,7 +659,7 @@ class SGEWNController(CgroupsWNController):
                 job_pid = "%s/job_pid" % job['spool']
                 job_cpu_max = job['max_cpu']
                 job_mem_max = job['max_memory']
-                # terminate_method = job['terminate_method']
+                terminate_method = job['terminate_method']
                 path = out["acc_file"]
                 job_info = {
                     "job_id": job['job_id'],
@@ -667,8 +676,8 @@ class SGEWNController(CgroupsWNController):
                 self.launch_job_monitoring(job_id, job_info, path,
                                            job_pid=job_pid,
                                            cpu_max=job_cpu_max,
-                                           mem_max=job_mem_max,)
-#                                           terminate_method=terminate_method)
+                                           mem_max=job_mem_max,
+                                           terminate_method=terminate_method)
             except KeyError as e:
                 message = ("Job information error %s"
                            % e.message)
