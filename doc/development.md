@@ -7,7 +7,7 @@ bdocker accounting file. They are implemented as in RESTFUL APIs.
 ## Working Node REST API
 
 The working node API is deployed as daemon in working nodes. This daemon controls the jobs execution which are configured
-under the bdocker environment. More details about the classes and methods can be found in the internal documentation.
+under the bdocker environment. More details about classes and methods can be found in the internal documentation.
 In addition, we plan to provide more documentation soon.
 
 ## Accounting REST API
@@ -20,7 +20,7 @@ In addition, we plan to provide more documentation soon.
 ## Modules
 
 Bdocker has modular design. Three different modules compose the system: credentials, batch, and docker modules.
-In the following we describe the modules and its behaviour. More details about the classes and methods can be found in the
+In the following we describe those modules and its behaviour. More details about the classes and methods can be found in the
 internal documentation.
 
 ### Credentials module
@@ -36,7 +36,7 @@ The main authorization rules are:
 ### Batch module
 
 This module is in charge of preparing the batch system environment and controlling the job execution.
-There are to kind of controllers in this module: working node and accounting controller.
+There are two kind of controllers in this module: working node and accounting controller.
 
 #### Working node
 The base class for controlling the working node is the WNController abstract class. On the other hand,

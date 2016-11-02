@@ -167,6 +167,10 @@ However, the client just uses some of the configuration parameters (described in
 The configuration file is located in ``/etc/configure_bdocker.cfg`` by default. But it can be modified
 by setting the environment variable ``BDOCKER_CONF_FILE``.
 
+Bdocker provide to commands that are executed before and after the utilization of bdocker by the root user.
+First, we include the configure command in the prolog to configure the environment. Second, we include the clean
+command, to clean the environment of bdocker job files, docker containers and other configurations.
+
 ### Prolog
 
     
