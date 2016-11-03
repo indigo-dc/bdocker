@@ -19,6 +19,9 @@ import abc
 import six
 
 from bdocker import exceptions
+from bdocker import utils
+
+FILE_NAME = "repository.yml"
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -28,12 +31,16 @@ class RepositoryController(object):
     def __init__(self, conf):
         """Initialize controller
 
-        :param conf: dictionary with the bdocker configuration
+        :param conf: repository configuration
         :return:
         """
+        try:
+            self.location = conf.get("location")
+        except Exception:
+            raise
 
-    def pull(self, image):
-        """Pull an image from the repository
+    def get_image(self, image):
+        """Get an image from the repository
 
         It is different for each batch scheduler, so, this class
         does not implement it.
@@ -41,7 +48,8 @@ class RepositoryController(object):
         :param image: image name
         :return: empty array
         """
-        pass
+        exceptions.NoImplementedException("Repository Controller"
+                                          "is not implemented")
 
 
 class FileController(RepositoryController):
@@ -55,8 +63,56 @@ class FileController(RepositoryController):
         """
         super(FileController, self).__init__(*args, **kwargs)
 
-    def pull(self, image):
+    def get_image(self, image):
+        repository_file = "%s/%s" % (self.location, FILE_NAME)
+        try:
+            image_list = utils.read_yaml_file(repository_file)
+        except Exception:
+            exceptions.RepositoryException(
+                message="File %s cannot be opened"
+                        % repository_file,
+                code=404)
+        image_info = utils.parse_image_name(image)
+        name = image_info["name"]
+        tag = image_info["tag"]
+        if name in image_list:
+            if tag in image_list[name]:
+                image_file = "%s/%s" % (
+                    self.location,
+                    image_list[name][tag]["file"]
+                )
+                return image_file
 
-        exceptions.RepositoryException(message="Not Found", code=404)
+
+class DatabaseController(RepositoryController):
+    """Database repository controller."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize controller
+
+        :param conf: dictionary with the bdocker configuration
+        :return:
+        """
+        super(DatabaseController, self).__init__(*args, **kwargs)
+
+    def get_image(self, image):
+
+        exceptions.NoImplementedException("Database Repository"
+                                          " Controller is not implemented")
 
 
+class DockerController(RepositoryController):
+    """Local docker repository controller."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize controller
+
+        :param conf: dictionary with the bdocker configuration
+        :return:
+        """
+        super(DockerController, self).__init__(*args, **kwargs)
+
+    def get_image(self, image):
+
+        exceptions.NoImplementedException("Docker Repository"
+                                          " Controller is not implemented")
