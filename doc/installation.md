@@ -53,7 +53,7 @@ We provide the information about how to deploy the bdocker daemons as services i
 
 ###Centos 7
 
-In order to create the daemos as services in Centos 7, we follow the next steps:
+In order to create the daemons as services in Centos 7, we follow the next steps:
 
 1. Create systemd file:
   * For the working node daemon:
@@ -98,13 +98,11 @@ In order to create the daemos as services in Centos 7, we follow the next steps:
     ```
 4. Start the bdocker service:
     ```
-    [root@ge bdocker]# service bdocker start
-    Redirecting to /bin/systemctl start  bdocker.service
+    [root@ge bdocker]# systemctl start bdocker    
     ```    
 5. Check status of the bdocker service:
     ```
-    [root@ge bdocker]# service bdocker status
-    Redirecting to /bin/systemctl status  bdocker.service
+    [root@ge bdocker]# systemctl status bdocker    
     bdocker.service - Bdocker daemon for controlling container execution in WN.
     Loaded: loaded (/usr/lib/systemd/system/bdocker.service; enabled; vendor preset: disabled)
     Active: active (running) since...
