@@ -180,10 +180,10 @@ def copy():
     return api.make_json_response(201, results)
 
 
-######################
-# UN IMPLEMENTED ####
-####################
-
+##############
+# NO USED ####
+##############
+# This code is not by the command line client
 
 @app.route('/stop', methods=['PUT'])
 def stop():
@@ -193,6 +193,11 @@ def stop():
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
+    return flask.g.server_controller
+
+##################
+#  NO USED #######
+##################
 
 
 def load_configuration():
@@ -213,10 +218,6 @@ def get_server_controller():
     if not hasattr(flask.g, 'server_controller'):
         flask.g.server_controller = init_server()
     return flask.g.server_controller
-
-########################
-#  UNIMPLEMETED  ######
-######################
 
 if __name__ == '__main__':
     with app.app_context():
