@@ -21,6 +21,11 @@ from bdocker import utils
 
 
 def get_pids_from_cgroup(cgroup):
+    """Get PIDs to a cgroup.
+
+    :param cgroup:
+    :return: pid array
+    """
     tasks_path = "%s/tasks" % cgroup
     job_pids = utils.read_file(tasks_path)
     array_pids = job_pids.split()
@@ -28,6 +33,12 @@ def get_pids_from_cgroup(cgroup):
 
 
 def task_to_cgroup(cgroup_dir, pid):
+    """Move PID to a cgroup
+
+    :param cgroup_dir:
+    :param pid:
+    :return:
+    """
     tasks = "NO TASK FILE"
     try:
         tasks = "%s/tasks" % cgroup_dir
@@ -43,6 +54,12 @@ def task_to_cgroup(cgroup_dir, pid):
 
 
 def remove_tasks(cgroup_name, cgroup_parent):
+    """Remove pids from the cgroup and move to the parent cgroup.
+
+    :param cgroup_name:
+    :param cgroup_parent:
+    :return:
+    """
     child_path = "%s/%s" % (cgroup_parent, cgroup_name)
     job_pids = get_pids_from_cgroup(child_path)
     for pid in job_pids:
@@ -67,6 +84,18 @@ def parse_cgroup_name(name):
 def create_tree_cgroups(group_name, parent_group_dir,
                         pid=None,
                         root_parent="/sys/fs/cgroup"):
+    """Create a full tree group.
+
+    Create a cgroup with name "group_name" in every cgroup of the
+     every part of the tree inside the parent group
+
+    :param group_name:
+    :param parent_group_dir:
+    :param pid:
+    :param root_parent:
+    :return:
+    """
+
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
         parent_group = parse_cgroup_name(parent_group_dir)
@@ -97,6 +126,16 @@ def create_tree_cgroups(group_name, parent_group_dir,
 
 def delete_tree_cgroups(group_name, parent_group,
                         root_parent="/sys/fs/cgroup"):
+    """Delete the full tree group.
+
+    Delete every group with name "group_name" from every cgroup of the
+     every part of the tree inside the parent group
+
+    :param group_name:
+    :param parent_group:
+    :param root_parent:
+    :return:
+    """
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
         parent_group = parse_cgroup_name(parent_group)
@@ -120,6 +159,16 @@ def delete_tree_cgroups(group_name, parent_group,
 
 def create_cgroups(group_name, parent_groups, pid=None,
                    root_parent="/sys/fs/cgroup"):
+    """Create single cgroup in path [DEPRECATED].
+
+    It creates a group call "group_name" in the parent group.
+
+    :param group_name:
+    :param parent_groups:
+    :param pid:
+    :param root_parent:
+    :return:
+    """
     try:
         c_tree = trees.Tree(root_path=root_parent)
         # test it GroupedTree
@@ -138,6 +187,15 @@ def create_cgroups(group_name, parent_groups, pid=None,
 
 def delete_cgroups(group_name, parent_groups,
                    root_parent="/sys/fs/cgroup"):
+    """Delete a single cgroup in path [DEPRECATED].
+
+    It deletes a group call "group_name" from the parent group.
+
+    :param group_name:
+    :param parent_groups:
+    :param root_parent:
+    :return:
+    """
     try:
         c_tree = trees.Tree(root_path=root_parent)
         for parent in parent_groups:
@@ -153,6 +211,15 @@ def delete_cgroups(group_name, parent_groups,
 
 def get_accounting(group_name, parent_group,
                    root_parent="/sys/fs/cgroup"):
+    """ Get the accounting of a given cgroup.
+
+    Retrieves the memory usage and the cpu usage.
+
+    :param group_name:
+    :param parent_group:
+    :param root_parent:
+    :return:
+    """
     memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
         root_parent, parent_group, group_name
     )
