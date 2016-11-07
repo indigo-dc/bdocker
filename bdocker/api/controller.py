@@ -20,6 +20,7 @@ from bdocker import modules
 
 
 class AccountingServerController(object):
+    """ Accounting Server Controller class"""
     def __init__(self, conf):
         self.credentials_module = modules.load_credentials_module(conf)
         self.batch_module = modules.load_batch_module(conf)
@@ -41,6 +42,7 @@ class AccountingServerController(object):
 
 
 class ServerController(object):
+    """ Working node server Controller class"""
     def __init__(self, conf):
         self.credentials_module = modules.load_credentials_module(conf)
         self.batch_module = modules.load_batch_module(conf)
@@ -305,7 +307,7 @@ class ServerController(object):
         return results
 
     ########################
-    # UN IMPLEMENTED ####
+    # UNIMPLEMENTED ####
     ######################
 
     def stop_container(self, data):
