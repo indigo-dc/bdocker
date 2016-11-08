@@ -140,6 +140,13 @@ def clean_environment(ctx, token):
 @decorators.source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
+    """Pull image from repository
+
+    :param ctx: context
+    :param token: token, optional
+    :param source: repository
+    :return:
+    """
     try:
         out = ctx.obj.container_pull(token, source)
         print_message(out)
@@ -159,6 +166,17 @@ def container_pull(ctx, token, source):
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
+    """Run container
+
+    :param ctx: context
+    :param token: token, optional
+    :param image_id: image id
+    :param script: script to execute
+    :param detach: detach the container, unsynchorinized
+    :param workdir: work dir
+    :param volume: volume to bind
+    :return:
+    """
     # NOTE(jorgesece): parameter detach doesn't allow assing
     # a value. It is just a flag (true/false)
     try:
@@ -179,9 +197,9 @@ def container_run(ctx, token, image_id,
 def container_list(ctx, token, all):
     """List all the containers running
 
-    :param ctx:
-    :param token:
-    :param all:
+    :param ctx: context
+    :param token:token, optional
+    :param all: boolean, all containers
     :return:
     """
     try:
@@ -201,9 +219,9 @@ def container_list(ctx, token, all):
 def container_logs(ctx, token, container_id):
     """Show the log of a container
 
-    :param ctx:
-    :param token:
-    :param all:
+    :param ctx: context
+    :param token: token, optional
+    :param container_id: container id
     :return:
     """
     try:
@@ -224,9 +242,9 @@ def container_logs(ctx, token, container_id):
 def container_inspect(ctx, token, container_id):
     """Return the low level information
 
-    :param ctx:
-    :param token:
-    :param all:
+    :param ctx: context
+    :param token: token, optional
+    :param container_id: container id
     :return:
     """
     try:
@@ -246,10 +264,10 @@ def container_inspect(ctx, token, container_id):
 def container_delete(ctx, token, container_ids, force):
     """Delete a container or list of them.
 
-    :param ctx:
-    :param token:
-    :param container_ids:
-    :param force:
+    :param ctx: context
+    :param token: token, optional
+    :param container_ids: container ids
+    :param force: force delete containers
     :return:
     """
     try:
@@ -276,9 +294,9 @@ def copy(ctx, token, path):
     Copy files/folders between a container and
     the local filesystem.
 
-    :param ctx:
-    :param token:
-    :param path:
+    :param ctx: context
+    :param token: token, optional
+    :param path: path with the appropiate format
     :return:
     """
     try:
