@@ -159,7 +159,7 @@ def container_pull(ctx, token, source):
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
-    # TODO(jorgesece): parameter detach doesn't allow assing
+    # NOTE(jorgesece): parameter detach doesn't allow assing
     # a value. It is just a flag (true/false)
     try:
         out = ctx.obj.container_run(
@@ -177,6 +177,13 @@ def container_run(ctx, token, image_id,
 @decorators.all_option
 @click.pass_context
 def container_list(ctx, token, all):
+    """List all the containers running
+
+    :param ctx:
+    :param token:
+    :param all:
+    :return:
+    """
     try:
         out = ctx.obj.container_list(token, all)
         headers = ['CONTAINER ID', 'IMAGE', 'COMMAND',
@@ -192,6 +199,13 @@ def container_list(ctx, token, all):
 @decorators.container_id_argument
 @click.pass_context
 def container_logs(ctx, token, container_id):
+    """Show the log of a container
+
+    :param ctx:
+    :param token:
+    :param all:
+    :return:
+    """
     try:
         out = ctx.obj.container_logs(token, container_id)
         print_message(out)
@@ -208,6 +222,13 @@ def container_logs(ctx, token, container_id):
 @decorators.container_id_argument
 @click.pass_context
 def container_inspect(ctx, token, container_id):
+    """Return the low level information
+
+    :param ctx:
+    :param token:
+    :param all:
+    :return:
+    """
     try:
         out = ctx.obj.container_inspect(token, container_id)
         print_message(out)
@@ -223,40 +244,20 @@ def container_inspect(ctx, token, container_id):
 @decorators.force_option
 @click.pass_context
 def container_delete(ctx, token, container_ids, force):
+    """Delete a container or list of them.
+
+    :param ctx:
+    :param token:
+    :param container_ids:
+    :param force:
+    :return:
+    """
     try:
         out = ctx.obj.container_delete(token, container_ids, force)
         print_message(out)
     except exceptions.DockerException as e:
         m = e.message
         print_error(m)
-
-
-@bdocker.command('notify_accounting',
-                 help="[BETA] Send accounting to the server."
-                      "ROOT privileges needed")
-@decorators.token_option
-@click.pass_context
-def notify_accounting(ctx, token, force):
-    # Command executed by the root in epilog
-    try:
-        out = ctx.obj.notify_accounting(token)
-        print_message(out)
-    except BaseException as e:
-        print_error(e.message)
-
-
-@bdocker.command('accounting',
-                 help="[BETA] Retrieve the job accounting."
-                      "ROOT privileges needed")
-@decorators.token_option
-@decorators.container_id_argument
-@click.pass_context
-def accounting(ctx, token, container_id):
-    try:
-        out = ctx.obj.accounting_retrieve(token, container_id)
-        print_message(out)
-    except BaseException as e:
-        print_error(e.message)
 
 
 @bdocker.command('cp',
@@ -270,6 +271,16 @@ def accounting(ctx, token, container_id):
 @decorators.path_argument
 @click.pass_context
 def copy(ctx, token, path):
+    """Copy files/folders
+
+    Copy files/folders between a container and
+    the local filesystem.
+
+    :param ctx:
+    :param token:
+    :param path:
+    :return:
+    """
     try:
         container_id = path["container_id"]
         container_path = path["container_path"]

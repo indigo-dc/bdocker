@@ -115,6 +115,13 @@ class CommandController(object):
         return token_file
 
     def configuration(self, user_name=None):
+        """Configures the job session.
+
+        It validates the admin user and creates the job session.
+
+        :param user_name:
+        :return:
+        """
         path = "/configuration"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
@@ -140,6 +147,16 @@ class CommandController(object):
         return {"token": token, "path": token_file}
 
     def clean_environment(self, token):
+        """Clean credentials and batch environment.
+
+        It cleans a token credential for the user, and
+        the batch environment, in addition to delete all
+        dockers. Also,
+        Command executed by the root in prolog
+
+        :param token:
+        :return:
+        """
         path = "/clean"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()

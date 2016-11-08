@@ -71,6 +71,15 @@ class RequestController(object):
 
     @staticmethod
     def _get_from_response(response, data_field='results'):
+        """Get json body from response.
+
+        Retrieves the field of the json body with
+        the results.
+
+        :param response: response
+        :param data_field: field to retrieve
+        :return: results
+        """
         if response.status_int in [200, 201, 202]:
             exceptions.make_log('debug', 'HTTP response: %s' %
                                 response.status_int)
@@ -84,13 +93,7 @@ class RequestController(object):
                  content_type="application/json",
                  body=None,
                  query_string=""):
-        """Return a new Request object to interact with OpenStack.
-
-        This method will create a new request starting with the same WSGI
-        environment as the original request, prepared to interact with
-        OpenStack. Namely, it will override the script name to match the
-        OpenStack version. It will also override the path, content_type and
-        body of the request, if any of those keyword arguments are passed.
+        """Return a new Request object to interact with Bdocker Server.
 
         :param path: new path for the request
         :param content_type: new content type for the request, defaults to
@@ -122,6 +125,7 @@ class RequestController(object):
 
         :param path: path of the request
         :param parameters: parameters to include in the request
+        :return: json response
         """
         try:
             query_string = get_query_string(parameters)
@@ -140,6 +144,7 @@ class RequestController(object):
 
         :param path: path of the request
         :param parameters: parameters to include in the request
+        :return: json response
         """
         try:
             body = make_body(parameters)
@@ -158,6 +163,7 @@ class RequestController(object):
 
         :param path: path of the request
         :param parameters: parameters to include in the request
+        :return: json response
         """
         try:
             query_string = get_query_string(parameters)
@@ -176,6 +182,7 @@ class RequestController(object):
 
         :param path: path of the request
         :param parameters: parameters to include in the request
+        :return: json response
         """
         try:
             body = make_body(parameters)
