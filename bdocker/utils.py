@@ -61,7 +61,7 @@ def write_yaml_file(path, data):
 
 
 def update_yaml_file(path, data):
-    """ Update yaml file.
+    """Update yaml file.
 
     :param path: file path
     :param data: dict data

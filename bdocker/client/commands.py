@@ -80,7 +80,7 @@ def write_user_credentials(token, file_path,
 
 
 class CommandController(object):
-    """Command line controller class"""
+    """Command line controller class."""
 
     def __init__(self, endpoint=None):
         self.conf = utils.load_configuration_from_file()
