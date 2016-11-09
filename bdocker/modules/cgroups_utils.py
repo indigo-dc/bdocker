@@ -23,7 +23,7 @@ from bdocker import utils
 def get_pids_from_cgroup(cgroup):
     """Get PIDs to a cgroup.
 
-    :param cgroup:
+    :param cgroup: cgroup name
     :return: pid array
     """
     tasks_path = "%s/tasks" % cgroup
@@ -33,10 +33,10 @@ def get_pids_from_cgroup(cgroup):
 
 
 def task_to_cgroup(cgroup_dir, pid):
-    """Move PID to a cgroup
+    """Move a task PID to a cgroup
 
-    :param cgroup_dir:
-    :param pid:
+    :param cgroup_dir: cgroup name
+    :param pid: pid of the task
     :return:
     """
     tasks = "NO TASK FILE"
@@ -56,8 +56,8 @@ def task_to_cgroup(cgroup_dir, pid):
 def remove_tasks(cgroup_name, cgroup_parent):
     """Remove pids from the cgroup and move to the parent cgroup.
 
-    :param cgroup_name:
-    :param cgroup_parent:
+    :param cgroup_name: cgroup job name
+    :param cgroup_parent: parent cgroup
     :return:
     """
     child_path = "%s/%s" % (cgroup_parent, cgroup_name)
@@ -67,12 +67,13 @@ def remove_tasks(cgroup_name, cgroup_parent):
 
 
 def parse_cgroup_name(name):
-    """Clean cgroup name.
+    """Clean especial cgroup extensions.
 
-    It is needed because cgroupspy clean them.
+    It is needed because cgroupspy remove the extension of
+    some of the cgroups.
 
-    :param name:
-    :return: name without extensions
+    :param name: cgroup name
+    :return: name without extension
     """
     extensions = ['.slice', '.scope', '.partition']
     new_name = str(name)
@@ -89,11 +90,10 @@ def create_tree_cgroups(group_name, parent_group_dir,
     Create a cgroup with name "group_name" in every cgroup of the
      every part of the tree inside the parent group
 
-    :param group_name:
-    :param parent_group_dir:
-    :param pid:
-    :param root_parent:
-    :return:
+    :param group_name: cgroup job name
+    :param parent_group_dir: parent cgroup
+    :param pid: pid to move into the cgroup
+    :param root_parent: root cgroup ("sys/fs/cgroup" by default)
     """
 
     try:
@@ -131,10 +131,9 @@ def delete_tree_cgroups(group_name, parent_group,
     Delete every group with name "group_name" from every cgroup of the
      every part of the tree inside the parent group
 
-    :param group_name:
-    :param parent_group:
-    :param root_parent:
-    :return:
+    :param group_name: cgroup job name
+    :param parent_group_dir: parent cgroup
+    :param root_parent: root cgroup ("sys/fs/cgroup" by default)
     """
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
@@ -163,11 +162,10 @@ def create_cgroups(group_name, parent_groups, pid=None,
 
     It creates a group call "group_name" in the parent group.
 
-    :param group_name:
-    :param parent_groups:
-    :param pid:
-    :param root_parent:
-    :return:
+    :param group_name: cgroup name
+    :param parent_groups: parent cgroup
+    :param pid: process id
+    :param root_parent: root cgroup ("sys/fs/cgroup" by default)
     """
     try:
         c_tree = trees.Tree(root_path=root_parent)
@@ -191,10 +189,9 @@ def delete_cgroups(group_name, parent_groups,
 
     It deletes a group call "group_name" from the parent group.
 
-    :param group_name:
-    :param parent_groups:
-    :param root_parent:
-    :return:
+    :param group_name: cgroup name
+    :param parent_groups: parent cgroup
+    :param root_parent: root cgroup ("sys/fs/cgroup" by default)
     """
     try:
         c_tree = trees.Tree(root_path=root_parent)
@@ -211,14 +208,14 @@ def delete_cgroups(group_name, parent_groups,
 
 def get_accounting(group_name, parent_group,
                    root_parent="/sys/fs/cgroup"):
-    """ Get the accounting of a given cgroup.
+    """Get the accounting of a given cgroup.
 
     Retrieves the memory usage and the cpu usage.
 
-    :param group_name:
-    :param parent_group:
-    :param root_parent:
-    :return:
+    :param group_name: cgroup name
+    :param parent_groups: parent cgroup
+    :param root_parent: root cgroup ("sys/fs/cgroup" by default)
+    :return: dictionary with the accounting
     """
     memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
         root_parent, parent_group, group_name

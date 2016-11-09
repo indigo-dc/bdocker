@@ -27,8 +27,11 @@ from bdocker.modules import request
 from bdocker import parsers
 from bdocker import utils
 
+# Default accounting file in the accounting server
 BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
+# Default temporal accounting file
 LOCAL_ACCOUNTING_FILE = ".bdocker_accounting"
+# CGROUP FOR THE JOB PID.
 JOB_PROCESS_CGROUP = 'COMMON'
 
 
