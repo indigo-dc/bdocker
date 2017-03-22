@@ -46,6 +46,7 @@ def load_batch_module(conf):
         batch_class = getattr(batch, batch_module)
         batch_instance = batch_class(conf['batch'])
         if conf["resource"]["role"] == "working":
+            #FIXME(A1ve5): What about SGEWNController?
             batch_class = batch.WNController
         else:
             batch_class = batch.AccountingController
