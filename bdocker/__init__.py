@@ -18,7 +18,7 @@ import logging
 
 from bdocker import utils
 
-DEFAUL_LOG_FILE = "/var/log/bdocker.log"
+DEFAULT_LOG_FILE = "/var/log/bdocker.log"
 
 
 def configure_logging():
@@ -26,7 +26,7 @@ def configure_logging():
     log_file = None
     try:
         out = utils.load_configuration_from_file()
-        log_file = DEFAUL_LOG_FILE
+        log_file = DEFAULT_LOG_FILE
         if "logging" in out["server"]:
             log_level = out["server"]['logging']
         if "logging_file" in out["server"]:
