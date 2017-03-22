@@ -160,6 +160,8 @@ However, the client just uses some of the configuration parameters (described in
 |                |``token_client_file`` |Token file name. By default: ".bdocker_token".
 |                |                      |In the configuration process, the user token is stored in the user home directory by using
 |                |                      |the path: $HOME/``token_client_file``_$JOB_ID.
+|``dockerAPI``    |(only working daemon) |*Docker access configuration*
+|                 | ``base_url``         |Docker server url. It could be a http link or a socket link (unix://var/run/docker.sock)
 
 
 ## 3. Bacth environment configuration
