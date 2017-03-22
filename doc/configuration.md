@@ -164,7 +164,7 @@ However, the client just uses some of the configuration parameters (described in
 |                 | ``base_url``         |Docker server url. It could be a http link or a socket link (unix://var/run/docker.sock)
 
 
-## 3. Bacth environment configuration
+## 3. Batch environment configuration
 
 The configuration file is located in ``/etc/configure_bdocker.cfg`` by default. But it can be modified
 by setting the environment variable ``BDOCKER_CONF_FILE``.
