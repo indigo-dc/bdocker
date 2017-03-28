@@ -30,11 +30,10 @@ class AccountingServerController(object):
         :param data: dict parameter with attributes
         :return: empty
         """
-        required = {'admin_token',
-                    "accounting"}
+        required = {'admin_token', 'accounting'}
         api.validate(data, required)
         admin_token = data['admin_token']
-        accounting = data["accounting"]
+        accounting = data['accounting']
         self.credentials_module.authorize_admin(admin_token)
         data = self.batch_module.set_job_accounting(accounting)
         return data

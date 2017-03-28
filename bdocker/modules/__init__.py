@@ -27,13 +27,13 @@ def load_credentials_module(conf):
     try:
         credentials_module = conf['credentials']["controller"]
         credentials_class = getattr(credentials, credentials_module)
-        path = conf["credentials"]['token_store']
-        crendentials_instance = credentials_class(path)
-        if not isinstance(crendentials_instance, credentials.TokenController):
+        path = conf['credentials']["token_store"]
+        credentials_instance = credentials_class(path)
+        if not isinstance(credentials_instance, credentials.TokenController):
             raise exceptions.ConfigurationException(
                 "%s is not a Credential module" %
                 credentials_module)
-        return crendentials_instance
+        return credentials_instance
     except BaseException:
         raise exceptions.ConfigurationException("Credentials is not supported")
 
@@ -45,7 +45,7 @@ def load_batch_module(conf):
         batch_module = conf['batch']["controller"]
         batch_class = getattr(batch, batch_module)
         batch_instance = batch_class(conf['batch'])
-        if conf["resource"]["role"] == "working":
+        if conf['resource']["role"] == "working":
             batch_class = batch.WNController
         else:
             batch_class = batch.AccountingController
@@ -60,5 +60,5 @@ def load_batch_module(conf):
 
 def load_docker_module(conf):
     return docker_helper.DockerController(
-        conf['dockerAPI']['base_url']
+        conf['dockerAPI']["base_url"]
     )

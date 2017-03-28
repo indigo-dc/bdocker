@@ -16,7 +16,7 @@
 
 import flask
 
-from bdocker import api
+from bdocker import api, exceptions
 from bdocker.api import controller
 from bdocker import utils
 
@@ -68,6 +68,8 @@ if __name__ == '__main__':
         debug = False
         if logging == 'DEBUG':
             debug = True
+            message = "[bdocker] Accounting server running on: %s:%s" % host, port
+            exceptions.make_log("debug", message)
         app.run(host=host,
                 port=port,
                 debug=debug)
