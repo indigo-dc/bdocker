@@ -48,7 +48,7 @@ class ServerController(object):
     def configuration(self, data):
         """Configure bdocker user environment.
 
-          It creates the token and configure the batch
+          It creates the token and configures the batch
           system.
 
         :param data: dict parameter with attributes
@@ -136,7 +136,7 @@ class ServerController(object):
         working_dir = data.get('working_dir', None)
         # cgroup = data.get('cgroup', None)
         # TODO(jorgesece): control image private
-        # credentials_module.authorize_image(
+# credentials_module.authorize_image(
         #     token,
         #     image_id
         # )
@@ -308,6 +308,11 @@ class ServerController(object):
     ######################
 
     def stop_container(self, data):
+        """ Stop container.
+        
+        :param data: dict parameter with attributes
+        :return: output
+        """
         required = {'token', 'container_id'}
         api.validate(data, required)
         token = data['token']

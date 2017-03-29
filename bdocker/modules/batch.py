@@ -355,7 +355,7 @@ class CgroupsWNController(WNController):
             return track_acc
         else:
             raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
+                message="Accounting not available without enabling "
                         "cgroups")
 
     def launch_job_monitoring(self, job_id, job_info, file_path, job_pid,
@@ -509,7 +509,7 @@ class CgroupsWNController(WNController):
         else:
             exceptions.make_log(
                 "exception",
-                "Accounting not available without enabling"
+                "Accounting not available without enabling "
                 "cgroups")
             flag = False
         return flag
@@ -551,7 +551,7 @@ class CgroupsWNController(WNController):
                 raise exceptions.NotificationException(exc=e)
         else:
             raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
+                message="Accounting not available without enabling "
                         "cgroups")
 
 
