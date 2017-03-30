@@ -159,7 +159,7 @@ def container_pull(ctx, token, source):
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
-    # TODO(jorgesece): parameter detach doesn't allow assing
+    # TODO(jorgesece): parameter detach doesn't allow to assign
     # a value. It is just a flag (true/false)
     try:
         out = ctx.obj.container_run(
