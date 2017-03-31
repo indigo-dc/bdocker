@@ -309,8 +309,8 @@ class ServerController(object):
     ######################
 
     def stop_container(self, data):
-        """ Stop container.
-        
+        """Stop container.
+
         :param data: dict parameter with attributes
         :return: output
         """
