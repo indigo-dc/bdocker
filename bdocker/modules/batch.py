@@ -759,7 +759,7 @@ class SGEWNController(CgroupsWNController):
             return full_string
         except KeyError as e:
             raise exceptions.ParseException(
-                "Job accountig file malformed: %s. " % e.message
+                "Job accounting file malformed: %s. " % e.message
             )
 
     def get_job_info(self):
