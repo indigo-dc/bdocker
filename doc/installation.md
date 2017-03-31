@@ -1,13 +1,13 @@
 # Installation
 
-## Instalation using pip
+## Installation using pip
 
 At the moment the only way to install Bdocker is by using pip as local repository, we will provide a better
 solution soon.
     ```
     $pip install .
     ```
-## Instalation and configuration through the use of an Ansible role
+## Installation and configuration through the use of an Ansible role
 
 An Ansible role has been developed that can, at the moment, install configure and deploy Bdocker into a SGE cluster.
 The role and further information about how to use it can be used can be found at [ansible-role-bdocker](https://github.com/indigo-dc/ansible-role-bdocker).
