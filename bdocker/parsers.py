@@ -48,7 +48,7 @@ def parse_docker_generator(gen_data):
                                         code=406)
 
 
-def parse_docker_generator1(gen_data, key='Status'):
+def parse_docker_generator1(gen_data, key='Status'):  # Apparently this one isn't used
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
@@ -81,9 +81,9 @@ def get_date_diff(date_end, date_format=None):
     else:
         date_ini = datetime.datetime.fromtimestamp(date_end)
     date_end = datetime.datetime.utcnow()
-    diferencia = date_end - date_ini
-    days = diferencia.days
-    seconds = diferencia.seconds
+    difference = date_end - date_ini
+    days = difference.days
+    seconds = difference.seconds
     weeks = divmod(days, 7)[0]
     minutes = divmod(seconds, 60)[0]
     hours = divmod(seconds, 3600)[0]
