@@ -48,7 +48,7 @@ def parse_docker_generator(gen_data):
                                         code=406)
 
 
-def parse_docker_generator1(gen_data, key='Status'):  # Apparently this one isn't used
+def parse_docker_generator1(gen_data, key='Status'):  # unused
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
