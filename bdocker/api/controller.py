@@ -36,7 +36,7 @@ class AccountingServerController(object):
         accounting = data['accounting']
         self.credentials_module.authorize_admin(admin_token)
         data = self.batch_module.set_job_accounting(accounting)
-        exceptions.make_log("debug", "Admin Token: %s\nAccounting Data:%s" % (admin_token, accounting))
+        exceptions.make_log("debug", "Admin Token: %s Accounting Data:%s" % (admin_token, accounting))
         return data
 
 
