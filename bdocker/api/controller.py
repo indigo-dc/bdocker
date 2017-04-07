@@ -36,7 +36,6 @@ class AccountingServerController(object):
         accounting = data['accounting']
         self.credentials_module.authorize_admin(admin_token)
         data = self.batch_module.set_job_accounting(accounting)
-        exceptions.make_log("debug", "Admin Token: %s Accounting Data:%s" % (admin_token, accounting))
         return data
 
 
@@ -304,10 +303,6 @@ class ServerController(object):
                                                              )
         return results
 
-    ########################
-    # UN IMPLEMENTED ####
-    ######################
-
     def stop_container(self, data):
         """Stop container.
 
@@ -324,3 +319,7 @@ class ServerController(object):
         results = self.docker_module.stop_container(
             container_id)
         return results
+
+    ########################
+    # UN IMPLEMENTED ####
+    ######################

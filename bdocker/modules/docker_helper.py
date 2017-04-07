@@ -172,9 +172,12 @@ class DockerController(object):
             raise exceptions.DockerException(e)
         return stat
 
-
-# NO IMPLEMENTED
-
     def stop_container(self, container_id):
-        self.control.stop(container=container_id)
-        return "stop container"
+        try:
+            # timeout - Seconds to wait for stop before killing it. Default: 10
+            stat = self.control.stop(container=container_id, timeout=10)
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return stat
+
+# NOT IMPLEMENTED

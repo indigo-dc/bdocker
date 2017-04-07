@@ -283,3 +283,16 @@ def copy(ctx, token, path):
         print_message(out)
     except BaseException as e:
         print_error(e.message)
+
+
+@bdocker.command('stop',
+                 help="Stop container")
+@decorators.token_option
+@decorators.container_id_argument
+@click.pass_context
+def stop(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_stop(token, container_id)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
