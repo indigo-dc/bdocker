@@ -166,7 +166,7 @@ class WNController(object):
     def __init__(self, conf):
         """Initialize controller.
 
-        Set attributes and instanciate the Batch Notification
+        Set attributes and instantiate the Batch Notification
          Controller.
 
         :param conf: dictionary with configuration properties.
@@ -270,7 +270,7 @@ class CgroupsWNController(WNController):
     def _get_cgroup_job(self, job_id):
         """Generates the job cgroup location.
 
-        :param job_id: Job identificator
+        :param job_id: Job identifier
         :return:
         """
         if self.parent_group == "/":
@@ -280,15 +280,15 @@ class CgroupsWNController(WNController):
         return cgroup_job
 
     def _create_cgroups(self, job_id, parent_pid):
-        """Create CGROUPs realted to the job.
+        """Create CGROUPs related to the job.
 
         It creates a cgroup in the parent cgroup (specified in
         configuration) naming it by using the job_idn. In addition,
         it creates another cgroup inside of previous one with name COMMON.
         The process pid of the job parent is included in COMMON.
 
-        :param job_id: Job identificator
-        :param parent_pid: process indentificator ot the
+        :param job_id: Job identifier
+        :param parent_pid: process identifier of the
         job parent process.
         :return:
         """
@@ -305,7 +305,7 @@ class CgroupsWNController(WNController):
             pid=parent_pid)
 
     def _delete_cgroups(self, job_id):
-        """Delete CGROUPs realted to the job.
+        """Delete CGROUPs related to the job.
 
         :param job_id:
         :return:
@@ -326,7 +326,7 @@ class CgroupsWNController(WNController):
 
         It retrieve the accounting information relative of job.
 
-        :param job_id: job identificator
+        :param job_id: job identifier
         :param file_path: location of the local accounting path
         :return: dictionary within accounting information
         """
@@ -365,7 +365,7 @@ class CgroupsWNController(WNController):
         """It monitors job resources consumption
 
          It tracks the accounting and store it in a local accounting file.
-         Furthermore, it controls that the job does not exeed the cpu and
+         Furthermore, it controls that the job does not exceed the cpu and
         memory quota. In case the job pass any limit, it is deleted by
         killing the process associated to it.
 
