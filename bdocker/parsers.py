@@ -174,6 +174,11 @@ def parse_inspect_container(data):
     return json_data
 
 
+def parse_docker_info(data):
+    json_data = json.dumps([data], indent=2)
+    return json_data
+
+
 def parse_time_to_nanoseconds(time_str):
     try:
         parsed = time_str.split(":")

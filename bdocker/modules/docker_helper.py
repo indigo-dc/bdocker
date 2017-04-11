@@ -190,7 +190,8 @@ class DockerController(object):
 
     def info(self):
         try:
-            info = self.control.info()
+            docker_out = self.control.info()
+            info = parsers.parse_docker_info(docker_out)
         except BaseException as e:
             raise exceptions.DockerException(e)
         return info
