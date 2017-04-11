@@ -308,4 +308,3 @@ def info(ctx, token):
         print_message(out)
     except BaseException as e:
         print_error(e.message)
-

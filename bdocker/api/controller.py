@@ -321,9 +321,9 @@ class ServerController(object):
         return results
 
     def info(self, data):
-        """ Get Docker information
-        
-        :param data: dict parameter with attributes   
+        """Get Docker information
+
+        :param data: dict parameter with attributes
         :return: output
         """
         required = {'token'}

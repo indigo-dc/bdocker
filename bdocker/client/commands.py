@@ -292,4 +292,3 @@ class CommandController(object):
         parameters = {"token": token}
         results = self.control.execute_get(path=path, parameters=parameters)
         return results
-
