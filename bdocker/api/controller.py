@@ -320,6 +320,19 @@ class ServerController(object):
             container_id)
         return results
 
+    def info(self, data):
+        """ Get Docker information
+        
+        :param data: dict parameter with attributes   
+        :return: output
+        """
+        required = {'token'}
+        api.validate(data, required)
+        token = data['token']
+        self.credentials_module.authorize(token)
+        results = self.docker_module.info()
+        return results
+
     ########################
     # UN IMPLEMENTED ####
     ######################

@@ -180,19 +180,36 @@ def copy():
     return api.make_json_response(201, results)
 
 
-######################
-# UN IMPLEMENTED ####
-####################
-
-
 @app.route('/stop', methods=['PUT'])
 def stop():
+    """Stop container.
+
+    :return: Request 201 with results
+    """
     data = flask.json.loads(flask.request.data)
     try:
         results = get_server_controller().stop_container(data)
     except Exception as e:
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
+
+
+@app.route('/info', methods=['GET'])
+def info():
+    """Get docker info.
+
+    :return: Request 200 with results
+    """
+    data = flask.request.args
+    try:
+        results = get_server_controller().info(data)
+    except Exception as e:
+        return api.manage_exceptions(e)
+    return api.make_json_response(200, results)
+
+######################
+# UN IMPLEMENTED ####
+####################
 
 
 def load_configuration():

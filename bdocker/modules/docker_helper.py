@@ -110,7 +110,11 @@ class DockerController(object):
             docker_out = self.control.logs(container=container_id,
                                            stdout=True,
                                            stderr=True,
-                                           stream=True)
+                                           stream=True,
+                                           timestamps=False,
+                                           tail='all',
+                                           since=None,
+                                           follow=None)
             out = parsers.parse_docker_log(docker_out)
         except BaseException as e:
             raise exceptions.DockerException(e)
@@ -127,11 +131,15 @@ class DockerController(object):
                       cgroup=None):
         try:
             binds = None
+            # FIXME(A1ve5): trying this; I'll sort it out later
+            # FIXME(A1ve5): Error: "Got unexpected extra arguments (create_network is not available for version < 1.21)"
+            # self.control.create_network("network1", driver="bridge")
             if host_dir:
                 binds = ['%s:%s' % (host_dir, docker_dir)]
             host_config = self.control.create_host_config(
                 binds=binds,
-                cgroup_parent=cgroup
+                cgroup_parent=cgroup,
+                network_mode='bridge'
                 )
             container_info = self.control.create_container(
                 image=image_id,
@@ -179,5 +187,12 @@ class DockerController(object):
         except BaseException as e:
             raise exceptions.DockerException(e)
         return stat
+
+    def info(self):
+        try:
+            info = self.control.info()
+        except BaseException as e:
+            raise exceptions.DockerException(e)
+        return info
 
 # NOT IMPLEMENTED

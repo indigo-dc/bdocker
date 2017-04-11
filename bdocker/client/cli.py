@@ -296,3 +296,16 @@ def stop(ctx, token, container_id):
         print_message(out)
     except BaseException as e:
         print_error(e.message)
+
+
+@bdocker.command('info',
+                 help="Docker info")
+@decorators.token_option
+@click.pass_context
+def info(ctx, token):
+    try:
+        out = ctx.obj.docker_info(token)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
+
