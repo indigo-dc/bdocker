@@ -1,4 +1,4 @@
-#INTRODUCTION
+# INTRODUCTION
 
 This software manages the execution of docker containers in batch systems.
 It provides two RESTFull APIs that are designed for executing as daemons:
@@ -10,5 +10,5 @@ in the bdocker accounting file.
 
 **This software is under testing**
 
-[check out the bDocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
+[check out the bdocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
 
