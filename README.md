@@ -9,3 +9,6 @@ This daemon listens the accounting request from the working node daemons and sto
 in the bdocker accounting file.
 
 **This software is under testing**
+
+[check out the bDocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
+
