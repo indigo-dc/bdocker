@@ -10,4 +10,5 @@ in the bdocker accounting file.
 
 **This software is under testing**
 
-[bDocker's EGI/INDIGO Conference 2017 poster Download](doc/EGI-INDIGO2017.pdf)
+[check out the bDocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
+
