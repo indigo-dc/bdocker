@@ -384,3 +384,24 @@ class CommandController(object):
                       "host_to_container": host_to_container}
         results = self.control.execute_put(path=path, parameters=parameters)
         return results
+
+    def container_stop(self, token, container_id):
+        path = "/stop"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token,
+                      "container_id": container_id}
+        results = self.control.execute_put(path=path, parameters=parameters)
+        return results
+
+    def docker_info(self, token):
+        path = "/info"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token}
+        results = self.control.execute_get(path=path, parameters=parameters)
+        return results

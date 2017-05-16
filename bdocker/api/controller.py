@@ -31,11 +31,10 @@ class AccountingServerController(object):
         :param data: dict parameter with attributes
         :return: empty
         """
-        required = {'admin_token',
-                    "accounting"}
+        required = {'admin_token', 'accounting'}
         api.validate(data, required)
         admin_token = data['admin_token']
-        accounting = data["accounting"]
+        accounting = data['accounting']
         self.credentials_module.authorize_admin(admin_token)
         data = self.batch_module.set_job_accounting(accounting)
         return data
@@ -51,7 +50,7 @@ class ServerController(object):
     def configuration(self, data):
         """Configure bdocker user environment.
 
-          It creates the token and configure the batch
+          It creates the token and configures the batch
           system.
 
         :param data: dict parameter with attributes
@@ -139,7 +138,7 @@ class ServerController(object):
         working_dir = data.get('working_dir', None)
         # cgroup = data.get('cgroup', None)
         # TODO(jorgesece): control image private
-        # credentials_module.authorize_image(
+# credentials_module.authorize_image(
         #     token,
         #     image_id
         # )
@@ -306,11 +305,13 @@ class ServerController(object):
                                                              )
         return results
 
-    ########################
-    # UNIMPLEMENTED ####
-    ######################
 
     def stop_container(self, data):
+        """Stop container.
+
+        :param data: dict parameter with attributes
+        :return: output
+        """
         required = {'token', 'container_id'}
         api.validate(data, required)
         token = data['token']
@@ -321,3 +322,20 @@ class ServerController(object):
         results = self.docker_module.stop_container(
             container_id)
         return results
+
+    def info(self, data):
+        """Get Docker information
+
+        :param data: dict parameter with attributes
+        :return: output
+        """
+        required = {'token'}
+        api.validate(data, required)
+        token = data['token']
+        self.credentials_module.authorize(token)
+        results = self.docker_module.info()
+        return results
+
+    ########################
+    # UN IMPLEMENTED ####
+    ######################

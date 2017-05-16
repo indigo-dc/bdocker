@@ -64,9 +64,9 @@ def make_body(parameters):
 class RequestController(object):
     resource = None
 
-    def __init__(self, defaul_path="",
+    def __init__(self, default_path="",
                  endopoint="http://127.0.0.33:5000"):
-        self.default_path = defaul_path
+        self.default_path = default_path
         self.endpoint = endopoint
 
     @staticmethod

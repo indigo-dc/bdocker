@@ -20,7 +20,7 @@ the file in ``/etc/configure_bdocker.cfg``. In the following, examples of config
 
 The working node configures the following fields:
 
-    
+
     [resource]
     # role can be working or accounting
     role = working
@@ -49,12 +49,12 @@ The working node configures the following fields:
 
     [dockerAPI]
     base_url = unix://var/run/docker.sock
-    
+
 ### Accounting
 
 The accounting configures the following fields:
 
-    
+
     [resource]
     # role can be working or accounting
     role = accounting
@@ -74,7 +74,7 @@ The accounting configures the following fields:
     [credentials]
     controller = TokenController
     token_store = /etc/token_store.yml
-    
+
 
 ### Configuration parameters
 
@@ -110,10 +110,10 @@ reset the request in case it exceed this time.
 The working node daemon raise this exception in case this time is exceeded:
 
 ``[2016-07-18 14:06:44 +0000] [21197] [CRITICAL] WORKER TIMEOUT (pid:21206)``
- 
+
  In addition, we describe the configuration parameters related to the **Cgroup controller**, so that,
  any controller, which inherits from the CgroupWNController class, includes these parameters in the *batch* configuration group:
- 
+
 | Daemon            |Field               |Description                                |
 | ----------------- |:------------------:|:------------------------------------------------|
 |    working     |``enable_cgroups``    |Enable cgroup accounting management. By default is 'no' [true, false, yes, no].          
@@ -128,10 +128,10 @@ The working node daemon raise this exception in case this time is exceeded:
 
 **SGE batch controller** inherits from Cgroups controller, thus requires its configuration parameters. In addition
 SGE batch controller allows to configure the wallclock time monitoring:
- 
+
 | Daemon            |Field               |Description                                |
 | ----------------- |:--------------------:|:------------------------------------------------|
-|    working     |``default_ru_wallclock`` | Default value for ru_wallclock accounting, By default: 0. 
+|    working     |``default_ru_wallclock`` | Default value for ru_wallclock accounting, By default: 0.
 |    working     |``include_wallclock``    | Include the ru_wallclock time in the accounting, by default it is 'no' and
 |                 |                      |the system includes the default_run_wallclock value. [true, false, yes, no]
 
@@ -141,7 +141,7 @@ SGE batch controller allows to configure the wallclock time monitoring:
 
 In the current version, the client is deployed together to the working node, so that, it is configured by using the same configuration file.
 However, the client just uses some of the configuration parameters (described in the previous section):
-    
+
 |Group           |Field                |Description
 | -------------- |:-------------------:|:------------------------------------------------|
 |``resource``    |                    |
@@ -152,7 +152,7 @@ However, the client just uses some of the configuration parameters (described in
 |                |``logging``         |Configure the logging level of bdocker.
 |                |``logging_file``         |Configure the logging file. By default: /var/log/bdocker.log.
 |``batch``        |                      |*Batch system configuration*. It provides the job information.      
-|                 |``controller``        |Specify the class to manage the batch system. 
+|                 |``controller``        |Specify the class to manage the batch system.
 |``credentials`` |                     |*Credential module configuration*
 |                |``controller``        |Specify the class to manage the user credentials.
 |                |``token_store``      |File in which the tokens are stored. **It MUST be protected under root permissions**.
@@ -160,9 +160,11 @@ However, the client just uses some of the configuration parameters (described in
 |                |``token_client_file`` |Token file name. By default: ".bdocker_token".
 |                |                      |In the configuration process, the user token is stored in the user home directory by using
 |                |                      |the path: $HOME/``token_client_file``_$JOB_ID.
+|``dockerAPI``    |(only working daemon) |*Docker access configuration*
+|                 | ``base_url``         |Docker server url. It could be a http link or a socket link (unix://var/run/docker.sock)
 
 
-## 3. Bacth environment configuration
+## 3. Batch environment configuration
 
 The configuration file is located in ``/etc/configure_bdocker.cfg`` by default. But it can be modified
 by setting the environment variable ``BDOCKER_CONF_FILE``.
@@ -173,19 +175,19 @@ command, to clean the environment of bdocker job files, docker containers and ot
 
 ### Prolog
 
-    
+
     ################
     ### BDOCKER ####
     ################
     ## For JOB_ID with value 1
-    ## The tocken will store the file in $HOME/.bdocker_token_1
+    ## The token will store the file in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker configure
-    
-    
+
+
 ### Epilog
 
-    
+
     ################
     ### BDOCKER ####
     ################
@@ -193,17 +195,17 @@ command, to clean the environment of bdocker job files, docker containers and ot
     ## It will take the tocken from token in $HOME/.bdocker_token_1
     export BDOCKER_CONF_FILE="/etc/configure_bdocker.cfg"
     bdocker clean
-    
+
 ### Token store file
 
 The credentials module requires this file to store the job information, every job is identified by using a
-token. The tokens are created by the module during the configuration process and they are used for controlling 
+token. The tokens are created by the module during the configuration process and they are used for controlling
 client privileges to access to docker container host directories.
-In addition, the module uses an administration token, called ``admin``, to communicate the three components for administration tasks 
+In addition, the module uses an administration token, called ``admin``, to communicate the three components for administration tasks
 (configure, clean and notify functionalities). So that, the token file **MUSTS CONTAIN THE FOLLOWING LINE**:
-    
+
     admin: {token: <token_prolog>}
-    
+
 where <token_prolog> is the token configured by the admin, **it must be the same in all the components.**.
 
 In order to have a proper security behaviour in bdocker, this file **must exists under root permissions**.

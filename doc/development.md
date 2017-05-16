@@ -77,7 +77,7 @@ is in charge of listening the working node daemons waiting for accounting notifi
 a file following the accounting format of each batch system.
 In the current version, the SGE batch system is supported by using the SGEAccountingController class.
 
-### Docker mudule
+### Docker module
 The docker module is in charge of managing the docker-py client for being used in the bdocker tool.
 
 ## Extensibility
