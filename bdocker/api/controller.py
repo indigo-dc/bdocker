@@ -305,7 +305,6 @@ class ServerController(object):
                                                              )
         return results
 
-
     def stop_container(self, data):
         """Stop container.
 
