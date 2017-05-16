@@ -1,0 +1,5 @@
+ubuntu:
+  latest: {file: "ubuntu.tar"}
+centos:
+  latest: {file: "centos.tar"}
+  indigo: {file: "indigo.tar"}
