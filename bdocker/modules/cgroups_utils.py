@@ -124,7 +124,7 @@ def create_tree_cgroups(group_name, parent_group_dir,
         raise exc
 
 
-def delete_tree_cgroups(group_name, parent_group,
+def delete_tree_cgroups(group_name, parent_group_dir,
                         root_parent="/sys/fs/cgroup"):
     """Delete the full tree group.
 
@@ -137,7 +137,7 @@ def delete_tree_cgroups(group_name, parent_group,
     """
     try:
         c_trees = trees.GroupedTree(root_path=root_parent)
-        parent_group = parse_cgroup_name(parent_group)
+        parent_group = parse_cgroup_name(parent_group_dir)
         parent_node = c_trees.get_node_by_path(parent_group)
         for node in parent_node.nodes:
             try:
@@ -206,7 +206,7 @@ def delete_cgroups(group_name, parent_groups,
         raise exc
 
 
-def get_accounting(group_name, parent_group,
+def get_accounting(group_name, parent_groups,
                    root_parent="/sys/fs/cgroup"):
     """Get the accounting of a given cgroup.
 
@@ -218,17 +218,17 @@ def get_accounting(group_name, parent_group,
     :return: dictionary with the accounting
     """
     memory_file = "%s/memory%s/%s/memory.usage_in_bytes" % (
-        root_parent, parent_group, group_name
+        root_parent, parent_groups, group_name
     )
     cpu_file = "%s/cpuacct%s/%s/cpuacct.usage" % (
-        root_parent, parent_group, group_name
+        root_parent, parent_groups, group_name
     )
     try:
         memory_usage = utils.read_file(memory_file)
         cpu_usage = utils.read_file(cpu_file)
     except BaseException:
         raise exceptions.CgroupException("%s/%s Not found"
-                                         % (parent_group,
+                                         % (parent_groups,
                                             group_name),
                                          group_name)
     return {"memory_usage": memory_usage,

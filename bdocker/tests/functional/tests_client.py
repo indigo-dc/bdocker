@@ -99,7 +99,7 @@ class TestFunctionalClient(TestCaseCommandLine):
         self.assertEqual(True, m_del.called)
 
     @mock.patch("os.chown")
-    @mock.patch("__builtin__.open")
+    @mock.mock_open(mock=None, read_data=None)
     @mock.patch("bdocker.client.commands.get_user_credentials")
     @mock.patch("bdocker.utils.read_yaml_file")
     @mock.patch("bdocker.utils.load_configuration_from_file")
