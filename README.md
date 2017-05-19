@@ -10,5 +10,5 @@ in the bdocker accounting file.
 
 **This software is under testing**
 
-[bdocker Documentation] (https://www.gitbook.com/book/indigo-dc/bdocker)
-[check out the bdocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
+* [bdocker Documentation](https://www.gitbook.com/book/indigo-dc/bdocker)
+* [check out the bdocker EGI/INDIGO Conference 2017 poster here](doc/EGI-INDIGO2017.pdf)
