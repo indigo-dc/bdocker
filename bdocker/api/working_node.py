@@ -196,8 +196,7 @@ def stop():
         results = get_server_controller().stop_container(data)
     except Exception as e:
         return api.manage_exceptions(e)
-    return api.make_json_response(200, results)
-    return flask.g.server_controller
+    return api.make_json_response(201, results)
 
 ##################
 #  NO USED #######

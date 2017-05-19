@@ -69,7 +69,7 @@ class TestSgeRestApiAccounting(testtools.TestCase):
         parameters = {"admin_token": self.admin_token,
                       "accounting": line
                       }
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=self.token_store):
             with mock.patch("os.getenv",
@@ -149,7 +149,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         m_class.pw_gid = user_gid
         m_getpi.return_value = m_class
         m_path.return_value = user_home
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=self.token_store
                         ):
@@ -227,7 +227,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         m_pull.return_value = create_log()
         parameters = {"token": token,
                       "source": 'repoooo'}
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=fakes.token_store
                         ):
@@ -257,7 +257,7 @@ class TestSgeRestApiWn(testtools.TestCase):
             "token": token,
             "container_id": containers,
             "force": force}
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
 
         with mock.patch("os.getenv",
                         return_value=self.file_name
@@ -364,7 +364,7 @@ class TestSgeRestApiWn(testtools.TestCase):
         containers = self.token_store[token]["containers"]
         parameters = {"token": token,
                       "container_id": containers[0]}
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=fakes.token_store
                         ):
@@ -376,7 +376,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                                              body=body,
                                              method="PUT"
                                              ).get_response(self.app)
-        self.assertEqual(200, result.status_code)
+        self.assertEqual(201, result.status_code)
 
     @mock.patch.object(docker_py.Client, "put_archive")
     @mock.patch("bdocker.utils.read_tar_raw_data_stream")
@@ -390,7 +390,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "container_path": "/coo",
                       "host_path": user_home,
                       "host_to_container": True}
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=fakes.token_store
                         ):
@@ -425,7 +425,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "container_path": "/coo",
                       "host_path": user_home,
                       "host_to_container": False}
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=fakes.token_store
                         ):
@@ -469,7 +469,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "docker_dir": "/doo",
                       "working_dir": "/doo",
                       }
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("os.getenv",
                         return_value=self.file_name
                         ):
@@ -507,7 +507,7 @@ class TestSgeRestApiWn(testtools.TestCase):
                       "docker_dir": "/doo",
                       "working_dir": "/doo",
                       }
-        body = bytes(request.make_body(parameters), 'utf-8')
+        body = request.make_body(parameters)
         with mock.patch("os.getenv",
                         return_value=self.file_name
                         ):
