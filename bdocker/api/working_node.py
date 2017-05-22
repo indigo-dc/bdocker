@@ -216,6 +216,20 @@ def info():
         return api.manage_exceptions(e)
     return api.make_json_response(200, results)
 
+
+@app.route('/start', methods=['PUT'])
+def start():
+    """Starts container.
+
+    :return: Request 201 with results
+    """
+    data = flask.json.loads(flask.request.data)
+    try:
+        results = get_server_controller().start_container(data)
+    except Exception as e:
+        return api.manage_exceptions(e)
+    return api.make_json_response(201, results)
+
 ######################
 # UN IMPLEMENTED ####
 ####################

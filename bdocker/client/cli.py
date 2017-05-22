@@ -337,3 +337,16 @@ def info(ctx, token):
         print_message(out)
     except BaseException as e:
         print_error(e.message)
+
+
+@bdocker.command('start',
+                 help="Starts container")
+@decorators.token_option
+@decorators.container_id_argument
+@click.pass_context
+def start(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_start(token, container_id)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
