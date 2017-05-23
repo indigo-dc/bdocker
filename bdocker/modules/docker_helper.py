@@ -237,7 +237,7 @@ class DockerController(object):
 
         :param container_id: container id
         :param container_path: container path
-        :param host_path: host pat
+        :param host_path: host path
         :param uid: user uid
         :param gid: user gid
         :return: stat retrieved from the docker api
