@@ -408,7 +408,8 @@ class CommandController(object):
     def docker_info(self, token):
         """Docker information.
 
-        This method get the token from the HOME file and make requests Docker information.
+        This method get the token from the HOME file and make
+        requests Docker information.
 
         :param token: token (optional)
         :return:
