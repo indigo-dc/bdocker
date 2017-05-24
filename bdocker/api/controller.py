@@ -20,6 +20,7 @@ from bdocker import modules
 
 
 class AccountingServerController(object):
+    """Accounting Server Controller class."""
     def __init__(self, conf):
         self.credentials_module = modules.load_credentials_module(conf)
         self.batch_module = modules.load_batch_module(conf)
@@ -40,6 +41,7 @@ class AccountingServerController(object):
 
 
 class ServerController(object):
+    """Working node server Controller class."""
     def __init__(self, conf):
         self.credentials_module = modules.load_credentials_module(conf)
         self.batch_module = modules.load_batch_module(conf)
@@ -333,6 +335,19 @@ class ServerController(object):
         results = self.docker_module.info()
         return results
 
-    ########################
-    # UN IMPLEMENTED ####
-    ######################
+    def start_container(self, data):
+        """Start container.
+
+        :param data: dict parameter with attributes
+        :return: output
+        """
+        required = {'token', 'container_id'}
+        api.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        self.credentials_module.authorize_container(
+            token,
+            container_id)
+        results = self.docker_module.start_container(
+            container_id)
+        return results

@@ -29,11 +29,16 @@ import yaml
 
 from bdocker import exceptions
 
-
+# Role name for working node.
 WORKING_NODE = 'working'
 
 
 def read_yaml_file(path):
+    """Read yaml file.
+
+    :param path: file path
+    :return: dict data
+    """
     f = open(path, 'r')
     data = f.read()
     f.close()
@@ -41,6 +46,11 @@ def read_yaml_file(path):
 
 
 def write_yaml_file(path, data):
+    """Write yaml file.
+
+    :param path: file path
+    :param data: dict data
+    """
     with open(path, 'w') as my_file:
         data_yaml = yaml.safe_dump(data, None,
                                    encoding='utf-8',
@@ -51,6 +61,11 @@ def write_yaml_file(path, data):
 
 
 def update_yaml_file(path, data):
+    """Update yaml file.
+
+    :param path: file path
+    :param data: dict data
+    """
     with open(path, 'r+') as my_file:
         current_data = my_file.read()
         plain_data = yaml.load(current_data)
@@ -66,13 +81,25 @@ def update_yaml_file(path, data):
 
 
 def delete_file(path):
+    """Delete file.
+
+    :param path: path file
+    """
     os.remove(path)
 
 
+# Default configuration file
 default_conf_file = "/etc/configure_bdocker.cfg"
 
 
 def validate_config(conf):
+    """Validate config file.
+
+    It checks if the required fields are included in the
+    configuration file.
+
+    :param conf: configuration dict
+    """
     section_keys = {'resource', 'server', 'batch',
                     'credentials'}
     working_keys = {"dockerAPI"}
@@ -136,6 +163,11 @@ def validate_config(conf):
 
 
 def load_configuration_from_file(path=None):
+    """Load configuration file.
+
+    :param path: file path
+    :return: configuration dict
+    """
 
     config = cfg.SafeConfigParser()
     if not path:
@@ -175,6 +207,14 @@ def load_configuration_from_file(path=None):
 
 
 def load_sge_job_configuration(path):
+    """Load job configuration file.
+
+    It read the job configuration file and
+    retrieves it as dict.
+
+    :param path: file path
+    :return: dict data
+    """
     config = cfg.SafeConfigParser()
     f = None
     try:
@@ -198,6 +238,15 @@ def load_sge_job_configuration(path):
 
 
 def check_user_credentials(user_info):
+    """Check user credentials.
+
+    It controls that the user information is right.
+    It check the uid, gid, and the home. It is important
+    to controls the HOME for security.
+
+    :param user_info: user information
+    :return: booblean
+    """
     info = pwd.getpwuid(user_info['uid'])
     if user_info['gid'] == info.pw_gid:
         home_dir = os.path.realpath(info.pw_dir)
@@ -209,21 +258,39 @@ def check_user_credentials(user_info):
 
 
 def validate_directory(dir_request, dir_user):
+    """Validate that a directory is inside other directory.
+
+    It checks if the real path of a directory is inside
+    other directory. Useful for security.
+
+    :param dir_request: request directory
+    :param dir_user: user directory
+    """
     real_path = os.path.realpath(dir_request)
     user_real_path = os.path.realpath(dir_user)
     prefix = os.path.commonprefix([real_path, user_real_path])
     if prefix != dir_user:
         raise exceptions.UserCredentialsException(
-            "User does not have permissons for %s"
+            "User does not have permissions for %s"
             % real_path
         )
 
 
 def read_user_credentials(file_path):
+    """Read user credentials file.
+
+    :param file_path: file path
+    :return:
+    """
     return read_file(file_path)
 
 
 def read_file(file_path):
+    """Read file
+
+    :param file_path: file path
+    :return:
+    """
     stream_read = open(file_path, 'r')
     token = stream_read.read().rstrip('\n')
     stream_read.close()
@@ -231,6 +298,12 @@ def read_file(file_path):
 
 
 def find_line(file_path, search_str):
+    """Find string line in file.
+
+    :param file_path: file path
+    :param search_str: string path
+    :return:
+    """
     found = None
     stream_read = open(file_path, 'r')
     line = stream_read.readline()
@@ -248,6 +321,12 @@ def find_line(file_path, search_str):
 
 
 def add_to_file(file_path, data):
+    """Add text to the end of a file.
+
+    :param file_path: file path
+    :param data: string
+    :return:
+    """
     with open(file_path, 'a') as file_obj:
         file_obj.write(data)
     file_obj.close()
@@ -255,13 +334,33 @@ def add_to_file(file_path, data):
 
 
 def write_tar_raw_data_stream(path, stream, uid, gid):
-    strema_io = io.StringIO(stream)
-    my_tar = tarfile.TarFile(fileobj=strema_io)
+    """Extract data from tar raw in stream data.
+
+    It extract the data from a stream to a file, and
+    change owner to the uid with gid.
+
+    :param path: file path
+    :param stream: data in stream.
+    :param uid: user uid
+    :param gid: group uid
+    """
+    try:
+        stream_io = io.BytesIO(stream)
+    except TypeError:
+        stream_io = io.StringIO(stream)
+    my_tar = tarfile.TarFile(fileobj=stream_io)
     my_tar.extractall(path=path)
     change_owner_dir(path, uid, gid)
 
 
 def read_tar_raw_data_stream(path):
+    """Read tar file and set in stream format.
+
+    It read the tar file and set in the stream data.
+
+    :param path: file path
+    :return: stream data
+    """
     file_name = "/tmp/%s.tar" % uuid.uuid4().hex
     tar_stream = tarfile.TarFile(file_name, mode="w")
     arcname = os.path.basename(path)
@@ -272,6 +371,13 @@ def read_tar_raw_data_stream(path):
 
 
 def change_owner_dir(path, uid, gid):
+    """Change directory owner.
+
+    :param path: file path
+    :param uid: user uid
+    :param gid: user group
+    :return:
+    """
     for root, dirs, files in os.walk(path):
         for momo in dirs:
             os.chown(os.path.join(root, momo), uid, gid)
@@ -280,6 +386,10 @@ def change_owner_dir(path, uid, gid):
 
 
 def get_environment(key):
+    """Get linux environment variable.
+
+    :param key: user variable.
+    """
     value = os.getenv(key)
     if value:
         return value
@@ -290,6 +400,15 @@ def get_environment(key):
 
 
 def get_boolean(data, key, default):
+    """Get boolean value from different formats.
+
+    This return true in case of: TRUE, YES, true or TRUE.
+
+    :param data: dict
+    :param key: key from with get the value
+    :param default: default value in case of NONE.
+    :return: boolean
+    """
     s = data.get(key, None)
     if s is None:
         return default

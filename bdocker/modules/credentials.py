@@ -13,7 +13,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-# import sys
 
 import uuid
 
@@ -93,6 +92,11 @@ class TokenController(object):
         self.save_token_file()
 
     def get_token(self, token):
+        """Return the token information from a token
+
+        :param token:
+        :return:
+        """
         return self._get_token_from_cache(token)
 
     def authenticate(self, admin_token, session_data):
@@ -113,7 +117,7 @@ class TokenController(object):
         return token
 
     def authorize_admin(self, admin_token):
-        """Clean token from token store
+        """Authorize the admin token.
 
         :param admin_token: token looked for
         """
@@ -124,12 +128,19 @@ class TokenController(object):
         return True
 
     def get_token_from_file(self, path, file_name, jobid):
+        """Get a token from an specific token file
+
+        :param path:
+        :param file_name:
+        :param jobid:
+        :return: token
+        """
         path = "%s/%s_%s" % (path, file_name, jobid)
         token = utils.read_user_credentials(path)
         return self._get_token_from_cache(token)
 
     def remove_token_from_cache(self, token):
-        """remove token from token store
+        """Remove token from token store
 
         :param token: token looked for
         """
@@ -246,7 +257,10 @@ class TokenController(object):
         return True
 
     def authorize_directory(self, token, dir_path):
-        """Check user authorization to the container.
+        """Check user authorization to a directory.
+
+        It check that the path is inside the user
+        HOME directory.
 
         :param token: user token
         :param dir_path: directory for validation
