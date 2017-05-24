@@ -148,6 +148,7 @@ class CgroupException(BDockerException):
         self.message = ("Cgroup Exception: %s"
                         % self.message)
 
+
 class RepositoryException(BDockerException):
     def __init__(self, e=None, message=None, code=None):
 
@@ -156,6 +157,7 @@ class RepositoryException(BDockerException):
         )
         self.message = ("Repository Exception: %s"
                         % self.message)
+
 
 def get_exception_details(ex=None, custom_message=None,
                           custom_code=None):

@@ -278,18 +278,16 @@ job_env = ["algo", "/", "algo", "algo"]
 
 repository_content = {
     "centos": {
-            "latest": {
-                "file": "centos.tar"
-            }
+        "latest": {
+            "file": "centos.tar"
+        }
     },
     "ubuntu": {
-
-            "latest": {
-                "file": "ubuntu.tar"
-            },
-            "indigo": {
-                "file": "indigo.tar"
-            }
-
+        "latest": {
+            "file": "ubuntu.tar"
+        },
+        "indigo": {
+            "file": "indigo.tar"
+        }
     }
 }

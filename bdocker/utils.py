@@ -306,7 +306,7 @@ def parse_image_name(full_name):
     sp = full_name.split(":")
     if sp:
         if sp.__len__() == 2:
-           tag = sp[1]
+            tag = sp[1]
         name = sp[0]
         return {"name": name,
                 "tag": tag}
