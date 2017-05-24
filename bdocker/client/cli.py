@@ -69,7 +69,7 @@ def print_table(headers, rows):
 @decorators.endpoint_argument
 @click.pass_context
 def bdocker(ctx, host):
-    """Manages docker execution on batch systems.
+    """Manages Docker containers' execution on batch systems.
 
     :param ctx: context
     :param host: endpoint optional to the one in
@@ -80,7 +80,7 @@ def bdocker(ctx, host):
 
 
 @bdocker.command('configure',
-                 help="Configution of the environment."
+                 help="Configuration of the environment. "
                       "It request for user token and"
                       "prepare the batch environment."
                       " ROOT privileges needed")
@@ -109,7 +109,7 @@ def configure_environment(ctx, user):
 
 
 @bdocker.command('clean',
-                 help="Clean work environment including"
+                 help="Clean work environment including "
                       "the batch system. Force remove all the"
                       " ROOT privileges needed")
 @decorators.token_option
@@ -135,7 +135,7 @@ def clean_environment(ctx, token):
 
 
 @bdocker.command('pull',
-                 help="Pull a image.")
+                 help="Pull an image.")
 @decorators.token_option
 @decorators.source_argument
 @click.pass_context
@@ -328,12 +328,25 @@ def stop(ctx, token, container_id):
 
 
 @bdocker.command('info',
-                 help="Docker info")
+                 help="Docker daemon info")
 @decorators.token_option
 @click.pass_context
 def info(ctx, token):
     try:
         out = ctx.obj.docker_info(token)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
+
+
+@bdocker.command('start',
+                 help="Starts container")
+@decorators.token_option
+@decorators.container_id_argument
+@click.pass_context
+def start(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_start(token, container_id)
         print_message(out)
     except BaseException as e:
         print_error(e.message)

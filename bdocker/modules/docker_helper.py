@@ -180,6 +180,7 @@ class DockerController(object):
             self.control.start(container=container_id)
         except BaseException as e:
             raise exceptions.DockerException(e)
+        return container_id
 
     def run_container(self, image_id, detach, command,
                       working_dir=None, host_dir=None, docker_dir=None,
@@ -237,7 +238,7 @@ class DockerController(object):
 
         :param container_id: container id
         :param container_path: container path
-        :param host_path: host pat
+        :param host_path: host path
         :param uid: user uid
         :param gid: user gid
         :return: stat retrieved from the docker api
@@ -273,10 +274,10 @@ class DockerController(object):
     def stop_container(self, container_id):
         try:
             # timeout - Seconds to wait for stop before killing it. Default: 10
-            stat = self.control.stop(container=container_id, timeout=10)
+            self.control.stop(container=container_id, timeout=10)
         except BaseException as e:
             raise exceptions.DockerException(e)
-        return stat
+        return container_id
 
     def info(self):
         try:

@@ -386,6 +386,15 @@ class CommandController(object):
         return results
 
     def container_stop(self, token, container_id):
+        """Stop container.
+
+        This method get the token from the HOME file and make the
+        container stop request.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
         path = "/stop"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -397,6 +406,14 @@ class CommandController(object):
         return results
 
     def docker_info(self, token):
+        """Docker information.
+
+        This method get the token from the HOME file and make
+        requests Docker information.
+
+        :param token: token (optional)
+        :return:
+        """
         path = "/info"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -404,4 +421,24 @@ class CommandController(object):
         token = token_parse(token, token_file)
         parameters = {"token": token}
         results = self.control.execute_get(path=path, parameters=parameters)
+        return results
+
+    def container_start(self, token, container_id):
+        """Starts container.
+
+        This method get the token from the HOME file and make the
+        container start request.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
+        path = "/start"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token,
+                      "container_id": container_id}
+        results = self.control.execute_put(path=path, parameters=parameters)
         return results

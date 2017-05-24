@@ -335,6 +335,19 @@ class ServerController(object):
         results = self.docker_module.info()
         return results
 
-    ########################
-    # UN IMPLEMENTED ####
-    ######################
+    def start_container(self, data):
+        """Start container.
+
+        :param data: dict parameter with attributes
+        :return: output
+        """
+        required = {'token', 'container_id'}
+        api.validate(data, required)
+        token = data['token']
+        container_id = data['container_id']
+        self.credentials_module.authorize_container(
+            token,
+            container_id)
+        results = self.docker_module.start_container(
+            container_id)
+        return results

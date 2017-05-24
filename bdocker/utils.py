@@ -271,7 +271,7 @@ def validate_directory(dir_request, dir_user):
     prefix = os.path.commonprefix([real_path, user_real_path])
     if prefix != dir_user:
         raise exceptions.UserCredentialsException(
-            "User does not have permissons for %s"
+            "User does not have permissions for %s"
             % real_path
         )
 
@@ -344,8 +344,11 @@ def write_tar_raw_data_stream(path, stream, uid, gid):
     :param uid: user uid
     :param gid: group uid
     """
-    strema_io = io.StringIO(stream)
-    my_tar = tarfile.TarFile(fileobj=strema_io)
+    try:
+        stream_io = io.BytesIO(stream)
+    except TypeError:
+        stream_io = io.StringIO(stream)
+    my_tar = tarfile.TarFile(fileobj=stream_io)
     my_tar.extractall(path=path)
     change_owner_dir(path, uid, gid)
 
