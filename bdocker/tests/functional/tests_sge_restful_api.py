@@ -279,9 +279,6 @@ class TestSgeRestApiWn(testtools.TestCase):
         containers = self.token_store[token]["containers"]
         parameters = {"token": token,
                       "container_id": containers[0]}
-        md.return_value = fake_out = {
-            "containerId": containers[0]
-        }
         body = request.make_body(parameters)
         with mock.patch("bdocker.utils.read_yaml_file",
                         return_value=fakes.token_store
@@ -295,9 +292,6 @@ class TestSgeRestApiWn(testtools.TestCase):
                                              method="PUT"
                                              ).get_response(self.app)
         self.assertEqual(201, result.status_code)
-        self.assertIsNotNone(json.loads(result.json_body["results"])[0])
-        out = json.loads(result.json_body["results"])[0]
-        self.assertEqual(fake_out["containerId"], out["containerId"])
 
     @mock.patch.object(docker_py.Client, "containers")
     def test_ps(self, ml):
