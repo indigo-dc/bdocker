@@ -33,5 +33,5 @@ class TestFileController(testtools.TestCase):
         mock_read.return_value = fakes.repository_content
         result = self.controller.get_image("ubuntu:indigo")
         file_expected = fakes.repository_content["ubuntu"]["indigo"]["file"]
-        expected = "%s/%s"% (self.conf["location"], file_expected)
+        expected = "%s/%s" % (self.conf["location"], file_expected)
         self.assertEqual(expected, result)
