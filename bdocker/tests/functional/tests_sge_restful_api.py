@@ -293,6 +293,26 @@ class TestSgeRestApiWn(testtools.TestCase):
                                              ).get_response(self.app)
         self.assertEqual(201, result.status_code)
 
+    @mock.patch.object(docker_py.Client, "start")
+    def test_start(self, md):
+        token = fakes.user_token
+        containers = self.token_store[token]["containers"]
+        parameters = {"token": token,
+                      "container_id": containers[0]}
+        body = request.make_body(parameters)
+        with mock.patch("bdocker.utils.read_yaml_file",
+                        return_value=fakes.token_store
+                        ):
+            with mock.patch("os.getenv",
+                            return_value=self.file_name
+                            ):
+                result = webob.Request.blank("/start",
+                                             content_type="application/json",
+                                             body=body,
+                                             method="PUT"
+                                             ).get_response(self.app)
+        self.assertEqual(201, result.status_code)
+
     @mock.patch.object(docker_py.Client, "containers")
     def test_ps(self, ml):
         token = fakes.user_token
