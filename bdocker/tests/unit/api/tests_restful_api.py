@@ -374,7 +374,7 @@ class TestWorkingNodeRESTAPI(flask_tests.TestCase):
                                      content_type="application/json",
                                      data=body
                                      )
-        self.assertEqual(200, result.status_code)
+        self.assertEqual(201, result.status_code)
 
     @mock.patch.object(controller.ServerController, "stop_container")
     def test_stop_405(self, m):

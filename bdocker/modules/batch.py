@@ -27,8 +27,11 @@ from bdocker.modules import request
 from bdocker import parsers
 from bdocker import utils
 
+# Default accounting file in the accounting server
 BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
+# Default temporal accounting file
 LOCAL_ACCOUNTING_FILE = ".bdocker_accounting"
+# CGROUP FOR THE JOB PID.
 JOB_PROCESS_CGROUP = 'COMMON'
 
 
@@ -123,11 +126,12 @@ class SGEAccountingController(AccountingController):
         """Get information from the SGE accounting file.
 
         It is DEPRECATED. We keep it in case we need in the future.
+        It get the information from the original SGE accounting file.
 
-        :param queue_name:
-        :param host_name:
-        :param job_id:
-        :return:
+        :param queue_name: queue name
+        :param host_name: host name
+        :param job_id: job id
+        :return: array with
         """
         try:
             sge_accounting = "/opt/sge/default/common/accounting"
@@ -175,11 +179,10 @@ class WNController(object):
         self.conf = conf
 
     def conf_environment(self, session_data):
-        """Configures the Working node environment by using CGROUPS.
+        """Configures the Working node environment.
 
-        If cgroups control is enabled by using "enable_groups" option,
-        it creates a cgroup and move the parent pid of the job to it.
-        Only administration users can execute this method.
+        It is different for each batch scheduler, so, this class
+        does not implement it.
 
         :param session_data: job and user information
         :return: relevant information about the configuration.
@@ -190,8 +193,8 @@ class WNController(object):
     def clean_environment(self, session_data, admin_token=None):
         """Clean the batch environment for the job.
 
-        It deletes the cgroups created for the job.
-        Only administration users can execute this method.
+        It is different for each batch scheduler, so, this class
+        does not implement it.
 
         :param session_data: job and user information
         :param admin_token: administration token.
@@ -571,7 +574,7 @@ class SGEWNController(CgroupsWNController):
         It gets the information related to relevant properties of the
         user and the job, including the job quotas.
 
-        :param spool:
+        :param spool: location of the job configuration file
         :return:
         """
         path = "%s/config" % spool
