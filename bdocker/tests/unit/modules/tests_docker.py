@@ -13,13 +13,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import json
-import uuid
-from distutils.command.config import config
 
 import docker
+import json
 import mock
 import testtools
+import uuid
 
 from bdocker import exceptions
 from bdocker.modules import docker_helper
