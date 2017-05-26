@@ -15,6 +15,7 @@
 # under the License.
 import json
 import uuid
+from distutils.command.config import config
 
 import docker
 import mock
@@ -212,7 +213,7 @@ class TestDocker(testtools.TestCase):
         m.return_value = None
         container_id = uuid.uuid4().hex
         out = self.control.start_container(container_id)
-        self.assertIsNone(out)
+        self.assertEqual(out, container_id)
 
     @mock.patch.object(docker.Client, 'start')
     def test_start_err(self, m):
@@ -224,6 +225,13 @@ class TestDocker(testtools.TestCase):
         self.assertRaises(exceptions.DockerException,
                           self.control.start_container,
                           container_id)
+
+    @mock.patch.object(docker.Client, 'stop')
+    def test_stop(self, m):
+        m.return_value = None
+        container_id = uuid.uuid4().hex
+        out = self.control.stop_container(container_id)
+        self.assertEqual(out, container_id)
 
     @mock.patch.object(docker.Client, 'get_archive')
     @mock.patch("io.FileIO")
