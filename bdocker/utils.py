@@ -418,3 +418,17 @@ def get_boolean(data, key, default):
             return True
         else:
             return False
+
+
+def parse_image_name(full_name):
+    tag = "latest"
+    sp = full_name.split(":")
+    if sp:
+        if sp.__len__() == 2:
+            tag = sp[1]
+        name = sp[0]
+        return {"name": name,
+                "tag": tag}
+    else:
+        raise exceptions.ParseException(
+            "wrong image name")
