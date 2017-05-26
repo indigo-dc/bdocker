@@ -200,17 +200,11 @@ class DockerController(object):
         """
         try:
             binds = None
-            # FIXME(A1ve5): trying this; I'll sort it out later
-            # FIXME(A1ve5): Error:
-            #               "Got unexpected extra arguments (create_network
-            #               is not available for version < 1.21)"
-            # self.control.create_network("network1", driver="bridge")
             if host_dir:
                 binds = ['%s:%s' % (host_dir, docker_dir)]
             host_config = self.control.create_host_config(
                 binds=binds,
                 cgroup_parent=cgroup,
-                network_mode='bridge'
                 )
             container_info = self.control.create_container(
                 image=image_id,
