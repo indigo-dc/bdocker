@@ -56,7 +56,7 @@ def exception_from_response(response):
         title = response.json_body['results']
     except Exception:
         code = 500
-        title = "Unknown error happenened processing response"
+        title = "Unknown error happened processing response"
     return manage_http_exception(code, title)
 
 

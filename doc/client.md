@@ -5,7 +5,7 @@ This document describes the commands available in Bdocker.
 ## Administration
 
 There are several commands that have administration role. They need to be
-execute before and after the utilization of bdocker by the root user.
+executed before and after the utilization of bdocker by the root user.
 
 ### Configure
 
@@ -20,15 +20,14 @@ Clean the user credentials and the batch environment:
     bdocker [--token=XX] clean
     
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 
 ## User commands
 
-These commands are working over a specific user work area. The commands
-need to be authorized by server through the user token. Such token
-contains the user information and the containers that the user has.
-By default the commands use the token stored in
-$HOME/bdocker_token_$JOB_ID.
+These commands are working over a specific user work area. They
+need to be authorized by the server through the user token. Such token
+contains the user information and the containers that the user owns in the system.
+By default the commands use the token stored in $HOME/bdocker_token_$JOB_ID.
 
 ### Pull
 
@@ -40,16 +39,16 @@ Parameters:
 * image repository
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
  
 ### List
 
-List all containers of the user (like ``docker ps``)::
+List user containers (like ``docker ps``)::
 
     bdocker ps [--token=XX] [--all]
     
 Optional parameters:
-* --token=XX or -t: Execute the action over other user token.
+* --token=XX or -t: Execute the action over another user token.
 * --all or -a: Show also the non-running containers.
 
 ### Logs
@@ -62,7 +61,7 @@ Parameters:
 * Container id
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 
 ### Inspect
 
@@ -74,11 +73,11 @@ Parameters:
 * Container id
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 
 ### Delete
 
-Delete one or several containers from a user (like ``docker rm``)::
+Delete one or several containers that the user owns (like ``docker rm``)::
 
     bdocker rm [--token=XX] <container_id_1 container_id_2 ...>
     
@@ -86,7 +85,7 @@ Parameters:
 * Container id
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 
 ### Copy
 
@@ -101,7 +100,7 @@ Parameters:
 * Host path (/path). It is limited to the HOME directory.
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 
 ### Run
 
@@ -115,7 +114,7 @@ Parameters:
 * Command
 
 Optional parameters:
-* --token=XX or -t XX: Execute the action over other user token.
+* --token=XX or -t XX: Execute the action over another user token.
 * --detach or -d: Run container in background and print container ID.
 * --workdir=XX or -w XX: Working directory inside the container.
 * --volume=XX or -v XX: Bind mount a volume (/container_path/:/host_path)
@@ -124,7 +123,7 @@ Optional parameters:
     
 ## Examples
 
-In the following we include several examples:
+In the following, we include several examples:
 
 ### Run
 
@@ -133,7 +132,6 @@ Run over a binding directory from the host:
     bdocker run -d 2fa927b5cdd3 -v /home/jorge/FAKE_JOB/:/tmp -w /tmp './script.sh'
 
 ### Copy
-
 
 Copy from host to container:
 

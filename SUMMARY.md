@@ -1,4 +1,4 @@
-# BDOCKER (Batch system docker management)
+# bdocker (Batch system Docker containers' execution and management)
 
 This software manages the execution of docker containers in  batch systems.
 

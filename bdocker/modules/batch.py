@@ -27,8 +27,11 @@ from bdocker.modules import request
 from bdocker import parsers
 from bdocker import utils
 
+# Default accounting file in the accounting server
 BDOCKER_ACCOUNTING = "/etc/bdocker_accounting"
+# Default temporal accounting file
 LOCAL_ACCOUNTING_FILE = ".bdocker_accounting"
+# CGROUP FOR THE JOB PID.
 JOB_PROCESS_CGROUP = 'COMMON'
 
 
@@ -123,11 +126,12 @@ class SGEAccountingController(AccountingController):
         """Get information from the SGE accounting file.
 
         It is DEPRECATED. We keep it in case we need in the future.
+        It get the information from the original SGE accounting file.
 
-        :param queue_name:
-        :param host_name:
-        :param job_id:
-        :return:
+        :param queue_name: queue name
+        :param host_name: host name
+        :param job_id: job id
+        :return: array with
         """
         try:
             sge_accounting = "/opt/sge/default/common/accounting"
@@ -166,7 +170,7 @@ class WNController(object):
     def __init__(self, conf):
         """Initialize controller.
 
-        Set attributes and instanciate the Batch Notification
+        Set attributes and instantiate the Batch Notification
          Controller.
 
         :param conf: dictionary with configuration properties.
@@ -175,11 +179,10 @@ class WNController(object):
         self.conf = conf
 
     def conf_environment(self, session_data):
-        """Configures the Working node environment by using CGROUPS.
+        """Configures the Working node environment.
 
-        If cgroups control is enabled by using "enable_groups" option,
-        it creates a cgroup and move the parent pid of the job to it.
-        Only administration users can execute this method.
+        It is different for each batch scheduler, so, this class
+        does not implement it.
 
         :param session_data: job and user information
         :return: relevant information about the configuration.
@@ -190,8 +193,8 @@ class WNController(object):
     def clean_environment(self, session_data, admin_token=None):
         """Clean the batch environment for the job.
 
-        It deletes the cgroups created for the job.
-        Only administration users can execute this method.
+        It is different for each batch scheduler, so, this class
+        does not implement it.
 
         :param session_data: job and user information
         :param admin_token: administration token.
@@ -270,7 +273,7 @@ class CgroupsWNController(WNController):
     def _get_cgroup_job(self, job_id):
         """Generates the job cgroup location.
 
-        :param job_id: Job identificator
+        :param job_id: Job identifier
         :return:
         """
         if self.parent_group == "/":
@@ -280,15 +283,15 @@ class CgroupsWNController(WNController):
         return cgroup_job
 
     def _create_cgroups(self, job_id, parent_pid):
-        """Create CGROUPs realted to the job.
+        """Create CGROUPs related to the job.
 
         It creates a cgroup in the parent cgroup (specified in
         configuration) naming it by using the job_idn. In addition,
         it creates another cgroup inside of previous one with name COMMON.
         The process pid of the job parent is included in COMMON.
 
-        :param job_id: Job identificator
-        :param parent_pid: process indentificator ot the
+        :param job_id: Job identifier
+        :param parent_pid: process identifier of the
         job parent process.
         :return:
         """
@@ -305,7 +308,7 @@ class CgroupsWNController(WNController):
             pid=parent_pid)
 
     def _delete_cgroups(self, job_id):
-        """Delete CGROUPs realted to the job.
+        """Delete CGROUPs related to the job.
 
         :param job_id:
         :return:
@@ -326,7 +329,7 @@ class CgroupsWNController(WNController):
 
         It retrieve the accounting information relative of job.
 
-        :param job_id: job identificator
+        :param job_id: job identifier
         :param file_path: location of the local accounting path
         :return: dictionary within accounting information
         """
@@ -355,7 +358,7 @@ class CgroupsWNController(WNController):
             return track_acc
         else:
             raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
+                message="Accounting not available without enabling "
                         "cgroups")
 
     def launch_job_monitoring(self, job_id, job_info, file_path, job_pid,
@@ -365,7 +368,7 @@ class CgroupsWNController(WNController):
         """It monitors job resources consumption
 
          It tracks the accounting and store it in a local accounting file.
-         Furthermore, it controls that the job does not exeed the cpu and
+         Furthermore, it controls that the job does not exceed the cpu and
         memory quota. In case the job pass any limit, it is deleted by
         killing the process associated to it.
 
@@ -509,7 +512,7 @@ class CgroupsWNController(WNController):
         else:
             exceptions.make_log(
                 "exception",
-                "Accounting not available without enabling"
+                "Accounting not available without enabling "
                 "cgroups")
             flag = False
         return flag
@@ -551,7 +554,7 @@ class CgroupsWNController(WNController):
                 raise exceptions.NotificationException(exc=e)
         else:
             raise exceptions.NoImplementedException(
-                message="Accounting not available without enabling"
+                message="Accounting not available without enabling "
                         "cgroups")
 
 
@@ -571,7 +574,7 @@ class SGEWNController(CgroupsWNController):
         It gets the information related to relevant properties of the
         user and the job, including the job quotas.
 
-        :param spool:
+        :param spool: location of the job configuration file
         :return:
         """
         path = "%s/config" % spool
@@ -759,7 +762,7 @@ class SGEWNController(CgroupsWNController):
             return full_string
         except KeyError as e:
             raise exceptions.ParseException(
-                "Job accountig file malformed: %s. " % e.message
+                "Job accounting file malformed: %s. " % e.message
             )
 
     def get_job_info(self):

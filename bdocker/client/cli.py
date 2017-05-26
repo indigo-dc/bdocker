@@ -69,7 +69,7 @@ def print_table(headers, rows):
 @decorators.endpoint_argument
 @click.pass_context
 def bdocker(ctx, host):
-    """Manages docker execution on batch systems.
+    """Manages Docker containers' execution on batch systems.
 
     :param ctx: context
     :param host: endpoint optional to the one in
@@ -80,7 +80,7 @@ def bdocker(ctx, host):
 
 
 @bdocker.command('configure',
-                 help="Configution of the environment."
+                 help="Configuration of the environment. "
                       "It request for user token and"
                       "prepare the batch environment."
                       " ROOT privileges needed")
@@ -109,7 +109,7 @@ def configure_environment(ctx, user):
 
 
 @bdocker.command('clean',
-                 help="Clean work environment including"
+                 help="Clean work environment including "
                       "the batch system. Force remove all the"
                       " ROOT privileges needed")
 @decorators.token_option
@@ -135,11 +135,18 @@ def clean_environment(ctx, token):
 
 
 @bdocker.command('pull',
-                 help="Pull a image.")
+                 help="Pull an image.")
 @decorators.token_option
 @decorators.source_argument
 @click.pass_context
 def container_pull(ctx, token, source):
+    """Pull image from repository
+
+    :param ctx: context
+    :param token: token, optional
+    :param source: repository
+    :return:
+    """
     try:
         out = ctx.obj.container_pull(token, source)
         print_message(out)
@@ -159,7 +166,18 @@ def container_pull(ctx, token, source):
 @click.pass_context
 def container_run(ctx, token, image_id,
                   script, detach, workdir, volume):
-    # TODO(jorgesece): parameter detach doesn't allow assing
+    """Run container
+
+    :param ctx: context
+    :param token: token, optional
+    :param image_id: image id
+    :param script: script to execute
+    :param detach: detach the container, unsynchorinized
+    :param workdir: work dir
+    :param volume: volume to bind
+    :return:
+    """
+    # NOTE(jorgesece): parameter detach doesn't allow assing
     # a value. It is just a flag (true/false)
     try:
         out = ctx.obj.container_run(
@@ -177,6 +195,13 @@ def container_run(ctx, token, image_id,
 @decorators.all_option
 @click.pass_context
 def container_list(ctx, token, all):
+    """List all the containers running
+
+    :param ctx: context
+    :param token:token, optional
+    :param all: boolean, all containers
+    :return:
+    """
     try:
         out = ctx.obj.container_list(token, all)
         headers = ['CONTAINER ID', 'IMAGE', 'COMMAND',
@@ -192,6 +217,13 @@ def container_list(ctx, token, all):
 @decorators.container_id_argument
 @click.pass_context
 def container_logs(ctx, token, container_id):
+    """Show the log of a container
+
+    :param ctx: context
+    :param token: token, optional
+    :param container_id: container id
+    :return:
+    """
     try:
         out = ctx.obj.container_logs(token, container_id)
         print_message(out)
@@ -208,6 +240,13 @@ def container_logs(ctx, token, container_id):
 @decorators.container_id_argument
 @click.pass_context
 def container_inspect(ctx, token, container_id):
+    """Return the low level information
+
+    :param ctx: context
+    :param token: token, optional
+    :param container_id: container id
+    :return:
+    """
     try:
         out = ctx.obj.container_inspect(token, container_id)
         print_message(out)
@@ -223,40 +262,20 @@ def container_inspect(ctx, token, container_id):
 @decorators.force_option
 @click.pass_context
 def container_delete(ctx, token, container_ids, force):
+    """Delete a container or list of them.
+
+    :param ctx: context
+    :param token: token, optional
+    :param container_ids: container ids
+    :param force: force delete containers
+    :return:
+    """
     try:
         out = ctx.obj.container_delete(token, container_ids, force)
         print_message(out)
     except exceptions.DockerException as e:
         m = e.message
         print_error(m)
-
-
-@bdocker.command('notify_accounting',
-                 help="[BETA] Send accounting to the server."
-                      "ROOT privileges needed")
-@decorators.token_option
-@click.pass_context
-def notify_accounting(ctx, token, force):
-    # Command executed by the root in epilog
-    try:
-        out = ctx.obj.notify_accounting(token)
-        print_message(out)
-    except BaseException as e:
-        print_error(e.message)
-
-
-@bdocker.command('accounting',
-                 help="[BETA] Retrieve the job accounting."
-                      "ROOT privileges needed")
-@decorators.token_option
-@decorators.container_id_argument
-@click.pass_context
-def accounting(ctx, token, container_id):
-    try:
-        out = ctx.obj.accounting_retrieve(token, container_id)
-        print_message(out)
-    except BaseException as e:
-        print_error(e.message)
 
 
 @bdocker.command('cp',
@@ -270,6 +289,16 @@ def accounting(ctx, token, container_id):
 @decorators.path_argument
 @click.pass_context
 def copy(ctx, token, path):
+    """Copy files/folders
+
+    Copy files/folders between a container and
+    the local filesystem.
+
+    :param ctx: context
+    :param token: token, optional
+    :param path: path with the appropiate format
+    :return:
+    """
     try:
         container_id = path["container_id"]
         container_path = path["container_path"]
@@ -280,6 +309,44 @@ def copy(ctx, token, path):
                                              container_path,
                                              host_path,
                                              host_to_container)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
+
+
+@bdocker.command('stop',
+                 help="Stop container")
+@decorators.token_option
+@decorators.container_id_argument
+@click.pass_context
+def stop(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_stop(token, container_id)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
+
+
+@bdocker.command('info',
+                 help="Docker daemon info")
+@decorators.token_option
+@click.pass_context
+def info(ctx, token):
+    try:
+        out = ctx.obj.docker_info(token)
+        print_message(out)
+    except BaseException as e:
+        print_error(e.message)
+
+
+@bdocker.command('start',
+                 help="Starts container")
+@decorators.token_option
+@decorators.container_id_argument
+@click.pass_context
+def start(ctx, token, container_id):
+    try:
+        out = ctx.obj.container_start(token, container_id)
         print_message(out)
     except BaseException as e:
         print_error(e.message)

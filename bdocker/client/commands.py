@@ -80,6 +80,7 @@ def write_user_credentials(token, file_path,
 
 
 class CommandController(object):
+    """Command line controller class."""
 
     def __init__(self, endpoint=None):
         self.conf = utils.load_configuration_from_file()
@@ -103,10 +104,20 @@ class CommandController(object):
             )
 
     def _get_job_info(self):
+        """Return the job information
+
+        :return: dictionary with job information
+        """
         job_info = self.batch_module.get_job_info()
         return job_info
 
     def _get_token_file(self, user_name, job_id):
+        """Return the token file path.
+
+        :param user_name: user name
+        :param job_id: job id
+        :return:
+        """
         token_file = "%s/%s_%s" % (
             user_name,
             self.defaul_token_name,
@@ -115,6 +126,13 @@ class CommandController(object):
         return token_file
 
     def configuration(self, user_name=None):
+        """Configures the job session.
+
+        It validates the admin user and creates the job session.
+
+        :param user_name:
+        :return:
+        """
         path = "/configuration"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
@@ -140,6 +158,15 @@ class CommandController(object):
         return {"token": token, "path": token_file}
 
     def clean_environment(self, token):
+        """Clean credentials and batch environment.
+
+        It cleans a token credential for the user, and
+        the batch environment, in addition to delete all
+        dockers. Also, Command executed by the root in prolog
+
+        :param token:
+        :return:
+        """
         path = "/clean"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
@@ -159,6 +186,14 @@ class CommandController(object):
         return token
 
     def container_pull(self, token, source):
+        """Pull image.
+
+        This method get the token from the HOME file and make the pull request.
+
+        :param token: token (optional)
+        :param source: image repository
+        :return: dictionary with results
+        """
         path = "/pull"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -170,6 +205,18 @@ class CommandController(object):
 
     def container_run(self, token, image_id, detach, script,
                       working_dir=None, volume=None):
+        """Run container.
+
+        This method get the token from the HOME file and make the run request.
+
+        :param token: token (optional)
+        :param image_id: image id
+        :param detach: boolean to detach the container execution
+        :param script: script to execute
+        :param working_dir: working dir
+        :param volume: volume to bind
+        :return: dictionary with results
+        """
         path = "/run"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -189,6 +236,14 @@ class CommandController(object):
         return results
 
     def container_list(self, token, all_containers=False):
+        """List containers
+
+        This method get the token from the HOME file and make the ps request.
+
+        :param token: token (optional)
+        :param all_containers: all containers (optional)
+        :return:
+        """
         path = "/ps"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -200,6 +255,15 @@ class CommandController(object):
         return results
 
     def container_logs(self, token, container_id):
+        """Show container log
+
+        This method get the token from the HOME file and make the
+        logs request.
+
+        :param token: token optional
+        :param container_id: container id
+        :return:
+        """
         path = "/logs"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -210,6 +274,16 @@ class CommandController(object):
         return results
 
     def container_delete(self, token, container_ids, force=False):
+        """Delete container
+
+        This method get the token from the HOME file and make the
+        rm request.
+
+        :param token: token (optional)
+        :param container_ids: container list
+        :param force: boolean to force deletion (optional)
+        :return:
+        """
         path = "/rm"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -221,6 +295,14 @@ class CommandController(object):
         return out
 
     def notify_accounting(self, token):
+        """Notify accounting
+
+        This method get the token from the HOME file and make the
+        notify_accounting request. This function is not used [DEPRECATED]
+
+        :param token: token (optional)
+        :return:
+        """
         path = "/notify_accounting"
         credential_module = modules.load_credentials_module(self.conf)
         admin_token = credential_module.get_admin_token()
@@ -236,6 +318,15 @@ class CommandController(object):
         return token
 
     def accounting_retrieve(self, token, container_id):
+        """Retrieve accounting.
+
+        This method get the token from the HOME file and make the
+        accounting request.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
         path = "/accounting"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -246,6 +337,16 @@ class CommandController(object):
         return results
 
     def container_inspect(self, token, container_id):
+        """Container details.
+
+        This method get the token from the HOME file and make the
+        inspect request.
+        Show container details.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
         path = "/inspect"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -259,6 +360,18 @@ class CommandController(object):
                                container_path,
                                host_path,
                                host_to_container):
+        """Copy between container and host file system.
+
+        This method get the token from the HOME file and make the
+        copy request. Copy files from or to the container.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :param container_path: file path in container
+        :param host_path: file path in the host
+        :param host_to_container: boolean indicates the sense of copy
+        :return:
+        """
         path = "/copy"
         job_info = self._get_job_info()
         token_file = self._get_token_file(job_info["home"],
@@ -269,5 +382,63 @@ class CommandController(object):
                       "container_path": container_path,
                       "host_path": host_path,
                       "host_to_container": host_to_container}
+        results = self.control.execute_put(path=path, parameters=parameters)
+        return results
+
+    def container_stop(self, token, container_id):
+        """Stop container.
+
+        This method get the token from the HOME file and make the
+        container stop request.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
+        path = "/stop"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token,
+                      "container_id": container_id}
+        results = self.control.execute_put(path=path, parameters=parameters)
+        return results
+
+    def docker_info(self, token):
+        """Docker information.
+
+        This method get the token from the HOME file and make
+        requests Docker information.
+
+        :param token: token (optional)
+        :return:
+        """
+        path = "/info"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token}
+        results = self.control.execute_get(path=path, parameters=parameters)
+        return results
+
+    def container_start(self, token, container_id):
+        """Starts container.
+
+        This method get the token from the HOME file and make the
+        container start request.
+
+        :param token: token (optional)
+        :param container_id: container id
+        :return:
+        """
+        path = "/start"
+        job_info = self._get_job_info()
+        token_file = self._get_token_file(job_info["home"],
+                                          job_info['job_id'])
+        token = token_parse(token, token_file)
+        parameters = {"token": token,
+                      "container_id": container_id}
         results = self.control.execute_put(path=path, parameters=parameters)
         return results

@@ -1,12 +1,17 @@
 # Installation
 
-## Instalation from pip
+## Installation using pip
 
 At the moment the only way to install Bdocker is by using pip as local repository, we will provide a better
 solution soon.
     ```
     $pip install .
     ```
+## Installation and configuration through the use of an Ansible role
+
+An Ansible role has been developed that can, at the moment, install configure and deploy Bdocker into a SGE cluster.
+The role and further information about how to use it can be used can be found at [ansible-role-bdocker](https://github.com/indigo-dc/ansible-role-bdocker).
+
 # Deployment
 
 Bdocker RESTFUL APIs are based on [Flask](flask.pocoo.org), but it does not support multi-request, so it can attend
@@ -53,7 +58,7 @@ We provide the information about how to deploy the bdocker daemons as services i
 
 ###Centos 7
 
-In order to create the daemos as services in Centos 7, we follow the next steps:
+In order to create the daemons as services in Centos 7, we follow the next steps:
 
 1. Create systemd file:
   * For the working node daemon:
@@ -98,13 +103,11 @@ In order to create the daemos as services in Centos 7, we follow the next steps:
     ```
 4. Start the bdocker service:
     ```
-    [root@ge bdocker]# service bdocker start
-    Redirecting to /bin/systemctl start  bdocker.service
+    [root@ge bdocker]# systemctl start bdocker    
     ```    
 5. Check status of the bdocker service:
     ```
-    [root@ge bdocker]# service bdocker status
-    Redirecting to /bin/systemctl status  bdocker.service
+    [root@ge bdocker]# systemctl status bdocker    
     bdocker.service - Bdocker daemon for controlling container execution in WN.
     Loaded: loaded (/usr/lib/systemd/system/bdocker.service; enabled; vendor preset: disabled)
     Active: active (running) since...

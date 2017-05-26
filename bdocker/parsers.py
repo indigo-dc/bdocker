@@ -21,6 +21,11 @@ from bdocker import exceptions
 
 
 def parse_docker_log(gen_data):
+    """Parse log message from dockerpy.
+
+    :param gen_data: generator within data
+    :return:
+    """
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
@@ -28,6 +33,11 @@ def parse_docker_log(gen_data):
 
 
 def parse_docker_generator(gen_data):
+    """Parse pull message form dockerpy.
+
+    :param gen_data: generator within data
+    :return:
+    """
     out_data = []
     try:
         for row in gen_data:
@@ -48,7 +58,14 @@ def parse_docker_generator(gen_data):
                                         code=406)
 
 
-def parse_docker_generator1(gen_data, key='Status'):
+def parse_docker_generator1(gen_data, key='Status'):  # unused
+    """Parse pull message from dockerpy [DEPRECATED].
+
+    :param gen_data: generator within data.
+    :param key: attribute with results.
+    :return:
+    """
+
     dict_data = []
     for line in gen_data:
         dict_data.append(line.strip())
@@ -76,14 +93,20 @@ def parse_docker_generator1(gen_data, key='Status'):
 
 
 def get_date_diff(date_end, date_format=None):
+    """Calculate the difference with current data.
+
+    :param date_end: data string
+    :param date_format: data format
+    :return:
+    """
     if date_format:
         date_ini = datetime.datetime.strptime(date_end, date_format)
     else:
         date_ini = datetime.datetime.fromtimestamp(date_end)
     date_end = datetime.datetime.utcnow()
-    diferencia = date_end - date_ini
-    days = diferencia.days
-    seconds = diferencia.seconds
+    difference = date_end - date_ini
+    days = difference.days
+    seconds = difference.seconds
     weeks = divmod(days, 7)[0]
     minutes = divmod(seconds, 60)[0]
     hours = divmod(seconds, 3600)[0]
@@ -99,6 +122,13 @@ def get_date_diff(date_end, date_format=None):
 
 
 def parse_list_container_details(data):
+    """Parse the inspect container output from dockerpy.
+
+    It list the containers with details.
+
+    :param data: dict with data
+    :return: dict with data
+    """
     try:
         finish = get_date_diff(
             data['State']['FinishedAt'][:-4],
@@ -141,6 +171,11 @@ def parse_list_container_details(data):
 
 
 def parse_list_container(data):
+    """Parse the list containers output from dockerpy.
+
+    :param data: dict data
+    :return:
+    """
     try:
         created = get_date_diff(
             data['Created']
@@ -170,11 +205,26 @@ def parse_list_container(data):
 
 
 def parse_inspect_container(data):
+    """Parse the inspect container output from dockerpy.
+
+    :param data: dict with data
+    :return: dcit with data
+    """
+    json_data = json.dumps([data], indent=2)
+    return json_data
+
+
+def parse_docker_info(data):
     json_data = json.dumps([data], indent=2)
     return json_data
 
 
 def parse_time_to_nanoseconds(time_str):
+    """Parse string time to nanoseconds.
+
+    :param time_str:time format "hh:mm:ss"
+    :return:
+    """
     try:
         parsed = time_str.split(":")
         time_struc = datetime.timedelta(
