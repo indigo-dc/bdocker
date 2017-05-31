@@ -117,7 +117,7 @@ class DockerController(object):
         docker client makes on ps.
 
         :param containers: list of containers
-        :param all: indicates all conainers (finished too)
+        :param all: indicates all containers (finished too)
         :return:
         """
         result = []
@@ -150,7 +150,7 @@ class DockerController(object):
         return details
 
     def logs_container(self, container_id):
-        """Return the log of a contanier.
+        """Return the log of a container.
 
         :param container_id:
         :return: log information
